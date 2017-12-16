@@ -1,0 +1,24 @@
+{
+  "name": "@glitz/core",
+  "version": "0.0.0",
+  "main": "./cjs/index.js",
+  "module": "./es6/index.js",
+  "types": "./es6/index.d.ts",
+  "license": "MIT",
+  "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
+  "homepage": "https://github.com/frenic/glitz",
+  "repository": "git@github.com:frenic/glitz.git",
+  "bugs": "https://github.com/frenic/glitz/issues",
+  "dependencies": {
+    "csstype": "*"
+  },
+  "scripts": {
+    "clean": "rimraf es6 cjs glitz.js glitz.min.js",
+    "build": "tsc -p tsconfig.es6.json && tsc -p tsconfig.cjs.json && node ../../bundle.js entry.js glitz",
+    "prepare": "npm run clean & npm run build"
+  },
+  "files": ["cjs", "es6", "glitz.js", "glitz.min.js", "server.d.ts", "server.js"],
+  "publishConfig": {
+    "access": "public"
+  }
+}

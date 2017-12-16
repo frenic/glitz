@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`react styled creates predefined styled component 1`] = `
+<div
+  className="a"
+/>
+`;
+
+exports[`react styled renders predefined styled component 1`] = `
+<div
+  className="a"
+/>
+`;

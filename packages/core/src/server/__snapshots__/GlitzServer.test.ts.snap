@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`server injects atomic rules 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b{background:green}.c{border:blue}</style>"`;
+
+exports[`server injects different combinations 1`] = `"<style class=\\"__glitz__\\">.a{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.b{color:green}</style><style class=\\"__glitz__\\" media=\\"(min-width: 992px)\\">.c{color:blue}</style>"`;
+
+exports[`server injects keyframes rule 1`] = `"<style class=\\"__glitz__\\">.a{animation-name:a}@keyframes a{from{color:red}to{color:green}}</style>"`;
+
+exports[`server injects media rule 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b:hover{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.c{color:red}.d:hover{color:red}</style>"`;
+
+exports[`server injects nested pseudo rule 1`] = `"<style class=\\"__glitz__\\">.a:first-child:hover{color:red}</style>"`;
+
+exports[`server injects plain rule 1`] = `"<style class=\\"__glitz__\\">.a{color:red}</style>"`;
+
+exports[`server injects pseudo rule 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b:hover{color:red}</style>"`;

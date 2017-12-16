@@ -1,0 +1,4 @@
+.cache/
+dist/
+etc/
+node_modules/

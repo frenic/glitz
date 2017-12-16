@@ -1,0 +1,5 @@
+node_modules/
+es6/
+cjs/
+glitz-react.js
+glitz-react.min.js

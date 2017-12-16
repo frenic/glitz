@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "@glitz/core": "../core/src",
+          "@glitz/react": "../react/src",
+          "@glitz/prefixer-transformer": "../prefixer-transformer/src"
+        }
+      }
+    ]
+  ]
+}

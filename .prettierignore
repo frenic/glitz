@@ -1,0 +1,10 @@
+node_modules/
+.cache/
+dist/
+etc/
+es6/
+cjs/
+glitz.js
+glitz.min.js
+glitz-react.js
+glitz-react.min.js

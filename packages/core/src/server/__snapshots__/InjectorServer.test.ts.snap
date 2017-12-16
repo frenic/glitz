@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`server injects fallback rule 1`] = `".a{color:red;color:green}"`;
+
+exports[`server injects keyframes rule 1`] = `"@keyframes a{from{color:red}to{color:green}}"`;
+
+exports[`server injects plain rule 1`] = `".a{color:red}.b{color:green;background:block}"`;
+
+exports[`server injects pseudo rule 1`] = `".a:hover{color:red}.b:hover{color:green;background:block}"`;
+
+exports[`server reuses fallback rule 1`] = `".a{color:red;color:green}"`;
+
+exports[`server reuses keyframes rule 1`] = `"@keyframes a{from{color:red}to{color:green}}"`;
+
+exports[`server reuses plain rule 1`] = `".a{color:red}"`;
+
+exports[`server reuses pseudo rule 1`] = `".a:hover{color:red}"`;
