@@ -16,6 +16,8 @@ async function build(input, name) {
       }),
       require('rollup-plugin-typescript')({
         typescript: require('typescript'),
+        ...require('./tsconfig.base.json').compilerOptions,
+        ...require('./tsconfig.json').compilerOptions,
         target: 'es5',
         module: 'es6',
         declaration: false,
