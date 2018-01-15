@@ -21,12 +21,7 @@
     "build": "tsc -p tsconfig.es6.json && tsc -p tsconfig.cjs.json && node ../../bundle.js entry.js glitz-react",
     "prepare": "npm run clean & npm run build"
   },
-  "files": [
-    "cjs",
-    "es6",
-    "glitz-react.js",
-    "glitz-react.min.js"
-  ],
+  "files": ["cjs", "es6", "glitz-react.js", "glitz-react.min.js"],
   "publishConfig": {
     "access": "public"
   }

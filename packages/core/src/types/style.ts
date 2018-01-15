@@ -8,9 +8,7 @@ export interface PropertiesList {
   [identifier: string]: Properties;
 }
 
-export type Properties = {
-  [property in keyof CSS.Properties]?: CSS.Properties[property] | Array<CSS.Properties[property]>
-};
+export type Properties = CSS.PropertiesFallback<string | number>;
 
 export type PrimitiveValue = string | number;
 
