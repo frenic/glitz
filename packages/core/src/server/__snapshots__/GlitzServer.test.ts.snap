@@ -6,6 +6,8 @@ exports[`server injects different combinations 1`] = `"<style class=\\"__glitz__
 
 exports[`server injects keyframes rule 1`] = `"<style class=\\"__glitz__\\">.a{animation-name:a}@keyframes a{from{color:red}to{color:green}}</style>"`;
 
+exports[`server injects media markup in certain order 1`] = `"<style class=\\"__glitz__\\">.d{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 100px)\\">.b{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 200px)\\">.c{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 300px)\\">.a{color:red}</style>"`;
+
 exports[`server injects media rule 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b:hover{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.c{color:red}.d:hover{color:red}</style>"`;
 
 exports[`server injects nested pseudo rule 1`] = `"<style class=\\"__glitz__\\">.a:first-child:hover{color:red}</style>"`;

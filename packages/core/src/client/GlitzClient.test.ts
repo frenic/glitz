@@ -54,6 +54,42 @@ describe('client', () => {
     expect(mediaSheet.cssRules).toHaveLength(2);
     expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
   });
+  it('injects media elements in certain order', () => {
+    const client = new GlitzClient(null, {
+      mediaOrder: (a: string, b: string) => {
+        if (a < b) {
+          return -1;
+        }
+        if (a > b) {
+          return 1;
+        }
+        return 0;
+      },
+    });
+
+    expect(client.injectStyle({ '@media (min-width: 300px)': { color: 'red' } } as Style)).toBe('a');
+    expect(client.injectStyle({ '@media (min-width: 100px)': { color: 'red' } } as Style)).toBe('b');
+
+    expect(document.head.childNodes).toHaveLength(2);
+    expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 300px)');
+
+    expect(client.injectStyle({ '@media (min-width: 200px)': { color: 'red' } } as Style)).toBe('c');
+
+    expect(document.head.childNodes).toHaveLength(3);
+    expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 200px)');
+    expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 300px)');
+
+    expect(client.injectStyle({ '@media (min-width: 300px)': { color: 'red' } } as Style)).toBe('a');
+    expect(client.injectStyle({ color: 'red' })).toBe('d');
+
+    expect(document.head.childNodes).toHaveLength(4);
+    expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 100px)');
+    expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 200px)');
+    expect((document.head.childNodes[3] as HTMLStyleElement).media).toBe('(min-width: 300px)');
+  });
   it('cache declarations', () => {
     let count = 0;
     const client = new GlitzClient(null, {

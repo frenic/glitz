@@ -1,6 +1,6 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight *(~1.5KB gz)* and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
+A fast, lightweight *(~1.7KB gz)* and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
 
 Features supported:
 - [Pseudo selectors/elements](#pseudo)
@@ -193,6 +193,32 @@ function numberToRemTransformer(style) {
 
 const glitz = new GlitzClient(null, { transformer: compose(prefixer, numberToRemTransformer) });
 ```
+
+---
+
+```ts
+mediaOrder(a: string, b: string): number
+```
+
+Unordered media style may sometimes cause some unwanted behavior. With this function you're able to sort the order of the injected media styles.
+
+You can either use [`sort-css-media-queries`](https://github.com/dutchenkoOleg/sort-css-media-queries/) or if you have a specific list of media queries it's preferred that you create your own.
+
+```ts
+const mediaQueryOrder = [
+  '(min-width: 320px)',
+  '(min-width: 768px)',
+  ...
+];
+
+function mediaQuerySorter(a, b) {
+  const indexA = mediaQueryOrder.indexOf(a);
+  const indexB = mediaQueryOrder.indexOf(b);
+  return indexA - indexB;
+}
+
+const glitz = new GlitzClient(null, { mediaOrder: mediaQuerySorter });
+``` 
 
 ---
 
