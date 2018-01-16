@@ -5,8 +5,18 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import App from './App';
 
+const mediaQueryOrder = ['(min-width: 320px)', '(min-width: 768px)'];
+
+function mediaQuerySorter(a: string, b: string) {
+  const indexA = mediaQueryOrder.indexOf(a);
+  const indexB = mediaQueryOrder.indexOf(b);
+  return indexA - indexB;
+}
+
+const glitz = new GlitzClient(null, { transformer: prefixerTransformer, mediaOrder: mediaQuerySorter });
+
 render(
-  <GlitzProvider glitz={new GlitzClient(null, { transformer: prefixerTransformer })}>
+  <GlitzProvider glitz={glitz}>
     <App />
   </GlitzProvider>,
   document.getElementById('container'),
