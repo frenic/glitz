@@ -171,6 +171,8 @@ new GlitzServer.getStyleMarkup(className?: string): string
 
 ### Options
 
+#### `options.transformer`
+
 ```ts
 transformer(style: Properties): Properties
 ```
@@ -194,7 +196,7 @@ function numberToRemTransformer(style) {
 const glitz = new GlitzClient(null, { transformer: compose(prefixer, numberToRemTransformer) });
 ```
 
----
+#### `options.mediaOrder`
 
 ```ts
 mediaOrder(a: string, b: string): number
@@ -220,7 +222,7 @@ function mediaQuerySorter(a, b) {
 const glitz = new GlitzClient(null, { mediaOrder: mediaQuerySorter });
 ``` 
 
----
+#### `options.prefix`
 
 ```ts
 prefix: string
@@ -228,9 +230,22 @@ prefix: string
 
 Prefix all class names.
 
+## Playground
+
+To play around with Glitz, just:
+
+```bash
+$ git clone https://github.com/frenic/glitz.git
+$ cd glitz
+$ yarn install
+$ yarn example
+```
+
+Open http://localhost:1234 in your browser and edit the code in `packages/example`.
+
 ## Prefixer
 
-The `@glitz/prefixer-transformer` is basically just a TypeScript wrapper for [`inline-style-prefixer/static`](https://github.com/rofrischmann/inline-style-prefixer).
+The [`@glitz/prefixer-transformer`](https://github.com/frenic/glitz/tree/master/packages/prefixer-transformer) is basically just a TypeScript wrapper for [`inline-style-prefixer/static`](https://github.com/rofrischmann/inline-style-prefixer).
 
 ```ts
 import GlitzClient from '@glitz/core';
