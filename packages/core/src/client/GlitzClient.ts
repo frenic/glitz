@@ -17,16 +17,60 @@ export default class GlitzClient extends Base {
     const classHasher = createHashCounter(options.prefix);
     const keyframesHasher = createHashCounter(options.prefix);
 
+    const mediaOrder = options.mediaOrder;
+    const mediaElements: { [media: string]: HTMLStyleElement } = {};
+    let hasMediaElements = false;
+
     let mainInjector: InjectorClient;
     const mediaInjectors: {
       [media: string]: InjectorClient;
     } = {};
 
-    const injector = (media?: string) =>
-      media
-        ? (mediaInjectors[media] =
-            mediaInjectors[media] || new InjectorClient(createStyleElement(media), classHasher, keyframesHasher))
-        : (mainInjector = mainInjector || new InjectorClient(createStyleElement(), classHasher, keyframesHasher));
+    const injector = (media?: string) => {
+      if (media) {
+        if (mediaInjectors[media]) {
+          return mediaInjectors[media];
+        }
+
+        // Inserts element as last one when `null`
+        let insertBefore: HTMLStyleElement | null = null;
+
+        if (mediaOrder && hasMediaElements) {
+          const medias = Object.keys(mediaElements);
+          const orderedMedias = medias.concat(media).sort(mediaOrder);
+          const index = orderedMedias.indexOf(media);
+          if (index < orderedMedias.length - 1) {
+            insertBefore = mediaElements[orderedMedias[index + 1]];
+          }
+        }
+
+        hasMediaElements = true;
+        const element = (mediaElements[media] = createStyleElement(media, insertBefore));
+        return (mediaInjectors[media] = new InjectorClient(element, classHasher, keyframesHasher));
+      } else {
+        if (mainInjector) {
+          return mainInjector;
+        }
+
+        let insertBefore: HTMLStyleElement | null = null;
+
+        if (hasMediaElements) {
+          const medias = Object.keys(mediaElements);
+          if (mediaOrder) {
+            const orderedMedias = medias.sort(mediaOrder);
+            insertBefore = mediaElements[orderedMedias[0]];
+          } else {
+            insertBefore = mediaElements[medias[0]];
+          }
+        }
+
+        return (mainInjector = new InjectorClient(
+          createStyleElement(null, insertBefore),
+          classHasher,
+          keyframesHasher,
+        ));
+      }
+    };
 
     super(injector, options.transformer);
 
@@ -52,6 +96,8 @@ export default class GlitzClient extends Base {
         const media = element.media;
 
         if (media) {
+          hasMediaElements = true;
+          mediaElements[media] = element;
           mediaInjectors[media] = new InjectorClient(element, classHasher, keyframesHasher);
         } else {
           mainInjector = new InjectorClient(element, classHasher, keyframesHasher);

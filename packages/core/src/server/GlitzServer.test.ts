@@ -30,6 +30,26 @@ describe('server', () => {
     expect(server.injectStyle({ '@media (min-width: 768px)': { ':hover': { color: 'red' } } } as Style)).toBe('d');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
+  it('injects media markup in certain order', () => {
+    const server = new GlitzServer({
+      mediaOrder: (a: string, b: string) => {
+        if (a < b) {
+          return -1;
+        }
+        if (a > b) {
+          return 1;
+        }
+        return 0;
+      },
+    });
+
+    expect(server.injectStyle({ '@media (min-width: 300px)': { color: 'red' } } as Style)).toBe('a');
+    expect(server.injectStyle({ '@media (min-width: 100px)': { color: 'red' } } as Style)).toBe('b');
+    expect(server.injectStyle({ '@media (min-width: 200px)': { color: 'red' } } as Style)).toBe('c');
+    expect(server.injectStyle({ color: 'red' })).toBe('d');
+
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
   it('injects atomic rules', () => {
     const server = new GlitzServer();
 

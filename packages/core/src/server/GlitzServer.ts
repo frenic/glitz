@@ -26,8 +26,15 @@ export default class GlitzServer extends Base {
       if (mainInjector) {
         markup += `<style class="${className}">${mainInjector.getStyle()}</style>`;
       }
-      for (const media in mediaInjectors) {
-        markup += `<style class="${className}" media="${media}">${mediaInjectors[media].getStyle()}</style>`;
+      if (options.mediaOrder) {
+        const orderedMedias = Object.keys(mediaInjectors).sort(options.mediaOrder);
+        for (const media of orderedMedias) {
+          markup += `<style class="${className}" media="${media}">${mediaInjectors[media].getStyle()}</style>`;
+        }
+      } else {
+        for (const media in mediaInjectors) {
+          markup += `<style class="${className}" media="${media}">${mediaInjectors[media].getStyle()}</style>`;
+        }
       }
       return markup;
     };
