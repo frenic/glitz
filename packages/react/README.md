@@ -56,6 +56,10 @@ Provides all styled component with the Glitz core instance.
 
 ### `styled`
 
+**Components created by `styled` all exposes a `css` prop which you can use to inject dynamic style and a `innerRef` prop to `ref` your inner element.**
+
+#### `styled.[tagname]()`
+
 ```ts
 styled.[tagname](staticStyle: Style): React.Component
 
@@ -64,8 +68,6 @@ styled.div(staticStyle: Style): React.Component
 ```
 
 The function can be any valid React tagname (lower cased) and returns a styled component.
-
-**Components created by `styled` all exposes a `css` prop which you can use to inject dynamic style.**
 
 ```tsx
 import { styled } from '@glitz/react';
@@ -85,7 +87,7 @@ export default function StyledBox(props) {
 }
 ```
 
----
+#### `<styled.[Tagname] />`
 
 ```ts
 styled.[Tagname]: React.Component
@@ -108,22 +110,20 @@ export default function StyledBox(props) {
 }
 ```
 
----
+#### `styled()`
 
 ```ts
 styled(component: Component, staticStyle: Style): React.Component
 
-// Alternatively
-styled(staticStyle: Style): (component: Component) => React.Component
-
-// Example
-
+// E.g.
 export default styled(Message, {
   background: 'orange',
 });
 
-// Or
+// Alternatively
+styled(staticStyle: Style): (component: Component) => React.Component
 
+// E.g.
 const messageStyled = styled({
   background: 'orange',
 });

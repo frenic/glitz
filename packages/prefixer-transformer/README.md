@@ -28,20 +28,6 @@ This is basically the same thing as:
 import GlitzClient from '@glitz/core';
 import prefixAll from 'inline-style-prefixer/static';
 const glitz = new GlitzClient(null, { transformer: prefixAll });
-
-const className = glitz.injectStyle({
-  'display': 'flex',
-  // Will be transformed into:
-  // {
-  //   display: [
-  //     '-webkit-box',
-  //     '-moz-box',
-  //     '-ms-flexbox',
-  //     '-webkit-flex',
-  //     'flex',
-  //   ];
-  // }
-});
 ```
 
 But with correct types for TypeScript when used with `@glitz/core`.
