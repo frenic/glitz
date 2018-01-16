@@ -103,6 +103,24 @@ export default class GlitzClient extends Base {
           mainInjector = new InjectorClient(element, classHasher, keyframesHasher);
         }
       }
+
+      if (process.env.NODE_ENV !== 'production') {
+        if (mediaOrder) {
+          // Verify hydrated style element order
+          const medias = Object.keys(mediaElements);
+          const orderedMedias = medias.sort(mediaOrder);
+          for (const key in medias) {
+            if (medias[key] !== orderedMedias[key]) {
+              console.error(
+                'The order of media queries rendered by the server did not meet the expected ' +
+                  'order by the browser. Make sure you pass the same function to the `mediaOrder`' +
+                  'option for both `GlitzServer` and `GlitzClient`.',
+              );
+              break;
+            }
+          }
+        }
+      }
     }
   }
 }
