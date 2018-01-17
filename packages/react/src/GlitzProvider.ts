@@ -23,6 +23,6 @@ export default class Provider extends React.Component<ProviderProps> {
     return this.childContext;
   }
   public render() {
-    return React.Children.only(this.props.children);
+    return this.props.children;
   }
 }
