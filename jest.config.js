@@ -8,8 +8,8 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules'],
   transform: {
-    '^.+\\.ts$': '<rootDir>/jest.preprocessor.js'
+    '^.+\\.ts$': '<rootDir>/jest.preprocessor.js',
   },
   testMatch: ['**/src/**/*.test.ts'],
-  setupTestFrameworkScriptFile: '<rootDir>jest.setup.ts'
-}
+  setupTestFrameworkScriptFile: '<rootDir>jest.setup.ts',
+};

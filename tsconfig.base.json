@@ -11,9 +11,6 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
-    "lib": [
-      "es6",
-      "dom"
-    ]
+    "lib": ["es6", "dom"]
   }
 }

@@ -1,8 +1,6 @@
 {
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "devDependencies": {
     "@types/enzyme": "^3.1.6",
@@ -30,10 +28,10 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build": "npm run clean && lerna run build",
+    "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
-    "pretty": "prettier --write \"packages/**/*.{js,json,ts,tsx,html}\"",
+    "pretty": "prettier --write \"**/*.{js,json,ts,tsx,html}\"",
     "test": "jest --no-cache",
     "prepublish": "npm run test",
     "sloppy": "tsc && npm run pretty && npm run lint && npm run test",
