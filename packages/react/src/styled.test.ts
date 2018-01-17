@@ -26,6 +26,34 @@ describe('react styled', () => {
       ),
     );
   });
+  it('creates embedded styled component', () => {
+    const embeddedStyle = styled({ color: 'red' });
+
+    const StyledComponent1 = embeddedStyle(props => {
+      expect(props.apply()).toBe('a');
+      expect(props.compose()).toMatchObject({ color: 'red' });
+      return React.createElement('div');
+    });
+    const StyledComponent2 = embeddedStyle(
+      props => {
+        expect(props.apply()).toBe('b');
+        expect(props.compose()).toMatchObject({ color: 'green' });
+        return React.createElement('div');
+      },
+      { color: 'green' },
+    );
+
+    renderer.create(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponent1),
+        React.createElement(StyledComponent2),
+      ),
+    );
+  });
   it('creates predefined styled component', () => {
     const StyledComponent = styled.div({ color: 'red' });
 
