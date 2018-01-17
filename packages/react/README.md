@@ -2,30 +2,31 @@
 
 React bindings for [Glitz](https://github.com/frenic/glitz/).
 
-{won't be injected until it's rendered}
-
 ```tsx
 import { styled } from '@glitz/react';
 
-const Box = styled.div({
-  borderRadius: '10px',
-});
-
 export default function Message(props) {
   return (
-    <Box>{props.children}</Box>
+    <Box
+      css={{color: props.important ? 'maroon' : 'teal'}}
+      /* Will be styled as `<div />` with `18px` and `maroon` or `teal` */
+    >{props.children}</Box>
   );
 }
+
+const Box = styled.div({
+  fontSize: '18px',
+});
 ```
 
 ## Getting started
 
 ```bash
-$ yarn add @glitz/core @glitz/react
+$ yarn add @glitz/react
 
 // or
 
-$ npm install @glitz/core @glitz/react
+$ npm install @glitz/react
 ```
 
 ```tsx
@@ -46,139 +47,152 @@ render(
 
 ## API
 
-### `GlitzProvider`
-
-```ts
-GlitzProvider: React.Component
-```
+### `<GlitzProvider glitz={GlitzClient | GlitzServer} />`
 
 Provides all styled component with the Glitz core instance.
 
-### `styled`
+### `styled` object
 
-**Components created by `styled` all exposes a `css` prop which you can use to inject dynamic style and a `innerRef` prop to `ref` your inner element.**
+**Any valid use of the `styled` object returns a React component which exposes a `css` prop which you can use to inject dynamic style and a `innerRef` prop to `ref` your inner element.**
 
-#### `styled.[tagname]()`
+#### `styled.[tagname](staticStyle: Style)`
 
-```ts
-styled.[tagname](staticStyle: Style): React.Component
+Returns: `<StyledComponent css?={Style} innerRef?={(instance: Element) => void} />`
 
-// E.g.
-styled.div(staticStyle: Style): React.Component
-```
+Tag name functions can be any valid React tag name (lower cased). It provides the possibility to have static style outside the component to not bloat your JSX-blocks. 
 
-The function can be any valid React tagname (lower cased) and returns a styled component.
+Dynamic style are in the other hand inside using the `css` prop _(see next example)_. In this way, the logical parts of the code becomes centralized to where you receive props and the typing remains manageable, if you use TypeScript.
 
 ```tsx
 import { styled } from '@glitz/react';
 
-const Box = styled.div({
-  borderRadius: '10px',
-});
-
-export default function StyledBox(props) {
+export default function Message(props) {
   return (
-    <Box
-      css={{
-        background: props.appearance === 'error' ? 'red' : 'green',
-      }}
-    >{props.children}</Box>
+    <Box>{props.children}</Box>
   );
 }
+
+const Box = styled.div({
+  fontSize: '18px',
+});
 ```
 
-#### `<styled.[Tagname] />`
+#### `<styled.[Tagname] css?={Style} innerRef?={(instance: Element) => void} />`
 
-```ts
-styled.[Tagname]: React.Component
-```
-
-You can also use capitalized tagname (initial letter upper cased) which exposes a component directly. _When you don't have or want to use static style._
+You can also use capitalized tag name (initial letter upper cased) which exposes a component directly. _When you don't have or want to use static style._
 
 ```tsx
 import { styled } from '@glitz/react';
 
-export default function StyledBox(props) {
+export default function Message(props) {
   return (
     <styled.Div
       css={{
-        borderRadius: props.size === 'large': '20px' : '10px',
-        background: props.appearance === 'error' ? 'red' : 'green',
+        fontSize: props.xlarge: '24px' : '18px',
       }}
     >{props.children}</styled.Div>
   );
 }
 ```
 
-#### `styled()`
+These components are basically the same thing as:
 
 ```ts
-styled(component: Component, staticStyle: Style): React.Component
-
-// E.g.
-export default styled(Message, {
-  background: 'orange',
-});
-
-// Alternatively
-styled(staticStyle: Style): (component: Component) => React.Component
-
-// E.g.
-const messageStyled = styled({
-  background: 'orange',
-});
-
-export default messageStyled(Message);
+const Div = styled({apply, compose, ...rest} => <div className={apply()} {...rest} />);
 ```
 
-When passing a component as argument, the component will receive two props.
+#### `styled(innerComponent: ComponentType, staticStyle?: Style)`
 
-- `props.apply(): string`: Function returns a string with class names of the injected style
+Returns: `<StyledComponent css?={Style} innerRef?={(instance: Component) => void} />`
 
-  ```tsx
-  import { styled } from '@glitz/react';
+You can also use `styled` as a HOC. This enables you to compose external components locally without having to create wrapping elements. This can be useful with your shared components.
 
-  class Message extends React.Component {
-    render() {
-      return (
-        <div
-          className={this.props.apply()}
-        >{this.props.children}</div>
-      );
-    }
+The inner component will receive two props:
+
+##### `props.apply()`
+
+Returns a string with class names of the injected style.
+
+```tsx
+import { styled } from '@glitz/react';
+
+class Message extends React.Component {
+  render() {
+    return (
+      <div
+        className={this.props.apply()}
+        /* Will be styled with `18px` */
+      >{this.props.children}</div>
+    );
   }
+}
 
-  export default styled(Message, {
-    color: 'green',
-  });
-  ```
+export default styled(Message, {
+  fontSize: '18px',
+});
+```
 
-  This will simple inject `color: green` to the `<div />`.
+##### `props.compose(composedStyle?: Style)`
 
-- `props.compose(composedStyle?: Style)`: Function to compose style from one styled component to another styled element
+Compose style from one styled component to another styled element.
 
-  ```tsx
-  import { styled } from '@glitz/react';
-  import StyledBox from './StyledBox';
+```tsx
+import { styled } from '@glitz/react';
+import Message from './Message';
 
-  class Message extends React.Component {
-    render() {
-      return (
-        <StyledBox
-          css={this.props.compose()}
-        >{this.props.children}</div>
-      );
-    }
+class Welcome extends React.Component {
+  render() {
+    return (
+      <Message
+        css={this.props.compose()}
+        /* Will be styled with `18px` and `bold` */
+      >Hi and welcome!</div>
+    );
   }
+}
 
-  export default styled(Message, {
-    color: 'green',
-  });
-  ```
+export default styled(Welcome, {
+  fonteight: 'bold',
+});
+```
 
-  In this example, it will pass `color: green` to `<StyledBox />` and override any other possible value for `color`.
-  
-  _If we were to use `props.apply` in this example and `<StyledBox />` already was styled with `color: blue`, it would apply both `green` and `blue` and cause some unwanted behavior since the order of the rules were to decide which value it'll really get._
+#### `styled(embeddedStyle: Style)`
+
+Returns: `styled(innerComponent: ComponentType, staticStyle?: Style)`
+
+It's also possible to pass style as a single argument to `styled`. In that case, it will return a new `styled` function with that static style embedded and assigned by any other style. _Note that it only returns a function. Not the properties like `styled.div` or `styled.Div`._
+
+```ts
+import { styled } from '@glitz/react';
+
+class List extends React.Component {
+  render() {
+    return (
+      <ul className={props.apply()}>
+        {props.items.map(item =(
+          <li key={item.key}>{item.text}</li>
+        ))}
+      </ul>
+    );
+  }
+}
+
+const listStyled = styled({
+  fontSize: '18px',
+  listStyle: 'square',
+});
+
+/* Will be styled as a list with squares, `18px` and `bold` */
+export const ImportantList = listStyled(List, {
+  fontWeight: 'bold',
+});
+
+/* Will be styled as a list with squares and `24px` */
+export const LargeList = listStyled(List, {
+  fontSize: '24px',
+});
+
+```
 
 ## Server rendering
 

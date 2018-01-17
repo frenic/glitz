@@ -45,7 +45,7 @@ const className = glitz.injectStyle({
     textDecoration: 'underline',
     // You're also able to nest
     ':after': {
-      content: '"Don not forget double quotes when doing this"',
+      content: '"Don\'t forget double quotes when doing this"',
     },
   },
 });
@@ -140,34 +140,37 @@ declare module '@glitz/core' {
 
 ## API
 
-### `GlitzClient`
+### `new GlitzClient(elements: HTMLStyleElement[], options: Options)`
 
-```ts
-GlitzClient(
-  styleElements?: HTMLStyleElement[] | NodeListOf<HTMLStyleElement> | HTMLCollectionOf<HTMLStyleElement> | 'auto' | null,
-  options?: Options
-)
-```
+The Glitz core class for browsers.
 
-```ts
-new GlitzClient.injectStyle(style: Style): string
-```
+#### Methods
 
-### `GlitzServer`
+##### `injectStyle(style: Style)`
+
+Returns: `string`
+
+The returned value contains the class names of the injected style.
+
+### `new GlitzServer(options?: Options)`
 
 _Imoprted from `@glitz/core/server`._
 
-```ts
-GlitzServer(options?: Options)
-```
+The Glitz core class for servers.
 
-```ts
-new GlitzServer.injectStyle(style: Style): string
-```
+#### Methods
 
-```ts
-new GlitzServer.getStyleMarkup(className?: string): string
-```
+##### `injectStyle(style: Style)`
+
+Returns: `string`
+
+Class names of the injected style.
+
+##### `getStyleMarkup(className?: string)`
+
+Returns: `string`
+
+Markup with style sheets to render into `<head>` that the Glitz core class for browsers will reuse.
 
 ### Options
 
@@ -204,7 +207,7 @@ mediaOrder(a: string, b: string): number
 
 Unordered media style may sometimes cause some unwanted behavior. With this function you're able to sort the order of the injected media styles.
 
-You can either use [`sort-css-media-queries`](https://github.com/dutchenkoOleg/sort-css-media-queries/) or if you have a specific list of media queries it's preferred that you create your own.
+It's recommended that you create your own with the media queries you use.
 
 ```ts
 const mediaQueryOrder = [
@@ -220,7 +223,9 @@ function mediaQuerySorter(a, b) {
 }
 
 const glitz = new GlitzClient(null, { mediaOrder: mediaQuerySorter });
-``` 
+```
+
+It's also possible to use [`sort-css-media-queries`](https://github.com/dutchenkoOleg/sort-css-media-queries/) if you don't have a specific list of media queries.
 
 #### `options.prefix`
 
