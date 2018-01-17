@@ -2,7 +2,7 @@ const tsc = require('typescript');
 const config = {
   ...require('./tsconfig.base.json').compilerOptions,
   ...require('./tsconfig.json').compilerOptions,
-  module: "commonjs",
+  module: 'commonjs',
 };
 
 module.exports = {

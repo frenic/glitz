@@ -1,9 +1,9 @@
 {
   "name": "@glitz/react",
   "version": "0.0.0",
-  "main": "./cjs/index.js",
-  "module": "./es6/index.js",
-  "types": "./es6/index.d.ts",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
@@ -17,11 +17,11 @@
     "@types/react": "*"
   },
   "scripts": {
-    "clean": "rimraf es6 cjs glitz-react.js glitz-react.min.js",
-    "build": "tsc -p tsconfig.es6.json && tsc -p tsconfig.cjs.json && node ../../bundle.js entry.js glitz-react",
+    "clean": "rimraf dist",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts",
     "prepare": "npm run clean & npm run build"
   },
-  "files": ["cjs", "es6", "glitz-react.js", "glitz-react.min.js"],
+  "files": ["dist"],
   "publishConfig": {
     "access": "public"
   }

@@ -1,3 +1,2 @@
 node_modules/
-es6/
-cjs/
+dist/
