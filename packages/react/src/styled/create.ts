@@ -21,6 +21,8 @@ export type InnerRefProp = {
   innerRef?: React.Ref<any>;
 };
 
+type InnerType<TProps> = React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string;
+
 function passingProps(props: any) {
   const newProps = { ...props };
 
@@ -34,15 +36,33 @@ function passingProps(props: any) {
   return newProps;
 }
 
+const ASSIGN_METHOD = '__GLITZ_ASSIGN';
+
+function isStyledComponent<TProps>(inner: InnerType<TProps>): inner is StyledComponent<TProps> {
+  return typeof inner === 'function' && ASSIGN_METHOD in inner;
+}
+
+function isCustomComponent<TProps>(inner: InnerType<TProps>): inner is React.ComponentType<TProps & StyledProps> {
+  return typeof inner === 'function';
+}
+
 export function create<TProps>(
-  inner: React.ComponentType<TProps & StyledProps> | string,
+  inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
   staticStyle?: Style,
 ): StyledComponent<TProps> {
-  class Component extends React.Component<TProps & CSSProp & InnerRefProp> {
+  if (isStyledComponent(inner)) {
+    // @ts-ignore
+    return inner[ASSIGN_METHOD](staticStyle);
+  }
+
+  class GlitzStyled extends React.Component<TProps & CSSProp & InnerRefProp> {
     public static contextTypes = {
-      glitz: () => null, //  Just pass the damn thing
+      glitz: () => null, // Just pass the damn thing
     };
     public static displayName: string;
+    public static [ASSIGN_METHOD](assigningStyle?: Style) {
+      return create(inner, assigningStyle ? { ...staticStyle, ...assigningStyle } : staticStyle);
+    }
     protected apply: () => string;
     protected compose: (additionalStyle?: Style) => Style | undefined;
     constructor(props: TProps, context: Context) {
@@ -63,31 +83,30 @@ export function create<TProps>(
         return { ...staticStyle, ...dynamicStyle, ...additionalStyle };
       };
 
-      this.render =
-        typeof inner === 'function'
-          ? () => {
-              const passProps: TProps & StyledProps = passingProps(this.props);
+      this.render = isCustomComponent(inner)
+        ? () => {
+            const passProps: TProps & StyledProps = passingProps(this.props);
 
-              passProps.apply = this.apply;
-              passProps.compose = this.compose;
+            passProps.apply = this.apply;
+            passProps.compose = this.compose;
 
-              return React.createElement(inner, passProps);
-            }
-          : () => {
-              const passProps: TProps & StyledElementProps = passingProps(this.props);
+            return React.createElement(inner, passProps);
+          }
+        : () => {
+            const passProps: TProps & StyledElementProps = passingProps(this.props);
 
-              passProps.className = this.apply();
+            passProps.className = this.apply();
 
-              return React.createElement(inner, passProps);
-            };
+            return React.createElement(inner, passProps);
+          };
     }
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    Component.displayName = `Styled(${
+    GlitzStyled.displayName = `Styled(${
       typeof inner === 'string' ? inner : inner.displayName || inner.name || 'Unknown'
     })`;
   }
 
-  return Component;
+  return GlitzStyled;
 }

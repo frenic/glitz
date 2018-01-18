@@ -91,6 +91,28 @@ describe('react styled', () => {
 
     expect(tree).toMatchSnapshot();
   });
+  it('assignes styled component', () => {
+    const StyledComponent = styled(
+      props => {
+        expect(props.apply()).toBe('a b c');
+        expect(props.compose()).toMatchObject({ color: 'red', fontSize: '24px', background: 'green' });
+        return React.createElement('div');
+      },
+      { color: 'red', fontSize: '18px' },
+    );
+
+    const AssignedComponent = styled(StyledComponent, { fontSize: '24px', background: 'green' });
+
+    renderer.create(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(AssignedComponent),
+      ),
+    );
+  });
   it('composes style', () => {
     const StyledComponent = styled.div({ color: 'red', background: 'green' });
 
