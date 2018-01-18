@@ -95,7 +95,7 @@ export function create<TProps>(
         : () => {
             const passProps: TProps & StyledElementProps = passingProps(this.props);
 
-            passProps.className = this.apply();
+            passProps.className = passProps.className ? passProps.className + ' ' + this.apply() : this.apply();
 
             return React.createElement(inner, passProps);
           };
