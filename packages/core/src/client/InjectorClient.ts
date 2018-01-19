@@ -1,3 +1,5 @@
+// tslint:disable no-conditional-assignment
+
 import Injector from '../core/Injector';
 import { Properties, PropertiesList } from '../types/style';
 import { injectSheetRule } from '../utils/dom';
@@ -23,7 +25,6 @@ export default class InjectorClient extends Injector {
     const css = styleElement.textContent;
     if (css) {
       let rule: RegExpExecArray | null;
-      // tslint:disable no-conditional-assignment
       while ((rule = RULE_REGEX.exec(css))) {
         incrementClassHash();
 
