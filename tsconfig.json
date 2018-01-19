@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@glitz/*": ["./packages/*/src"]
+      "@glitz/*": ["./packages/*/src"],
+      "@glitz/core/server": ["./packages/core/src/server"]
     },
     "noEmit": true
   }

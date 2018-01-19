@@ -4,7 +4,8 @@ import { Style } from '@glitz/core';
 import * as React from 'react';
 // @ts-ignore
 import { StyledComponent } from './styled/create';
-import { customStyled } from './styled/custom';
+// @ts-ignore
+import { customStyled, StyledDecorator } from './styled/custom';
 // @ts-ignore
 import { assignPredefined, PredefinedStyled } from './styled/predefined';
 
