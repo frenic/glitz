@@ -6,12 +6,7 @@ import InjectorClient from './InjectorClient';
 
 export default class GlitzClient extends Base {
   constructor(
-    styleElements?:
-      | HTMLStyleElement[]
-      | NodeListOf<HTMLStyleElement>
-      | HTMLCollectionOf<HTMLStyleElement>
-      | 'auto'
-      | null,
+    styleElements?: HTMLStyleElement[] | NodeListOf<Element> | HTMLCollectionOf<Element> | 'auto' | null,
     options: Options = {},
   ) {
     const classHasher = createHashCounter(options.prefix);

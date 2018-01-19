@@ -10,7 +10,7 @@ export type Context = {
   glitz: GlitzClient | GlitzServer;
 };
 
-export default class Provider extends React.Component<ProviderProps> {
+export default class GlitzProvider extends React.Component<ProviderProps> {
   public static childContextTypes = {
     glitz: () => null, //  Just pass the damn thing
   };
