@@ -4,6 +4,8 @@ const gzipSize = require('gzip-size');
 const { rollup } = require('rollup');
 
 async function build(input, ...args) {
+  const estimate = args.indexOf('--estimate') !== -1;
+
   const filenameEs = path.resolve(process.cwd(), 'dist/index.es.js');
   const filenameCjs = path.resolve(process.cwd(), 'dist/index.cjs.js');
 
@@ -11,9 +13,11 @@ async function build(input, ...args) {
     input: path.resolve(process.cwd(), input),
     external: ['react', 'inline-style-prefixer/static'],
     plugins: [
-      require('rollup-plugin-replace')({
-        'process.env.NODE_ENV': JSON.stringify('production'),
-      }),
+      ...(estimate
+        ? require('rollup-plugin-replace')({
+            'process.env.NODE_ENV': JSON.stringify('production'),
+          })
+        : []),
       require('rollup-plugin-typescript')({
         typescript: require('typescript'),
         ...require('./tsconfig.base.json').compilerOptions,
@@ -42,7 +46,7 @@ async function build(input, ...args) {
   write(await generateEs, filenameEs);
   write(await generateCjs, filenameCjs);
 
-  if (args.indexOf('--estimate') !== -1) {
+  if (estimate) {
     const options = inputOptions('es5');
     const bundle = await rollup({
       ...options,

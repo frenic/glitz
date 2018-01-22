@@ -2,7 +2,7 @@ import { Properties, PropertiesList } from '../types/style';
 import { formatRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
-export default class InjectorClient {
+export default class Injector {
   public injectClassRule: (style: Properties, pseudo?: string) => string | void;
   public injectKeyframesRule: (styleList: PropertiesList) => string | void;
   constructor(
