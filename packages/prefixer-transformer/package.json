@@ -10,13 +10,13 @@
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "dependencies": {
-    "@glitz/core": "^0.0.0",
+    "@glitz/core": "^1.0.0-beta.0",
     "inline-style-prefixer": "^4.0.0"
   },
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts",
-    "prepare": "npm run clean & npm run build"
+    "prepublish": "npm run clean & npm run build"
   },
   "files": ["dist"],
   "publishConfig": {

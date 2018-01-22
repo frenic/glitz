@@ -8,7 +8,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "license": "MIT",
   "dependencies": {
-    "@glitz/core": "^0.0.0",
+    "@glitz/core": "^1.0.0-beta.0",
     "@glitz/prefixer-transformer": "^0.0.0",
     "@glitz/react": "^0.0.0",
     "@types/react": "*",
