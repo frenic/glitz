@@ -1,6 +1,6 @@
 {
   "name": "@glitz/prefixer-transformer",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
@@ -10,7 +10,7 @@
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "dependencies": {
-    "@glitz/type": "1.0.0-beta.0",
+    "@glitz/type": "^1.0.0-beta.1",
     "inline-style-prefixer": "^4.0.0"
   },
   "scripts": {
@@ -18,5 +18,7 @@
     "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts",
     "prepublish": "npm run clean & npm run build"
   },
-  "files": ["dist"]
+  "files": [
+    "dist"
+  ]
 }
