@@ -11,7 +11,5 @@
   "dependencies": {
     "csstype": "*"
   },
-  "files": [
-    "index.d.ts"
-  ]
+  "files": ["index.d.ts"]
 }

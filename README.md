@@ -121,21 +121,26 @@ const className = glitz.injectStyle({
 
 ### Add custom properties
 
-Unknown properties will fail to be able to notify you when there's a typo. This means that e.g. `@media` statements will also fail. Here's an example of how to extend the interface with some custom properties:
+Unknown properties will fail to be able to notify you when there's a typo. This means that e.g. `@media` statements will also fail. Here's an example of how to use module augmentation to extend the interface with some custom properties:
 
 ```ts
 // my-style.d.ts
-import * as Glitz from '@glitz/core';
+import * as Glitz from '@glitz/type';
 
-declare module '@glitz/core' {
+declare module '@glitz/type' {
   interface Style {
-    // Extend media query
-    '@media (min-width: 320px)': Glitz.Rule;
-
-    // Extend any other property
-    [property: string]: Glitz.Rule;
+    // Add media query
+    '@media (min-width: 768px)'?: Glitz.Rule;
+  }
+  interface Properties {
+    // Add CSS property
+    mozOsxFontSmoothing?: string;
+    
+    // Allow any other property
+    [property: string]: any;
   }
 }
+
 ```
 
 ## API

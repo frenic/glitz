@@ -10,19 +10,12 @@
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "dependencies": {
-    "@glitz/type": "*"
+    "@glitz/type": "1.0.0-beta.0"
   },
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts",
     "prepublish": "npm run clean & npm run build"
   },
-  "files": [
-    "dist",
-    "server.d.ts",
-    "server.js"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  "files": ["dist", "server.d.ts", "server.js"]
 }

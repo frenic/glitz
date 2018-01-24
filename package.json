@@ -27,7 +27,7 @@
     "typescript": "^2.6.2"
   },
   "scripts": {
-    "prepare": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap",
     "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
