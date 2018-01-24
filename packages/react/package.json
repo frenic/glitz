@@ -1,6 +1,6 @@
 {
   "name": "@glitz/react",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
@@ -22,7 +22,9 @@
     "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts",
     "prepublish": "npm run clean & npm run build"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   }
