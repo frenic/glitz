@@ -1,4 +1,4 @@
-import { PrimitiveValue, Properties } from '../types/style';
+import { PrimitiveValue, Properties } from '@glitz/type';
 
 export function parseDeclarationBlock(style: Properties) {
   let block = '';

@@ -1,4 +1,4 @@
-import { Style } from '@glitz/core';
+import { Style } from '@glitz/type';
 import { create, StyledComponent } from './create';
 
 function createPredefined(component: string) {

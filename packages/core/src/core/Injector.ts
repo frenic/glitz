@@ -1,4 +1,4 @@
-import { Properties, PropertiesList } from '../types/style';
+import { Properties, PropertiesList } from '@glitz/type';
 import { formatRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 

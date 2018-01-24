@@ -1,4 +1,4 @@
-import { Style } from '../types/style';
+import { Style } from '@glitz/type';
 import GlitzClient from './GlitzClient';
 
 describe('client', () => {

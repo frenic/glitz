@@ -11,6 +11,7 @@
     "@glitz/core": "^1.0.0-beta.0",
     "@glitz/prefixer-transformer": "^1.0.0-beta.0",
     "@glitz/react": "^1.0.0-beta.0",
+    "@glitz/type": "*",
     "@types/react": "*",
     "@types/react-dom": "*",
     "react": "^16.2.0",

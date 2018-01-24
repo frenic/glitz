@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@glitz/core": "^1.0.0-beta.0",
+    "@glitz/type": "*",
     "@types/react": "*"
   },
   "scripts": {

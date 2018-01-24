@@ -1,0 +1,15 @@
+{
+  "name": "@glitz/type",
+  "version": "0.0.0",
+  "main": "",
+  "types": "./index.d.ts",
+  "license": "MIT",
+  "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
+  "homepage": "https://github.com/frenic/glitz",
+  "repository": "git@github.com:frenic/glitz.git",
+  "bugs": "https://github.com/frenic/glitz/issues",
+  "dependencies": {
+    "csstype": "*"
+  },
+  "files": ["index.d.ts"]
+}

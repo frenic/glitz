@@ -1,4 +1,4 @@
-import { Properties } from './style';
+import { Properties } from '@glitz/type';
 
 export type Transformer = (style: Properties) => Properties;
 

@@ -1,7 +1,7 @@
 // tslint:disable no-conditional-assignment
 
+import { Properties, PropertiesList } from '@glitz/type';
 import Injector from '../core/Injector';
-import { Properties, PropertiesList } from '../types/style';
 import { injectSheetRule } from '../utils/dom';
 import { formatClassRule, formatKeyframesRule } from '../utils/format';
 import { createHashCounter } from '../utils/hash';

@@ -1,6 +1,6 @@
 // tslint:disable
 
-import { Style } from '@glitz/core';
+import { Style } from '@glitz/type';
 import prefixer from './prefixer';
 
 const a: Style = {};

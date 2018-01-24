@@ -1,7 +1,7 @@
+import { PrimitiveValue, Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
-import { PrimitiveValue, Style } from '../types/style';
 
 type DeclarationCache = { [cssProperty: string]: { [value: string]: string; [value: number]: string } };
 type PseudoInMediaDeclarationCache = { [pseudoInMediaProperty: string]: DeclarationCache };

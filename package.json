@@ -27,13 +27,12 @@
     "typescript": "^2.6.2"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
+    "prepare": "lerna bootstrap",
     "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
     "pretty": "prettier --write \"**/*.{js,json,ts,tsx,html}\"",
     "test": "jest --no-cache",
-    "prepublish": "npm run test",
     "sloppy": "tsc && npm run pretty && npm run lint && npm run test",
     "example": "npm run start --prefix packages/example"
   }

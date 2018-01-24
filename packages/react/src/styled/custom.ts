@@ -1,4 +1,4 @@
-import { Style } from '@glitz/core';
+import { Style } from '@glitz/type';
 import * as React from 'react';
 import { create, StyledComponent, StyledProps } from './create';
 

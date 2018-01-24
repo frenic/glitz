@@ -1,5 +1,5 @@
 // @ts-ignore
-import { Style } from '@glitz/core';
+import { Style } from '@glitz/type';
 // @ts-ignore
 import * as React from 'react';
 // @ts-ignore

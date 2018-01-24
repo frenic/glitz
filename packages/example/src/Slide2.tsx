@@ -1,5 +1,5 @@
-import { Style } from '@glitz/core';
 import { styled } from '@glitz/react';
+import { Style } from '@glitz/type';
 import * as React from 'react';
 
 export default function Slide1() {
