@@ -1,6 +1,6 @@
 {
   "name": "@glitz/type",
-  "version": "0.0.0",
+  "version": "1.0.0-beta.0",
   "main": "",
   "types": "./index.d.ts",
   "license": "MIT",
@@ -11,5 +11,7 @@
   "dependencies": {
     "csstype": "*"
   },
-  "files": ["index.d.ts"]
+  "files": [
+    "index.d.ts"
+  ]
 }
