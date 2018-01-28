@@ -49,7 +49,7 @@ const uppercaseRegex = /[A-Z]/g;
 const prefixRegex = /^(ms|moz|webkit)/;
 const propertyCache: { [property: string]: string } = {};
 
-function hyphenateProperty(property: string) {
+export function hyphenateProperty(property: string) {
   return property in propertyCache
     ? propertyCache[property]
     : (propertyCache[property] = property

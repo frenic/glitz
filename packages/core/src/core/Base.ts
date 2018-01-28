@@ -12,7 +12,7 @@ type MediaOrPseudoDeclarationCache = {
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
 
 export default class Base {
-  public injectStyle: (style: Style) => string;
+  private inject: (style: Style) => string;
   constructor(injector: (media?: string) => InjectorClient | InjectorServer, transformer: Transformer | undefined) {
     const declarator = transformer
       ? (property: string, value: PrimitiveValue | PrimitiveValue[]) => transformer(declaration(property, value))
@@ -20,7 +20,7 @@ export default class Base {
 
     const declarationCache: DeclarationCache | MediaOrPseudoDeclarationCache = {};
 
-    const injectStyle = (style: Style, media?: string, pseudo?: string) => {
+    const inject = (this.inject = (style: Style, media?: string, pseudo?: string) => {
       let classNames = '';
 
       for (const property in style) {
@@ -62,20 +62,20 @@ export default class Base {
           // Pseudo
           if (property[0] === ':') {
             const combinedPseudo = (pseudo || '') + property;
-            classNames += injectStyle(value, media, combinedPseudo);
+            classNames += inject(value, media, combinedPseudo);
             continue;
           }
 
           if (property.indexOf('@media') === 0) {
             const combinedMedia = (media ? `${media} and ` : '') + property.slice(7);
-            classNames += injectStyle(value, combinedMedia, pseudo);
+            classNames += inject(value, combinedMedia, pseudo);
             continue;
           }
 
           if (property === '@keyframes') {
             const name = injector().injectKeyframesRule(value);
             if (name) {
-              classNames += injectStyle({ animationName: name });
+              classNames += inject({ animationName: name });
               continue;
             }
           }
@@ -92,9 +92,10 @@ export default class Base {
       }
 
       return classNames.slice(1);
-    };
-
-    this.injectStyle = style => injectStyle(style);
+    });
+  }
+  public injectStyle(style: Style) {
+    return this.inject(style);
   }
 }
 

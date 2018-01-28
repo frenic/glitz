@@ -3,14 +3,22 @@ import { Options } from '../types/options';
 import { createStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
+import Validator from './Validator';
 
-export default class GlitzClient extends Base {
+export let Parent = Base;
+
+if (process.env.NODE_ENV !== 'production') {
+  Parent = Validator;
+}
+
+export default class GlitzClient extends Parent {
   constructor(
     styleElements?: HTMLStyleElement[] | NodeListOf<Element> | HTMLCollectionOf<Element> | 'auto' | null,
     options: Options = {},
   ) {
-    const classHasher = createHashCounter(options.prefix);
-    const keyframesHasher = createHashCounter(options.prefix);
+    const prefix = options.prefix;
+    const classHasher = createHashCounter(prefix);
+    const keyframesHasher = createHashCounter(prefix);
 
     const mediaOrder = options.mediaOrder;
     const mediaElements: { [media: string]: HTMLStyleElement } = {};
