@@ -3,17 +3,17 @@ const fs = require('fs');
 const gzipSize = require('gzip-size');
 const { rollup } = require('rollup');
 
-async function build(input, ...args) {
-  const estimate = args.indexOf('--estimate') !== -1;
+async function build(input, output, ...args) {
+  const production = args.indexOf('--production') !== -1;
+  const filename = path.resolve(process.cwd(), `${output}.js`);
+  const target = args.indexOf('--es5') !== -1 ? 'es5' : 'es6';
+  const format = args.indexOf('--cjs') !== -1 ? 'cjs' : 'es';
 
-  const filenameEs = path.resolve(process.cwd(), 'dist/index.es.js');
-  const filenameCjs = path.resolve(process.cwd(), 'dist/index.cjs.js');
-
-  const inputOptions = (target = 'es6') => ({
+  const bundle = await rollup({
     input: path.resolve(process.cwd(), input),
     external: ['react', 'inline-style-prefixer/static'],
     plugins: [
-      ...(estimate
+      ...(production
         ? require('rollup-plugin-replace')({
             'process.env.NODE_ENV': JSON.stringify('production'),
           })
@@ -30,39 +30,9 @@ async function build(input, ...args) {
     ],
   });
 
-  const outputOptions = (format = 'es') => ({
-    name: 'glitz',
-    format,
-    globals: {
-      react: 'React',
-    },
-  });
+  const generate = bundle.generate({ name: 'glitz', format, globals: { react: 'React' } });
 
-  const bundle = await rollup(inputOptions());
-
-  const generateEs = bundle.generate(outputOptions());
-  const generateCjs = bundle.generate(outputOptions('cjs'));
-
-  write(await generateEs, filenameEs);
-  write(await generateCjs, filenameCjs);
-
-  if (estimate) {
-    const options = inputOptions('es5');
-    const bundle = await rollup({
-      ...options,
-      plugins: [...options.plugins, require('rollup-plugin-uglify')()],
-    });
-    const { code } = await bundle.generate(outputOptions('iife'));
-    const gzip = gzipSize.sync(code);
-    console.info(`Estimated (min/gz): ${filesize(code.length, gzip)}`);
-  }
-
-  if (args.indexOf('--es5') !== -1) {
-    const options = inputOptions('es5');
-    const bundle = await rollup(inputOptions('es5'));
-    const generate = bundle.generate(outputOptions('iife'));
-    write(await generate, path.resolve(process.cwd(), 'dist/index.es5.js'));
-  }
+  write(await generate, filename);
 }
 
 function write({ code }, filename) {
