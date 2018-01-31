@@ -64,20 +64,20 @@ export function create<TProps>(
       return create(inner, assigningStyle ? { ...staticStyle, ...assigningStyle } : staticStyle);
     }
     protected apply: () => string;
-    protected compose: (additionalStyle?: Style) => Style | undefined;
+    protected compose: (additionalStyle?: Style) => Style;
     constructor(props: TProps, context: Context) {
       super(props, context);
 
       this.apply = () => {
         const composedStyle = this.compose();
-        return composedStyle ? context.glitz.injectStyle(composedStyle) : '';
+        return context.glitz.injectStyle(composedStyle);
       };
 
       this.compose = additionalStyle => {
         const dynamicStyle: Style | undefined = this.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
-          return staticStyle;
+          return staticStyle || {};
         }
 
         return { ...staticStyle, ...dynamicStyle, ...additionalStyle };
