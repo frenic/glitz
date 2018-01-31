@@ -1,9 +1,13 @@
 import { Style } from '@glitz/type';
 import GlitzClient from './GlitzClient';
 
+beforeEach(() => {
+  document.head.innerHTML = '';
+});
+
 describe('client', () => {
   it('injects plain rule', () => {
-    const style = document.createElement('style');
+    const style = createStyle();
     const client = new GlitzClient([style]);
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
@@ -14,7 +18,7 @@ describe('client', () => {
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
-    const style = document.createElement('style');
+    const style = createStyle();
     const client = new GlitzClient([style]);
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
@@ -26,7 +30,7 @@ describe('client', () => {
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
   });
   it('injects nested pseudo rule', () => {
-    const style = document.createElement('style');
+    const style = createStyle();
     const client = new GlitzClient([style]);
 
     expect(client.injectStyle({ ':first-child': { ':hover': { color: 'red' } } })).toBe('a');
@@ -37,9 +41,8 @@ describe('client', () => {
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
   });
   it('injects media rule', () => {
-    const style = document.createElement('style');
-    const media = document.createElement('style');
-    media.media = '(min-width: 768px)';
+    const style = createStyle();
+    const media = createStyle('(min-width: 768px)');
     const client = new GlitzClient([style, media]);
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
@@ -113,7 +116,7 @@ describe('client', () => {
     expect(count).toBe(4);
   });
   it('injects atomic rules', () => {
-    const style = document.createElement('style');
+    const style = createStyle();
     const client = new GlitzClient([style]);
 
     expect(client.injectStyle({ color: 'red', background: 'green', border: 'blue' })).toBe('a b c');
@@ -126,7 +129,7 @@ describe('client', () => {
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {
-    const style = document.createElement('style');
+    const style = createStyle();
     const client = new GlitzClient([style]);
 
     expect(client.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
@@ -138,11 +141,9 @@ describe('client', () => {
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
   });
   it('injects different combinations', () => {
-    const style1 = document.createElement('style');
-    const style2 = document.createElement('style');
-    style2.media = '(min-width: 768px)';
-    const style3 = document.createElement('style');
-    style3.media = '(min-width: 992px)';
+    const style1 = createStyle();
+    const style2 = createStyle('(min-width: 768px)');
+    const style3 = createStyle('(min-width: 992px)');
     const client = new GlitzClient([style1, style2, style3]);
 
     expect(
@@ -169,22 +170,15 @@ describe('client', () => {
     expect(sheet3.cssRules[0].cssText).toMatchSnapshot();
   });
   it('hydrates media rule', () => {
-    const style = document.createElement('style');
-    style.media = '(min-width: 768px)';
-    style.appendChild(document.createTextNode(`.a{color:red}`));
+    const style = createStyle('(min-width: 768px)', '.a{color:red}');
     const client = new GlitzClient([style]);
 
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'red' } } as Style)).toBe('a');
   });
   it('hydrates multiple different combinations', () => {
-    const style1 = document.createElement('style');
-    style1.appendChild(document.createTextNode(`.a{color:red}`));
-    const style2 = document.createElement('style');
-    style2.media = '(min-width: 768px)';
-    style2.appendChild(document.createTextNode(`.b{color:green}`));
-    const style3 = document.createElement('style');
-    style3.media = '(min-width: 992px)';
-    style3.appendChild(document.createTextNode(`.c{color:blue}`));
+    const style1 = createStyle(null, '.a{color:red}');
+    const style2 = createStyle('(min-width: 768px)', '.b{color:green}');
+    const style3 = createStyle('(min-width: 992px)', '.c{color:blue}');
     const client = new GlitzClient([style1, style2, style3]);
 
     expect(
@@ -196,3 +190,18 @@ describe('client', () => {
     ).toBe('a b c');
   });
 });
+
+function createStyle(media?: string | null, css?: string) {
+  const element = document.createElement('style');
+  document.head.appendChild(element);
+
+  if (media) {
+    element.media = media;
+  }
+
+  if (css) {
+    element.appendChild(document.createTextNode(css));
+  }
+
+  return element;
+}
