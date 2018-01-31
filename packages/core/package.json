@@ -1,6 +1,6 @@
 {
   "name": "@glitz/core",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "main": "./es/index.js",
   "types": "./es/index.d.ts",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "dependencies": {
-    "@glitz/type": "^1.0.0-beta.1"
+    "@glitz/type": "^1.0.0-beta.2"
   },
   "scripts": {
     "clean": "rimraf es server",
