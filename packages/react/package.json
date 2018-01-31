@@ -1,6 +1,6 @@
 {
   "name": "@glitz/react",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "main": "./es/index.js",
   "types": "./es/index.d.ts",
   "license": "MIT",
