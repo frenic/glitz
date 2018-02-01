@@ -1,5 +1,5 @@
 import GlitzServer from '@glitz/core/server';
-import prefixer from './prefixer';
+import prefixer from './';
 
 describe('prefixer', () => {
   it('injects prefixed style', () => {

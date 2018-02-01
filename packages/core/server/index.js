@@ -1,1 +1,1 @@
-module.exports = require('../cjs/glitz.server');
+module.exports = require('../cjs/server');

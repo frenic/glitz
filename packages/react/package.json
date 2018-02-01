@@ -1,9 +1,9 @@
 {
   "name": "@glitz/react",
   "version": "1.0.0-beta.5",
-  "main": "./cjs/glitz.react.js",
-  "module": "./es/index.js",
-  "types": "./es/index.d.ts",
+  "main": "./cjs/index.js",
+  "module": "./jsm/index.js",
+  "types": "./es6/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
@@ -19,12 +19,13 @@
     "react": "15.x - 16.x"
   },
   "scripts": {
-    "clean": "rimraf cjs es",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts cjs/glitz.react --double",
+    "clean": "rimraf cjs es6 jsm",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjsx2 index --jsm index",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
     "cjs/",
-    "es/"
+    "es6/",
+    "jsm/"
   ]
 }

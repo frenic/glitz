@@ -7,42 +7,66 @@ const typescript = require('rollup-plugin-typescript');
 const uglify = require('rollup-plugin-uglify');
 const resolver = require('rollup-plugin-node-resolve');
 
-const [input, template, ...args] = process.argv.slice(process.argv.findIndex(arg => arg.endsWith('bundle.js')) + 1);
-const double = args.indexOf('--double') !== -1;
+const JSM_TYPE = Symbol();
+const CJS_SINGLE_TYPE = Symbol();
+const CJS_DOUBLE_TYPE = Symbol();
 
-const inputPath = resolvePath(input);
-const developmentTemplate = `${template}${double ? '.development' : ''}`;
+const [input, ...args] = process.argv.slice(process.argv.findIndex(arg => arg.endsWith('bundle.js')) + 1);
+const inputPath = path.join(process.cwd(), input);
 
-if (double) {
-  const productionTemplate = `${template}.production`;
-  const productionBundlePath = resolvePath(productionTemplate + '.js');
-  build(inputPath, productionBundlePath, true, true).catch(error => {
+const jsm = args.indexOf('--jsm') !== -1;
+const cjsDouble = args.indexOf('--cjsx2') !== -1;
+const cjsSingle = args.indexOf('--cjs') !== -1;
+
+if (cjsSingle || cjsDouble) {
+  const template = args[args.indexOf('--cjsx2') !== -1 ? args.indexOf('--cjsx2') + 1 : args.indexOf('--cjs') + 1];
+  const developmentCjsTemplate = `${template}${cjsSingle ? '' : '.development'}`;
+
+  const developmentCjsBundlePath = resolvePath(developmentCjsTemplate + '.js');
+  build(inputPath, developmentCjsBundlePath, cjsSingle ? CJS_SINGLE_TYPE : CJS_DOUBLE_TYPE, false).catch(error => {
     console.log(error);
     process.exit(1);
   });
 
-  const entryPath = resolvePath(`${template}.js`);
-  write({ code: `'use strict';
+  if (cjsDouble) {
+    const productionCjsTemplate = `${template}.production`;
+    const productionCjsBundlePath = resolvePath(productionCjsTemplate + '.js');
+    build(inputPath, productionCjsBundlePath, CJS_DOUBLE_TYPE, true).catch(error => {
+      console.log(error);
+      process.exit(1);
+    });
+
+    const entryPath = resolvePath(`${template}.js`);
+    write(
+      {
+        code: `'use strict';
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(productionTemplate))}');
+  module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(productionCjsTemplate))}');
 } else {
-  module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(developmentTemplate))}');
+  module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(developmentCjsTemplate))}');
 }
-` }, entryPath);
-}
-
-const developmentBundlePath = resolvePath(developmentTemplate + '.js');
-build(inputPath, developmentBundlePath, double, false).catch(error => {
-  console.log(error);
-  process.exit(1);
-});
-
-function resolvePath(relative) {
-  return path.join(process.cwd(), relative);
+`,
+      },
+      entryPath,
+    );
+  }
 }
 
-async function build(input, output, double, production) {
+if (jsm) {
+  const template = args[args.indexOf('--jsm') + 1];
+  const developmentJsmBundlePath = resolvePath(template + '.js', true);
+  build(inputPath, developmentJsmBundlePath, JSM_TYPE, false).catch(error => {
+    console.log(error);
+    process.exit(1);
+  });
+}
+
+function resolvePath(relative, jsm = false) {
+  return path.join(process.cwd(), jsm ? 'jsm' : 'cjs', relative);
+}
+
+async function build(input, output, type, production) {
   // @ts-ignore
   const bundle = await rollup({
     input,
@@ -55,12 +79,12 @@ async function build(input, output, double, production) {
         ...require('./tsconfig.base.json').compilerOptions,
         // @ts-ignore
         ...require('./tsconfig.json').compilerOptions,
-        target: 'es5',
+        target: type === JSM_TYPE ? 'es6' : 'es5',
         module: 'es6',
         declaration: false,
         importHelpers: true,
       }),
-      ...(double
+      ...(type === CJS_DOUBLE_TYPE
         ? [
             replace({
               'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
@@ -71,7 +95,11 @@ async function build(input, output, double, production) {
     ],
   });
 
-  const generate = bundle.generate({ name: 'glitz', format: 'cjs', globals: { react: 'React' } });
+  const generate = bundle.generate({
+    name: 'glitz',
+    format: type === JSM_TYPE ? 'es' : 'cjs',
+    globals: { react: 'React' },
+  });
 
   write(await generate, output);
 }

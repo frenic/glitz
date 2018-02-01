@@ -1,9 +1,9 @@
 {
   "name": "@glitz/core",
   "version": "1.0.0-beta.4",
-  "main": "./cjs/glitz.client.js",
-  "modules": "./es/index.js",
-  "types": "./es/index.d.ts",
+  "main": "./cjs/index.js",
+  "module": "./jsm/index.js",
+  "types": "./es6/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
@@ -14,13 +14,14 @@
     "@glitz/type": "^1.0.0-beta.3"
   },
   "scripts": {
-    "clean": "rimraf cjs es",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts cjs/glitz.client --double && node ../../bundle.js src/server.ts cjs/glitz.server",
+    "clean": "rimraf cjs es6 jsm",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjsx2 index --jsm index && node ../../bundle.js src/server.ts --cjs server --jsm server",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
     "cjs/",
-    "es/",
+    "es6/",
+    "jsm/",
     "server/"
   ]
 }
