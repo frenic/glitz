@@ -1,23 +1,26 @@
 {
   "name": "@glitz/prefixer-transformer",
   "version": "1.0.0-beta.3",
-  "main": "./es/index.js",
+  "main": "./cjs/glitz.prefixer-transformer.js",
+  "module": "./es/index.js",
   "types": "./es/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
+  "side-effects": false,
   "dependencies": {
     "@glitz/type": "^1.0.0-beta.2",
     "inline-style-prefixer": "^4.0.0"
   },
   "scripts": {
-    "clean": "rimraf es",
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf cjs es",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts cjs/glitz.prefixer-transformer",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
-    "es"
+    "cjs/",
+    "es/"
   ]
 }

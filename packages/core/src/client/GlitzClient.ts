@@ -3,13 +3,9 @@ import { Options } from '../types/options';
 import { createStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
-import Validator from './Validator';
+import createValidator from './Validator';
 
-export let Parent = Base;
-
-if (process.env.NODE_ENV !== 'production') {
-  Parent = Validator;
-}
+export let Parent = process.env.NODE_ENV !== 'production' ? createValidator() : Base;
 
 export default class GlitzClient extends Parent {
   constructor(

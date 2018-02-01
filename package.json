@@ -1,6 +1,8 @@
 {
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "devDependencies": {
     "@types/enzyme": "^3.1.8",
@@ -17,6 +19,7 @@
     "react-test-renderer": "^16.2.0",
     "rimraf": "^2.6.2",
     "rollup": "^0.55.1",
+    "rollup-plugin-closure-compiler-js": "^1.0.6",
     "rollup-plugin-node-resolve": "^3.0.2",
     "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-typescript": "^0.8.1",

@@ -1,23 +1,26 @@
 {
   "name": "@glitz/core",
   "version": "1.0.0-beta.3",
-  "main": "./es/index.js",
+  "main": "./cjs/glitz.client.js",
+  "modules": "./es/index.js",
   "types": "./es/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
+  "side-effects": false,
   "dependencies": {
     "@glitz/type": "^1.0.0-beta.2"
   },
   "scripts": {
-    "clean": "rimraf es server",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/server.ts server/index && echo export * from '../es/server'; >> server/index.d.ts && echo export {default} from '../es/server'; >> server/index.d.ts",
+    "clean": "rimraf cjs es",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts cjs/glitz.client --double && node ../../bundle.js src/server.ts cjs/glitz.server",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
-    "es",
-    "server"
+    "cjs/",
+    "es/",
+    "server/"
   ]
 }

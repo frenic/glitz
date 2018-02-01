@@ -2,37 +2,78 @@ const path = require('path');
 const fs = require('fs');
 const gzipSize = require('gzip-size');
 const { rollup } = require('rollup');
+const replace = require('rollup-plugin-replace');
+const typescript = require('rollup-plugin-typescript');
+const uglify = require('rollup-plugin-uglify');
+const resolver = require('rollup-plugin-node-resolve');
 
-async function build(input, output, ...args) {
-  const production = args.indexOf('--production') !== -1;
-  const filename = path.resolve(process.cwd(), `${output}.js`);
-  const target = args.indexOf('--es5') !== -1 ? 'es5' : 'es6';
-  const format = args.indexOf('--cjs') !== -1 ? 'cjs' : 'es';
+const [input, template, ...args] = process.argv.slice(process.argv.findIndex(arg => arg.endsWith('bundle.js')) + 1);
+const double = args.indexOf('--double') !== -1;
 
+const inputPath = resolvePath(input);
+const developmentTemplate = `${template}${double ? '.development' : ''}`;
+
+if (double) {
+  const productionTemplate = `${template}.production`;
+  const productionBundlePath = resolvePath(productionTemplate + '.js');
+  build(inputPath, productionBundlePath, true, true).catch(error => {
+    console.log(error);
+    process.exit(1);
+  });
+
+  const entryPath = resolvePath(`${template}.js`);
+  write({ code: `'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(productionTemplate))}');
+} else {
+  module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(developmentTemplate))}');
+}
+` }, entryPath);
+}
+
+const developmentBundlePath = resolvePath(developmentTemplate + '.js');
+build(inputPath, developmentBundlePath, double, false).catch(error => {
+  console.log(error);
+  process.exit(1);
+});
+
+function resolvePath(relative) {
+  return path.join(process.cwd(), relative);
+}
+
+async function build(input, output, double, production) {
+  // @ts-ignore
   const bundle = await rollup({
-    input: path.resolve(process.cwd(), input),
+    input,
     external: ['react', 'inline-style-prefixer/static'],
     plugins: [
-      ...(production
-        ? require('rollup-plugin-replace')({
-            'process.env.NODE_ENV': JSON.stringify('production'),
-          })
-        : []),
-      require('rollup-plugin-typescript')({
+      resolver(),
+      typescript({
         typescript: require('typescript'),
+        // @ts-ignore
         ...require('./tsconfig.base.json').compilerOptions,
+        // @ts-ignore
         ...require('./tsconfig.json').compilerOptions,
-        target,
+        target: 'es5',
         module: 'es6',
         declaration: false,
         importHelpers: true,
       }),
+      ...(double
+        ? [
+            replace({
+              'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
+            }),
+          ]
+        : []),
+      ...(production ? [uglify({ toplevel: true })] : []),
     ],
   });
 
-  const generate = bundle.generate({ name: 'glitz', format, globals: { react: 'React' } });
+  const generate = bundle.generate({ name: 'glitz', format: 'cjs', globals: { react: 'React' } });
 
-  write(await generate, filename);
+  write(await generate, output);
 }
 
 function write({ code }, filename) {
@@ -60,8 +101,3 @@ function write({ code }, filename) {
 function filesize(origSize, gzipSize) {
   return `${(origSize / 1024).toFixed(2)}KB / ${(gzipSize / 1024).toFixed(2)}KB gz`;
 }
-
-build(...process.argv.slice(process.argv.findIndex(arg => arg.endsWith('bundle.js')) + 1)).catch(error => {
-  console.log(error);
-  process.exit(1);
-});

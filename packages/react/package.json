@@ -1,27 +1,30 @@
 {
   "name": "@glitz/react",
   "version": "1.0.0-beta.4",
-  "main": "./es/index.js",
+  "main": "./cjs/glitz.react.js",
+  "module": "./es/index.js",
   "types": "./es/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
-  "peerDependencies": {
-    "react": "15.x - 16.x"
-  },
+  "side-effects": false,
   "dependencies": {
     "@glitz/core": "^1.0.0-beta.3",
     "@glitz/type": "^1.0.0-beta.2",
     "@types/react": "*"
   },
+  "peerDependencies": {
+    "react": "15.x - 16.x"
+  },
   "scripts": {
-    "clean": "rimraf es",
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf cjs es",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts cjs/glitz.react --double",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
-    "es"
+    "cjs/",
+    "es/"
   ]
 }

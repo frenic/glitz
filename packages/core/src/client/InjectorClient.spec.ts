@@ -97,7 +97,9 @@ describe('client', () => {
     expect(injector.injectClassRule({ color: 'green' }, ':hover')).toBe('b');
   });
   it('hydrates keyframes rule', () => {
-    const style = createStyle('@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:black}to{color:white}}');
+    const style = createStyle(
+      '@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:black}to{color:white}}',
+    );
     const injector = new InjectorClient(style);
 
     // Skipping .a
