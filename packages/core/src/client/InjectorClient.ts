@@ -1,6 +1,5 @@
 // tslint:disable no-conditional-assignment
 
-import { Properties, PropertiesList } from '@glitz/type';
 import Injector from '../core/Injector';
 import { injectSheetRule } from '../utils/dom';
 import { formatClassRule, formatKeyframesRule } from '../utils/format';
@@ -10,8 +9,6 @@ const RULE_REGEX = /\.([a-z0-9])(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9])\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
 
 export default class InjectorClient extends Injector {
-  public injectClassRule: (style: Properties, pseudo?: string) => string | void;
-  public injectKeyframesRule: (styleList: PropertiesList) => string | void;
   constructor(
     styleElement: HTMLStyleElement,
     incrementClassHash = createHashCounter(),

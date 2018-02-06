@@ -1,11 +1,8 @@
-import { Properties, PropertiesList } from '@glitz/type';
 import Injector from '../core/Injector';
 import { formatClassRule, formatKeyframesRule } from '../utils/format';
 import { createHashCounter } from '../utils/hash';
 
 export default class InjectorServer extends Injector {
-  public injectClassRule: (style: Properties, pseudo?: string) => string | void;
-  public injectKeyframesRule: (styleList: PropertiesList) => string | void;
   public getStyle: () => void;
   constructor(incrementClassHash = createHashCounter(), incrementKeyframesHash = createHashCounter()) {
     const plainDictionary: { [block: string]: string } = {};
