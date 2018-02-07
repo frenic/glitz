@@ -1,6 +1,6 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight *(~1.7KB gz)* and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
+A fast, lightweight [*(~1.5KB gz)*](bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
 
 Features supported:
 - [Pseudo selectors/elements](#pseudo)
@@ -77,7 +77,7 @@ An array of values will be injected as one rule.
 
 ```ts
 const className = glitz.injectStyle({
-  'display': [
+  display: [
     '-webkit-flex',
     'flex',
   ],
@@ -263,7 +263,7 @@ import prefixer from '@glitz/prefixer-transformer';
 const glitz = new GlitzClient(null, { transformer: prefixer });
 
 const className = glitz.injectStyle({
-  'display': 'flex',
+  display: 'flex',
   // Will be transformed into:
   // {
   //   display: [
@@ -306,5 +306,3 @@ The injected rules would in this case look like:
 ```
 
 So the next time you use `display: 'flex'` it will reuse `a` instead of injecting a new rule.
-
-Glitz is highly inspired by [Styletron](https://github.com/rtsao/styletron). So many thanks to Ryan Tsao for his incredible work. To read more about this, visit [his blog post](https://ryantsao.com/blog/virtual-css-with-styletron) which describes pretty much how Glitz works.
