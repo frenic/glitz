@@ -1,6 +1,6 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight [*(~1.5KB gz)*](bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
+A fast, lightweight [*(~1.5KB gz)*](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
 
 Features supported:
 - [Pseudo selectors/elements](#pseudo)
