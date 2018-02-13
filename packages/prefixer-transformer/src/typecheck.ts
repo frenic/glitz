@@ -1,10 +1,10 @@
 // tslint:disable
 
-import { Style } from '@glitz/type';
+import { Properties } from '@glitz/type';
 import prefixer from './';
 
-const a: Style = {};
-const b: Style = prefixer(a);
+const a: Properties = {};
+const b: Properties = prefixer(a);
 
 // Avoid unread variables type error
 b;
