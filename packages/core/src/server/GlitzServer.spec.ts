@@ -61,6 +61,9 @@ describe('server', () => {
 
     expect(server.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();
+
+    expect(server.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+    expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects different combinations', () => {
     const server = new GlitzServer();

@@ -139,6 +139,12 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(2);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+
+    expect(client.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+
+    expect(sheet.cssRules).toHaveLength(4);
+    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
   });
   it('injects different combinations', () => {
     const style1 = createStyle();

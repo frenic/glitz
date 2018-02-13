@@ -10,8 +10,9 @@ export declare interface PropertiesList {
   [identifier: string]: Properties;
 }
 
-export declare type KeyframesRule = { '@keyframes'?: PropertiesList };
-
-export declare interface Style extends Rule, KeyframesRule {}
+export declare interface Style extends Rule {
+  '@keyframes'?: PropertiesList;
+  animationName?: PropertiesList | Properties['animationName'];
+}
 
 export declare type PrimitiveValue = string | number;

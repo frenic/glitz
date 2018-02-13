@@ -26,9 +26,19 @@ new GlitzClient('auto', options);
 const client = new GlitzClient(null, options);
 const d: string = client.injectStyle({});
 
+const e: string = client.injectStyle({
+  '@keyframes': {
+    '': {},
+  },
+  animationName: {
+    '': {},
+  },
+});
+
 // Avoid unread variables type error
 transformers;
 a;
 b;
 c;
 d;
+e;

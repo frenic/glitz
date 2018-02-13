@@ -72,7 +72,7 @@ export default class Base {
             continue;
           }
 
-          if (property === '@keyframes') {
+          if (property === '@keyframes' || property === 'animationName') {
             const name = injector().injectKeyframesRule(value);
             if (name) {
               classNames += inject({ animationName: name });

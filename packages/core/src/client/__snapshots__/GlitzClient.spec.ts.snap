@@ -21,6 +21,15 @@ exports[`client injects keyframes rule 1`] = `
 
 exports[`client injects keyframes rule 2`] = `".a {animation-name: a;}"`;
 
+exports[`client injects keyframes rule 3`] = `
+"@keyframes b { 
+  from {color: blue;} 
+  to {color: white;} 
+}"
+`;
+
+exports[`client injects keyframes rule 4`] = `".b {animation-name: b;}"`;
+
 exports[`client injects media rule 1`] = `".c {color: red;}"`;
 
 exports[`client injects nested pseudo rule 1`] = `".a:first-child:hover {color: red;}"`;
