@@ -36,7 +36,7 @@
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
     "pretty": "prettier --write \"**/*.{js,json,ts,tsx,html}\"",
     "test": "jest --no-cache",
-    "sloppy": "tsc && npm run pretty && npm run lint && npm run test",
+    "lazy": "tsc && npm run lint && npm run pretty && npm run test",
     "example": "npm run start --prefix packages/example"
   }
 }
