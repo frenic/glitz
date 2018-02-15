@@ -2,7 +2,7 @@ import * as CSS from 'csstype';
 
 export declare interface Properties extends CSS.PropertiesFallback<string | number> {}
 
-export declare type PseudoRule = { [P in CSS.Pseudos]?: Properties | PseudoRule };
+export declare type PseudoRule = { [P in CSS.SimplePseudos]?: Properties | PseudoRule };
 
 export declare interface Rule extends Properties, PseudoRule {}
 
