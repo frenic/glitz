@@ -6,9 +6,9 @@ exports[`server injects atomic rules 1`] = `"<style class=\\"__glitz__\\">.a{col
 
 exports[`server injects different combinations 1`] = `"<style class=\\"__glitz__\\">.a{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.b{color:green}</style><style class=\\"__glitz__\\" media=\\"(min-width: 992px)\\">.c{color:blue}</style>"`;
 
-exports[`server injects keyframes rule 1`] = `"<style class=\\"__glitz__\\">.a{animation-name:a}@keyframes a{from{color:red}to{color:green}}</style>"`;
+exports[`server injects font face rule 1`] = `"<style class=\\"__glitz__\\">.a{font-family:a}.b{font-family:b}.c{font-family:b,sans-serif}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')}</style>"`;
 
-exports[`server injects keyframes rule 2`] = `"<style class=\\"__glitz__\\">.a{animation-name:a}.b{animation-name:b}@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}</style>"`;
+exports[`server injects keyframes rule 1`] = `"<style class=\\"__glitz__\\">.a{animation-name:a}.b{animation-name:b}@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}</style>"`;
 
 exports[`server injects media markup in certain order 1`] = `"<style class=\\"__glitz__\\">.d{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 100px)\\">.b{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 200px)\\">.c{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 300px)\\">.a{color:red}</style>"`;
 

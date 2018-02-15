@@ -54,7 +54,7 @@ const className = glitz.injectStyle({
 
 ### Keyframes
 
-The `@keyframes` property injects the list of declaration blocks into a unique 'animation-name'.
+The `animationName` property injects the `@keyframes` declaration list and will be replaced by a unique name.
 
 ```ts
 const className = glitz.injectStyle({
@@ -66,10 +66,63 @@ const className = glitz.injectStyle({
       color: 'green',
     },
   },
+  // Will be injected as:
+  // .a {
+  //   animation-name: a;
+  // }
+  // @keyframes a {
+  //   from {
+  //     color: red;
+  //   }
+  //   to {
+  //     color: green;
+  //   }
+  // }
 });
 ```
 
-The name will be reused when an identical `@keyframes` will be used again.
+The name will be reused when an identical declaration list is used again.
+
+### Font faces
+
+The `fontFamily` property injects the `@font-face` rule and will be replaced by a unique name.
+
+```ts
+const className = glitz.injectStyle({
+  fontFamily: {
+    fontStyle: 'normal',
+    fontWeight: 400,
+    src: "url(https://domain.tld/path/to/font.woff2) format('woff2')",
+  },
+  // Will be injected as:
+  // .a {
+  //   font-family: a;
+  // }
+  // @font-face {
+  //   font-style: normal;
+  //   font-weight: 400;
+  //   src: url(https://domain.tld/path/to/font.woff2) format('woff2');
+  //   font-family: a;
+  // }
+});
+```
+
+The font family name will be reused when an identical block is used again.
+
+You're also able to use fallback values in combination with font faces.
+
+```ts
+const className = glitz.injectStyle({
+  fontFamily: [
+    {
+      fontStyle: 'normal',
+      fontWeight: 400,
+      src: "url(https://domain.tld/path/to/font.woff2) format('woff2')",
+    },
+    'sans-serif',
+  ],
+});
+```
 
 ### Fallback values
 

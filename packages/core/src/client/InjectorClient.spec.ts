@@ -42,6 +42,23 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(1);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
   });
+  it('injects font face rule', () => {
+    const style = createStyle();
+    const injector = new InjectorClient(style);
+
+    expect(
+      injector.injectFontFaceRule({
+        fontStyle: 'normal',
+        fontWeight: 400,
+        src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+      }),
+    ).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
   it('injects fallback rule', () => {
     // Use Puppeteer
   });

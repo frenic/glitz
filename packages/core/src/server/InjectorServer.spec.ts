@@ -15,6 +15,18 @@ describe('server', () => {
     expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
+  it('injects font face rule', () => {
+    const injector = new Injector();
+
+    expect(
+      injector.injectFontFaceRule({
+        fontStyle: 'normal',
+        fontWeight: 400,
+        src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+      }),
+    ).toBe('a');
+    expect(injector.getStyle()).toMatchSnapshot();
+  });
   it('injects keyframes rule', () => {
     const injector = new Injector();
 

@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { FontFace, Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
@@ -113,7 +113,22 @@ export default class Base<TStyle extends Style> {
           if (property === '@keyframes' || property === 'animationName') {
             const animationName = injector().injectKeyframesRule(value);
             if (animationName) {
-              classNames += inject({ animationName } as TStyle);
+              classNames += inject({ animationName } as TStyle, media, pseudo);
+              continue;
+            }
+          }
+
+          if (property === '@font-face' || property === 'fontFamily') {
+            let fontFamily = '';
+            const families: Array<string | FontFace> = Array.isArray(value) ? value : [value];
+            for (const family of families) {
+              if (fontFamily) {
+                fontFamily += ',';
+              }
+              fontFamily += typeof family === 'string' ? family : injector().injectFontFaceRule(family);
+            }
+            if (fontFamily) {
+              classNames += inject({ fontFamily } as TStyle, media, pseudo);
               continue;
             }
           }

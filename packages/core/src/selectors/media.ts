@@ -19,7 +19,7 @@ export function query(list: Query): string {
       break;
     }
     if (isEmpty) {
-      console.warn('The media query is empty and will therefor be ignored. Prefer not having empty media queries.');
+      console.warn('The media query is empty and will therefor be ignored. Prefer not having empty media queries');
     }
   }
 

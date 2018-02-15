@@ -1,15 +1,28 @@
 import Injector from '../core/Injector';
-import { formatClassRule, formatKeyframesRule } from '../utils/format';
+import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
 import { createHashCounter } from '../utils/hash';
 
 export default class InjectorServer extends Injector {
   public getStyle: () => void;
-  constructor(incrementClassHash = createHashCounter(), incrementKeyframesHash = createHashCounter()) {
+  constructor(
+    incrementClassHash = createHashCounter(),
+    incrementKeyframesHash = createHashCounter(),
+    incrementFontFaceHash = createHashCounter(),
+  ) {
     const plainDictionary: { [block: string]: string } = {};
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesDictionary: { [block: string]: string } = {};
+    const fontFaceDictionary: { [block: string]: string } = {};
 
-    super(plainDictionary, pseudoDictionary, keyframesDictionary, incrementClassHash, incrementKeyframesHash);
+    super(
+      plainDictionary,
+      pseudoDictionary,
+      keyframesDictionary,
+      fontFaceDictionary,
+      incrementClassHash,
+      incrementKeyframesHash,
+      incrementFontFaceHash,
+    );
 
     this.getStyle = () => {
       let style = '';
@@ -24,6 +37,9 @@ export default class InjectorServer extends Injector {
       }
       for (const blockList in keyframesDictionary) {
         style += formatKeyframesRule(keyframesDictionary[blockList], blockList);
+      }
+      for (const block in fontFaceDictionary) {
+        style += formatFontFaceRule(block);
       }
       return style;
     };

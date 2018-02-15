@@ -2,6 +2,7 @@ import * as CSS from 'csstype';
 
 export interface Style extends FeaturedProperties, PseudoMap {
   '@keyframes'?: PropertiesList;
+  '@font-face'?: FontFace;
 }
 
 export interface Properties extends CSS.StandardLonghandPropertiesFallback, CSS.VendorPropertiesFallback {}
@@ -13,6 +14,10 @@ type FeaturedProperties = Omit<Properties, keyof ExtendedProperties> &
 
 interface ExtendedProperties {
   animationName?: PropertiesList | Properties['animationName'];
+  fontFamily?:
+    | FontFace
+    | CSS.StandardLonghandProperties['fontFamily']
+    | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>;
 }
 
 interface ShorthandProperties {
@@ -160,12 +165,13 @@ interface ShorthandProperties {
   };
 }
 
+type PseudoMap = { [P in CSS.SimplePseudos]?: Style };
+
 interface PropertiesList {
   [identifier: string]: Properties;
 }
 
-// Need this due to https://github.com/Microsoft/TypeScript/issues/13573
-type PseudoMap = { [P in CSS.SimplePseudos]?: Style };
+type FontFace = Omit<CSS.FontFaceFallback, 'fontFamily'>;
 
 type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;

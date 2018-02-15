@@ -2,27 +2,31 @@
 
 import Injector from '../core/Injector';
 import { injectSheetRule } from '../utils/dom';
-import { formatClassRule, formatKeyframesRule } from '../utils/format';
+import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
 import { createHashCounter } from '../utils/hash';
 
-const RULE_REGEX = /\.([a-z0-9])(:[^{]+)?\{([^}]+)\}/g;
+const CLASS_RULE_REGEX = /\.([a-z0-9])(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9])\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
+const FONT_FACE_REGEX = /@font-face \{([^}]+)\}/g;
+const FONT_FACE_FAMILY_REGEX = /font-family:([^;}]+)/;
 
 export default class InjectorClient extends Injector {
   constructor(
     styleElement: HTMLStyleElement,
     incrementClassHash = createHashCounter(),
     incrementKeyframesHash = createHashCounter(),
+    incrementFontFaceHash = createHashCounter(),
   ) {
     const plainDictionary: { [block: string]: string } = {};
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesDictionary: { [blockList: string]: string } = {};
+    const fontFaceDictionary: { [block: string]: string } = {};
 
     // Hydrate
     const css = styleElement.textContent;
     if (css) {
       let rule: RegExpExecArray | null;
-      while ((rule = RULE_REGEX.exec(css))) {
+      while ((rule = CLASS_RULE_REGEX.exec(css))) {
         incrementClassHash();
 
         if (rule[2]) {
@@ -36,6 +40,13 @@ export default class InjectorClient extends Injector {
         incrementKeyframesHash();
         keyframesDictionary[rule[2]] = rule[1];
       }
+      while ((rule = FONT_FACE_REGEX.exec(css))) {
+        const name = FONT_FACE_FAMILY_REGEX.exec(rule[2]);
+        incrementFontFaceHash();
+        if (name) {
+          keyframesDictionary[name[1]] = rule[1];
+        }
+      }
     }
 
     const injectNewClassRule = (className: string, block: string, pseudo?: string) => {
@@ -48,14 +59,22 @@ export default class InjectorClient extends Injector {
       injectSheetRule(styleElement, rule);
     };
 
+    const injectNewFontFaceRule = (block: string) => {
+      const rule = formatFontFaceRule(block);
+      injectSheetRule(styleElement, rule);
+    };
+
     super(
       plainDictionary,
       pseudoDictionary,
       keyframesDictionary,
+      fontFaceDictionary,
       incrementClassHash,
       incrementKeyframesHash,
+      incrementFontFaceHash,
       injectNewClassRule,
       injectNewKeyframesRule,
+      injectNewFontFaceRule,
     );
   }
 }

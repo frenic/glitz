@@ -198,6 +198,56 @@ describe('client', () => {
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
     expect(sheet.cssRules[3].cssText).toMatchSnapshot();
   });
+  it('injects font face rule', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>([style]);
+
+    expect(
+      client.injectStyle({
+        '@font-face': {
+          fontStyle: 'normal',
+          fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(2);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        fontFamily: {
+          fontStyle: 'normal',
+          fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('b');
+
+    expect(sheet.cssRules).toHaveLength(4);
+    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        fontFamily: [
+          {
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+          'sans-serif',
+        ],
+      }),
+    ).toBe('c');
+
+    expect(sheet.cssRules).toHaveLength(5);
+    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+  });
   it('injects different combinations', () => {
     const style1 = createStyle();
     const style2 = createStyle('(min-width: 768px)');
@@ -232,6 +282,39 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>([style]);
 
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('a');
+  });
+  it('hydrates keyframes rule', () => {
+    const style = createStyle(null, '@keyframes a{from{color:red}to{color:green}}');
+    const client = new GlitzClient<TestStyle>([style]);
+
+    expect(client.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
+    expect(client.injectStyle({ animationName: { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
+  });
+  it('hydrates font face rule', () => {
+    const style = createStyle(
+      null,
+      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')}",
+    );
+    const client = new GlitzClient<TestStyle>([style]);
+
+    expect(
+      client.injectStyle({
+        '@font-face': {
+          fontStyle: 'normal',
+          fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('a');
+    expect(
+      client.injectStyle({
+        fontFamily: {
+          fontStyle: 'normal',
+          fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('a');
   });
   it('hydrates multiple different combinations', () => {
     const style1 = createStyle(null, '.a{color:red}');

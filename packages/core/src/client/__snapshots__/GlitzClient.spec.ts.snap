@@ -14,6 +14,16 @@ exports[`client injects different combinations 2`] = `".b {color: green;}"`;
 
 exports[`client injects different combinations 3`] = `".c {color: blue;}"`;
 
+exports[`client injects font face rule 1`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: a;}"`;
+
+exports[`client injects font face rule 2`] = `".a {font-family: a;}"`;
+
+exports[`client injects font face rule 3`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: b;}"`;
+
+exports[`client injects font face rule 4`] = `".b {font-family: b;}"`;
+
+exports[`client injects font face rule 5`] = `".c {font-family: b,sans-serif;}"`;
+
 exports[`client injects keyframes rule 1`] = `
 "@keyframes a { 
   from {color: red;} 

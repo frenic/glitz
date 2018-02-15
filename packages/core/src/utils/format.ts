@@ -9,3 +9,7 @@ export function formatClassRule(className: string, block: string, pseudo: string
 export function formatKeyframesRule(name: string, blockList: string) {
   return `@keyframes ${formatRule(name, blockList)}`;
 }
+
+export function formatFontFaceRule(block: string) {
+  return `@font-face {${block}}`;
+}
