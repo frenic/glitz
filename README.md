@@ -40,11 +40,13 @@ $ npm install @glitz/core
 You define your pseudo selector or element as the property name, followed with the style you wish to have for that pseudo.
 
 ```ts
+import { pseudo } from '@glitz/core';
+
 const className = glitz.injectStyle({
-  ':hover': {
+  [pseudo(':hover')]: {
     textDecoration: 'underline',
     // You're also able to nest
-    ':after': {
+    [pseudo(':after')]: {
       content: '"Don\'t forget double quotes when doing this"',
     },
   },
@@ -57,7 +59,7 @@ The `@keyframes` property injects the list of declaration blocks into a unique '
 
 ```ts
 const className = glitz.injectStyle({
-  '@keyframes': {
+  'animationName': {
     from: {
       color: 'red',
     },
@@ -65,7 +67,6 @@ const className = glitz.injectStyle({
       color: 'green',
     },
   },
-  // Will be transformed into: `{ animationName: 'a' }`
 });
 ```
 
@@ -91,11 +92,13 @@ const className = glitz.injectStyle({
 
 ### Media queries
 
-You can define any `@media` property as you like. However, it won't be defined by default if you use TypeScript. You simply need to [add custom properties](#add-custom-properties) to the type definition. 
+You can define any `@media` property as you like.
 
 ```ts
+import { media } from '@glitz/core';
+
 const className = glitz.injectStyle({
-  '@media (min-width: 768px)': {
+  [media({minWidth: 768})]: {
     display: 'block',
   }
 });
@@ -114,28 +117,27 @@ You don't need TypeScript to use Glitz. But if you do, everything is typed! Even
 
 ```ts
 const className = glitz.injectStyle({
-  display: 'flez', // Type error on value
-  colour: 'white', // Type error on property
+  alignSelf: 'stretsh', // Type error on value
+  colour: 'white',      // Type error on property
 });
 ```
 
 ### Add custom properties
 
-Unknown properties will fail to be able to notify you when there's a typo. This means that e.g. `@media` statements will also fail. Here's an example of how to use module augmentation to extend the interface with some custom properties:
+Unknown properties will fail to be able to notify you when there's a typo. This means that e.g. custom CSS variables will also fail. Here's an example of how to use module augmentation to extend the interface with some custom properties:
 
 ```ts
 // my-style.d.ts
 import * as Glitz from '@glitz/type';
 
 declare module '@glitz/type' {
-  interface Style {
-    // Add media query
-    '@media (min-width: 768px)'?: Glitz.Rule;
-  }
   interface Properties {
     // Add CSS property
     mozOsxFontSmoothing?: string;
-    
+
+    // Add CSS variable name
+    '--theme-color'?: string;
+
     // Allow any other property
     [property: string]: any;
   }
@@ -216,8 +218,8 @@ It's recommended that you create your own with the media queries you use.
 
 ```ts
 const mediaQueryOrder = [
-  '(min-width: 320px)',
-  '(min-width: 768px)',
+  media({minWidth: 320}, true),
+  media({minWidth: 768}, true),
   ...
 ];
 
@@ -239,6 +241,24 @@ prefix: string
 ```
 
 Prefix all class names.
+
+### Helpers
+
+#### `media`
+
+```ts
+media(query: Query | string, onlyList?: boolean): string
+```
+
+Parses and validates [`Query`](https://github.com/frenic/glitz/blob/master/packages/core/src/types/query.ts) or string into a valid media query selector. See [example](#media-queries).
+
+#### `pseudo`
+
+```ts
+pseudo(selector: string): string
+```
+
+Validates the pseudo selector. See [example](#pseudo).
 
 ## Playground
 
