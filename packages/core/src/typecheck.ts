@@ -1,7 +1,7 @@
 // tslint:disable
 
 import { Properties } from '@glitz/type';
-import GlitzClient, { Options, compose } from './index';
+import GlitzClient, { Options, compose, pseudo, media } from './index';
 import GlitzServer from './server';
 
 const transformer: (input: Properties) => Properties = input => input;
@@ -27,12 +27,8 @@ const client = new GlitzClient(null, options);
 const d: string = client.injectStyle({});
 
 const e: string = client.injectStyle({
-  '@keyframes': {
-    '': {},
-  },
-  animationName: {
-    '': {},
-  },
+  ...pseudo('', {}),
+  ...media({}, {}),
 });
 
 // Avoid unread variables type error

@@ -1,14 +1,15 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight [*(~1.5KB gz)*](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
+A fast, lightweight [_(~1.5KB gz)_](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
 
 Features supported:
-- [Pseudo selectors/elements](#pseudo)
-- [Keyframes](#keyframes)
-- [Fallback values](#fallback-values)
-- [Media queries](#media-queries)
-- [Auto-prefixing](#prefixer)
-- [Server rendering](#server-rendering)
+
+* [Pseudo classes/elements](#pseudos)
+* [Keyframes](#keyframes)
+* [Fallback values](#fallback-values)
+* [Media queries](#media-queries)
+* [Auto-prefixing](#prefixer)
+* [Server rendering](#server-rendering)
 
 The most basic implementation is really easy. You don't need any config or module loaders to get started.
 
@@ -35,18 +36,16 @@ $ npm install @glitz/core
 
 ## Features
 
-### Pseudo
+### Pseudos
 
 You define your pseudo selector or element as the property name, followed with the style you wish to have for that pseudo.
 
 ```ts
-import { pseudo } from '@glitz/core';
-
 const className = glitz.injectStyle({
-  [pseudo(':hover')]: {
+  ':hover': {
     textDecoration: 'underline',
     // You're also able to nest
-    [pseudo(':after')]: {
+    ':after': {
       content: '"Don\'t forget double quotes when doing this"',
     },
   },
@@ -59,7 +58,7 @@ The `@keyframes` property injects the list of declaration blocks into a unique '
 
 ```ts
 const className = glitz.injectStyle({
-  'animationName': {
+  animationName: {
     from: {
       color: 'red',
     },
@@ -70,7 +69,7 @@ const className = glitz.injectStyle({
 });
 ```
 
-The name will be reused when an identical `@keyframes` will be used again. 
+The name will be reused when an identical `@keyframes` will be used again.
 
 ### Fallback values
 
@@ -78,10 +77,7 @@ An array of values will be injected as one rule.
 
 ```ts
 const className = glitz.injectStyle({
-  display: [
-    '-webkit-flex',
-    'flex',
-  ],
+  display: ['-webkit-flex', 'flex'],
   // Will be injected as:
   // .a {
   //   display: -webkit-flex;
@@ -98,33 +94,53 @@ You can define any `@media` property as you like.
 import { media } from '@glitz/core';
 
 const className = glitz.injectStyle({
-  [media({minWidth: 768})]: {
+  '@media (min-width: 768px)': {
     display: 'block',
-  }
+  },
 });
 ```
 
 ## Server rendering
 
-The difference between `GlitzServer` class and `GlitzClient` class is that `GlitzServer` wont insert the rules into the DOM. Instead you pull it out the style sheets as a string and put it in the `<head>`. On client side, the style sheets will be hydrated and used by `GlitzClient`.
+The difference between `GlitzServer` class and `GlitzClient` class is that `GlitzClient` inserts new rules into the DOM directly. Instead `GlitzServer` collects the rendered style as a string for you to put in the `<head>`. The client side will then hydrate the CSS and reuse it.
 
-- [API reference](#glitzserver)
-- [Example implementation](https://github.com/frenic/glitz/blob/master/packages/react/#server-rendering)
+* [API reference](#glitzserver)
+* [Example implementation](https://github.com/frenic/glitz/blob/master/packages/react/#server-rendering)
 
-## Types
+## TypeScript
 
 You don't need TypeScript to use Glitz. But if you do, everything is typed! Even CSS! This means you'll get autocompletion and warnings as you write.
 
 ```ts
 const className = glitz.injectStyle({
   alignSelf: 'stretsh', // Type error on value
-  colour: 'white',      // Type error on property
+  colour: 'white', // Type error on property
+});
+```
+
+### Unknown properties
+
+Unknown properties will fail to be able to notify you when there's a typo. This means that function-like pseudos (e.g. `:not(:first-child)`) and media query selectors will be considered unknown properties. For those, there's two helper functions ([`pseudo`](#pseudo) and [`media`](#media)) that will make the selectors valid.
+
+```ts
+import { media, pseudo } from '@glitz/core';
+
+const className = glitz.injectStyle({
+  ...media(
+    { minWidth: 768 },
+    {
+      display: 'block',
+    },
+  ),
+  ...pseudo(':not(:first-child)', {
+    textDecoration: 'underline',
+  }),
 });
 ```
 
 ### Add custom properties
 
-Unknown properties will fail to be able to notify you when there's a typo. This means that e.g. custom CSS variables will also fail. Here's an example of how to use module augmentation to extend the interface with some custom properties:
+You can also extend the interface with custom CSS properties like CSS variables and other unknown properties using module augmentation.
 
 ```ts
 // my-style.d.ts
@@ -142,7 +158,6 @@ declare module '@glitz/type' {
     [property: string]: any;
   }
 }
-
 ```
 
 ## API
@@ -217,9 +232,11 @@ Unordered media style may sometimes cause some unwanted behavior. With this func
 It's recommended that you create your own with the media queries you use.
 
 ```ts
+import {query} from '@glitz/core';
+
 const mediaQueryOrder = [
-  media({minWidth: 320}, true),
-  media({minWidth: 768}, true),
+  query({minWidth: 320}),
+  query({minWidth: 768}),
   ...
 ];
 
@@ -237,20 +254,12 @@ It's also possible to use [`sort-css-media-queries`](https://github.com/dutchenk
 #### `options.prefix`
 
 ```ts
-prefix: string
+prefix: string;
 ```
 
 Prefix all class names.
 
 ### Helpers
-
-#### `media`
-
-```ts
-media(query: Query | string, onlyList?: boolean): string
-```
-
-Parses and validates [`Query`](https://github.com/frenic/glitz/blob/master/packages/core/src/types/query.ts) or string into a valid media query selector. See [example](#media-queries).
 
 #### `pseudo`
 
@@ -258,7 +267,23 @@ Parses and validates [`Query`](https://github.com/frenic/glitz/blob/master/packa
 pseudo(selector: string): string
 ```
 
-Validates the pseudo selector. See [example](#pseudo).
+Validates the pseudo rule. See [example](#unknown-properties).
+
+#### `media`
+
+```ts
+media(query: Query | string, style?: Style): Style
+```
+
+Parse and validate [`Query`](https://github.com/frenic/glitz/blob/master/packages/core/src/types/query.ts) or string into a valid media **rule**. See [example](#unknown-properties).
+
+#### `query`
+
+```ts
+query(query: Query): string
+```
+
+Parse and validate [`Query`](https://github.com/frenic/glitz/blob/master/packages/core/src/types/query.ts) into a valid media query.
 
 ## Playground
 

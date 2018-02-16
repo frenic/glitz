@@ -1,4 +1,4 @@
-import { PrimitiveValue, Style } from '@glitz/type';
+import { Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
@@ -15,7 +15,8 @@ export default class Base {
   private inject: (style: Style) => string;
   constructor(injector: (media?: string) => InjectorClient | InjectorServer, transformer: Transformer | undefined) {
     const declarator = transformer
-      ? (property: string, value: PrimitiveValue | PrimitiveValue[]) => transformer(declaration(property, value))
+      ? (property: string, value: (string | number) | Array<string | number>) =>
+          transformer(declaration(property, value))
       : declaration;
 
     const declarationCache: DeclarationCache | MediaOrPseudoDeclarationCache = {};
@@ -99,6 +100,6 @@ export default class Base {
   }
 }
 
-function declaration(property: string, value: PrimitiveValue | PrimitiveValue[]) {
+function declaration(property: string, value: (string | number) | Array<string | number>) {
   return { [property]: value };
 }

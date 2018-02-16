@@ -31,10 +31,11 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
+    "lerna": "lerna --ignore=glitz-example",
     "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
-    "pretty": "prettier --write \"**/*.{js,json,ts,tsx,html}\"",
+    "pretty": "prettier --write \"**/*.{js,json,ts,tsx,html,md}\"",
     "test": "jest --no-cache",
     "lazy": "tsc && npm run lint && npm run pretty && npm run test",
     "example": "npm run start --prefix packages/example"

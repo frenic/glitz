@@ -1,4 +1,4 @@
-import { PrimitiveValue, Properties } from '@glitz/type';
+import { Properties } from '@glitz/type';
 
 export function parseDeclarationBlock(style: Properties) {
   let block = '';
@@ -22,7 +22,7 @@ export function parseDeclarationBlock(style: Properties) {
   return block;
 }
 
-export function parseDeclaration(property: keyof Properties, value?: PrimitiveValue) {
+export function parseDeclaration(property: keyof Properties, value?: string | number) {
   if (typeof value === 'string' || typeof value === 'number') {
     if (process.env.NODE_ENV !== 'production') {
       if (value === '') {

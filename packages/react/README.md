@@ -8,9 +8,11 @@ import { styled } from '@glitz/react';
 export default function Message(props) {
   return (
     <Box
-      css={{color: props.important ? 'maroon' : 'teal'}}
+      css={{ color: props.important ? 'maroon' : 'teal' }}
       /* Will be styled as `<div />` with `18px` and `maroon` or `teal` */
-    >{props.children}</Box>
+    >
+      {props.children}
+    </Box>
   );
 }
 
@@ -41,7 +43,7 @@ render(
   <GlitzProvider glitz={glitz}>
     <App />
   </GlitzProvider>,
-  document.getElementById('container')
+  document.getElementById('container'),
 );
 ```
 
@@ -59,7 +61,7 @@ Provides all styled component with the Glitz core instance.
 
 Returns: `<StyledComponent css?={Style} innerRef?={(instance: Element) => void} />`
 
-Tag name functions can be any valid React tag name (lower cased). It provides the possibility to have static style outside the component to not bloat your JSX-blocks. 
+Tag name functions can be any valid React tag name (lower cased). It provides the possibility to have static style outside the component to not bloat your JSX-blocks.
 
 Dynamic style are in the other hand inside using the `css` prop _(see next example)_. In this way, the logical parts of the code becomes centralized to where you receive props and the typing remains manageable, if you use TypeScript.
 
@@ -67,9 +69,7 @@ Dynamic style are in the other hand inside using the `css` prop _(see next examp
 import { styled } from '@glitz/react';
 
 export default function Message(props) {
-  return (
-    <Box>{props.children}</Box>
-  );
+  return <Box>{props.children}</Box>;
 }
 
 const Box = styled.div({
@@ -122,7 +122,9 @@ class Message extends React.Component {
       <div
         className={this.props.apply()}
         /* Will be styled with `18px` */
-      >{this.props.children}</div>
+      >
+        {this.props.children}
+      </div>
     );
   }
 }
@@ -167,13 +169,7 @@ import { styled } from '@glitz/react';
 
 class List extends React.Component {
   render() {
-    return (
-      <ul className={props.apply()}>
-        {props.items.map(item =(
-          <li key={item.key}>{item.text}</li>
-        ))}
-      </ul>
-    );
+    return <ul className={props.apply()}>{props.items.map((item = <li key={item.key}>{item.text}</li>))}</ul>;
   }
 }
 
@@ -191,7 +187,48 @@ export const ImportantList = listStyled(List, {
 export const LargeList = listStyled(List, {
   fontSize: '24px',
 });
+```
 
+## TypeScript
+
+If you're using TypeScript and need to use `styled` as a HOC, the props for your inner component need to have `StyledProps`.
+
+```tsx
+// Message.tsx
+import { styled, StyledProps } from '@glitz/react';
+
+type Props = {
+  title: string;
+};
+
+class Message extends React.Component<Props & StyledProps> {
+  render() {
+    return (
+      <div className={this.props.apply()}>
+        <h1>{this.props.title}</h1>
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
+export default styled(Message, {
+  fontSize: '18px',
+});
+
+// HelloWorld.tsx
+import { styled } from '@glitz/react';
+import Message from 'Message';
+
+const HelloWorld = styled(Message, {
+  backgroundColor: 'green',
+});
+
+export default class Feature extends React.Component {
+  render() {
+    return <HelloWorld title="Hello world">Welcome</HelloWorld>;
+  }
+}
 ```
 
 ## Server rendering
@@ -211,7 +248,7 @@ const bodyMarkup = renderToString(
   <GlitzProvider glitz={glitz}>
     <App />
   </GlitzProvider>,
-  document.getElementById('container')
+  document.getElementById('container'),
 );
 
 const headMarkup = glitz.getStyleMarkup();

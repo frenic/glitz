@@ -8,7 +8,7 @@ import prefixer from '@glitz/prefixer-transformer';
 const glitz = new GlitzClient(null, { transformer: prefixer });
 
 const className = glitz.injectStyle({
-  'display': 'flex',
+  display: 'flex',
   // Will be transformed into:
   // {
   //   display: [
