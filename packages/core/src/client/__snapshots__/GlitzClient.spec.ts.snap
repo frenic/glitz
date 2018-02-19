@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`client applies transformer 1`] = `".a {appearance: none; -moz-appearance: none;}"`;
+
 exports[`client injects atomic rules 1`] = `".a {color: red;}"`;
 
 exports[`client injects atomic rules 2`] = `".b {background: green;}"`;

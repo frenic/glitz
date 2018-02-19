@@ -1,5 +1,3 @@
-export type Function<T> = (arg: T) => T;
-
-export function compose<T>(...fns: Array<Function<T>>) {
-  return fns.reduceRight((prevFn, nextFn) => value => nextFn(prevFn(value)), value => value);
+export function compose<T>(...fns: Array<(arg: T) => T>) {
+  return fns.reduceRight((prevFn, nextFn) => arg => nextFn(prevFn(arg)), fns.pop() || (arg => arg));
 }

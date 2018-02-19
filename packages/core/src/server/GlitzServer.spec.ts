@@ -91,4 +91,12 @@ describe('server', () => {
     ).toBe('a b c');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
+  it('applies transformer', () => {
+    const server = new GlitzServer<TestStyle>({
+      transformer: properties => ({ ...properties, mozAppearance: 'none' }),
+    });
+
+    expect(server.injectStyle({ appearance: 'none' })).toBe('a');
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
 });

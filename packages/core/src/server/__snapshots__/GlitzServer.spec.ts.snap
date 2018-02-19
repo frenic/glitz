@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`server applies transformer 1`] = `"<style class=\\"__glitz__\\">.a{appearance:none;-moz-appearance:none}</style>"`;
+
 exports[`server injects atomic rules 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b{background:green}.c{border:blue}</style>"`;
 
 exports[`server injects different combinations 1`] = `"<style class=\\"__glitz__\\">.a{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.b{color:green}</style><style class=\\"__glitz__\\" media=\\"(min-width: 992px)\\">.c{color:blue}</style>"`;

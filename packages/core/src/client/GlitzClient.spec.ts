@@ -209,6 +209,19 @@ describe('client', () => {
       }),
     ).toBe('a b c');
   });
+  it('applies transformer', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>([style], {
+      transformer: properties => ({ ...properties, mozAppearance: 'none' }),
+    });
+
+    expect(client.injectStyle({ appearance: 'none' })).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
 });
 
 function createStyle(media?: string | null, css?: string) {
