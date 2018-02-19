@@ -1,9 +1,10 @@
+import { Style } from '@glitz/type';
 import Base, { DEFAULT_HYDRATE_CLASS_NAME } from '../core/Base';
 import { Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 
-export default class GlitzServer extends Base {
+export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
   public getStyleMarkup: (className?: string) => string;
   constructor(options: Options = {}) {
     const classHasher = createHashCounter(options.prefix);

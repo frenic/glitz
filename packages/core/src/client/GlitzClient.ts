@@ -1,3 +1,4 @@
+import { Style } from '@glitz/type';
 import Base, { DEFAULT_HYDRATE_CLASS_NAME } from '../core/Base';
 import { Options } from '../types/options';
 import { createStyleElement } from '../utils/dom';
@@ -7,7 +8,7 @@ import createValidator from './Validator';
 
 export let Parent = process.env.NODE_ENV !== 'production' ? createValidator() : Base;
 
-export default class GlitzClient extends Parent {
+export default class GlitzClient<TStyle = Style> extends Parent<TStyle> {
   constructor(
     styleElements?: HTMLStyleElement[] | NodeListOf<Element> | HTMLCollectionOf<Element> | 'auto' | null,
     options: Options = {},

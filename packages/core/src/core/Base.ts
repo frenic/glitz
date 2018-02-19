@@ -11,8 +11,8 @@ type MediaOrPseudoDeclarationCache = {
 
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
 
-export default class Base {
-  private inject: (style: Style) => string;
+export default class Base<TStyle extends Style> {
+  private inject: (style: TStyle) => string;
   constructor(injector: (media?: string) => InjectorClient | InjectorServer, transformer: Transformer | undefined) {
     const declarator = transformer
       ? (property: string, value: (string | number) | Array<string | number>) =>
@@ -21,7 +21,7 @@ export default class Base {
 
     const declarationCache: DeclarationCache | MediaOrPseudoDeclarationCache = {};
 
-    const inject = (this.inject = (style: Style, media?: string, pseudo?: string) => {
+    const inject = (this.inject = (style: TStyle, media?: string, pseudo?: string) => {
       let classNames = '';
 
       for (const property in style) {
@@ -74,9 +74,9 @@ export default class Base {
           }
 
           if (property === '@keyframes' || property === 'animationName') {
-            const name = injector().injectKeyframesRule(value);
-            if (name) {
-              classNames += inject({ animationName: name });
+            const animationName = injector().injectKeyframesRule(value);
+            if (animationName) {
+              classNames += inject({ animationName } as TStyle);
               continue;
             }
           }
@@ -95,7 +95,7 @@ export default class Base {
       return classNames.slice(1);
     });
   }
-  public injectStyle(style: Style) {
+  public injectStyle(style: TStyle) {
     return this.inject(style);
   }
 }
