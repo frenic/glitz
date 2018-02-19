@@ -31,6 +31,44 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(1);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
   });
+  it('injects shorthand rule', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>([style]);
+
+    expect(
+      client.injectStyle({
+        padding: { left: '10px', right: '10px', top: '10px', bottom: '10px' },
+      }),
+    ).toBe('a b c d');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(4);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        margin: { x: '10px' },
+      }),
+    ).toBe('e f');
+
+    expect(sheet.cssRules).toHaveLength(6);
+    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        margin: { y: '10px' },
+      }),
+    ).toBe('g h');
+
+    expect(sheet.cssRules).toHaveLength(8);
+    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[7].cssText).toMatchSnapshot();
+  });
   it('injects pseudo rule', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>([style]);
@@ -133,7 +171,7 @@ describe('client', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>([style]);
 
-    expect(client.injectStyle({ color: 'red', background: 'green', border: 'blue' })).toBe('a b c');
+    expect(client.injectStyle({ color: 'red', backgroundColor: 'green', borderColor: 'blue' })).toBe('a b c');
 
     const sheet = style.sheet as CSSStyleSheet;
 

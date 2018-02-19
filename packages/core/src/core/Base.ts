@@ -11,6 +11,26 @@ type MediaOrPseudoDeclarationCache = {
 
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
 
+const shorthandLengthProperties = ['margin', 'padding'];
+const shorthandProperties = shorthandLengthProperties.concat([
+  'animation',
+  'background',
+  'border',
+  'borderBottom',
+  'borderImage',
+  'borderLeft',
+  'borderRight',
+  'borderTop',
+  'flex',
+  'font',
+  'grid',
+  'maskBorder',
+  'mask',
+  'offset',
+  'outline',
+  'transition',
+]);
+
 export default class Base<TStyle extends Style> {
   private inject: (style: TStyle) => string;
   constructor(injector: (media?: string) => InjectorClient | InjectorServer, transformer: Transformer | undefined) {
@@ -60,6 +80,23 @@ export default class Base<TStyle extends Style> {
         }
 
         if (typeof value === 'object') {
+          if (process.env.NODE_ENV !== 'production') {
+            let isEmpty = true;
+            for (const x in value) {
+              isEmpty = false;
+              // tslint:disable no-unused-expression
+              x;
+              break;
+            }
+            if (isEmpty) {
+              console.warn(
+                'The style property `%s` was an empty %s and should be removed',
+                property,
+                Array.isArray(value) ? 'array' : 'object',
+              );
+            }
+          }
+
           // Pseudo
           if (property[0] === ':') {
             const combinedPseudo = (pseudo || '') + property;
@@ -83,6 +120,67 @@ export default class Base<TStyle extends Style> {
 
           if (Array.isArray(value)) {
             classNames += injector(media).injectClassRule(declarator(property, value), pseudo);
+            continue;
+          }
+
+          if (shorthandProperties.indexOf(property) !== -1) {
+            const longhand: any = {};
+
+            for (const extension in value) {
+              const longhandValue = value[extension];
+
+              if (
+                typeof longhandValue === 'string' ||
+                typeof longhandValue === 'number' ||
+                Array.isArray(longhandValue)
+              ) {
+                if (extension === 'x') {
+                  if (process.env.NODE_ENV !== 'production') {
+                    if (shorthandLengthProperties.indexOf(property) === -1) {
+                      console.error(
+                        'The longhand style property `%s.y` is only supported for %s in `%o`',
+                        property,
+                        shorthandLengthProperties.map(shorthand => `\`${shorthand}\``).join('and'),
+                        value,
+                      );
+                    }
+                  }
+                  longhand[property + 'Left'] = longhandValue;
+                  longhand[property + 'Right'] = longhandValue;
+                  continue;
+                }
+
+                if (extension === 'y') {
+                  if (process.env.NODE_ENV !== 'production') {
+                    if (shorthandLengthProperties.indexOf(property) === -1) {
+                      console.error(
+                        'The longhand style property `%s.y` is only supported for %s in `%o`',
+                        property,
+                        shorthandLengthProperties.map(shorthand => `\`${shorthand}\``).join('and'),
+                        value,
+                      );
+                    }
+                  }
+                  longhand[property + 'Top'] = longhandValue;
+                  longhand[property + 'Bottom'] = longhandValue;
+                  continue;
+                }
+
+                longhand[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+                continue;
+              }
+
+              if (process.env.NODE_ENV !== 'production') {
+                console.error(
+                  'The longhand style property `%s.%s` only allows string or number as value, was `%o`',
+                  property,
+                  extension,
+                  value,
+                );
+              }
+            }
+
+            classNames += inject(longhand, media, pseudo);
             continue;
           }
         }

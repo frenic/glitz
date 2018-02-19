@@ -5,14 +5,14 @@ describe('server', () => {
     const injector = new Injector();
 
     expect(injector.injectClassRule({ color: 'red' })).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', background: 'block' })).toBe('b');
+    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' })).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const injector = new Injector();
 
     expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', background: 'block' }, ':hover')).toBe('b');
+    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {

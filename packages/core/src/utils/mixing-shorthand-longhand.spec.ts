@@ -1,3 +1,4 @@
+import { Style } from '@glitz/type';
 import { validateMixingShorthandLonghand } from './mixing-shorthand-longhand';
 
 describe('mixing shorthand longhand', () => {
@@ -8,7 +9,7 @@ describe('mixing shorthand longhand', () => {
       {
         border: '',
         borderBottomColor: '',
-      },
+      } as Style,
       '',
     );
 
@@ -18,7 +19,7 @@ describe('mixing shorthand longhand', () => {
       {
         borderBottom: '',
         borderBottomColor: '',
-      },
+      } as Style,
       '',
     );
 
@@ -31,7 +32,7 @@ describe('mixing shorthand longhand', () => {
         borderBottomWidth: '',
         borderTop: '',
         borderTopColor: '',
-      },
+      } as Style,
       '',
     );
 
@@ -44,7 +45,7 @@ describe('mixing shorthand longhand', () => {
       {
         border: '',
         marginBottom: '',
-      },
+      } as Style,
       '',
     );
 

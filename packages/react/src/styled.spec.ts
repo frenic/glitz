@@ -95,13 +95,13 @@ describe('react styled', () => {
     const StyledComponent = styled(
       props => {
         expect(props.apply()).toBe('a b c');
-        expect(props.compose()).toMatchObject({ color: 'red', fontSize: '24px', background: 'green' });
+        expect(props.compose()).toMatchObject({ color: 'red', fontSize: '24px', backgroundColor: 'green' });
         return React.createElement('div');
       },
       { color: 'red', fontSize: '18px' },
     );
 
-    const AssignedComponent = styled(StyledComponent, { fontSize: '24px', background: 'green' });
+    const AssignedComponent = styled(StyledComponent, { fontSize: '24px', backgroundColor: 'green' });
 
     renderer.create(
       React.createElement(
@@ -114,7 +114,7 @@ describe('react styled', () => {
     );
   });
   it('composes style', () => {
-    const StyledComponent = styled.div({ color: 'red', background: 'green' });
+    const StyledComponent = styled.div({ color: 'red', backgroundColor: 'green' });
 
     const ComposedComponent = styled(
       props => {
@@ -132,7 +132,7 @@ describe('react styled', () => {
           glitz: new GlitzClient(),
         },
         React.createElement(ComposedComponent, {
-          css: { background: 'white' },
+          css: { backgroundColor: 'white' },
         }),
       ),
     );
@@ -140,7 +140,7 @@ describe('react styled', () => {
     const declaration = getComputedStyle(root.getDOMNode());
 
     expect(declaration.getPropertyValue('color')).toBe('black');
-    expect(declaration.getPropertyValue('background')).toBe('white');
+    expect(declaration.getPropertyValue('background-color')).toBe('white');
   });
   it('passes innerRef prop', () => {
     class Spy extends React.Component<StyledProps> {

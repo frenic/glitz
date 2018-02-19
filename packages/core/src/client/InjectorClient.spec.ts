@@ -10,7 +10,7 @@ describe('client', () => {
     const injector = new InjectorClient(style);
 
     expect(injector.injectClassRule({ color: 'red' })).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', background: 'block' })).toBe('b');
+    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' })).toBe('b');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -23,7 +23,7 @@ describe('client', () => {
     const injector = new InjectorClient(style);
 
     expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', background: 'block' }, ':hover')).toBe('b');
+    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -82,12 +82,12 @@ describe('client', () => {
     // Use Puppeteer
   });
   it('hydrates plain rule', () => {
-    const style = createStyle('.a{color:red}.b{color:green}.c{color:black;background:white}');
+    const style = createStyle('.a{color:red}.b{color:green}.c{color:black;background-color:white}');
     const injector = new InjectorClient(style);
 
     // Skipping .a
     expect(injector.injectClassRule({ color: 'green' })).toBe('b');
-    expect(injector.injectClassRule({ color: 'black', background: 'white' })).toBe('c');
+    expect(injector.injectClassRule({ color: 'black', backgroundColor: 'white' })).toBe('c');
   });
   it('hydrates pseudo rule', () => {
     const style = createStyle('.a:hover{color:red}.b:hover{color:green}');

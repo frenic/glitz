@@ -116,7 +116,6 @@ if (process.env.NODE_ENV !== 'production') {
               hyphenatedProperties[longhand],
               hyphenatedProperties[property],
               style,
-              hyphenatedProperties[property],
             );
           }
         }

@@ -22,6 +22,29 @@ describe('server', () => {
     expect(server.injectStyle({ color: 'red' })).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
+  it('injects shorthand rule', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        padding: { left: '10px', right: '10px', top: '10px', bottom: '10px' },
+      }),
+    ).toBe('a b c d');
+
+    expect(
+      server.injectStyle({
+        margin: { x: '10px' },
+      }),
+    ).toBe('e f');
+
+    expect(
+      server.injectStyle({
+        margin: { y: '10px' },
+      }),
+    ).toBe('g h');
+
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
   it('injects pseudo rule', () => {
     const server = new GlitzServer<TestStyle>();
 
@@ -67,7 +90,7 @@ describe('server', () => {
   it('injects atomic rules', () => {
     const server = new GlitzServer<TestStyle>();
 
-    expect(server.injectStyle({ color: 'red', background: 'green', border: 'blue' })).toBe('a b c');
+    expect(server.injectStyle({ color: 'red', backgroundColor: 'green', borderColor: 'blue' })).toBe('a b c');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {
