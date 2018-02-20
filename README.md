@@ -5,8 +5,9 @@ A fast, lightweight [_(~1.5KB gz)_](https://bundlephobia.com/result?p=@glitz/cor
 Features supported:
 
 * [Pseudo classes/elements](#pseudos)
-* [Keyframes](#keyframes)
 * [Fallback values](#fallback-values)
+* [Keyframes](#keyframes)
+* [Font faces](#font-faces)
 * [Media queries](#media-queries)
 * [Auto-prefixing](#prefixer)
 * [Server rendering](#server-rendering)
@@ -49,6 +50,21 @@ const className = glitz.injectStyle({
       content: '"Don\'t forget double quotes when doing this"',
     },
   },
+});
+```
+
+### Fallback values
+
+An array of values will be injected as one rule.
+
+```ts
+const className = glitz.injectStyle({
+  display: ['-webkit-flex', 'flex'],
+  // Will be injected as:
+  // .a {
+  //   display: -webkit-flex;
+  //   display: flex;
+  // }
 });
 ```
 
@@ -124,21 +140,6 @@ const className = glitz.injectStyle({
 });
 ```
 
-### Fallback values
-
-An array of values will be injected as one rule.
-
-```ts
-const className = glitz.injectStyle({
-  display: ['-webkit-flex', 'flex'],
-  // Will be injected as:
-  // .a {
-  //   display: -webkit-flex;
-  //   display: flex;
-  // }
-});
-```
-
 ### Media queries
 
 You can define any `@media` property as you like.
@@ -159,6 +160,69 @@ The difference between `GlitzServer` class and `GlitzClient` class is that `Glit
 
 * [API reference](#glitzserver)
 * [Example implementation](https://github.com/frenic/glitz/blob/master/packages/react/#server-rendering)
+
+## Shorthand properties
+
+Problems mixing CSS shorthand and longhand properties are known. It often causes unexpected behaviors.
+
+```ts
+import { media } from '@glitz/core';
+
+const first = glitz.injectStyle({
+  marginLeft: '10px',
+});
+
+// Bad
+const second = glitz.injectStyle({
+  margin: '20px',
+  marginLeft: '10px', // <- The order of the CSS will result in this never being applied
+});
+
+// Good
+const second = glitz.injectStyle({
+  marginTop: '20px',
+  marginRight: '20px',
+  marginBottom: '20px',
+  marginLeft: '10px',
+});
+```
+
+Instead of writing each longhand property separately, you're able to use objects with shorthand properties.
+
+```ts
+import { media } from '@glitz/core';
+
+// Good
+const second = glitz.injectStyle({
+  margin: {
+    top: '20px',
+    right: '20px',
+    bottom: '20px',
+    left: '10px',
+  },
+});
+```
+
+For `margin` and `padding` the `x` property is an alias for `left` and `right`. The `y` property is an alias for `top` and `bottom`.
+
+```ts
+import { media } from '@glitz/core';
+
+// Bad
+const second = glitz.injectStyle({
+  padding: '10px',
+});
+
+// Good
+const second = glitz.injectStyle({
+  padding: {
+    x: '10px',
+    y: '10px',
+  },
+});
+```
+
+Supported shorthand objects are: `animation`, `background`, `border`, `borderBottom`, `borderImage`, `borderLeft`, `borderRight`, `borderTop`, `flex`, `font`, `grid`, `maskBorder`, `mask`, `margin`, `offset`, `outline`, `padding`, `transition`. You can see a complete [list of shorthand objects](https://github.com/frenic/glitz/blob/c1b547990e7d56764472045566127aa3a0831711/packages/type/index.d.ts#L23) here.
 
 ## TypeScript
 
