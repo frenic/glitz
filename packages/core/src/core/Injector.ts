@@ -62,7 +62,7 @@ export default class Injector {
     this.injectFontFaceRule = style => {
       if (process.env.NODE_ENV !== 'production') {
         if ('fontFamily' in style) {
-          console.error('Defined font family for font faces are ignored');
+          console.warn('The CSS property `font-family` font face will be ignored in %O', style);
         }
       }
       delete (style as any).fontFamily;

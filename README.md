@@ -163,7 +163,7 @@ The difference between `GlitzServer` class and `GlitzClient` class is that `Glit
 
 ## Shorthand properties
 
-Problems mixing CSS shorthand and longhand properties are known. It often causes unexpected behaviors.
+Problems mixing CSS shorthand and longhand properties are common with styling techniques like this and doesn't only affects Glitz. It often causes unexpected behaviors.
 
 ```ts
 import { media } from '@glitz/core';
@@ -175,7 +175,7 @@ const first = glitz.injectStyle({
 // Bad
 const second = glitz.injectStyle({
   margin: '20px',
-  marginLeft: '10px', // <- The order of the CSS will result in this never being applied
+  marginLeft: '10px', // <- The order of the CSS will result in this never being applied as expected
 });
 
 // Good
@@ -222,7 +222,7 @@ const second = glitz.injectStyle({
 });
 ```
 
-Supported shorthand objects are: `animation`, `background`, `border`, `borderBottom`, `borderImage`, `borderLeft`, `borderRight`, `borderTop`, `flex`, `font`, `grid`, `maskBorder`, `mask`, `margin`, `offset`, `outline`, `padding`, `transition`. You can see a complete [list of shorthand objects](https://github.com/frenic/glitz/blob/c1b547990e7d56764472045566127aa3a0831711/packages/type/index.d.ts#L23) here.
+You can see a complete [list of shorthand objects](https://github.com/frenic/glitz/blob/c1b547990e7d56764472045566127aa3a0831711/packages/type/index.d.ts#L23) here.
 
 ## TypeScript
 
