@@ -7,8 +7,11 @@ import { StyledComponent } from './styled/create';
 // @ts-ignore
 import { customStyled, StyledDecorator } from './styled/custom';
 // @ts-ignore
-import { assignPredefined, PredefinedStyled } from './styled/predefined';
+import { assignPredefined } from './styled/predefined';
+// @ts-ignore
+import { StyledElementComponents, StyledElementFunctions } from './styled/types';
 
 export * from './styled/create';
+export * from './styled/types';
 
 export const styled = assignPredefined(customStyled);
