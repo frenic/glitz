@@ -147,7 +147,7 @@ export default class Base<TStyle extends Style> {
 
             if (process.env.NODE_ENV !== 'production') {
               console.error(
-                "The shorthand object `%s` will be ignored and be the cause of the error below because property `%s.%s` wasn't a string, number or array of values, was `%o`",
+                "The shorthand object `%s` will be ignored and be the cause of the error below because property `%s.%s` wasn't a string, number or array of values, was `%O`",
                 property,
                 property,
                 extension,
@@ -166,7 +166,7 @@ export default class Base<TStyle extends Style> {
         }
 
         if (process.env.NODE_ENV !== 'production') {
-          console.error('The style property `%s` does not support the value `%o`', property, value);
+          console.error('The style property `%s` does not support the value `%O`', property, value);
         }
       }
 
