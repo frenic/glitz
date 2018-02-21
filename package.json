@@ -32,6 +32,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "lerna": "lerna --ignore=glitz-example",
+    "prerelease": "lerna --ignore=glitz-example publish --npm-tag=next",
     "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
