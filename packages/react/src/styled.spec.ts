@@ -149,7 +149,7 @@ describe('react styled', () => {
       }
     }
 
-    const StyledComponent = styled<{}>(Spy);
+    const StyledComponent = styled(Spy);
 
     mount(
       React.createElement(

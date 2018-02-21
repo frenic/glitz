@@ -29,19 +29,13 @@ const D = styled(props => <div className={props.apply()} />, {});
 const E = styled((props: { x: string } & StyledProps) => <div className={props.apply()} />);
 <E x="" css={{}} />;
 
-const F = styled(
-  class extends React.Component<StyledProps> {
-    render() {
-      return <div className={this.props.apply()} />;
-    }
-  },
-);
-<F css={{}} innerRef={c => c} />;
+const F = styled(E);
+<F x="" css={{}} />;
 
 const G = styled(
   class extends React.Component<StyledProps> {
     render() {
-      return <F css={this.props.compose({})} />;
+      return <div className={this.props.apply()} />;
     }
   },
 );
@@ -50,35 +44,47 @@ const G = styled(
 const H = styled(
   class extends React.Component<StyledProps> {
     render() {
+      return <G css={this.props.compose({})} />;
+    }
+  },
+);
+<H css={{}} innerRef={c => c} />;
+
+const I = styled(
+  class extends React.Component<StyledProps> {
+    render() {
       return <div className={this.props.apply()} />;
     }
   },
   {},
 );
-<H css={{}} innerRef={c => c} />;
+<I css={{}} innerRef={c => c} />;
 
-const I = styled(
+const J = styled(
   class extends React.Component<{ x: string } & StyledProps> {
     render() {
       return <div className={this.props.apply()} />;
     }
   },
 );
-<I x="" css={{}} innerRef={c => c} />;
+<J x="" css={{}} innerRef={c => c} />;
+
+const K = styled(J);
+<K x="" css={{}} innerRef={c => c} />;
 
 const j = styled({});
-const J = j(props => <div className={props.apply()} />);
-<J css={{}} />;
+const L = j(props => <div className={props.apply()} />);
+<L css={{}} />;
 
 const k = styled({});
-const K = k(
+const M = k(
   class extends React.Component<StyledProps> {
     render() {
       return <div className={this.props.apply()} />;
     }
   },
 );
-<K css={{}} innerRef={c => c} />;
+<M css={{}} innerRef={c => c} />;
 
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881

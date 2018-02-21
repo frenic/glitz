@@ -2,32 +2,43 @@ import { Style } from '@glitz/type';
 import * as React from 'react';
 import { create, StyledComponent, StyledProps } from './create';
 
-export type InnerComponent<TProps> = React.ComponentType<TProps & StyledProps> | StyledComponent<TProps>;
+export function customStyled<TProps extends StyledProps>(
+  component: React.ComponentType<TProps>,
+  style?: Style,
+): StyledComponentWithProps<TProps>;
 
-export interface StyledDecorator {
-  // Needed due to: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/17181
-  (component: InnerComponent<{}>, style?: Style): StyledComponent<{}>;
-  <TProps>(component: InnerComponent<TProps>, style?: Style): StyledComponent<TProps>;
-}
-
-function isStyle<TProps>(arg: InnerComponent<TProps> | Style): arg is Style {
-  return typeof arg === 'object';
-}
-
-export function customStyled(component: InnerComponent<{}>, style?: Style): StyledComponent<{}>;
-
-export function customStyled<TProps>(component: InnerComponent<TProps>, style?: Style): StyledComponent<TProps>;
+export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
 
 export function customStyled(style: Style): StyledDecorator;
 
 export function customStyled<TProps>(
-  arg1: InnerComponent<TProps> | Style,
+  arg1: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | Style,
   arg2?: Style,
-): StyledComponent<TProps> | StyledDecorator {
+): StyledComponent<any> | StyledDecorator {
   if (isStyle(arg1)) {
-    return <TInnerProps>(innerComponent: InnerComponent<TInnerProps>, style?: Style) =>
-      customStyled<TInnerProps>(innerComponent, style ? { ...arg1, ...style } : arg1);
+    return (innerComponent: React.ComponentType<any>, style?: Style) =>
+      customStyled(innerComponent, style ? { ...arg1, ...style } : arg1);
   }
 
-  return create<TProps>(arg1, arg2);
+  return create(arg1, arg2);
 }
+
+function isStyle(arg: React.ComponentType<any> | Style): arg is Style {
+  return typeof arg === 'object';
+}
+
+export interface StyledDecorator {
+  <TProps extends StyledProps>(component: React.ComponentType<TProps>, style?: Style): StyledComponentWithProps<TProps>;
+  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
+}
+
+// TODO: Use conditional types when TypeScript 2.8 arrives
+export type StyledComponentWithProps<TProps extends StyledProps> = StyledComponent<
+  Cleanup<Omit<TProps, keyof StyledProps>>
+>;
+
+// Clean up types
+export type Cleanup<T> = { [P in keyof T]: T[P] };
+export type Diff<T extends string, U extends string> = ({ [P in T]: P } &
+  { [P in U]: never } & { [x: string]: never })[T];
+export type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;
