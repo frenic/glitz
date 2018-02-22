@@ -5,7 +5,7 @@ import { Context } from '../GlitzProvider';
 export interface StyledComponent<TProps> extends React.ComponentClass<TProps & CSSProp & InnerRefProp> {}
 
 export type StyledProps = {
-  apply: () => string;
+  apply: () => string | undefined;
   compose: (style?: Style) => Style | undefined;
 };
 
@@ -55,6 +55,8 @@ export function create<TProps>(
     return inner[ASSIGN_METHOD](staticStyle);
   }
 
+  let cached: string | null = null;
+
   class GlitzStyled extends React.Component<TProps & CSSProp & InnerRefProp> {
     public static contextTypes = {
       glitz: () => null, // Just pass the damn thing
@@ -63,21 +65,36 @@ export function create<TProps>(
     public static [ASSIGN_METHOD](assigningStyle?: Style) {
       return create(inner, assigningStyle ? { ...staticStyle, ...assigningStyle } : staticStyle);
     }
-    protected apply: () => string;
-    protected compose: (additionalStyle?: Style) => Style;
+    protected apply: () => string | undefined;
+    protected compose: (additionalStyle?: Style) => Style | undefined;
     constructor(props: TProps, context: Context) {
       super(props, context);
 
       this.apply = () => {
-        const composedStyle = this.compose();
-        return context.glitz.injectStyle(composedStyle);
+        const style = this.compose();
+
+        if (!style) {
+          return;
+        }
+
+        const isPure = style === staticStyle;
+
+        if (isPure && cached) {
+          return cached;
+        }
+
+        const classNames = context.glitz.injectStyle(style);
+
+        cached = isPure ? classNames : null;
+
+        return classNames;
       };
 
       this.compose = additionalStyle => {
         const dynamicStyle: Style | undefined = this.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
-          return staticStyle || {};
+          return staticStyle;
         }
 
         return { ...staticStyle, ...dynamicStyle, ...additionalStyle };

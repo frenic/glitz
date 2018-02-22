@@ -1,7 +1,8 @@
 node_modules/
 .cache/
 cjs/
-es/
+es6/
+jsm/
 etc/
 dist/
 package.json

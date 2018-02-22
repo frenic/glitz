@@ -142,6 +142,29 @@ describe('react styled', () => {
     expect(declaration.getPropertyValue('color')).toBe('black');
     expect(declaration.getPropertyValue('background-color')).toBe('white');
   });
+  it('caches pure style', () => {
+    let count = 0;
+
+    const StyledComponent = styled.div({
+      get color() {
+        count++;
+        return 'red';
+      },
+    });
+
+    renderer.create(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponent),
+        React.createElement(StyledComponent),
+      ),
+    );
+
+    expect(count).toBe(1);
+  });
   it('passes innerRef prop', () => {
     class Spy extends React.Component<StyledProps> {
       public render() {
