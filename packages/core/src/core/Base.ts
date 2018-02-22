@@ -127,7 +127,8 @@ export default class Base<TStyle extends Style> {
             if (
               typeof longhandValue === 'string' ||
               typeof longhandValue === 'number' ||
-              Array.isArray(longhandValue)
+              Array.isArray(longhandValue) ||
+              (typeof longhandValue === 'object' && allowedShorthandExtensionObject(property, extension))
             ) {
               if (extension === 'x') {
                 longhand[property + 'Left'] = longhandValue;
@@ -180,4 +181,8 @@ export default class Base<TStyle extends Style> {
 
 function declaration(property: string, value: (string | number) | Array<string | number>) {
   return { [property]: value };
+}
+
+function allowedShorthandExtensionObject(shorthand: string, extension: string) {
+  return (shorthand === 'animation' && extension === 'name') || (shorthand === 'font' && extension === 'family');
 }

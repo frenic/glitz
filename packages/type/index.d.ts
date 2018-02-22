@@ -27,7 +27,7 @@ interface ShorthandProperties {
     duration?: CSS.StandardLonghandPropertiesFallback['animationDuration'];
     fillMode?: CSS.StandardLonghandPropertiesFallback['animationFillMode'];
     iterationCount?: CSS.StandardLonghandPropertiesFallback['animationIterationCount'];
-    name?: CSS.StandardLonghandPropertiesFallback['animationName'];
+    name?: PropertiesList | CSS.StandardLonghandPropertiesFallback['animationName'];
     playState?: CSS.StandardLonghandPropertiesFallback['animationPlayState'];
     timingFunction?: CSS.StandardLonghandPropertiesFallback['animationTimingFunction'];
   };
@@ -82,7 +82,10 @@ interface ShorthandProperties {
     wrap?: CSS.StandardLonghandPropertiesFallback['flexWrap'];
   };
   font?: {
-    family?: CSS.StandardLonghandPropertiesFallback['fontFamily'];
+    family?:
+      | FontFace
+      | CSS.StandardLonghandProperties['fontFamily']
+      | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>;
     featureSettings?: CSS.StandardLonghandPropertiesFallback['fontFeatureSettings'];
     kerning?: CSS.StandardLonghandPropertiesFallback['fontKerning'];
     languageOverride?: CSS.StandardLonghandPropertiesFallback['fontLanguageOverride'];

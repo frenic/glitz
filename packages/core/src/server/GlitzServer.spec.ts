@@ -97,8 +97,8 @@ describe('server', () => {
     const server = new GlitzServer<TestStyle>();
 
     expect(server.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
-
     expect(server.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+    expect(server.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects font face rule', () => {
@@ -126,6 +126,18 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
+        font: {
+          family: {
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+      }),
+    ).toBe('b');
+
+    expect(
+      server.injectStyle({
         fontFamily: [
           {
             fontStyle: 'normal',
@@ -136,6 +148,23 @@ describe('server', () => {
         ],
       }),
     ).toBe('c');
+
+    expect(
+      server.injectStyle({
+        font: {
+          family: [
+            {
+              fontStyle: 'normal',
+              fontWeight: 400,
+              src:
+                "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+            },
+            'sans-serif',
+          ],
+        },
+      }),
+    ).toBe('c');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects different combinations', () => {

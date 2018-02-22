@@ -197,6 +197,8 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(4);
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
     expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+
+    expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
   });
   it('injects font face rule', () => {
     const style = createStyle();
@@ -228,6 +230,18 @@ describe('client', () => {
       }),
     ).toBe('b');
 
+    expect(
+      client.injectStyle({
+        font: {
+          family: {
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+      }),
+    ).toBe('b');
+
     expect(sheet.cssRules).toHaveLength(4);
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
     expect(sheet.cssRules[3].cssText).toMatchSnapshot();
@@ -242,6 +256,22 @@ describe('client', () => {
           },
           'sans-serif',
         ],
+      }),
+    ).toBe('c');
+
+    expect(
+      client.injectStyle({
+        font: {
+          family: [
+            {
+              fontStyle: 'normal',
+              fontWeight: 400,
+              src:
+                "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+            },
+            'sans-serif',
+          ],
+        },
       }),
     ).toBe('c');
 
@@ -289,6 +319,7 @@ describe('client', () => {
 
     expect(client.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
     expect(client.injectStyle({ animationName: { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
+    expect(client.injectStyle({ animation: { name: { from: { color: 'red' }, to: { color: 'green' } } } })).toBe('a');
   });
   it('hydrates font face rule', () => {
     const style = createStyle(
