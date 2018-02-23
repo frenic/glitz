@@ -97,7 +97,7 @@ export default function Message(props) {
 
 These components are basically the same thing as:
 
-```ts
+```tsx
 const Div = styled({apply, compose, ...rest} => <div className={apply()} {...rest} />);
 ```
 
@@ -111,7 +111,7 @@ The inner component will receive two props:
 
 ##### `props.apply()`
 
-Returns a string with class names of the injected style.
+Returns a string with class names of the injected style. This method is used to **apply style on built in components** (HTML and SVG elements).
 
 ```tsx
 import { styled } from '@glitz/react';
@@ -136,7 +136,7 @@ export default styled(Message, {
 
 ##### `props.compose(composedStyle?: Style)`
 
-Compose style from one styled component to another styled element.
+Compose style from one styled component to another styled element. This method is used to **apply style on other Glitz styled components**.
 
 ```tsx
 import { styled } from '@glitz/react';
@@ -146,15 +146,17 @@ class Welcome extends React.Component {
   render() {
     return (
       <Message
-        css={this.props.compose()}
-        /* Will be styled with `18px` and `bold` */
+        css={this.props.compose({
+          textDecoration: 'underline'
+        })}
+        /* Will be styled with `18px`, `bold` and `underline` */
       >Hi and welcome!</div>
     );
   }
 }
 
 export default styled(Welcome, {
-  fonteight: 'bold',
+  fontWeight: 'bold',
 });
 ```
 
@@ -164,7 +166,7 @@ Returns: `styled(innerComponent: ComponentType, staticStyle?: Style)`
 
 It's also possible to pass style as a single argument to `styled`. In that case, it will return a new `styled` function with that static style embedded and assigned by any other style. _Note that it only returns a function. Not the properties like `styled.div` or `styled.Div`._
 
-```ts
+```tsx
 import { styled } from '@glitz/react';
 
 class List extends React.Component {
@@ -186,6 +188,36 @@ export const ImportantList = listStyled(List, {
 /* Will be styled as a list with squares and `24px` */
 export const LargeList = listStyled(List, {
   fontSize: '24px',
+});
+```
+
+## Deep merging
+
+Multiple styles on the same element will treated deeply, which basically means the same thing as if they were "deeply merged".
+
+```tsx
+import { styled } from '@glitz/react';
+
+export const Link = styled.a({
+  color: 'grey',
+  ':hover': {
+    color: 'black',
+    textDecoration: 'underline',
+  },
+});
+
+export const InvertedLink = styled(Link, {
+  ':hover': {
+    color: 'white',
+  },
+  // Will receive:
+  // {
+  //   color: 'grey',
+  //   ':hover': {
+  //     color: 'white',
+  //     textDecoration: 'underline',
+  //   }
+  // }
 });
 ```
 
