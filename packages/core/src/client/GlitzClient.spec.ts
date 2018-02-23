@@ -482,17 +482,20 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>();
     const logger = (console.error = jest.fn());
 
-    client.injectStyle({ ':hover': { border: { color: 'red' } }, borderColor: 'green' });
+    client.injectStyle({ border: { width: 1 }, borderWidth: 1 });
     expect(logger).toHaveBeenCalledTimes(0);
 
-    client.injectStyle({ border: { color: 'red' }, borderColor: 'green' });
+    client.injectStyle({ ':hover': { border: 1 }, borderWidth: 1 } as TestStyle);
     expect(logger).toHaveBeenCalledTimes(0);
 
-    client.injectStyle(({ border: 'red', borderColor: 'green' } as any) as TestStyle);
+    client.injectStyle({ border: 1, borderWidth: 1 } as TestStyle);
     expect(logger).toHaveBeenCalledTimes(1);
 
-    client.injectStyle(([{ border: 'red' }, { borderColor: 'green' }] as any) as TestStyle);
+    client.injectStyle([{ border: 1 }, { borderWidth: 1 }] as TestStyle[]);
     expect(logger).toHaveBeenCalledTimes(2);
+
+    client.injectStyle({ ':hover': { border: 1, borderWidth: 1 } } as TestStyle);
+    expect(logger).toHaveBeenCalledTimes(3);
   });
 });
 

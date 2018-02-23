@@ -7,12 +7,6 @@ interface TestStyle extends Style {
   '@media (min-width: 300px)'?: Style;
   '@media (min-width: 768px)'?: Style;
   '@media (min-width: 992px)'?: Style;
-  spacing?: {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-  };
 }
 
 describe('server', () => {
