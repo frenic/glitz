@@ -2,50 +2,66 @@ import { FontFace, Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
+import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 
-type DeclarationCache = { [cssProperty: string]: { [value: string]: string; [value: number]: string } };
-type PseudoInMediaDeclarationCache = { [pseudoInMediaProperty: string]: DeclarationCache };
-type MediaOrPseudoDeclarationCache = {
-  [mediaOrPseudoProperty: string]: DeclarationCache | PseudoInMediaDeclarationCache;
+type Dictionary<TValue> = { [cssProperty: string]: TValue };
+type PseudoInMediaDictionary<TValue> = { [pseudoInMediaProperty: string]: Dictionary<TValue> };
+type MediaOrPseudoDictionary<TValue> = {
+  [mediaOrPseudoProperty: string]: Dictionary<TValue> | PseudoInMediaDictionary<TValue>;
 };
 
+type CacheValue = {
+  [value: string]: string;
+};
+
+type SelectorsValue = 1;
+
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
+const ANIMATION_NAME = 'animationName';
+const FONT_FAMILY = 'fontFamily';
 
 export default class Base<TStyle extends Style> {
-  private inject: (style: TStyle) => string;
+  private inject: (styles: TStyle) => string;
+  private injectDeep: (styles: TStyle[]) => string;
   constructor(injector: (media?: string) => InjectorClient | InjectorServer, transformer: Transformer | undefined) {
     const declarator = transformer
       ? (property: string, value: (string | number) | Array<string | number>) =>
           transformer(declaration(property, value))
       : declaration;
 
-    const declarationCache: DeclarationCache | MediaOrPseudoDeclarationCache = {};
+    const cache: Dictionary<CacheValue> | MediaOrPseudoDictionary<CacheValue> = {};
 
-    const inject = (this.inject = (style: TStyle, media?: string, pseudo?: string) => {
+    const inject = (
+      style: TStyle,
+      selectors: Dictionary<SelectorsValue> | MediaOrPseudoDictionary<SelectorsValue>,
+      media?: string,
+      pseudo?: string,
+    ) => {
       let classNames = '';
 
       for (const property in style) {
-        classNames += ' ';
-
         const value = (style as any)[property];
 
         if (typeof value === 'string' || typeof value === 'number') {
-          // Only supports caching of primitive values
-          let cache = declarationCache as DeclarationCache;
-          if (media && pseudo) {
-            const pseudoCache = (declarationCache[media] =
-              declarationCache[media] || {}) as PseudoInMediaDeclarationCache;
-            cache = pseudoCache[pseudo] = pseudoCache[pseudo] || {};
-          } else if (media) {
-            cache = (declarationCache[media] = declarationCache[media] || {}) as DeclarationCache;
-          } else if (pseudo) {
-            cache = (declarationCache[pseudo] = declarationCache[pseudo] || {}) as DeclarationCache;
+          if (shouldSkip(selectors, property, media, pseudo, true)) {
+            continue;
           }
 
-          const cachedValues = (cache[property] = cache[property] || {});
+          // Only supports caching of primitive values
+          let dictionary = cache as Dictionary<CacheValue>;
+          if (media && pseudo) {
+            const pseudoCache = (cache[media] = cache[media] || {}) as PseudoInMediaDictionary<CacheValue>;
+            dictionary = pseudoCache[pseudo] = pseudoCache[pseudo] || {};
+          } else if (media) {
+            dictionary = (cache[media] = cache[media] || {}) as Dictionary<CacheValue>;
+          } else if (pseudo) {
+            dictionary = (cache[pseudo] = cache[pseudo] || {}) as Dictionary<CacheValue>;
+          }
+
+          const cachedValues = (dictionary[property] = dictionary[property] || {});
 
           if (cachedValues[value]) {
-            classNames += cachedValues[value];
+            classNames += ' ' + cachedValues[value];
             continue;
           }
 
@@ -55,7 +71,7 @@ export default class Base<TStyle extends Style> {
             cachedValues[value] = className;
           }
 
-          classNames += className;
+          classNames += ' ' + className;
           continue;
         }
 
@@ -80,44 +96,51 @@ export default class Base<TStyle extends Style> {
           // Pseudo
           if (property[0] === ':') {
             const combinedPseudo = (pseudo || '') + property;
-            classNames += inject(value, media, combinedPseudo);
+            classNames += inject(value, selectors, media, combinedPseudo);
             continue;
           }
 
           if (property.indexOf('@media') === 0) {
             const combinedMedia = (media ? `${media} and ` : '') + property.slice(7);
-            classNames += inject(value, combinedMedia, pseudo);
+            classNames += inject(value, selectors, combinedMedia, pseudo);
             continue;
           }
 
-          if (property === '@keyframes' || property === 'animationName') {
-            const animationName = injector().injectKeyframesRule(value);
-            if (animationName) {
-              classNames += inject({ animationName } as TStyle, media, pseudo);
+          if (property === '@keyframes' || property === ANIMATION_NAME) {
+            if (shouldSkip(selectors, ANIMATION_NAME, media, pseudo, false)) {
+              continue;
+            }
+            const name = injector().injectKeyframesRule(value);
+            if (name) {
+              classNames += inject({ [ANIMATION_NAME]: name } as TStyle, selectors, media, pseudo);
               continue;
             }
           }
 
-          if (property === '@font-face' || property === 'fontFamily') {
-            let fontFamily = '';
+          if (property === '@font-face' || property === FONT_FAMILY) {
+            if (shouldSkip(selectors, FONT_FAMILY, media, pseudo, false)) {
+              continue;
+            }
+            let names = '';
             const families: Array<string | FontFace> = Array.isArray(value) ? value : [value];
             for (const family of families) {
-              if (fontFamily) {
-                fontFamily += ',';
+              if (names) {
+                names += ',';
               }
-              fontFamily += typeof family === 'string' ? family : injector().injectFontFaceRule(family);
+              names += typeof family === 'string' ? family : injector().injectFontFaceRule(family);
             }
-            if (fontFamily) {
-              classNames += inject({ fontFamily } as TStyle, media, pseudo);
+            if (names) {
+              classNames += inject({ [FONT_FAMILY]: names } as TStyle, selectors, media, pseudo);
               continue;
             }
           }
 
           if (Array.isArray(value)) {
-            classNames += injector(media).injectClassRule(declarator(property, value), pseudo);
+            classNames += ' ' + injector(media).injectClassRule(declarator(property, value), pseudo);
             continue;
           }
 
+          // Shorthand objects
           let isValid = true;
           const longhand: any = {};
 
@@ -162,7 +185,7 @@ export default class Base<TStyle extends Style> {
           }
 
           if (isValid) {
-            classNames += inject(longhand, media, pseudo);
+            classNames += inject(longhand, selectors, media, pseudo);
             continue;
           }
         }
@@ -172,11 +195,37 @@ export default class Base<TStyle extends Style> {
         }
       }
 
+      return classNames;
+    };
+
+    this.inject = (style: TStyle) => {
+      const selectors = {};
+      const classNames = inject(style, selectors);
+
+      if (process.env.NODE_ENV !== 'production') {
+        validateMixingShorthandLonghand(selectors, classNames);
+      }
+
       return classNames.slice(1);
-    });
+    };
+
+    this.injectDeep = (styles: TStyle[]) => {
+      let classNames = '';
+      const selectors = {};
+
+      for (let i = styles.length; i >= 0; i--) {
+        classNames += inject(styles[i], selectors);
+      }
+
+      if (process.env.NODE_ENV !== 'production') {
+        validateMixingShorthandLonghand(selectors, classNames);
+      }
+
+      return classNames.slice(1);
+    };
   }
-  public injectStyle(style: TStyle) {
-    return this.inject(style);
+  public injectStyle(styles: TStyle | TStyle[]) {
+    return Array.isArray(styles) ? this.injectDeep(styles) : this.inject(styles);
   }
 }
 
@@ -186,4 +235,32 @@ function declaration(property: string, value: (string | number) | Array<string |
 
 function allowedShorthandExtensionObject(shorthand: string, extension: string) {
   return (shorthand === 'animation' && extension === 'name') || (shorthand === 'font' && extension === 'family');
+}
+
+function shouldSkip(
+  selectors: Dictionary<SelectorsValue> | MediaOrPseudoDictionary<SelectorsValue>,
+  property: string,
+  media: string | undefined,
+  pseudo: string | undefined,
+  willBeIncluded: boolean,
+) {
+  let directory = selectors as Dictionary<SelectorsValue>;
+  if (media && pseudo) {
+    const pseudoSelectors = (selectors[media] = selectors[media] || {}) as PseudoInMediaDictionary<SelectorsValue>;
+    directory = pseudoSelectors[pseudo] = pseudoSelectors[pseudo] || {};
+  } else if (media) {
+    directory = (selectors[media] = selectors[media] || {}) as Dictionary<SelectorsValue>;
+  } else if (pseudo) {
+    directory = (selectors[pseudo] = selectors[pseudo] || {}) as Dictionary<SelectorsValue>;
+  }
+
+  if (property in directory) {
+    return true;
+  }
+
+  if (willBeIncluded) {
+    directory[property] = 1;
+  }
+
+  return false;
 }

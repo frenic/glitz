@@ -7,12 +7,6 @@ interface TestStyle extends Style {
   '@media (min-width: 300px)'?: Style;
   '@media (min-width: 768px)'?: Style;
   '@media (min-width: 992px)'?: Style;
-  spacing?: {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-  };
 }
 
 beforeEach(() => {
@@ -307,6 +301,116 @@ describe('client', () => {
     expect(sheet3.cssRules).toHaveLength(1);
     expect(sheet3.cssRules[0].cssText).toMatchSnapshot();
   });
+  it('injects rule deeply', () => {
+    const style = createStyle();
+    const media = createStyle('(min-width: 768px)');
+    const client = new GlitzClient<TestStyle>([style, media]);
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(client.injectStyle([{ color: 'green' }, { color: 'red' }])).toBe('a');
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle([
+        {
+          padding: { left: '10px' },
+        },
+        {
+          paddingLeft: '20px',
+        },
+      ]),
+    ).toBe('b');
+
+    expect(sheet.cssRules).toHaveLength(2);
+    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+
+    expect(client.injectStyle([{ ':hover': { color: 'green' } }, { ':hover': { color: 'red' } }])).toBe('c');
+    expect(
+      client.injectStyle([
+        { ':first-child': { ':hover': { color: 'green' } } },
+        { ':first-child': { ':hover': { color: 'red' } } },
+      ]),
+    ).toBe('d');
+
+    expect(sheet.cssRules).toHaveLength(4);
+    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle([
+        { '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } },
+        { '@keyframes': { from: { color: 'green' }, to: { color: 'blue' } } },
+      ]),
+    ).toBe('e');
+    expect(
+      client.injectStyle([
+        { animationName: { from: { color: 'blue' }, to: { color: 'white' } } },
+        { animationName: { from: { color: 'white' }, to: { color: 'black' } } },
+      ]),
+    ).toBe('f');
+
+    expect(sheet.cssRules).toHaveLength(8);
+    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[7].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle([
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        },
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+      ]),
+    ).toBe('g');
+    expect(
+      client.injectStyle([
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        },
+      ]),
+    ).toBe('h');
+
+    expect(sheet.cssRules).toHaveLength(12);
+    expect(sheet.cssRules[8].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[10].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[11].cssText).toMatchSnapshot();
+
+    const mediaSheet = media.sheet as CSSStyleSheet;
+
+    expect(
+      client.injectStyle([
+        { '@media (min-width: 768px)': { color: 'green' } },
+        { '@media (min-width: 768px)': { color: 'red' } },
+      ]),
+    ).toBe('i');
+    expect(
+      client.injectStyle([
+        { '@media (min-width: 768px)': { ':hover': { color: 'green' } } },
+        { '@media (min-width: 768px)': { ':hover': { color: 'red' } } },
+      ]),
+    ).toBe('j');
+
+    expect(mediaSheet.cssRules).toHaveLength(2);
+    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
+  });
   it('hydrates media rule', () => {
     const style = createStyle('(min-width: 768px)', '.a{color:red}');
     const client = new GlitzClient<TestStyle>([style]);
@@ -373,6 +477,22 @@ describe('client', () => {
 
     expect(sheet.cssRules).toHaveLength(1);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
+  it('warns with mixed longhand and shorthand', () => {
+    const client = new GlitzClient<TestStyle>();
+    const logger = (console.error = jest.fn());
+
+    client.injectStyle({ ':hover': { border: { color: 'red' } }, borderColor: 'green' });
+    expect(logger).toHaveBeenCalledTimes(0);
+
+    client.injectStyle({ border: { color: 'red' }, borderColor: 'green' });
+    expect(logger).toHaveBeenCalledTimes(0);
+
+    client.injectStyle(({ border: 'red', borderColor: 'green' } as any) as TestStyle);
+    expect(logger).toHaveBeenCalledTimes(1);
+
+    client.injectStyle(([{ border: 'red' }, { borderColor: 'green' }] as any) as TestStyle);
+    expect(logger).toHaveBeenCalledTimes(2);
   });
 });
 

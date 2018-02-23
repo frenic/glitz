@@ -179,6 +179,87 @@ describe('server', () => {
     ).toBe('a b c');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
+  it('injects rule deeply', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(server.injectStyle([{ color: 'green' }, { color: 'red' }])).toBe('a');
+
+    expect(
+      server.injectStyle([
+        {
+          padding: { left: '10px' },
+        },
+        {
+          paddingLeft: '20px',
+        },
+      ]),
+    ).toBe('b');
+
+    expect(server.injectStyle([{ ':hover': { color: 'green' } }, { ':hover': { color: 'red' } }])).toBe('c');
+    expect(
+      server.injectStyle([
+        { ':first-child': { ':hover': { color: 'green' } } },
+        { ':first-child': { ':hover': { color: 'red' } } },
+      ]),
+    ).toBe('d');
+
+    expect(
+      server.injectStyle([
+        { '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } },
+        { '@keyframes': { from: { color: 'green' }, to: { color: 'blue' } } },
+      ]),
+    ).toBe('e');
+    expect(
+      server.injectStyle([
+        { animationName: { from: { color: 'blue' }, to: { color: 'white' } } },
+        { animationName: { from: { color: 'white' }, to: { color: 'black' } } },
+      ]),
+    ).toBe('f');
+
+    expect(
+      server.injectStyle([
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        },
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+      ]),
+    ).toBe('g');
+    expect(
+      server.injectStyle([
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+        {
+          '@font-face': {
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        },
+      ]),
+    ).toBe('h');
+
+    expect(
+      server.injectStyle([
+        { '@media (min-width: 768px)': { color: 'green' } },
+        { '@media (min-width: 768px)': { color: 'red' } },
+      ]),
+    ).toBe('i');
+    expect(
+      server.injectStyle([
+        { '@media (min-width: 768px)': { ':hover': { color: 'green' } } },
+        { '@media (min-width: 768px)': { ':hover': { color: 'red' } } },
+      ]),
+    ).toBe('j');
+
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
       transformer: properties => ({ ...properties, mozAppearance: 'none' }),

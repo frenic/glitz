@@ -1,7 +1,6 @@
-import { Style } from '@glitz/type';
 import { hyphenateProperty } from '../utils/parse';
 
-export let validateMixingShorthandLonghand: (style: Style, classNames: string) => void = () => {
+export let validateMixingShorthandLonghand: (style: { [property: string]: any }, classNames: string) => void = () => {
   /* noop */
 };
 
@@ -100,8 +99,11 @@ if (process.env.NODE_ENV !== 'production') {
     transition: ['transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay'],
   };
 
-  validateMixingShorthandLonghand = (style, classNames) => {
-    const hyphenatedProperties = Object.keys(style).reduce<{ [property: string]: string }>((properties, property) => {
+  validateMixingShorthandLonghand = (object, classNames) => {
+    const hyphenatedProperties = Object.keys(object).reduce<{ [property: string]: string }>((properties, property) => {
+      if (typeof object[property] === 'object' && !Array.isArray(object[property])) {
+        validateMixingShorthandLonghand(object[property], classNames);
+      }
       properties[hyphenateProperty(property)] = property;
       return properties;
     }, {});
@@ -115,7 +117,7 @@ if (process.env.NODE_ENV !== 'production') {
               classNames,
               hyphenatedProperties[longhand],
               hyphenatedProperties[property],
-              style,
+              object,
             );
           }
         }
