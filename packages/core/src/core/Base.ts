@@ -21,8 +21,7 @@ const ANIMATION_NAME = 'animationName';
 const FONT_FAMILY = 'fontFamily';
 
 export default class Base<TStyle extends Style> {
-  private inject: (styles: TStyle) => string;
-  private injectDeep: (styles: TStyle[]) => string;
+  public injectStyle: (styles: TStyle | TStyle[]) => string;
   constructor(injector: (media?: string) => InjectorClient | InjectorServer, transformer: Transformer | undefined) {
     const declarator = transformer
       ? (property: string, value: (string | number) | Array<string | number>) =>
@@ -198,23 +197,16 @@ export default class Base<TStyle extends Style> {
       return classNames;
     };
 
-    this.inject = (style: TStyle) => {
+    this.injectStyle = (styles: TStyle | TStyle[]) => {
       const selectors = {};
-      const classNames = inject(style, selectors);
-
-      if (process.env.NODE_ENV !== 'production') {
-        validateMixingShorthandLonghand(selectors, classNames);
-      }
-
-      return classNames.slice(1);
-    };
-
-    this.injectDeep = (styles: TStyle[]) => {
       let classNames = '';
-      const selectors = {};
 
-      for (let i = styles.length; i >= 0; i--) {
-        classNames += inject(styles[i], selectors);
+      if (Array.isArray(styles)) {
+        for (let i = styles.length; i >= 0; i--) {
+          classNames += inject(styles[i], selectors);
+        }
+      } else {
+        classNames = inject(styles, selectors);
       }
 
       if (process.env.NODE_ENV !== 'production') {
@@ -223,9 +215,6 @@ export default class Base<TStyle extends Style> {
 
       return classNames.slice(1);
     };
-  }
-  public injectStyle(styles: TStyle | TStyle[]) {
-    return Array.isArray(styles) ? this.injectDeep(styles) : this.inject(styles);
   }
 }
 
