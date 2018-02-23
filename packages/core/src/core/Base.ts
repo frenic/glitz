@@ -142,6 +142,7 @@ export default class Base<TStyle extends Style> {
                 continue;
               }
 
+              // Convert to camel cased CSS property due to declaration cache
               longhand[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
               continue;
             }

@@ -75,6 +75,7 @@ The `animationName` property injects the `@keyframes` declaration list and will 
 ```ts
 const className = glitz.injectStyle({
   animationName: {
+    // or animation: { name: { ...
     from: {
       color: 'red',
     },
@@ -106,6 +107,7 @@ The `fontFamily` property injects the `@font-face` rule and will be replaced by 
 ```ts
 const className = glitz.injectStyle({
   fontFamily: {
+    // or font: { family: { ...
     fontStyle: 'normal',
     fontWeight: 400,
     src: "url(https://domain.tld/path/to/font.woff2) format('woff2')",
