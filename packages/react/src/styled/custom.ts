@@ -17,10 +17,10 @@ export function customStyled<TProps>(
 ): StyledComponent<any> | StyledDecorator {
   if (isStyle(arg1)) {
     return (innerComponent: React.ComponentType<any>, style?: Style) =>
-      customStyled(innerComponent, style ? { ...arg1, ...style } : arg1);
+      create(innerComponent, ([] as Style[]).concat(arg1 || [], style || []));
   }
 
-  return create(arg1, arg2);
+  return create(arg1, arg2 ? [arg2] : []);
 }
 
 function isStyle(arg: React.ComponentType<any> | Style): arg is Style {

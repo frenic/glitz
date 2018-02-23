@@ -6,7 +6,7 @@ export interface StyledComponent<TProps> extends React.ComponentClass<TProps & C
 
 export type StyledProps = {
   apply: () => string | undefined;
-  compose: (style?: Style) => Style | undefined;
+  compose: (style?: Style) => Style[];
 };
 
 export type StyledElementProps = {
@@ -14,7 +14,7 @@ export type StyledElementProps = {
 };
 
 export type CSSProp = {
-  css?: Style;
+  css?: Style | Style[];
 };
 
 export type InnerRefProp = {
@@ -48,7 +48,7 @@ function isCustomComponent<TProps>(inner: InnerType<TProps>): inner is React.Com
 
 export function create<TProps>(
   inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
-  staticStyle?: Style,
+  staticStyle: Style[] = [],
 ): StyledComponent<TProps> {
   if (isStyledComponent(inner)) {
     // @ts-ignore
@@ -63,10 +63,10 @@ export function create<TProps>(
     };
     public static displayName: string;
     public static [ASSIGN_METHOD](assigningStyle?: Style) {
-      return create(inner, assigningStyle ? { ...staticStyle, ...assigningStyle } : staticStyle);
+      return create(inner, assigningStyle ? staticStyle.concat(assigningStyle) : staticStyle);
     }
     protected apply: () => string | undefined;
-    protected compose: (additionalStyle?: Style) => Style | undefined;
+    protected compose: (additionalStyle?: Style) => Style[];
     constructor(props: TProps, context: Context) {
       super(props, context);
 
@@ -91,13 +91,13 @@ export function create<TProps>(
       };
 
       this.compose = additionalStyle => {
-        const dynamicStyle: Style | undefined = this.props.css;
+        const dynamicStyle: Style | Style[] | undefined = this.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
           return staticStyle;
         }
 
-        return { ...staticStyle, ...dynamicStyle, ...additionalStyle };
+        return staticStyle.concat(dynamicStyle || [], additionalStyle || []);
       };
 
       this.render = isCustomComponent(inner)

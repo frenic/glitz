@@ -10,7 +10,7 @@ describe('react styled', () => {
     const StyledComponent = styled(
       props => {
         expect(props.apply()).toBe('a');
-        expect(props.compose()).toMatchObject({ color: 'red' });
+        expect(props.compose()).toEqual([{ color: 'red' }]);
         return React.createElement('div');
       },
       { color: 'red' },
@@ -31,13 +31,13 @@ describe('react styled', () => {
 
     const StyledComponent1 = embeddedStyle(props => {
       expect(props.apply()).toBe('a');
-      expect(props.compose()).toMatchObject({ color: 'red' });
+      expect(props.compose()).toEqual([{ color: 'red' }]);
       return React.createElement('div');
     });
     const StyledComponent2 = embeddedStyle(
       props => {
         expect(props.apply()).toBe('b');
-        expect(props.compose()).toMatchObject({ color: 'green' });
+        expect(props.compose()).toEqual([{ color: 'red' }, { color: 'green' }]);
         return React.createElement('div');
       },
       { color: 'green' },
@@ -91,11 +91,14 @@ describe('react styled', () => {
 
     expect(tree).toMatchSnapshot();
   });
-  it('assignes styled component', () => {
+  it('assigns styled component', () => {
     const StyledComponent = styled(
       props => {
         expect(props.apply()).toBe('a b c');
-        expect(props.compose()).toMatchObject({ color: 'red', fontSize: '24px', backgroundColor: 'green' });
+        expect(props.compose()).toEqual([
+          { color: 'red', fontSize: '18px' },
+          { fontSize: '24px', backgroundColor: 'green' },
+        ]);
         return React.createElement('div');
       },
       { color: 'red', fontSize: '18px' },

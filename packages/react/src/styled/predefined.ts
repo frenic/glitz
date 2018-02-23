@@ -3,7 +3,7 @@ import { create } from './create';
 import { StyledElementComponents, StyledElementFunctions } from './types';
 
 function createPredefined(component: string) {
-  return (style: Style) => create(component, style);
+  return (style: Style) => create(component, [style]);
 }
 
 export function assignPredefined<TTarget>(target: TTarget) {
