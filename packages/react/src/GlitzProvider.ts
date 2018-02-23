@@ -4,10 +4,14 @@ import * as React from 'react';
 
 export type ProviderProps = {
   glitz: GlitzClient | GlitzServer;
+  enableDeepComposition?: boolean;
 };
 
 export type Context = {
-  glitz: GlitzClient | GlitzServer;
+  glitz: {
+    glitz: GlitzClient | GlitzServer;
+    deep: boolean;
+  };
 };
 
 export default class GlitzProvider extends React.Component<ProviderProps> {
@@ -17,7 +21,12 @@ export default class GlitzProvider extends React.Component<ProviderProps> {
   private childContext: Context;
   constructor(props: ProviderProps, context: Context) {
     super(props, context);
-    this.childContext = { glitz: props.glitz };
+    this.childContext = {
+      glitz: {
+        glitz: props.glitz,
+        deep: !!props.enableDeepComposition,
+      },
+    };
   }
   public getChildContext() {
     return this.childContext;

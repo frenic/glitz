@@ -8,7 +8,7 @@ function createPredefined(component: string) {
 
 export function assignPredefined<TTarget>(target: TTarget) {
   for (const element of predefinedElements) {
-    (target as any)[element[0].toUpperCase() + element.slice(1)] = create(element);
+    (target as any)[element[0].toUpperCase() + element.slice(1)] = create(element, []);
     (target as any)[element] = createPredefined(element);
   }
   return target as TTarget & StyledElementFunctions & StyledElementComponents;

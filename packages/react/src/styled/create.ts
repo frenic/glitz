@@ -6,7 +6,7 @@ export interface StyledComponent<TProps> extends React.ComponentClass<TProps & C
 
 export type StyledProps = {
   apply: () => string | undefined;
-  compose: (style?: Style) => Style[];
+  compose: (style?: Style) => Style | Style[];
 };
 
 export type StyledElementProps = {
@@ -48,14 +48,14 @@ function isCustomComponent<TProps>(inner: InnerType<TProps>): inner is React.Com
 
 export function create<TProps>(
   inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
-  staticStyle: Style[] = [],
+  originalStaticStyle: Style[],
 ): StyledComponent<TProps> {
   if (isStyledComponent(inner)) {
     // @ts-ignore
-    return inner[ASSIGN_METHOD](staticStyle);
+    return inner[ASSIGN_METHOD](originalStaticStyle);
   }
 
-  let cached: string | null = null;
+  let cache: string | null = null;
 
   class GlitzStyled extends React.Component<TProps & CSSProp & InnerRefProp> {
     public static contextTypes = {
@@ -63,29 +63,33 @@ export function create<TProps>(
     };
     public static displayName: string;
     public static [ASSIGN_METHOD](assigningStyle?: Style) {
-      return create(inner, assigningStyle ? staticStyle.concat(assigningStyle) : staticStyle);
+      return create(inner, assigningStyle ? originalStaticStyle.concat(assigningStyle) : originalStaticStyle);
     }
     protected apply: () => string | undefined;
-    protected compose: (additionalStyle?: Style) => Style[];
+    protected compose: (additionalStyle?: Style) => Style | Style[];
     constructor(props: TProps, context: Context) {
       super(props, context);
 
-      this.apply = () => {
-        const style = this.compose();
+      const staticStyle: Style | Style[] = context.glitz.deep
+        ? originalStaticStyle
+        : originalStaticStyle.length < 2 ? originalStaticStyle[0] || {} : flatten(originalStaticStyle);
 
-        if (!style) {
+      this.apply = () => {
+        const styles: Style | Style[] = this.compose();
+
+        if (!styles) {
           return;
         }
 
-        const isPure = style === staticStyle;
+        const isPure = styles === staticStyle;
 
-        if (isPure && cached) {
-          return cached;
+        if (isPure && cache) {
+          return cache;
         }
 
-        const classNames = context.glitz.injectStyle(style);
+        const classNames = context.glitz.glitz.injectStyle(styles);
 
-        cached = isPure ? classNames : null;
+        cache = isPure ? classNames : null;
 
         return classNames;
       };
@@ -97,7 +101,15 @@ export function create<TProps>(
           return staticStyle;
         }
 
-        return staticStyle.concat(dynamicStyle || [], additionalStyle || []);
+        const styles = ([] as Style[]).concat(staticStyle, dynamicStyle || [], additionalStyle || []);
+
+        if (context.glitz.deep) {
+          return styles;
+        } else if (styles.length < 2) {
+          return styles[0] || {};
+        } else {
+          return flatten(styles);
+        }
       };
 
       this.render = isCustomComponent(inner)
@@ -126,4 +138,16 @@ export function create<TProps>(
   }
 
   return GlitzStyled;
+}
+
+function flatten(styles: Style[]) {
+  const result: Style = {};
+  for (const chunk of styles) {
+    let property: keyof Style;
+    for (property in chunk) {
+      result[property] = chunk[property];
+    }
+  }
+
+  return result;
 }

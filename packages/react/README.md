@@ -49,9 +49,9 @@ render(
 
 ## API
 
-### `<GlitzProvider glitz={GlitzClient | GlitzServer} />`
+### `<GlitzProvider glitz={GlitzClient | GlitzServer} enableDeepComposition?={boolean} />`
 
-Provides all styled component with the Glitz core instance.
+Provides all styled component with the Glitz core instance. It's also possible to [enable deep composition](#deep-style-composition).
 
 ### `styled` object
 
@@ -191,9 +191,29 @@ export const LargeList = listStyled(List, {
 });
 ```
 
-## Deep merging
+## Deep style composition
 
-Multiple styles on the same element will treated deeply, which basically means the same thing as if they were "deeply merged".
+Default is shallow merge of multiple style objects. But enabling deep composition means that multiple style objects will be **treated** deeply instead.
+
+_They are **not** deeply merged. Instead, Glitz will keep an index of applied rules and ignore those that are overridden. So `@keyframes` and `@font-face` objects wont be merged in any way._
+
+```tsx
+import { render } from 'react-dom';
+import GlitzClient from '@glitz/core';
+import { GlitzProvider } from '@glitz/react';
+import App from './App';
+
+const glitz = new GlitzClient();
+
+render(
+  <GlitzProvider glitz={glitz} enableDeepComposition>
+    <App />
+  </GlitzProvider>,
+  document.getElementById('container'),
+);
+```
+
+Here's an example of the different results:
 
 ```tsx
 import { styled } from '@glitz/react';
@@ -210,12 +230,20 @@ export const InvertedLink = styled(Link, {
   ':hover': {
     color: 'white',
   },
-  // Will receive:
+  // With deep composition enabled:
   // {
   //   color: 'grey',
   //   ':hover': {
   //     color: 'white',
   //     textDecoration: 'underline',
+  //   }
+  // }
+  //
+  // With deep composition disabled:
+  // {
+  //   color: 'grey',
+  //   ':hover': {
+  //     color: 'white',
   //   }
   // }
 });

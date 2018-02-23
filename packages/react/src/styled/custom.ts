@@ -17,7 +17,7 @@ export function customStyled<TProps>(
 ): StyledComponent<any> | StyledDecorator {
   if (isStyle(arg1)) {
     return (innerComponent: React.ComponentType<any>, style?: Style) =>
-      create(innerComponent, ([] as Style[]).concat(arg1 || [], style || []));
+      create(innerComponent, style ? [arg1, style] : [arg1]);
   }
 
   return create(arg1, arg2 ? [arg2] : []);

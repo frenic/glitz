@@ -10,7 +10,7 @@ describe('react styled', () => {
     const StyledComponent = styled(
       props => {
         expect(props.apply()).toBe('a');
-        expect(props.compose()).toEqual([{ color: 'red' }]);
+        expect(props.compose()).toEqual({ color: 'red' });
         return React.createElement('div');
       },
       { color: 'red' },
@@ -31,13 +31,13 @@ describe('react styled', () => {
 
     const StyledComponent1 = embeddedStyle(props => {
       expect(props.apply()).toBe('a');
-      expect(props.compose()).toEqual([{ color: 'red' }]);
+      expect(props.compose()).toEqual({ color: 'red' });
       return React.createElement('div');
     });
     const StyledComponent2 = embeddedStyle(
       props => {
         expect(props.apply()).toBe('b');
-        expect(props.compose()).toEqual([{ color: 'red' }, { color: 'green' }]);
+        expect(props.compose()).toEqual({ color: 'green' });
         return React.createElement('div');
       },
       { color: 'green' },
@@ -92,19 +92,16 @@ describe('react styled', () => {
     expect(tree).toMatchSnapshot();
   });
   it('assigns styled component', () => {
-    const StyledComponent = styled(
+    const FlattenComponentA = styled(
       props => {
-        expect(props.apply()).toBe('a b c');
-        expect(props.compose()).toEqual([
-          { color: 'red', fontSize: '18px' },
-          { fontSize: '24px', backgroundColor: 'green' },
-        ]);
+        expect(props.compose()).toEqual({ fontSize: '24px', ':hover': { backgroundColor: 'green' } });
+        expect(props.apply()).toBe('a b');
         return React.createElement('div');
       },
-      { color: 'red', fontSize: '18px' },
+      { fontSize: '18px', ':hover': { color: 'red' } },
     );
 
-    const AssignedComponent = styled(StyledComponent, { fontSize: '24px', backgroundColor: 'green' });
+    const FlattenComponentB = styled(FlattenComponentA, { fontSize: '24px', ':hover': { backgroundColor: 'green' } });
 
     renderer.create(
       React.createElement(
@@ -112,7 +109,32 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(AssignedComponent),
+        React.createElement(FlattenComponentB),
+      ),
+    );
+
+    const DeepComponentA = styled(
+      props => {
+        expect(props.compose()).toEqual([
+          { fontSize: '18px', ':hover': { color: 'red' } },
+          { fontSize: '24px', ':hover': { backgroundColor: 'green' } },
+        ]);
+        expect(props.apply()).toBe('a b c');
+        return React.createElement('div');
+      },
+      { fontSize: '18px', ':hover': { color: 'red' } },
+    );
+
+    const DeepComponentB = styled(DeepComponentA, { fontSize: '24px', ':hover': { backgroundColor: 'green' } });
+
+    renderer.create(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+          enableDeepComposition: true,
+        },
+        React.createElement(DeepComponentB),
       ),
     );
   });

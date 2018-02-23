@@ -8,7 +8,7 @@ describe('react provider', () => {
     const glitz = new GlitzClient();
     // @ts-ignore
     const Spy: React.StatelessComponent<any> = (props, context) => {
-      expect(context.glitz).toBe(glitz);
+      expect(context.glitz.glitz).toBe(glitz);
       return React.createElement('div');
     };
     Spy.contextTypes = {
