@@ -144,13 +144,27 @@ export default class Base<TStyle extends Style> {
           const longhand: any = {};
 
           for (const extension in value) {
+            if (process.env.NODE_ENV !== 'production') {
+              if (!/^[a-z]+$/i.test(extension)) {
+                console.error(
+                  "The property `%s['%s']` in %O isn't a valid shorthand extension and will likely cause a failure",
+                  property,
+                  extension,
+                  value,
+                );
+              }
+            }
+
             const longhandValue = value[extension];
+            const typeOfValue = typeof longhandValue;
 
             if (
-              typeof longhandValue === 'string' ||
-              typeof longhandValue === 'number' ||
+              typeOfValue === 'string' ||
+              typeOfValue === 'number' ||
               Array.isArray(longhandValue) ||
-              (typeof longhandValue === 'object' && allowedShorthandExtensionObject(property, extension))
+              // Objects are only valid for `animation.name` and `font.family`
+              ((typeOfValue === 'object' && (property === 'animation' && extension === 'name')) ||
+                (property === 'font' && extension === 'family'))
             ) {
               if (extension === 'x') {
                 longhand[property + 'Left'] = longhandValue;
@@ -164,14 +178,14 @@ export default class Base<TStyle extends Style> {
                 continue;
               }
 
-              // Convert to camel cased CSS property due to declaration cache
+              // Convert to camel cased CSS property due to cache
               longhand[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
               continue;
             }
 
             if (process.env.NODE_ENV !== 'production') {
               console.error(
-                "The shorthand object `%s` will be ignored and be the cause of the error below because property `%s.%s` wasn't a string, number or array of values, was `%O`",
+                "The object of `%s` isn't a valid shorthand object and will be ignored because property `%s['%s']` wasn't a string, number or array of values, was %O",
                 property,
                 property,
                 extension,
@@ -185,12 +199,13 @@ export default class Base<TStyle extends Style> {
 
           if (isValid) {
             classNames += inject(longhand, selectors, media, pseudo);
-            continue;
           }
+
+          continue;
         }
 
         if (process.env.NODE_ENV !== 'production') {
-          console.error('The style property `%s` does not support the value `%O`', property, value);
+          console.error('The style property `%s` does not support the value %O', property, value);
         }
       }
 
@@ -220,10 +235,6 @@ export default class Base<TStyle extends Style> {
 
 function declaration(property: string, value: (string | number) | Array<string | number>) {
   return { [property]: value };
-}
-
-function allowedShorthandExtensionObject(shorthand: string, extension: string) {
-  return (shorthand === 'animation' && extension === 'name') || (shorthand === 'font' && extension === 'family');
 }
 
 function shouldSkip(
