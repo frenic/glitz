@@ -23,28 +23,7 @@ export type InnerRefProp = {
 
 type InnerType<TProps> = React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string;
 
-function passingProps(props: any) {
-  const newProps = { ...props };
-
-  delete newProps.css;
-
-  if (newProps.innerRef) {
-    newProps.ref = newProps.innerRef;
-    delete newProps.innerRef;
-  }
-
-  return newProps;
-}
-
 const ASSIGN_METHOD = '__GLITZ_ASSIGN';
-
-function isStyledComponent<TProps>(inner: InnerType<TProps>): inner is StyledComponent<TProps> {
-  return typeof inner === 'function' && ASSIGN_METHOD in inner;
-}
-
-function isCustomComponent<TProps>(inner: InnerType<TProps>): inner is React.ComponentType<TProps & StyledProps> {
-  return typeof inner === 'function';
-}
 
 export function create<TProps>(
   inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
@@ -69,6 +48,14 @@ export function create<TProps>(
     protected compose: (additionalStyle?: Style) => Style | Style[];
     constructor(props: TProps, context: Context) {
       super(props, context);
+
+      if (process.env.NODE_ENV !== 'production') {
+        if (!(context && context.glitz && context.glitz.glitz)) {
+          throw new Error(
+            "The `<GlitzProvider>` doesn't seem to be used correctly because the core instance couldn't be found",
+          );
+        }
+      }
 
       const staticStyle: Style | Style[] = context.glitz.deep
         ? originalStaticStyle
@@ -150,4 +137,25 @@ function flatten(styles: Style[]) {
   }
 
   return result;
+}
+
+function passingProps(props: any) {
+  const newProps = { ...props };
+
+  delete newProps.css;
+
+  if (newProps.innerRef) {
+    newProps.ref = newProps.innerRef;
+    delete newProps.innerRef;
+  }
+
+  return newProps;
+}
+
+function isStyledComponent<TProps>(inner: InnerType<TProps>): inner is StyledComponent<TProps> {
+  return typeof inner === 'function' && ASSIGN_METHOD in inner;
+}
+
+function isCustomComponent<TProps>(inner: InnerType<TProps>): inner is React.ComponentType<TProps & StyledProps> {
+  return typeof inner === 'function';
 }
