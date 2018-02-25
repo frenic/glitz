@@ -21,6 +21,21 @@ const Box = styled.div({
 });
 ```
 
+## Table of content
+
+* [Getting started](#getting-started)
+* [API](#api)
+  * [`<GlitzProvider />`](#glitzprovider-)
+  * [`styled.[tagname](staticStyle: Style)`](#styledtagnamestaticstyle-style)
+  * [`<styled.[Tagname] />`](#styledtagname-)
+  * [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent-componenttype-staticstyle-style)
+    * [Prop `apply()`](#prop-apply)
+    * [Prop `compose(composedStyle?: Style)`](#prop-composecomposedstyle-style)
+  * [`styled(embeddedStyle: Style)`](#styledembeddedstyle-style)
+* [Deep style composition](#deep-style-composition)
+* [TypeScript](#typescript)
+* [Server rendering](#server-rendering)
+
 ## Getting started
 
 ```bash
@@ -49,17 +64,33 @@ render(
 
 ## API
 
-### `<GlitzProvider glitz={GlitzClient | GlitzServer} enableDeepComposition?={boolean} />`
+### `<GlitzProvider />`
 
 Provides all styled component with the Glitz core instance. It's also possible to [enable deep composition](#deep-style-composition).
 
-### `styled` object
+```tsx
+<GlitzProvider
+  /* Required, provides instance of `new GlitzClient` or `new GlitzServer` */
+  glitz={glitz}
+  /* Optional, enables deep composition */
+  enableDeepComposition
+>
+```
 
-**Any valid use of the `styled` object returns a React component which exposes a `css` prop which you can use to inject dynamic style and a `innerRef` prop to `ref` your inner element.**
+Composed styles are shallow merged by default. But [deep composition](#deep-style-composition) is possible by the `enableDeepComposition`.
 
-#### `styled.[tagname](staticStyle: Style)`
+### `styled.[tagname](staticStyle: Style)`
 
-Returns: `<StyledComponent css?={Style} innerRef?={(instance: Element) => void} />`
+Returns a component:
+
+```tsx
+<StyledComponent
+  /* Optional, compose with e.g. dynamic styles */
+  css={...}
+  /* Optional, passes a function to the inner element as `ref` */
+  innerRef={...}
+/>
+```
 
 Tag name functions can be any valid React tag name (lower cased). It provides the possibility to have static style outside the component to not bloat your JSX-blocks.
 
@@ -77,7 +108,18 @@ const Box = styled.div({
 });
 ```
 
-#### `<styled.[Tagname] css?={Style} innerRef?={(instance: Element) => void} />`
+### `<styled.[Tagname] />`
+
+Returns a component:
+
+```tsx
+<styled.[Tagname]
+  /* Optional, compose with e.g. dynamic styles */
+  css={...}
+  /* Optional, passes a function to the inner element as `ref` */
+  innerRef={...}
+/>
+```
 
 You can also use capitalized tag name (initial letter upper cased) which exposes a component directly. _When you don't have or want to use static style._
 
@@ -95,21 +137,24 @@ export default function Message(props) {
 }
 ```
 
-These components are basically the same thing as:
+### `styled(innerComponent: ComponentType, staticStyle?: Style)`
+
+Returns a component:
 
 ```tsx
-const Div = styled({apply, compose, ...rest} => <div className={apply()} {...rest} />);
+<StyledComponent
+  /* Optional, compose with e.g. dynamic styles */
+  css={...}
+  /* Optional, passes a function to the inner element as `ref` */
+  innerRef={...}
+/>
 ```
-
-#### `styled(innerComponent: ComponentType, staticStyle?: Style)`
-
-Returns: `<StyledComponent css?={Style} innerRef?={(instance: Component) => void} />`
 
 You can also use `styled` as a HOC. This enables you to compose external components locally without having to create wrapping elements. This can be useful with your shared components.
 
 The inner component will receive two props:
 
-##### `props.apply()`
+#### Prop `apply()`
 
 Returns a string with class names of the injected style. This method is used to **apply style on built in components** (HTML and SVG elements).
 
@@ -134,7 +179,7 @@ export default styled(Message, {
 });
 ```
 
-##### `props.compose(composedStyle?: Style)`
+#### Prop `compose(composedStyle?: Style)`
 
 Compose style from one styled component to another styled element. This method is used to **apply style on other Glitz styled components**.
 
@@ -160,7 +205,7 @@ export default styled(Welcome, {
 });
 ```
 
-#### `styled(embeddedStyle: Style)`
+### `styled(embeddedStyle: Style)`
 
 Returns: `styled(innerComponent: ComponentType, staticStyle?: Style)`
 

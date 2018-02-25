@@ -1,16 +1,6 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight [_(~1.5KB gz)_](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
-
-Features supported:
-
-* [Pseudo classes/elements](#pseudos)
-* [Fallback values](#fallback-values)
-* [Keyframes](#keyframes)
-* [Font faces](#font-faces)
-* [Media queries](#media-queries)
-* [Auto-prefixing](#prefixer)
-* [Server rendering](#server-rendering)
+A fast, lightweight [_(~2.1KB gz)_](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
 
 The most basic implementation is really easy. You don't need any config or module loaders to get started.
 
@@ -24,6 +14,38 @@ const className = glitz.injectStyle({
 ```
 
 At this moment, there's officially only [React bindings](https://github.com/frenic/glitz/blob/master/packages/react/) available.
+
+## Table of content
+
+* [Getting started](#getting-started)
+* [Features](#features)
+  * [Pseudos](#pseudos)
+  * [Fallback values](#fallback-values)
+  * [Keyframes](#keyframes)
+  * [Font faces](#font-faces)
+  * [Media queries](#media-queries)
+* [Server rendering](#server-rendering)
+* [Shorthand properties](#shorthand-properties)
+* [TypeScript](#typescript)
+  * [Unknown properties](#unknown-properties)
+  * [Add custom properties](#add-custom-properties)
+* [API](#api)
+  * [`new GlitzClient(elements: HTMLStyleElement[], options: Options)`](#new-glitzclientelements-htmlstyleelement-options-options)
+    * [Method `injectStyle(style: Style)`](#method-injectstylestyle-style)
+  * [`new GlitzServer(options?: Options)`](#new-glitzserveroptions-options)
+    * [Method `injectStyle(style: Style)`](#method-injectstylestyle-style-1)
+    * [Method `getStyleMarkup(className?: string)`](#method-getstylemarkupclassname-string)
+  * [Options](#options)
+    * [`options.transformer`](#optionstransformer)
+    * [`options.mediaOrder`](#optionsmediaorder)
+    * [`options.prefix`](#optionsprefix)
+  * [Helpers](#helpers)
+    * [`pseudo`](#pseudo)
+    * [`media`](#media)
+    * [`query`](#query)
+* [Playground](#playground)
+* [Prefixer](#prefixer)
+* [Atomic](#atomic)
 
 ## Getting started
 
@@ -285,9 +307,7 @@ declare module '@glitz/type' {
 
 The Glitz core class for browsers.
 
-#### Methods
-
-##### `injectStyle(style: Style)`
+#### Method `injectStyle(style: Style)`
 
 Returns: `string`
 
@@ -299,15 +319,13 @@ _Imoprted from `@glitz/core/server`._
 
 The Glitz core class for servers.
 
-#### Methods
-
-##### `injectStyle(style: Style)`
+#### Method `injectStyle(style: Style)`
 
 Returns: `string`
 
 Class names of the injected style.
 
-##### `getStyleMarkup(className?: string)`
+#### Method `getStyleMarkup(className?: string)`
 
 Returns: `string`
 
