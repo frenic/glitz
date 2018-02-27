@@ -6,7 +6,7 @@ exports[`server injects atomic rules 1`] = `"<style class=\\"__glitz__\\">.a{col
 
 exports[`server injects different combinations 1`] = `"<style class=\\"__glitz__\\">.a{color:red}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.b{color:green}</style><style class=\\"__glitz__\\" media=\\"(min-width: 992px)\\">.c{color:blue}</style>"`;
 
-exports[`server injects font face rule 1`] = `"<style class=\\"__glitz__\\">.a{font-family:a}.b{font-family:b}.c{font-family:b,sans-serif}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')}</style>"`;
+exports[`server injects font face rule 1`] = `"<style class=\\"__glitz__\\">.a{font-family:a}.b{font-family:b}.c{font-family:b,sans-serif}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:b}</style>"`;
 
 exports[`server injects keyframes rule 1`] = `"<style class=\\"__glitz__\\">.a{animation-name:a}.b{animation-name:b}@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}</style>"`;
 
@@ -22,6 +22,6 @@ exports[`server injects plain rule 1`] = `"<style class=\\"__glitz__\\">.a{color
 
 exports[`server injects pseudo rule 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b:hover{color:red}</style>"`;
 
-exports[`server injects rule deeply 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:a}.h{font-family:b}.c:hover{color:red}.d:first-child:hover{color:red}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.i{color:red}.j:hover{color:red}</style>"`;
+exports[`server injects rule deeply 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:a}.h{font-family:b}.c:hover{color:red}.d:first-child:hover{color:red}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:a}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:b}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.i{color:red}.j:hover{color:red}</style>"`;
 
 exports[`server injects shorthand rule 1`] = `"<style class=\\"__glitz__\\">.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{margin-left:10px}.f{margin-right:10px}.g{margin-top:10px}.h{margin-bottom:10px}</style>"`;

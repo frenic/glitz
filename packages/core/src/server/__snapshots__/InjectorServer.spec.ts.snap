@@ -2,7 +2,7 @@
 
 exports[`server injects fallback rule 1`] = `".a{color:red;color:green}"`;
 
-exports[`server injects font face rule 1`] = `"@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')}"`;
+exports[`server injects font face rule 1`] = `"@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}"`;
 
 exports[`server injects keyframes rule 1`] = `"@keyframes a{from{color:red}to{color:green}}"`;
 

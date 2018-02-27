@@ -13,12 +13,14 @@ export default class InjectorServer extends Injector {
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesDictionary: { [block: string]: string } = {};
     const fontFaceDictionary: { [block: string]: string } = {};
+    const fontFaceOriginalDictionary: { [block: string]: string } = {};
 
     super(
       plainDictionary,
       pseudoDictionary,
       keyframesDictionary,
       fontFaceDictionary,
+      fontFaceOriginalDictionary,
       incrementClassHash,
       incrementKeyframesHash,
       incrementFontFaceHash,

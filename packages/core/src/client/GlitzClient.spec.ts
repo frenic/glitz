@@ -452,24 +452,38 @@ describe('client', () => {
     expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
     expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
   });
-  it('hydrates media rule', () => {
-    const style = createStyle('(min-width: 768px)', '.a{color:red}');
+  it('hydrates plain rule', () => {
+    const style = createStyle(null, '.a{color:red}.b{color:green}');
     const client = new GlitzClient<TestStyle>([style]);
 
-    expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('a');
+    expect(client.injectStyle({ color: 'green' })).toBe('b');
+  });
+  it('hydrates media rule', () => {
+    const style = createStyle(null, '.a{color:red}.b:hover{color:green}');
+    const media = createStyle('(min-width: 768px)', '.c{color:blue}.d:hover{color:white}');
+    const client = new GlitzClient<TestStyle>([style, media]);
+
+    expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'blue', ':hover': { color: 'white' } } })).toBe(
+      'c d',
+    );
   });
   it('hydrates keyframes rule', () => {
-    const style = createStyle(null, '@keyframes a{from{color:red}to{color:green}}');
+    const style = createStyle(
+      null,
+      '.a{animation-name:a}.b{animation-name:b}@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}',
+    );
     const client = new GlitzClient<TestStyle>([style]);
 
-    expect(client.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
-    expect(client.injectStyle({ animationName: { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
-    expect(client.injectStyle({ animation: { name: { from: { color: 'red' }, to: { color: 'green' } } } })).toBe('a');
+    expect(client.injectStyle({ '@keyframes': { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+    expect(client.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+    expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
   });
   it('hydrates font face rule', () => {
     const style = createStyle(
       null,
-      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')}",
+      '.a{font-family:a}.b{font-family:b}.c{font-family:b,sans-serif}' +
+        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}" +
+        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:b}",
     );
     const client = new GlitzClient<TestStyle>([style]);
 
@@ -478,19 +492,31 @@ describe('client', () => {
         '@font-face': {
           fontStyle: 'normal',
           fontWeight: 400,
-          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
         },
       }),
-    ).toBe('a');
+    ).toBe('b');
     expect(
       client.injectStyle({
         fontFamily: {
           fontStyle: 'normal',
           fontWeight: 400,
-          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
         },
       }),
-    ).toBe('a');
+    ).toBe('b');
+    expect(
+      client.injectStyle({
+        fontFamily: [
+          {
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+          'sans-serif',
+        ],
+      }),
+    ).toBe('c');
   });
   it('hydrates multiple different combinations', () => {
     const style1 = createStyle(null, '.a{color:red}');

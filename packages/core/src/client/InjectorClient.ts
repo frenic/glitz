@@ -8,7 +8,7 @@ import { createHashCounter } from '../utils/hash';
 const CLASS_RULE_REGEX = /\.([a-z0-9])(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9])\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
 const FONT_FACE_REGEX = /@font-face \{([^}]+)\}/g;
-const FONT_FACE_FAMILY_REGEX = /font-family:([^;}]+)/;
+const FONT_FACE_FAMILY_REGEX = /;?font-family:([^;}]+)/;
 
 export default class InjectorClient extends Injector {
   constructor(
@@ -21,9 +21,11 @@ export default class InjectorClient extends Injector {
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesDictionary: { [blockList: string]: string } = {};
     const fontFaceDictionary: { [block: string]: string } = {};
+    const fontFaceOriginalDictionary: { [block: string]: string } = {};
 
     // Hydrate
     const css = styleElement.textContent;
+    // console.log(styleElement);
     if (css) {
       let rule: RegExpExecArray | null;
       while ((rule = CLASS_RULE_REGEX.exec(css))) {
@@ -41,10 +43,11 @@ export default class InjectorClient extends Injector {
         keyframesDictionary[rule[2]] = rule[1];
       }
       while ((rule = FONT_FACE_REGEX.exec(css))) {
-        const name = FONT_FACE_FAMILY_REGEX.exec(rule[2]);
+        const name = FONT_FACE_FAMILY_REGEX.exec(rule[1]);
         incrementFontFaceHash();
         if (name) {
-          keyframesDictionary[name[1]] = rule[1];
+          fontFaceDictionary[rule[1]] = name[1];
+          fontFaceOriginalDictionary[rule[1].replace(FONT_FACE_FAMILY_REGEX, '')] = name[1];
         }
       }
     }
@@ -69,6 +72,7 @@ export default class InjectorClient extends Injector {
       pseudoDictionary,
       keyframesDictionary,
       fontFaceDictionary,
+      fontFaceOriginalDictionary,
       incrementClassHash,
       incrementKeyframesHash,
       incrementFontFaceHash,
