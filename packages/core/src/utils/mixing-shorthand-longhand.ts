@@ -1,6 +1,6 @@
 import { hyphenateProperty } from '../utils/parse';
 
-export let validateMixingShorthandLonghand: (style: { [property: string]: any }, classNames: string) => void = () => {
+export let validateMixingShorthandLonghand: (object: { [property: string]: any }, classNames: string) => void = () => {
   /* noop */
 };
 

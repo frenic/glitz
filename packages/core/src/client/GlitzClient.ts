@@ -69,7 +69,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       }
     };
 
-    super(injector, options.transformer);
+    super(injector, options.transformer, options.atomic);
 
     if (styleElements === 'auto') {
       styleElements = document.getElementsByClassName(DEFAULT_HYDRATE_CLASS_NAME) as HTMLCollectionOf<HTMLStyleElement>;

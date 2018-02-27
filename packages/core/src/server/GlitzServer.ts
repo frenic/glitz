@@ -20,7 +20,7 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
         ? (mediaInjectors[media] = mediaInjectors[media] || new InjectorServer(classHasher, keyframesHasher))
         : (mainInjector = mainInjector || new InjectorServer(classHasher, keyframesHasher));
 
-    super(injector, options.transformer);
+    super(injector, options.transformer, options.atomic);
 
     this.getStyleMarkup = (className = DEFAULT_HYDRATE_CLASS_NAME) => {
       let markup = '';

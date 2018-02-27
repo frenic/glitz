@@ -96,7 +96,7 @@ describe('client', () => {
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('c');
     expect(client.injectStyle({ '@media (min-width: 768px)': { ':hover': { color: 'red' } } })).toBe('d');
 
-    const sheet = media.sheet as CSSStyleSheet;
+    const sheet = style.sheet as CSSStyleSheet;
     const mediaSheet = media.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
@@ -163,16 +163,57 @@ describe('client', () => {
   });
   it('injects atomic rules', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
-
-    expect(client.injectStyle({ color: 'red', backgroundColor: 'green', borderColor: 'blue' })).toBe('a b c');
-
+    const media = createStyle('(min-width: 768px)');
+    const client = new GlitzClient<TestStyle>([style, media]);
     const sheet = style.sheet as CSSStyleSheet;
+    const mediaSheet = media.sheet as CSSStyleSheet;
 
-    expect(sheet.cssRules).toHaveLength(3);
+    expect(
+      client.injectStyle({
+        color: 'red',
+        background: { color: 'green' },
+        borderColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+      }),
+    ).toBe('a b c d e f g h i');
+
+    expect(sheet.cssRules).toHaveLength(6);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+
+    expect(mediaSheet.cssRules).toHaveLength(3);
+    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[2].cssText).toMatchSnapshot();
+  });
+  it('injects non-atomic rules', () => {
+    const style = createStyle();
+    const media = createStyle('(min-width: 768px)');
+    const client = new GlitzClient<TestStyle>([style, media], { atomic: false });
+    const sheet = style.sheet as CSSStyleSheet;
+    const mediaSheet = media.sheet as CSSStyleSheet;
+
+    expect(
+      client.injectStyle({
+        color: 'red',
+        background: { color: 'green' },
+        borderColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+      }),
+    ).toBe('a b c');
+
+    expect(sheet.cssRules).toHaveLength(2);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+
+    expect(mediaSheet.cssRules).toHaveLength(1);
+    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {
     const style = createStyle();

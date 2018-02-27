@@ -3,9 +3,9 @@ import { formatRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
 export default class Injector {
-  public injectClassRule: (style: Properties, pseudo?: string) => string | void;
-  public injectKeyframesRule: (styleList: PropertiesList) => string | void;
-  public injectFontFaceRule: (style: FontFace) => string | void;
+  public injectClassRule: (declarations: Properties, pseudo?: string) => string | void;
+  public injectKeyframesRule: (declarationList: PropertiesList) => string | void;
+  public injectFontFaceRule: (declarations: FontFace) => string | void;
   constructor(
     plainDictionary: { [block: string]: string },
     pseudoDictionary: { [pseudo: string]: { [block: string]: string } },
@@ -18,8 +18,8 @@ export default class Injector {
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
     injectNewFontFaceRule?: (block: string) => void,
   ) {
-    this.injectClassRule = (style, pseudo) => {
-      const block = parseDeclarationBlock(style);
+    this.injectClassRule = (declarations, pseudo) => {
+      const block = parseDeclarationBlock(declarations);
       if (block) {
         const dictionary = pseudo ? (pseudoDictionary[pseudo] = pseudoDictionary[pseudo] || {}) : plainDictionary;
         const existingClassName = dictionary[block];
@@ -37,10 +37,10 @@ export default class Injector {
       return '';
     };
 
-    this.injectKeyframesRule = styleList => {
+    this.injectKeyframesRule = declarationList => {
       let blockList = '';
-      for (const identifier in styleList) {
-        const keyframeBlock = parseDeclarationBlock(styleList[identifier]);
+      for (const identifier in declarationList) {
+        const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
         blockList += formatRule(identifier, keyframeBlock);
       }
       if (blockList) {
@@ -59,25 +59,25 @@ export default class Injector {
       return '';
     };
 
-    this.injectFontFaceRule = style => {
+    this.injectFontFaceRule = declarations => {
       if (process.env.NODE_ENV !== 'production') {
-        if ('fontFamily' in style) {
-          console.warn('The CSS property `font-family` font face will be ignored in %O', style);
+        if ('fontFamily' in declarations) {
+          console.warn('The CSS property `font-family` font face will be ignored in %O', declarations);
         }
       }
-      delete (style as any).fontFamily;
-      const block = parseDeclarationBlock(style);
+      delete (declarations as any).fontFamily;
+      const block = parseDeclarationBlock(declarations);
       if (block) {
         const existingClassName = fontFaceDictionary[block];
         if (existingClassName) {
           return existingClassName;
         } else {
-          style = { ...style };
+          declarations = { ...declarations };
           const name = incrementFontFaceHash();
-          (style as any).fontFamily = name;
+          (declarations as any).fontFamily = name;
           fontFaceDictionary[block] = name;
           if (injectNewFontFaceRule) {
-            injectNewFontFaceRule(parseDeclarationBlock(style));
+            injectNewFontFaceRule(parseDeclarationBlock(declarations));
           }
           return name;
         }

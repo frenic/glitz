@@ -25,23 +25,23 @@ export default class InjectorServer extends Injector {
     );
 
     this.getStyle = () => {
-      let style = '';
+      let css = '';
       for (const block in plainDictionary) {
-        style += formatClassRule(plainDictionary[block], block);
+        css += formatClassRule(plainDictionary[block], block);
       }
       for (const pseudo in pseudoDictionary) {
         const dictionary = pseudoDictionary[pseudo];
         for (const block in dictionary) {
-          style += formatClassRule(dictionary[block], block, pseudo);
+          css += formatClassRule(dictionary[block], block, pseudo);
         }
       }
       for (const blockList in keyframesDictionary) {
-        style += formatKeyframesRule(keyframesDictionary[blockList], blockList);
+        css += formatKeyframesRule(keyframesDictionary[blockList], blockList);
       }
       for (const block in fontFaceDictionary) {
-        style += formatFontFaceRule(block);
+        css += formatFontFaceRule(block);
       }
-      return style;
+      return css;
     };
   }
 }

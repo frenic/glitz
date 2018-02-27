@@ -1,18 +1,18 @@
 import * as CSS from 'csstype';
 
-export interface Style extends FeaturedProperties, PseudoMap {
-  '@keyframes'?: PropertiesList;
-  '@font-face'?: FontFace;
-}
+export interface Style extends FeaturedProperties, PseudoMap {}
 
 export interface Properties extends CSS.StandardLonghandPropertiesFallback, CSS.VendorPropertiesFallback {}
 
-type FeaturedProperties = Omit<Properties, keyof ExtendedProperties> &
+export type FeaturedProperties = Omit<Properties, keyof ExtendedProperties> &
   ExtendedProperties &
   Omit<CSS.StandardShorthandPropertiesFallback, keyof ShorthandProperties> &
-  ShorthandProperties;
+  ShorthandProperties & {
+    '@keyframes'?: PropertiesList;
+    '@font-face'?: FontFace;
+  };
 
-interface ExtendedProperties {
+export interface ExtendedProperties {
   animationName?: PropertiesList | Properties['animationName'];
   fontFamily?:
     | FontFace
@@ -20,7 +20,7 @@ interface ExtendedProperties {
     | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>;
 }
 
-interface ShorthandProperties {
+export interface ShorthandProperties {
   animation?: {
     delay?: CSS.StandardLonghandPropertiesFallback['animationDelay'];
     direction?: CSS.StandardLonghandPropertiesFallback['animationDirection'];
@@ -168,13 +168,13 @@ interface ShorthandProperties {
   };
 }
 
-type PseudoMap = { [P in CSS.SimplePseudos]?: Style };
+export type PseudoMap = { [P in CSS.SimplePseudos]?: FeaturedProperties & PseudoMap };
 
-interface PropertiesList {
+export interface PropertiesList {
   [identifier: string]: Properties;
 }
 
-type FontFace = Omit<CSS.FontFaceFallback, 'fontFamily'>;
+export type FontFace = Omit<CSS.FontFaceFallback, 'fontFamily'>;
 
 type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;

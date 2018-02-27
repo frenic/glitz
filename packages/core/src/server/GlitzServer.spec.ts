@@ -84,7 +84,31 @@ describe('server', () => {
   it('injects atomic rules', () => {
     const server = new GlitzServer<TestStyle>();
 
-    expect(server.injectStyle({ color: 'red', backgroundColor: 'green', borderColor: 'blue' })).toBe('a b c');
+    expect(
+      server.injectStyle({
+        color: 'red',
+        background: { color: 'green' },
+        borderColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+      }),
+    ).toBe('a b c d e f g h i');
+
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
+  it('injects non-atomic rules', () => {
+    const server = new GlitzServer<TestStyle>({ atomic: false });
+
+    expect(
+      server.injectStyle({
+        color: 'red',
+        background: { color: 'green' },
+        borderColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+      }),
+    ).toBe('a b c');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {

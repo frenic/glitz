@@ -1,10 +1,10 @@
 import { Properties } from '@glitz/type';
 
-export function parseDeclarationBlock(style: Properties) {
+export function parseDeclarationBlock(declarations: Properties) {
   let block = '';
   let property: keyof Properties;
-  for (property in style) {
-    const value = style[property];
+  for (property in declarations) {
+    const value = declarations[property];
     if (typeof value === 'object') {
       for (const fallback of value) {
         if (block) {
