@@ -14,7 +14,8 @@ export type StyledElementProps = {
 };
 
 export type CSSProp = {
-  css?: Style | Style[];
+  // `any[]` details type error details on `Style`, should be `Style[]`
+  css?: Style | any[];
 };
 
 export type InnerRefProp = {
@@ -57,7 +58,7 @@ export function create<TProps>(
 
       const staticStyle: Style | Style[] = context.glitz.deep
         ? originalStaticStyle
-        : originalStaticStyle.length < 2 ? originalStaticStyle[0] || {} : flatten(originalStaticStyle);
+        : flatten(originalStaticStyle);
 
       let cache: string | null = null;
 
@@ -92,8 +93,6 @@ export function create<TProps>(
 
         if (context.glitz.deep) {
           return styles;
-        } else if (styles.length < 2) {
-          return styles[0] || {};
         } else {
           return flatten(styles);
         }

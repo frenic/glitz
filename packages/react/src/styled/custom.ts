@@ -9,6 +9,12 @@ export function customStyled<TProps extends StyledProps>(
 
 export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
 
+// Provides type error details on `Style`
+export function customStyled(
+  component: React.ComponentType<StyledProps> | StyledComponent<any>,
+  style?: Style,
+): StyledComponentWithProps<StyledProps>;
+
 export function customStyled(style: Style): StyledDecorator;
 
 export function customStyled<TProps>(
