@@ -34,8 +34,6 @@ export function create<TProps>(
     return inner[ASSIGN_METHOD](originalStaticStyle);
   }
 
-  let cache: string | null = null;
-
   class GlitzStyled extends React.Component<TProps & CSSProp & InnerRefProp> {
     public static contextTypes = {
       glitz: () => null, // Just pass the damn thing
@@ -60,6 +58,8 @@ export function create<TProps>(
       const staticStyle: Style | Style[] = context.glitz.deep
         ? originalStaticStyle
         : originalStaticStyle.length < 2 ? originalStaticStyle[0] || {} : flatten(originalStaticStyle);
+
+      let cache: string | null = null;
 
       this.apply = () => {
         const styles: Style | Style[] = this.compose();

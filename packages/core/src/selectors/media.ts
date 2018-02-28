@@ -14,7 +14,7 @@ export function query(list: Query): string {
     let isEmpty = true;
     for (const x in list) {
       isEmpty = false;
-      // tslint:disable no-unused-expression
+      // tslint:disable-next-line no-unused-expression
       x;
       break;
     }

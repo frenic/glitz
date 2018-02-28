@@ -45,7 +45,7 @@ export default class Base<TStyle extends Style> {
             let isEmpty = true;
             for (const x in value) {
               isEmpty = false;
-              // tslint:disable no-unused-expression
+              // tslint:disable-next-line no-unused-expression
               x;
               break;
             }

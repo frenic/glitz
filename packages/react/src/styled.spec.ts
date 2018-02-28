@@ -1,3 +1,5 @@
+// tslint:disable max-classes-per-file
+
 import GlitzClient from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';
@@ -169,26 +171,85 @@ describe('react styled', () => {
   });
   it('caches pure style', () => {
     let count = 0;
+    let renders = 0;
 
-    const StyledComponent = styled.div({
-      get color() {
-        count++;
-        return 'red';
+    const StyledComponentCount = styled(
+      class extends React.Component<StyledProps> {
+        public componentDidMount() {
+          this.forceUpdate();
+        }
+        public render() {
+          renders++;
+          return React.createElement('div', { className: this.props.apply() });
+        }
       },
-    });
+      {
+        get color() {
+          count++;
+          return 'red';
+        },
+      },
+    );
 
-    renderer.create(
+    mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponent),
-        React.createElement(StyledComponent),
+        React.createElement(StyledComponentCount),
       ),
     );
 
     expect(count).toBe(1);
+    expect(renders).toBe(2);
+
+    let spyFirstRenderA = true;
+    const SpyA = styled(
+      props => {
+        expect(props.apply()).toBe(spyFirstRenderA ? 'a' : 'b');
+        spyFirstRenderA = false;
+        return React.createElement('div');
+      },
+      {
+        color: 'red',
+      },
+    );
+
+    let spyFirstRenderB = true;
+    const SpyB = styled(
+      props => {
+        expect(props.apply()).toBe(spyFirstRenderB ? 'b' : 'a');
+        spyFirstRenderB = false;
+        return React.createElement('div');
+      },
+      {
+        color: 'green',
+      },
+    );
+
+    mount(
+      React.createElement(
+        'div',
+        {},
+        React.createElement(
+          GlitzProvider,
+          {
+            glitz: new GlitzClient(),
+          },
+          React.createElement(SpyA),
+          React.createElement(SpyB),
+        ),
+        React.createElement(
+          GlitzProvider,
+          {
+            glitz: new GlitzClient(),
+          },
+          React.createElement(SpyB),
+          React.createElement(SpyA),
+        ),
+      ),
+    );
   });
   it('passes innerRef prop', () => {
     class Spy extends React.Component<StyledProps> {
