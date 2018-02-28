@@ -38,6 +38,7 @@ At this moment, there's officially only [React bindings](https://github.com/fren
   * [Options](#options)
     * [`options.transformer`](#optionstransformer)
     * [`options.mediaOrder`](#optionsmediaorder)
+    * [`options.atomic`](#optionsatomic)
     * [`options.prefix`](#optionsprefix)
   * [Helpers](#helpers)
     * [`pseudo`](#pseudo)
@@ -339,6 +340,8 @@ Markup with style sheets to render into `<head>` that the Glitz core class for b
 transformer(style: Properties): Properties
 ```
 
+Default: `undefined`
+
 Transform or hook into the injected style. The transform function will receive an object with `string | number | Array<string | number>` as values and expects the same in return. Have in mind that the transformer will receive each unique declaration only ones. The same unique declaration will later use a cached result and will never again reach the transformer.
 
 ```ts
@@ -364,6 +367,8 @@ const glitz = new GlitzClient(null, { transformer: compose(prefixer, numberToRem
 mediaOrder(a: string, b: string): number
 ```
 
+Default: `undefined`
+
 Unordered media style may sometimes cause some unwanted behavior. With this function you're able to sort the order of the injected media styles.
 
 It's recommended that you create your own with the media queries you use.
@@ -388,11 +393,23 @@ const glitz = new GlitzClient(null, { mediaOrder: mediaQuerySorter });
 
 It's also possible to use [`sort-css-media-queries`](https://github.com/dutchenkoOleg/sort-css-media-queries/) if you don't have a specific list of media queries.
 
+#### `options.atomic`
+
+```ts
+atomic: boolean;
+```
+
+Default: `true`
+
+Breaks down each CSS declaration to separate class names for minimal output and maximum performance. This can cause problems if you e.g. [mix longhand and shorthand properties](#shorthand-properties) because the order of the CSS can't be guaranteed. Disabling this isn't recommended, but possible by setting this to `false`.
+
 #### `options.prefix`
 
 ```ts
 prefix: string;
 ```
+
+Default: `""`
 
 Prefix all class names.
 
