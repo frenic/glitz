@@ -1755,9 +1755,9 @@ cssom@0.3.x, "cssom@>= 0.3.2 < 0.4.0":
   dependencies:
     cssom "0.3.x"
 
-csstype@^1.7.1:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-1.7.2.tgz#aecd408172a24f02114c1fd98322a9b595e13b70"
+csstype@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-1.8.1.tgz#90c57913cabd3a6e53140f3545593729e6a80cf6"
 
 currently-unhandled@^0.4.1:
   version "0.4.1"
