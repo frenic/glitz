@@ -2,15 +2,19 @@ import GlitzClient from '@glitz/core';
 import GlitzServer from '@glitz/core/server';
 import * as React from 'react';
 
+export type ProviderOptions = {
+  enableDeepComposition?: boolean;
+};
+
 export type ProviderProps = {
   glitz: GlitzClient | GlitzServer;
-  enableDeepComposition?: boolean;
+  options?: ProviderOptions;
 };
 
 export type Context = {
   glitz: {
     glitz: GlitzClient | GlitzServer;
-    deep: boolean;
+    options: ProviderOptions;
   };
 };
 
@@ -24,7 +28,7 @@ export default class GlitzProvider extends React.Component<ProviderProps> {
     this.childContext = {
       glitz: {
         glitz: props.glitz,
-        deep: !!props.enableDeepComposition,
+        options: props.options || {},
       },
     };
   }

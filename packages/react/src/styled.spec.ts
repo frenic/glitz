@@ -134,7 +134,7 @@ describe('react styled', () => {
         GlitzProvider,
         {
           glitz: new GlitzClient(),
-          enableDeepComposition: true,
+          options: { enableDeepComposition: true },
         },
         React.createElement(DeepComponentB),
       ),

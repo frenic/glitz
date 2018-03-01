@@ -14,7 +14,7 @@ export type StyledElementProps = {
 };
 
 export type CSSProp = {
-  // `any[]` details type error details on `Style`, should be `Style[]`
+  // `any[]` details type error details on `Style`, should be `Style[]` when conditional types are released
   css?: Style | any[];
 };
 
@@ -56,7 +56,7 @@ export function create<TProps>(
         }
       }
 
-      const staticStyle: Style | Style[] = context.glitz.deep
+      const staticStyle: Style | Style[] = context.glitz.options.enableDeepComposition
         ? originalStaticStyle
         : flatten(originalStaticStyle);
 
@@ -91,7 +91,7 @@ export function create<TProps>(
 
         const styles = ([] as Style[]).concat(staticStyle, dynamicStyle || [], additionalStyle || []);
 
-        if (context.glitz.deep) {
+        if (context.glitz.options.enableDeepComposition) {
           return styles;
         } else {
           return flatten(styles);
