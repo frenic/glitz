@@ -3,18 +3,17 @@ export function injectSheetRule(styleElement: HTMLStyleElement, rule: string) {
   sheet.insertRule(rule, sheet.cssRules.length);
 }
 
-export function createStyleElement(media?: string | null, insertBefore?: HTMLStyleElement | null) {
+export function createStyleElement(media?: string | null) {
   const element = document.createElement('style');
 
   if (media) {
     element.media = media;
   }
 
-  if (insertBefore) {
-    document.head.insertBefore(element, insertBefore);
-  } else {
-    document.head.appendChild(element);
-  }
+  return element;
+}
 
+export function insertStyleElement(element: HTMLStyleElement, insertBefore: HTMLStyleElement | null) {
+  document.head.insertBefore(element, insertBefore);
   return element;
 }

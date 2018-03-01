@@ -4,7 +4,7 @@ import GlitzClient from './GlitzClient';
 interface TestStyle extends Style {
   '@media (min-width: 100px)'?: Style;
   '@media (min-width: 200px)'?: Style;
-  '@media (min-width: 300px)'?: Style;
+  '@media (min-width: 1000px)'?: Style;
   '@media (min-width: 768px)'?: Style;
   '@media (min-width: 992px)'?: Style;
 }
@@ -104,40 +104,37 @@ describe('client', () => {
     expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
   });
   it('injects media elements in certain order', () => {
+    const order = ['(min-width: 100px)', '(min-width: 200px)', '(min-width: 1000px)'];
     const client = new GlitzClient<TestStyle>(null, {
       mediaOrder: (a: string, b: string) => {
-        if (a < b) {
-          return -1;
-        }
-        if (a > b) {
-          return 1;
-        }
-        return 0;
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+        return indexA - indexB;
       },
     });
 
-    expect(client.injectStyle({ '@media (min-width: 300px)': { color: 'red' } })).toBe('a');
+    expect(client.injectStyle({ '@media (min-width: 1000px)': { color: 'red' } })).toBe('a');
     expect(client.injectStyle({ '@media (min-width: 100px)': { color: 'red' } })).toBe('b');
 
     expect(document.head.childNodes).toHaveLength(2);
     expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
-    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 300px)');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
 
     expect(client.injectStyle({ '@media (min-width: 200px)': { color: 'red' } })).toBe('c');
 
     expect(document.head.childNodes).toHaveLength(3);
     expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
     expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 200px)');
-    expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 300px)');
+    expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
 
-    expect(client.injectStyle({ '@media (min-width: 300px)': { color: 'red' } })).toBe('a');
+    expect(client.injectStyle({ '@media (min-width: 1000px)': { color: 'red' } })).toBe('a');
     expect(client.injectStyle({ color: 'red' })).toBe('d');
 
     expect(document.head.childNodes).toHaveLength(4);
     expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('');
     expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 100px)');
     expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 200px)');
-    expect((document.head.childNodes[3] as HTMLStyleElement).media).toBe('(min-width: 300px)');
+    expect((document.head.childNodes[3] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
   });
   it('cache declarations', () => {
     let count = 0;

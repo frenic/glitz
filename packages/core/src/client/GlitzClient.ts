@@ -1,7 +1,7 @@
 import { Style } from '@glitz/type';
 import Base, { DEFAULT_HYDRATE_CLASS_NAME } from '../core/Base';
 import { Options } from '../types/options';
-import { createStyleElement } from '../utils/dom';
+import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 
@@ -10,13 +10,12 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
     styleElements?: HTMLStyleElement[] | NodeListOf<Element> | HTMLCollectionOf<Element> | 'auto' | null,
     options: Options = {},
   ) {
-    const prefix = options.prefix;
-    const classHasher = createHashCounter(prefix);
-    const keyframesHasher = createHashCounter(prefix);
+    const classHasher = createHashCounter(options.prefix);
+    const keyframesHasher = createHashCounter(options.prefix);
 
-    const mediaOrder = options.mediaOrder;
-    const mediaElements: { [media: string]: HTMLStyleElement } = {};
-    let hasMediaElements = false;
+    const mediaOrderOption = options.mediaOrder;
+    const mediaSheets: { [media: string]: HTMLStyleElement } = {};
+    let initialMediaSheet: HTMLStyleElement | null = null;
 
     let mainInjector: InjectorClient;
     const mediaInjectors: {
@@ -29,43 +28,26 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
           return mediaInjectors[media];
         }
 
-        // Inserts element as last one when `null`
-        let insertBefore: HTMLStyleElement | null = null;
+        const element = (mediaSheets[media] = createStyleElement(media));
 
-        if (mediaOrder && hasMediaElements) {
-          const medias = Object.keys(mediaElements);
-          const orderedMedias = medias.concat(media).sort(mediaOrder);
-          const index = orderedMedias.indexOf(media);
-          if (index < orderedMedias.length - 1) {
-            insertBefore = mediaElements[orderedMedias[index + 1]];
-          }
+        let insertBefore: HTMLStyleElement | null = null;
+        if (mediaOrderOption) {
+          const orderedMediaKeys = Object.keys(mediaSheets).sort(mediaOrderOption);
+          initialMediaSheet = mediaSheets[orderedMediaKeys[0]];
+          insertBefore = mediaSheets[orderedMediaKeys[orderedMediaKeys.indexOf(media) + 1]] || null;
         }
 
-        hasMediaElements = true;
-        const element = (mediaElements[media] = createStyleElement(media, insertBefore));
+        insertStyleElement(element, insertBefore);
+
         return (mediaInjectors[media] = new InjectorClient(element, classHasher, keyframesHasher));
       } else {
         if (mainInjector) {
           return mainInjector;
         }
 
-        let insertBefore: HTMLStyleElement | null = null;
+        const element = insertStyleElement(createStyleElement(media), initialMediaSheet);
 
-        if (hasMediaElements) {
-          const medias = Object.keys(mediaElements);
-          if (mediaOrder) {
-            const orderedMedias = medias.sort(mediaOrder);
-            insertBefore = mediaElements[orderedMedias[0]];
-          } else {
-            insertBefore = mediaElements[medias[0]];
-          }
-        }
-
-        return (mainInjector = new InjectorClient(
-          createStyleElement(null, insertBefore),
-          classHasher,
-          keyframesHasher,
-        ));
+        return (mainInjector = new InjectorClient(element, classHasher, keyframesHasher));
       }
     };
 
@@ -93,8 +75,10 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
         const media = element.media;
 
         if (media) {
-          hasMediaElements = true;
-          mediaElements[media] = element;
+          if (!initialMediaSheet) {
+            initialMediaSheet = element;
+          }
+          mediaSheets[media] = element;
           mediaInjectors[media] = new InjectorClient(element, classHasher, keyframesHasher);
         } else {
           mainInjector = new InjectorClient(element, classHasher, keyframesHasher);
@@ -102,12 +86,12 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       }
 
       if (process.env.NODE_ENV !== 'production') {
-        if (mediaOrder) {
+        if (mediaOrderOption) {
           // Verify hydrated style element order
-          const medias = Object.keys(mediaElements);
-          const orderedMedias = medias.sort(mediaOrder);
-          for (const key in medias) {
-            if (medias[key] !== orderedMedias[key]) {
+          const medias = Object.keys(mediaSheets);
+          const orderedMedias = medias.sort(mediaOrderOption);
+          for (const index in medias) {
+            if (medias[index] !== orderedMedias[index]) {
               console.error(
                 'The order of media queries rendered by the server did not meet the expected ' +
                   'order by the browser. Make sure you pass the same function to the `mediaOrder`' +
