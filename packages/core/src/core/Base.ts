@@ -176,10 +176,8 @@ export default class Base<TStyle extends Style> {
       return rules;
     };
 
-    const declarator = (property: string, value: Properties[keyof Properties]) => {
-      const declaration = { [property]: value };
-      return transformer ? transformer(declaration) : declaration;
-    };
+    const injectClassName = (declarations: Properties, media: string | undefined, pseudo: string | undefined) =>
+      injector(media).injectClassRule(transformer ? transformer(declarations) : declarations, pseudo);
 
     const cache: Rules<CacheValue> = createIndex();
 
@@ -187,9 +185,7 @@ export default class Base<TStyle extends Style> {
       // Atomic as default
       atomic === false
         ? (declarations: Declarations, media?: string, pseudo?: string) => {
-            return (
-              ' ' + injector(media).injectClassRule(transformer ? transformer(declarations) : declarations, pseudo)
-            );
+            return ' ' + injectClassName(declarations, media, pseudo);
           }
         : (declarations: Declarations, media?: string, pseudo?: string) => {
             let classNames = '';
@@ -202,12 +198,12 @@ export default class Base<TStyle extends Style> {
                 const index = getIndex(cache, media, pseudo);
                 const cachedValues = (index[property] = index[property] || {});
 
-                if (cachedValues[value]) {
+                if (value in cachedValues) {
                   classNames += ' ' + cachedValues[value];
                   continue;
                 }
 
-                const className = injector(media).injectClassRule(declarator(property, value), pseudo);
+                const className = injectClassName({ [property]: value }, media, pseudo);
 
                 if (className) {
                   cachedValues[value] = className;
@@ -218,7 +214,7 @@ export default class Base<TStyle extends Style> {
               }
 
               if (Array.isArray(value)) {
-                classNames += ' ' + injector(media).injectClassRule(declarator(property, value), pseudo);
+                classNames += ' ' + injectClassName({ [property]: value }, media, pseudo);
                 continue;
               }
             }
