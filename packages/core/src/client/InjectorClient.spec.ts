@@ -1,3 +1,4 @@
+import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 
 beforeEach(() => {
@@ -7,7 +8,7 @@ beforeEach(() => {
 describe('client', () => {
   it('injects plain rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectClassRule({ color: 'red' })).toBe('a');
     expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' })).toBe('b');
@@ -20,7 +21,7 @@ describe('client', () => {
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
@@ -33,7 +34,7 @@ describe('client', () => {
   });
   it('injects keyframes rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
 
@@ -44,7 +45,7 @@ describe('client', () => {
   });
   it('injects font face rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(
       injector.injectFontFaceRule({
@@ -64,7 +65,7 @@ describe('client', () => {
   });
   it('reuses plain rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectClassRule({ color: 'red' })).toBe('a');
     expect(injector.injectClassRule({ color: 'red' })).toBe('a');
@@ -75,7 +76,7 @@ describe('client', () => {
   });
   it('reuses pseudo rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
@@ -86,7 +87,7 @@ describe('client', () => {
   });
   it('reuses keyframes rule', () => {
     const style = createStyle();
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
     expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
@@ -100,7 +101,7 @@ describe('client', () => {
   });
   it('hydrates plain rule', () => {
     const style = createStyle('.a{color:red}.b{color:green}.c{color:black;background-color:white}');
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     // Skipping .a
     expect(injector.injectClassRule({ color: 'green' })).toBe('b');
@@ -108,7 +109,7 @@ describe('client', () => {
   });
   it('hydrates pseudo rule', () => {
     const style = createStyle('.a:hover{color:red}.b:hover{color:green}');
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     // Skipping .a
     expect(injector.injectClassRule({ color: 'green' }, ':hover')).toBe('b');
@@ -117,21 +118,21 @@ describe('client', () => {
     const style = createStyle(
       '@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:black}to{color:white}}',
     );
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     // Skipping .a
     expect(injector.injectKeyframesRule({ from: { color: 'black' }, to: { color: 'white' } })).toBe('b');
   });
   it('hydrates fallback rule', () => {
     const style = createStyle('.a{color:red;color:green}.b{color:black;color:white}');
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     // Skipping .a
     expect(injector.injectClassRule({ color: ['black', 'white'] })).toBe('b');
   });
   it('increments plain hash', () => {
     const style = createStyle('.a{color:red}.b{color:green}');
-    const injector = new InjectorClient(style);
+    const injector = createInjector(style);
 
     expect(injector.injectClassRule({ color: 'blue' })).toBe('c');
 
@@ -150,4 +151,8 @@ function createStyle(css?: string) {
   }
 
   return element;
+}
+
+function createInjector(style: HTMLStyleElement) {
+  return new InjectorClient(style, createHashCounter(), createHashCounter(), createHashCounter());
 }

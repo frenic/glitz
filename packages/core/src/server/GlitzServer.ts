@@ -7,35 +7,31 @@ import InjectorServer from './InjectorServer';
 export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
   public getStyleMarkup: (className?: string) => string;
   constructor(options: Options = {}) {
-    const classHasher = createHashCounter(options.prefix);
-    const keyframesHasher = createHashCounter(options.prefix);
+    const prefix = options.prefix;
+    const classHasher = createHashCounter(prefix);
+    const keyframesHasher = createHashCounter(prefix);
+    const fontFaceHasher = createHashCounter(prefix);
 
-    let mainInjector: InjectorServer;
-    const mediaInjectors: {
+    let plain: InjectorServer;
+    const mediaIndex: {
       [media: string]: InjectorServer;
     } = {};
 
     const injector = (media?: string) =>
       media
-        ? (mediaInjectors[media] = mediaInjectors[media] || new InjectorServer(classHasher, keyframesHasher))
-        : (mainInjector = mainInjector || new InjectorServer(classHasher, keyframesHasher));
+        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classHasher, keyframesHasher, fontFaceHasher))
+        : (plain = plain || new InjectorServer(classHasher, keyframesHasher, fontFaceHasher));
 
     super(injector, options.transformer, options.atomic);
 
     this.getStyleMarkup = (className = DEFAULT_HYDRATE_CLASS_NAME) => {
       let markup = '';
-      if (mainInjector) {
-        markup += `<style class="${className}">${mainInjector.getStyle()}</style>`;
+      if (plain) {
+        markup += `<style class="${className}">${plain.getStyle()}</style>`;
       }
-      if (options.mediaOrder) {
-        const orderedMedias = Object.keys(mediaInjectors).sort(options.mediaOrder);
-        for (const media of orderedMedias) {
-          markup += `<style class="${className}" media="${media}">${mediaInjectors[media].getStyle()}</style>`;
-        }
-      } else {
-        for (const media in mediaInjectors) {
-          markup += `<style class="${className}" media="${media}">${mediaInjectors[media].getStyle()}</style>`;
-        }
+      const medias = options.mediaOrder ? Object.keys(mediaIndex).sort(options.mediaOrder) : Object.keys(mediaIndex);
+      for (const media of medias) {
+        markup += `<style class="${className}" media="${media}">${mediaIndex[media].getStyle()}</style>`;
       }
       return markup;
     };

@@ -3,7 +3,6 @@
 import Injector from '../core/Injector';
 import { injectSheetRule } from '../utils/dom';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
-import { createHashCounter } from '../utils/hash';
 
 const CLASS_RULE_REGEX = /\.([a-z0-9])(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9])\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
@@ -13,9 +12,9 @@ const FONT_FACE_FAMILY_REGEX = /;?font-family:([^;}]+)/;
 export default class InjectorClient extends Injector {
   constructor(
     styleElement: HTMLStyleElement,
-    incrementClassHash = createHashCounter(),
-    incrementKeyframesHash = createHashCounter(),
-    incrementFontFaceHash = createHashCounter(),
+    incrementClassHash: () => string,
+    incrementKeyframesHash: () => string,
+    incrementFontFaceHash: () => string,
   ) {
     const plainDictionary: { [block: string]: string } = {};
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};

@@ -546,19 +546,19 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>();
     const logger = (console.error = jest.fn());
 
-    client.injectStyle({ border: { width: 1 }, borderWidth: 1 });
+    client.injectStyle({ border: { width: 0 }, borderWidth: 0 });
     expect(logger).toHaveBeenCalledTimes(0);
 
-    client.injectStyle({ ':hover': { border: 1 }, borderWidth: 1 } as TestStyle);
+    client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle);
     expect(logger).toHaveBeenCalledTimes(0);
 
-    client.injectStyle({ border: 1, borderWidth: 1 } as TestStyle);
+    client.injectStyle({ border: 0, borderWidth: 0 } as TestStyle);
     expect(logger).toHaveBeenCalledTimes(1);
 
-    client.injectStyle([{ border: 1 }, { borderWidth: 1 }] as TestStyle[]);
+    client.injectStyle([{ border: 0 }, { borderWidth: 0 }] as TestStyle[]);
     expect(logger).toHaveBeenCalledTimes(2);
 
-    client.injectStyle({ ':hover': { border: 1, borderWidth: 1 } } as TestStyle);
+    client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle);
     expect(logger).toHaveBeenCalledTimes(3);
   });
 });

@@ -1,13 +1,12 @@
 import Injector from '../core/Injector';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
-import { createHashCounter } from '../utils/hash';
 
 export default class InjectorServer extends Injector {
   public getStyle: () => void;
   constructor(
-    incrementClassHash = createHashCounter(),
-    incrementKeyframesHash = createHashCounter(),
-    incrementFontFaceHash = createHashCounter(),
+    incrementClassHash: () => string,
+    incrementKeyframesHash: () => string,
+    incrementFontFaceHash: () => string,
   ) {
     const plainDictionary: { [block: string]: string } = {};
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};

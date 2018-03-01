@@ -10,22 +10,24 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
     styleElements?: HTMLStyleElement[] | NodeListOf<Element> | HTMLCollectionOf<Element> | 'auto' | null,
     options: Options = {},
   ) {
-    const classHasher = createHashCounter(options.prefix);
-    const keyframesHasher = createHashCounter(options.prefix);
+    const prefix = options.prefix;
+    const classHasher = createHashCounter(prefix);
+    const keyframesHasher = createHashCounter(prefix);
+    const fontFaceHasher = createHashCounter(prefix);
 
     const mediaOrderOption = options.mediaOrder;
     const mediaSheets: { [media: string]: HTMLStyleElement } = {};
     let initialMediaSheet: HTMLStyleElement | null = null;
 
-    let mainInjector: InjectorClient;
-    const mediaInjectors: {
+    let plain: InjectorClient;
+    const mediaIndex: {
       [media: string]: InjectorClient;
     } = {};
 
     const injector = (media?: string) => {
       if (media) {
-        if (mediaInjectors[media]) {
-          return mediaInjectors[media];
+        if (mediaIndex[media]) {
+          return mediaIndex[media];
         }
 
         const element = (mediaSheets[media] = createStyleElement(media));
@@ -39,15 +41,15 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
         insertStyleElement(element, insertBefore);
 
-        return (mediaInjectors[media] = new InjectorClient(element, classHasher, keyframesHasher));
+        return (mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher));
       } else {
-        if (mainInjector) {
-          return mainInjector;
+        if (plain) {
+          return plain;
         }
 
         const element = insertStyleElement(createStyleElement(media), initialMediaSheet);
 
-        return (mainInjector = new InjectorClient(element, classHasher, keyframesHasher));
+        return (plain = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher));
       }
     };
 
@@ -79,9 +81,9 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
             initialMediaSheet = element;
           }
           mediaSheets[media] = element;
-          mediaInjectors[media] = new InjectorClient(element, classHasher, keyframesHasher);
+          mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher);
         } else {
-          mainInjector = new InjectorClient(element, classHasher, keyframesHasher);
+          plain = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher);
         }
       }
 
