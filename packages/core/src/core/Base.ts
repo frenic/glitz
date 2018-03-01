@@ -50,8 +50,8 @@ export default class Base<TStyle extends Style> {
               break;
             }
             if (isEmpty) {
-              console.warn(
-                'The style property `%s` was an empty %s and should be removed',
+              console.error(
+                'The style property `%s` was an empty %s and should be removed because it can cause unexpected behavior',
                 property,
                 Array.isArray(value) ? 'array' : 'object',
               );
@@ -77,10 +77,8 @@ export default class Base<TStyle extends Style> {
               continue;
             }
             const name = injector().injectKeyframesRule(value);
-            if (name) {
-              declarations[ANIMATION_NAME] = name;
-              continue;
-            }
+            declarations[ANIMATION_NAME] = name;
+            continue;
           }
 
           if (property === '@font-face' || property === FONT_FAMILY) {
@@ -96,10 +94,8 @@ export default class Base<TStyle extends Style> {
               }
               names += typeof family === 'string' ? family : injector().injectFontFaceRule(family);
             }
-            if (names) {
-              declarations[FONT_FAMILY] = names;
-              continue;
-            }
+            declarations[FONT_FAMILY] = names;
+            continue;
           }
 
           if (Array.isArray(value)) {
@@ -180,9 +176,10 @@ export default class Base<TStyle extends Style> {
       return rules;
     };
 
-    const declarator = transformer
-      ? (property: string, value: Properties[keyof Properties]) => transformer({ [property]: value })
-      : (property: string, value: Properties[keyof Properties]) => ({ [property]: value });
+    const declarator = (property: string, value: Properties[keyof Properties]) => {
+      const declaration = { [property]: value };
+      return transformer ? transformer(declaration) : declaration;
+    };
 
     const cache: Rules<CacheValue> = createIndex();
 
@@ -191,8 +188,7 @@ export default class Base<TStyle extends Style> {
       atomic === false
         ? (declarations: Declarations, media?: string, pseudo?: string) => {
             return (
-              ' ' +
-              (injector(media).injectClassRule(transformer ? transformer(declarations) : declarations, pseudo) || '')
+              ' ' + injector(media).injectClassRule(transformer ? transformer(declarations) : declarations, pseudo)
             );
           }
         : (declarations: Declarations, media?: string, pseudo?: string) => {

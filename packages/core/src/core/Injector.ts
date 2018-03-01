@@ -3,9 +3,9 @@ import { formatRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
 export default class Injector {
-  public injectClassRule: (declarations: Properties, pseudo?: string) => string | void;
-  public injectKeyframesRule: (declarationList: PropertiesList) => string | void;
-  public injectFontFaceRule: (declarations: FontFace) => string | void;
+  public injectClassRule: (declarations: Properties, pseudo?: string) => string;
+  public injectKeyframesRule: (declarationList: PropertiesList) => string;
+  public injectFontFaceRule: (declarations: FontFace) => string;
   constructor(
     plainDictionary: { [block: string]: string },
     pseudoDictionary: { [pseudo: string]: { [block: string]: string } },
