@@ -203,30 +203,14 @@ describe('react styled', () => {
 
     expect(count).toBe(1);
     expect(renders).toBe(2);
-
-    let spyFirstRenderA = true;
-    const SpyA = styled(
-      props => {
-        expect(props.apply()).toBe(spyFirstRenderA ? 'a' : 'b');
-        spyFirstRenderA = false;
-        return React.createElement('div');
-      },
-      {
-        color: 'red',
-      },
-    );
-
-    let spyFirstRenderB = true;
-    const SpyB = styled(
-      props => {
-        expect(props.apply()).toBe(spyFirstRenderB ? 'b' : 'a');
-        spyFirstRenderB = false;
-        return React.createElement('div');
-      },
-      {
-        color: 'green',
-      },
-    );
+  });
+  it('renders correctly with new instance', () => {
+    const StyledComponentA = styled.div({
+      color: 'red',
+    });
+    const StyledComponentB = styled.div({
+      color: 'green',
+    });
 
     mount(
       React.createElement(
@@ -237,16 +221,24 @@ describe('react styled', () => {
           {
             glitz: new GlitzClient(),
           },
-          React.createElement(SpyA),
-          React.createElement(SpyB),
+          React.createElement(StyledComponentA, {
+            innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a'),
+          }),
+          React.createElement(StyledComponentB, {
+            innerRef: (el: HTMLDivElement) => expect(el.className).toBe('b'),
+          }),
         ),
         React.createElement(
           GlitzProvider,
           {
             glitz: new GlitzClient(),
           },
-          React.createElement(SpyB),
-          React.createElement(SpyA),
+          React.createElement(StyledComponentB, {
+            innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a'),
+          }),
+          React.createElement(StyledComponentA, {
+            innerRef: (el: HTMLDivElement) => expect(el.className).toBe('b'),
+          }),
         ),
       ),
     );
