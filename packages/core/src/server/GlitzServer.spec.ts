@@ -37,6 +37,13 @@ describe('server', () => {
       }),
     ).toBe('g h');
 
+    expect(
+      server.injectStyle({
+        padding: { left: '20px' },
+        paddingLeft: '30px',
+      }),
+    ).toBe('i');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {

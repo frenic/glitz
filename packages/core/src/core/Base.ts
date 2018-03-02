@@ -1,17 +1,24 @@
-import { FontFace, Properties, Style } from '@glitz/type';
+import { FontFace, Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 
-type Declarations<TValue = Properties[keyof Properties]> = { [property: string]: TValue };
+type StyleValue = string | number | Array<string | number>;
 
-type Rules<TValue = Properties[keyof Properties]> = {
-  0: Declarations<TValue>;
-  1: { [pseudo: string]: Declarations<TValue> };
-  2: { [media: string]: Declarations<TValue> };
-  3: { [media: string]: { [pseudo: string]: Declarations<TValue> } };
-};
+type Declarations<TValue = StyleValue> = { [property: string]: TValue };
+
+type MediaIndex<TValue = StyleValue> =
+  | Declarations<TValue>
+  | {
+      [pseudo: string]: Declarations<TValue>;
+    };
+
+type Index<TValue = StyleValue> =
+  | Declarations<TValue>
+  | {
+      [selector: string]: Declarations<TValue> | MediaIndex<TValue>;
+    };
 
 type CacheValue = {
   [value: string]: string;
@@ -20,6 +27,7 @@ type CacheValue = {
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
 const ANIMATION_NAME = 'animationName';
 const FONT_FAMILY = 'fontFamily';
+const NON_ATOMIC_KEY = '$';
 
 export default class Base<TStyle extends Style> {
   public injectStyle: (styles: TStyle | TStyle[]) => string;
@@ -28,64 +36,46 @@ export default class Base<TStyle extends Style> {
     transformer: Transformer | undefined,
     atomic: boolean | undefined,
   ) {
-    const walk = (style: TStyle | Declarations, rules: Rules, media?: string, pseudo?: string) => {
-      for (const property in style) {
-        const value: any = style[property];
+    const resolve = (style: TStyle | Declarations, result: Index = {}, media?: string, pseudo?: string) => {
+      const properties = Object.keys(style);
 
-        if (typeof value === 'string' || typeof value === 'number') {
-          const declarations = getIndex(rules, media, pseudo);
+      for (let i = properties.length - 1; i >= 0; i--) {
+        const property = properties[i];
+        const value = (style as any)[property];
+
+        if (isPrimitive(value)) {
+          const declarations = getIndex(result, media, pseudo);
           if (!(property in declarations)) {
             declarations[property] = value;
+            continue;
           }
           continue;
         }
 
-        if (typeof value === 'object') {
-          if (process.env.NODE_ENV !== 'production') {
-            let isEmpty = true;
-            for (const x in value) {
-              isEmpty = false;
-              // tslint:disable-next-line no-unused-expression
-              x;
-              break;
-            }
-            if (isEmpty) {
-              console.error(
-                'The style property `%s` was an empty %s and should be removed because it can cause unexpected behavior',
-                property,
-                Array.isArray(value) ? 'array' : 'object',
-              );
-            }
+        if (process.env.NODE_ENV !== 'production') {
+          if (typeof value !== 'object') {
+            console.error('The style property `%s` was has to be a string, number or object, was %O', property, value);
+          } else if (Object.keys(value).length === 0) {
+            console.error(
+              'The style property `%s` was an empty %s and should be removed because it can cause unexpected behavior',
+              property,
+              Array.isArray(value) ? 'array' : 'object',
+            );
           }
+        }
 
-          // Pseudo
-          if (property[0] === ':') {
-            const combinedPseudo = (pseudo || '') + property;
-            walk(value, rules, media, combinedPseudo);
-            continue;
-          }
-
-          if (property.indexOf('@media') === 0) {
-            const combinedMedia = (media ? `${media} and ` : '') + property.slice(7);
-            walk(value, rules, combinedMedia, pseudo);
-            continue;
-          }
-
-          if (property === '@keyframes' || property === ANIMATION_NAME) {
-            const declarations = getIndex(rules, media, pseudo);
-            if (ANIMATION_NAME in declarations) {
-              continue;
-            }
+        if (property === '@keyframes' || property === ANIMATION_NAME) {
+          const declarations = getIndex(result, media, pseudo);
+          if (!(ANIMATION_NAME in declarations)) {
             const name = injector().injectKeyframesRule(value);
             declarations[ANIMATION_NAME] = name;
-            continue;
           }
+          continue;
+        }
 
-          if (property === '@font-face' || property === FONT_FAMILY) {
-            const declarations = getIndex(rules, media, pseudo);
-            if (FONT_FAMILY in declarations) {
-              continue;
-            }
+        if (property === '@font-face' || property === FONT_FAMILY) {
+          const declarations = getIndex(result, media, pseudo);
+          if (!(FONT_FAMILY in declarations)) {
             let names = '';
             const families: Array<string | FontFace> = Array.isArray(value) ? value : [value];
             for (const family of families) {
@@ -95,89 +85,89 @@ export default class Base<TStyle extends Style> {
               names += typeof family === 'string' ? family : injector().injectFontFaceRule(family);
             }
             declarations[FONT_FAMILY] = names;
-            continue;
           }
+          continue;
+        }
 
-          if (Array.isArray(value)) {
-            getIndex(rules, media, pseudo)[property] = value;
-            continue;
+        // Pseudo
+        if (property[0] === ':') {
+          const combinedPseudo = (pseudo || '') + property;
+          resolve(value, result, media, combinedPseudo);
+          continue;
+        }
+
+        // Media
+        if (property[0] === '@') {
+          resolve(value, result, property, pseudo);
+          continue;
+        }
+
+        if (Array.isArray(value)) {
+          const declarations = getIndex(result, media, pseudo);
+          if (!(property in declarations)) {
+            declarations[property] = value;
           }
+          continue;
+        }
 
-          // Shorthand objects
-          let isValid = true;
-          const longhandDeclarations: Declarations = {};
+        // Shorthand objects
+        let isValid = true;
+        const longhandDeclarations: Declarations = {};
 
-          for (const extension in value) {
-            if (process.env.NODE_ENV !== 'production') {
-              if (!/^[a-z]+$/i.test(extension)) {
-                console.error(
-                  "The property `%s['%s']` in %O isn't a valid shorthand extension and will likely cause a failure",
-                  property,
-                  extension,
-                  value,
-                );
-              }
-            }
-
-            const longhandValue = value[extension];
-            const typeOfValue = typeof longhandValue;
-
-            if (
-              typeOfValue === 'string' ||
-              typeOfValue === 'number' ||
-              Array.isArray(longhandValue) ||
-              // Objects are only valid for `animation.name` and `font.family`
-              ((typeOfValue === 'object' && (property === 'animation' && extension === 'name')) ||
-                (property === 'font' && extension === 'family'))
-            ) {
-              if (extension === 'x') {
-                longhandDeclarations[property + 'Left'] = longhandValue;
-                longhandDeclarations[property + 'Right'] = longhandValue;
-                continue;
-              }
-
-              if (extension === 'y') {
-                longhandDeclarations[property + 'Top'] = longhandValue;
-                longhandDeclarations[property + 'Bottom'] = longhandValue;
-                continue;
-              }
-
-              // Convert to camel cased CSS property due to cache
-              longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
-              continue;
-            }
-
-            if (process.env.NODE_ENV !== 'production') {
+        for (const extension in value) {
+          if (process.env.NODE_ENV !== 'production') {
+            if (!/^[a-z]+$/i.test(extension)) {
               console.error(
-                "The object of `%s` isn't a valid shorthand object and will be ignored because property `%s['%s']` wasn't a string, number or array of values, was %O",
-                property,
+                "The property `%s['%s']` in %O isn't a valid shorthand extension and will likely cause a failure",
                 property,
                 extension,
                 value,
               );
             }
-
-            isValid = false;
-            break;
           }
 
-          if (isValid) {
-            if (process.env.NODE_ENV !== 'production') {
-              for (const longhandProperty in longhandDeclarations) {
-                if (longhandProperty in style) {
-                  console.warn(
-                    'A property in shorthand object %O resolved to `%s` that already exists in %O. The last one in order will be ignored.',
-                    value,
-                    longhandProperty,
-                    style,
-                  );
-                }
-              }
+          const longhandValue = value[extension];
+
+          if (
+            isPrimitive(longhandValue) ||
+            Array.isArray(longhandValue) ||
+            // Objects are only valid for `animation.name` and `font.family`
+            ((typeof longhandValue === 'object' && (property === 'animation' && extension === 'name')) ||
+              (property === 'font' && extension === 'family'))
+          ) {
+            if (extension === 'x') {
+              longhandDeclarations[property + 'Left'] = longhandValue;
+              longhandDeclarations[property + 'Right'] = longhandValue;
+              continue;
             }
 
-            walk(longhandDeclarations, rules, media, pseudo);
+            if (extension === 'y') {
+              longhandDeclarations[property + 'Top'] = longhandValue;
+              longhandDeclarations[property + 'Bottom'] = longhandValue;
+              continue;
+            }
+
+            // Convert to camel cased CSS property due to cache
+            longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+            continue;
           }
 
+          if (process.env.NODE_ENV !== 'production') {
+            console.error(
+              "The object of `%s` isn't a valid shorthand object and will be ignored because property `%s['%s']` wasn't a string, number or array of values, was %O",
+              property,
+              property,
+              extension,
+              value,
+            );
+          }
+
+          isValid = false;
+          break;
+        }
+
+        if (isValid) {
+          resolve(longhandDeclarations, result, media, pseudo);
           continue;
         }
 
@@ -186,29 +176,75 @@ export default class Base<TStyle extends Style> {
         }
       }
 
-      return rules;
+      return result;
     };
 
-    const injectClassName = (declarations: Properties, media: string | undefined, pseudo: string | undefined) =>
+    const injectClassName = (declarations: Declarations, media: string | undefined, pseudo: string | undefined) =>
       injector(media).injectClassRule(transformer ? transformer(declarations) : declarations, pseudo);
 
-    const cache: Rules<CacheValue> = createIndex();
+    const cache: Index<CacheValue> = {};
 
     const inject =
       // Atomic as default
       atomic === false
-        ? (declarations: Declarations, media?: string, pseudo?: string) => {
-            return ' ' + injectClassName(declarations, media, pseudo);
-          }
-        : (declarations: Declarations, media?: string, pseudo?: string) => {
+        ? (style: Index | MediaIndex, media?: string, pseudo?: string) => {
             let classNames = '';
+            const properties = Object.keys(style);
+            const blocks: Index = {};
 
-            for (const property in declarations) {
-              const value = declarations[property];
+            for (let i = properties.length - 1; i >= 0; i--) {
+              const property = properties[i];
+              const value = style[property];
 
-              if (typeof value === 'string' || typeof value === 'number') {
+              if (property[0] === ':' || property[0] === '@') {
+                blocks[property] = value;
+                continue;
+              }
+
+              const block = (blocks[NON_ATOMIC_KEY] = blocks[NON_ATOMIC_KEY] || {}) as Declarations;
+
+              block[property] = value as StyleValue;
+            }
+
+            for (const rule in blocks) {
+              if (rule === NON_ATOMIC_KEY) {
+                classNames += ' ' + injectClassName(blocks[rule] as Declarations, media, pseudo);
+              } else {
+                classNames += inject(
+                  blocks[rule] as Declarations | MediaIndex,
+                  rule[0] === '@' ? rule.slice(7) : media,
+                  rule[0] === ':' ? rule : pseudo,
+                );
+              }
+            }
+
+            return classNames;
+          }
+        : (style: Index | MediaIndex, media?: string, pseudo?: string) => {
+            let classNames = '';
+            const properties = Object.keys(style);
+            const index = getIndex(cache, media, pseudo);
+
+            for (let i = properties.length - 1; i >= 0; i--) {
+              const property = properties[i];
+              const value = style[property];
+
+              // Pseudo
+              if (property[0] === ':') {
+                classNames += inject(value as Declarations, media, property);
+                continue;
+              }
+
+              // Media
+              if (property[0] === '@') {
+                classNames += inject(value as MediaIndex, property.slice(7), pseudo);
+                continue;
+              }
+
+              const declaration = { [property]: value as StyleValue };
+
+              if (isPrimitive(value)) {
                 // Only supports caching of primitive values
-                const index = getIndex(cache, media, pseudo);
                 const cachedValues = (index[property] = index[property] || {});
 
                 if (value in cachedValues) {
@@ -216,7 +252,7 @@ export default class Base<TStyle extends Style> {
                   continue;
                 }
 
-                const className = injectClassName({ [property]: value }, media, pseudo);
+                const className = injectClassName(declaration, media, pseudo);
 
                 if (className) {
                   cachedValues[value] = className;
@@ -226,41 +262,24 @@ export default class Base<TStyle extends Style> {
                 continue;
               }
 
-              if (Array.isArray(value)) {
-                classNames += ' ' + injectClassName({ [property]: value }, media, pseudo);
-                continue;
-              }
+              // Array
+              classNames += ' ' + injectClassName(declaration, media, pseudo);
             }
 
             return classNames;
           };
 
+    const reducer = (result: Index, style: TStyle) => resolve(style, result);
+
     this.injectStyle = (styles: TStyle | TStyle[]) => {
-      const rules: Rules = createIndex();
+      const result = Array.isArray(styles)
+        ? styles.length > 1 ? styles.reduceRight(reducer, {}) : resolve(styles[0] || {})
+        : resolve(styles);
 
-      if (Array.isArray(styles)) {
-        for (let i = styles.length; i >= 0; i--) {
-          walk(styles[i], rules);
-        }
-      } else {
-        walk(styles, rules);
-      }
-
-      let classNames = inject(rules[0]);
-      for (const pseudo in rules[1]) {
-        classNames += inject(rules[1][pseudo], undefined, pseudo);
-      }
-      for (const media in rules[2]) {
-        classNames += inject(rules[2][media], media);
-      }
-      for (const media in rules[3]) {
-        for (const pseudo in rules[3][media]) {
-          classNames += inject(rules[3][media][pseudo], media, pseudo);
-        }
-      }
+      const classNames = inject(result);
 
       if (process.env.NODE_ENV !== 'production') {
-        validateMixingShorthandLonghand(rules, classNames);
+        validateMixingShorthandLonghand(result, classNames);
       }
 
       return classNames.slice(1);
@@ -268,22 +287,24 @@ export default class Base<TStyle extends Style> {
   }
 }
 
-function createIndex<TValue>(): Rules<TValue> {
-  return [{}, {}, {}, {}];
-}
-
 function getIndex<TValue>(
-  rules: Rules<TValue>,
+  indexes: Index<TValue>,
   media: string | undefined,
   pseudo: string | undefined,
 ): Declarations<TValue> {
-  if (media && pseudo) {
-    const pseudos = (rules[3][media] = rules[3][media] || {});
-    return (pseudos[pseudo] = pseudos[pseudo] || {});
-  } else if (media) {
-    return (rules[2][media] = rules[2][media] || {});
-  } else if (pseudo) {
-    return (rules[1][pseudo] = rules[1][pseudo] || {});
+  let index = indexes as Index<TValue>;
+
+  if (media) {
+    index = (index[media] = index[media] || {}) as MediaIndex<TValue>;
   }
-  return rules[0];
+
+  if (pseudo) {
+    return (index[pseudo] = index[pseudo] || {}) as Declarations<TValue>;
+  } else {
+    return index as Declarations<TValue>;
+  }
+}
+
+function isPrimitive(value: any): value is string | number {
+  return typeof value === 'string' || typeof value === 'number';
 }

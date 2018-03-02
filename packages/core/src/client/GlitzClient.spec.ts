@@ -62,6 +62,16 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(8);
     expect(sheet.cssRules[6].cssText).toMatchSnapshot();
     expect(sheet.cssRules[7].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        padding: { left: '20px' },
+        paddingLeft: '30px',
+      }),
+    ).toBe('i');
+
+    expect(sheet.cssRules).toHaveLength(9);
+    expect(sheet.cssRules[8].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
@@ -171,9 +181,14 @@ describe('client', () => {
         background: { color: 'green' },
         borderColor: 'blue',
         ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
-        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        '@media (min-width: 768px)': {
+          color: 'red',
+          background: { color: 'green' },
+          borderColor: 'blue',
+          ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        },
       }),
-    ).toBe('a b c d e f g h i');
+    ).toBe('a b c d e f g h i j k l');
 
     expect(sheet.cssRules).toHaveLength(6);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
@@ -183,10 +198,13 @@ describe('client', () => {
     expect(sheet.cssRules[4].cssText).toMatchSnapshot();
     expect(sheet.cssRules[5].cssText).toMatchSnapshot();
 
-    expect(mediaSheet.cssRules).toHaveLength(3);
+    expect(mediaSheet.cssRules).toHaveLength(6);
     expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
     expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
     expect(mediaSheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[3].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[5].cssText).toMatchSnapshot();
   });
   it('injects non-atomic rules', () => {
     const style = createStyle();
@@ -201,16 +219,22 @@ describe('client', () => {
         background: { color: 'green' },
         borderColor: 'blue',
         ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
-        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        '@media (min-width: 768px)': {
+          color: 'red',
+          background: { color: 'green' },
+          borderColor: 'blue',
+          ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        },
       }),
-    ).toBe('a b c');
+    ).toBe('a b c d');
 
     expect(sheet.cssRules).toHaveLength(2);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
 
-    expect(mediaSheet.cssRules).toHaveLength(1);
+    expect(mediaSheet.cssRules).toHaveLength(2);
     expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {
     const style = createStyle();
@@ -544,24 +568,22 @@ describe('client', () => {
   });
   it('warns with mixed longhand and shorthand', () => {
     const client = new GlitzClient<TestStyle>();
-    const error = (console.error = jest.fn());
-    const warn = (console.warn = jest.fn());
+    const logger = (console.error = jest.fn());
 
     client.injectStyle({ border: { width: 0 }, borderWidth: 0 });
-    expect(error).toHaveBeenCalledTimes(0);
-    expect(warn).toHaveBeenCalledTimes(1);
+    expect(logger).toHaveBeenCalledTimes(0);
 
     client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle);
-    expect(error).toHaveBeenCalledTimes(0);
+    expect(logger).toHaveBeenCalledTimes(0);
 
     client.injectStyle({ border: 0, borderWidth: 0 } as TestStyle);
-    expect(error).toHaveBeenCalledTimes(1);
+    expect(logger).toHaveBeenCalledTimes(1);
 
     client.injectStyle([{ border: 0 }, { borderWidth: 0 }] as TestStyle[]);
-    expect(error).toHaveBeenCalledTimes(2);
+    expect(logger).toHaveBeenCalledTimes(2);
 
     client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle);
-    expect(error).toHaveBeenCalledTimes(3);
+    expect(logger).toHaveBeenCalledTimes(3);
   });
 });
 

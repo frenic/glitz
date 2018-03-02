@@ -20,6 +20,12 @@ exports[`client injects atomic rules 8`] = `".h {background-color: green;}"`;
 
 exports[`client injects atomic rules 9`] = `".i {border-color: blue;}"`;
 
+exports[`client injects atomic rules 10`] = `".j:hover {color: red;}"`;
+
+exports[`client injects atomic rules 11`] = `".k:hover {background-color: green;}"`;
+
+exports[`client injects atomic rules 12`] = `".l:hover {border-color: blue;}"`;
+
 exports[`client injects different combinations 1`] = `".a {color: red;}"`;
 
 exports[`client injects different combinations 2`] = `".b {color: green;}"`;
@@ -63,6 +69,8 @@ exports[`client injects non-atomic rules 1`] = `".a {color: red; background-colo
 exports[`client injects non-atomic rules 2`] = `".b:hover {color: red; background-color: green; border-color: blue;}"`;
 
 exports[`client injects non-atomic rules 3`] = `".c {color: red; background-color: green; border-color: blue;}"`;
+
+exports[`client injects non-atomic rules 4`] = `".d:hover {color: red; background-color: green; border-color: blue;}"`;
 
 exports[`client injects plain rule 1`] = `".a {color: red;}"`;
 
@@ -121,3 +129,5 @@ exports[`client injects shorthand rule 6`] = `".f {margin-right: 10px;}"`;
 exports[`client injects shorthand rule 7`] = `".g {margin-top: 10px;}"`;
 
 exports[`client injects shorthand rule 8`] = `".h {margin-bottom: 10px;}"`;
+
+exports[`client injects shorthand rule 9`] = `".i {padding-left: 30px;}"`;
