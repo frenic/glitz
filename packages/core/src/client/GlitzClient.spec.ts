@@ -544,22 +544,24 @@ describe('client', () => {
   });
   it('warns with mixed longhand and shorthand', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.error = jest.fn());
+    const error = (console.error = jest.fn());
+    const warn = (console.warn = jest.fn());
 
     client.injectStyle({ border: { width: 0 }, borderWidth: 0 });
-    expect(logger).toHaveBeenCalledTimes(0);
+    expect(error).toHaveBeenCalledTimes(0);
+    expect(warn).toHaveBeenCalledTimes(1);
 
     client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(0);
+    expect(error).toHaveBeenCalledTimes(0);
 
     client.injectStyle({ border: 0, borderWidth: 0 } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenCalledTimes(1);
 
     client.injectStyle([{ border: 0 }, { borderWidth: 0 }] as TestStyle[]);
-    expect(logger).toHaveBeenCalledTimes(2);
+    expect(error).toHaveBeenCalledTimes(2);
 
     client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(3);
+    expect(error).toHaveBeenCalledTimes(3);
   });
 });
 

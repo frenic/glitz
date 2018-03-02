@@ -162,6 +162,19 @@ export default class Base<TStyle extends Style> {
           }
 
           if (isValid) {
+            if (process.env.NODE_ENV !== 'production') {
+              for (const longhandProperty in longhandDeclarations) {
+                if (longhandProperty in style) {
+                  console.warn(
+                    'A property in shorthand object %O resolved to `%s` that already exists in %O. The last one in order will be ignored.',
+                    value,
+                    longhandProperty,
+                    style,
+                  );
+                }
+              }
+            }
+
             walk(longhandDeclarations, rules, media, pseudo);
           }
 
