@@ -1,33 +1,24 @@
-import { FontFace, Style } from '@glitz/type';
+import { FontFace, PropertiesList, Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
+import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
-type StyleValue = string | number | Array<string | number>;
-
-type Declarations<TValue = StyleValue> = { [property: string]: TValue };
-
-type MediaIndex<TValue = StyleValue> =
-  | Declarations<TValue>
-  | {
-      [pseudo: string]: Declarations<TValue>;
-    };
-
-type Index<TValue = StyleValue> =
-  | Declarations<TValue>
-  | {
-      [selector: string]: Declarations<TValue> | MediaIndex<TValue>;
-    };
+type StyleValue = string | number | FontFace | PropertiesList | Array<string | number | FontFace>;
 
 type CacheValue = {
   [value: string]: string;
 };
 
+type Declarations<TValue = StyleValue> = { [property: string]: TValue };
+
+interface Index<TValue = StyleValue> extends Declarations<TValue | Index<TValue>> {}
+
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
-const ANIMATION_NAME = 'animationName';
-const FONT_FAMILY = 'fontFamily';
 const NON_ATOMIC_KEY = '$';
+const MEDIA_IDENTIFIER = '@';
+const PSEUDO_IDENTIFIER = ':';
 
 export default class Base<TStyle extends Style> {
   public injectStyle: (styles: TStyle | TStyle[]) => string;
@@ -36,26 +27,18 @@ export default class Base<TStyle extends Style> {
     transformer: Transformer | undefined,
     atomic: boolean | undefined,
   ) {
-    const resolve = (style: TStyle | Declarations, result: Index = {}, media?: string, pseudo?: string) => {
+    const resolve = (style: Style, result = {} as Index, media?: string, pseudo?: string) => {
       const properties = Object.keys(style);
 
       for (let i = properties.length - 1; i >= 0; i--) {
-        const property = properties[i];
-        const value = (style as any)[property];
-
-        if (isPrimitive(value)) {
-          const declarations = getIndex(result, media, pseudo);
-          if (!(property in declarations)) {
-            declarations[property] = value;
-            continue;
-          }
-          continue;
-        }
+        let property = properties[i];
+        let value = (style as Index)[property];
 
         if (process.env.NODE_ENV !== 'production') {
-          if (typeof value !== 'object') {
+          if (value === undefined || value === null || !(isPrimitive(value) || typeof value === 'object')) {
             console.error('The style property `%s` was has to be a string, number or object, was %O', property, value);
-          } else if (Object.keys(value).length === 0) {
+          }
+          if (typeof value === 'object' && Object.keys(value).length === 0) {
             console.error(
               'The style property `%s` was an empty %s and should be removed because it can cause unexpected behavior',
               property,
@@ -64,57 +47,59 @@ export default class Base<TStyle extends Style> {
           }
         }
 
-        if (property === '@keyframes' || property === ANIMATION_NAME) {
+        if (property === '@keyframes') {
+          property = ANIMATION_NAME;
+        }
+
+        if (property === '@font-face') {
+          property = FONT_FAMILY;
+        }
+
+        if (isPrimitive(value) || Array.isArray(value) || property === ANIMATION_NAME || property === FONT_FAMILY) {
           const declarations = getIndex(result, media, pseudo);
-          if (!(ANIMATION_NAME in declarations)) {
-            const name = injector().injectKeyframesRule(value);
-            declarations[ANIMATION_NAME] = name;
-          }
-          continue;
-        }
 
-        if (property === '@font-face' || property === FONT_FAMILY) {
-          const declarations = getIndex(result, media, pseudo);
-          if (!(FONT_FAMILY in declarations)) {
-            let names = '';
-            const families: Array<string | FontFace> = Array.isArray(value) ? value : [value];
-            for (const family of families) {
-              if (names) {
-                names += ',';
-              }
-              names += typeof family === 'string' ? family : injector().injectFontFaceRule(family);
-            }
-            declarations[FONT_FAMILY] = names;
-          }
-          continue;
-        }
-
-        // Pseudo
-        if (property[0] === ':') {
-          const combinedPseudo = (pseudo || '') + property;
-          resolve(value, result, media, combinedPseudo);
-          continue;
-        }
-
-        // Media
-        if (property[0] === '@') {
-          resolve(value, result, property, pseudo);
-          continue;
-        }
-
-        if (Array.isArray(value)) {
-          const declarations = getIndex(result, media, pseudo);
           if (!(property in declarations)) {
+            if (property === ANIMATION_NAME) {
+              value = injector().injectKeyframes(value as PropertiesList);
+            }
+
+            if (property === FONT_FAMILY) {
+              const families = ([] as Array<string | FontFace>).concat(value as
+                | string
+                | FontFace
+                | Array<string | FontFace>);
+              let names = '';
+              for (const family of families) {
+                if (names) {
+                  names += ',';
+                }
+                names += isPrimitive(family) ? family : injector().injectFontFace(family);
+              }
+              value = names;
+            }
+
             declarations[property] = value;
           }
           continue;
         }
 
+        // Media or pseudo
+        if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
+          resolve(
+            value,
+            result,
+            property[0] === MEDIA_IDENTIFIER ? property : media,
+            property[0] === PSEUDO_IDENTIFIER ? (pseudo || '') + property : pseudo,
+          );
+          continue;
+        }
+
         // Shorthand objects
         let isValid = true;
-        const longhandDeclarations: Declarations = {};
+        const longhandDeclarations = {} as Index;
 
-        for (const extension in value) {
+        let extension: keyof Index;
+        for (extension in value) {
           if (process.env.NODE_ENV !== 'production') {
             if (!/^[a-z]+$/i.test(extension)) {
               console.error(
@@ -126,14 +111,14 @@ export default class Base<TStyle extends Style> {
             }
           }
 
-          const longhandValue = value[extension];
+          const longhandValue = (value as Index)[extension];
 
           if (
             isPrimitive(longhandValue) ||
             Array.isArray(longhandValue) ||
             // Objects are only valid for `animation.name` and `font.family`
-            ((typeof longhandValue === 'object' && (property === 'animation' && extension === 'name')) ||
-              (property === 'font' && extension === 'family'))
+            (property === 'animation' && extension === 'name') ||
+            (property === 'font' && extension === 'family')
           ) {
             if (extension === 'x') {
               longhandDeclarations[property + 'Left'] = longhandValue;
@@ -153,13 +138,7 @@ export default class Base<TStyle extends Style> {
           }
 
           if (process.env.NODE_ENV !== 'production') {
-            console.error(
-              "The object of `%s` isn't a valid shorthand object and will be ignored because property `%s['%s']` wasn't a string, number or array of values, was %O",
-              property,
-              property,
-              extension,
-              value,
-            );
+            console.error('The style property `%s` does not support the value %O', property, value);
           }
 
           isValid = false;
@@ -168,11 +147,6 @@ export default class Base<TStyle extends Style> {
 
         if (isValid) {
           resolve(longhandDeclarations, result, media, pseudo);
-          continue;
-        }
-
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('The style property `%s` does not support the value %O', property, value);
         }
       }
 
@@ -180,30 +154,28 @@ export default class Base<TStyle extends Style> {
     };
 
     const injectClassName = (declarations: Declarations, media: string | undefined, pseudo: string | undefined) =>
-      injector(media).injectClassRule(transformer ? transformer(declarations) : declarations, pseudo);
+      injector(media).injectClassName(transformer ? transformer(declarations) : declarations, pseudo);
 
     const cache: Index<CacheValue> = {};
 
     const inject =
       // Atomic as default
       atomic === false
-        ? (style: Index | MediaIndex, media?: string, pseudo?: string) => {
+        ? (style: Index, media?: string, pseudo?: string) => {
             let classNames = '';
-            const properties = Object.keys(style);
-            const blocks: Index = {};
+            const keys = Object.keys(style);
+            const blocks: { [property: string]: Index } = {};
 
-            for (let i = properties.length - 1; i >= 0; i--) {
-              const property = properties[i];
-              const value = style[property];
+            for (let i = keys.length - 1; i >= 0; i--) {
+              const key = keys[i];
+              const object =
+                key[0] === MEDIA_IDENTIFIER || key[0] === PSEUDO_IDENTIFIER
+                  ? // Media or pseudo
+                    blocks
+                  : // Group declarations
+                    (blocks[NON_ATOMIC_KEY] = blocks[NON_ATOMIC_KEY] || {});
 
-              if (property[0] === ':' || property[0] === '@') {
-                blocks[property] = value;
-                continue;
-              }
-
-              const block = (blocks[NON_ATOMIC_KEY] = blocks[NON_ATOMIC_KEY] || {}) as Declarations;
-
-              block[property] = value as StyleValue;
+              object[key] = style[key];
             }
 
             for (const rule in blocks) {
@@ -211,16 +183,16 @@ export default class Base<TStyle extends Style> {
                 classNames += ' ' + injectClassName(blocks[rule] as Declarations, media, pseudo);
               } else {
                 classNames += inject(
-                  blocks[rule] as Declarations | MediaIndex,
-                  rule[0] === '@' ? rule.slice(7) : media,
-                  rule[0] === ':' ? rule : pseudo,
+                  blocks[rule],
+                  rule[0] === MEDIA_IDENTIFIER ? rule.slice(7) : media,
+                  rule[0] === PSEUDO_IDENTIFIER ? rule : pseudo,
                 );
               }
             }
 
             return classNames;
           }
-        : (style: Index | MediaIndex, media?: string, pseudo?: string) => {
+        : (style: Index, media?: string, pseudo?: string) => {
             let classNames = '';
             const properties = Object.keys(style);
             const index = getIndex(cache, media, pseudo);
@@ -229,19 +201,17 @@ export default class Base<TStyle extends Style> {
               const property = properties[i];
               const value = style[property];
 
-              // Pseudo
-              if (property[0] === ':') {
-                classNames += inject(value as Declarations, media, property);
+              // Media or pseudo
+              if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
+                classNames += inject(
+                  value as Index,
+                  property[0] === MEDIA_IDENTIFIER ? property.slice(7) : media,
+                  property[0] === PSEUDO_IDENTIFIER ? property : pseudo,
+                );
                 continue;
               }
 
-              // Media
-              if (property[0] === '@') {
-                classNames += inject(value as MediaIndex, property.slice(7), pseudo);
-                continue;
-              }
-
-              const declaration = { [property]: value as StyleValue };
+              const declaration = { [property]: value };
 
               if (isPrimitive(value)) {
                 // Only supports caching of primitive values
@@ -253,12 +223,8 @@ export default class Base<TStyle extends Style> {
                 }
 
                 const className = injectClassName(declaration, media, pseudo);
+                classNames += ' ' + (cachedValues[value] = className);
 
-                if (className) {
-                  cachedValues[value] = className;
-                }
-
-                classNames += ' ' + className;
                 continue;
               }
 
@@ -292,10 +258,10 @@ function getIndex<TValue>(
   media: string | undefined,
   pseudo: string | undefined,
 ): Declarations<TValue> {
-  let index = indexes as Index<TValue>;
+  let index: Index<TValue> = indexes;
 
   if (media) {
-    index = (index[media] = index[media] || {}) as MediaIndex<TValue>;
+    index = (index[media] = index[media] || {}) as Index<TValue>;
   }
 
   if (pseudo) {

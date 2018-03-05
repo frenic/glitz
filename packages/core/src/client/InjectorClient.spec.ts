@@ -10,8 +10,8 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    expect(injector.injectClassRule({ color: 'red' })).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' })).toBe('b');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' })).toBe('b');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -23,8 +23,8 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -36,7 +36,7 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -48,7 +48,7 @@ describe('client', () => {
     const injector = createInjector(style);
 
     expect(
-      injector.injectFontFaceRule({
+      injector.injectFontFace({
         fontStyle: 'normal',
         fontWeight: 400,
         src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
@@ -67,8 +67,8 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    expect(injector.injectClassRule({ color: 'red' })).toBe('a');
-    expect(injector.injectClassRule({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -78,8 +78,8 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -89,8 +89,8 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
-    expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -104,15 +104,15 @@ describe('client', () => {
     const injector = createInjector(style);
 
     // Skipping .a
-    expect(injector.injectClassRule({ color: 'green' })).toBe('b');
-    expect(injector.injectClassRule({ color: 'black', backgroundColor: 'white' })).toBe('c');
+    expect(injector.injectClassName({ color: 'green' })).toBe('b');
+    expect(injector.injectClassName({ color: 'black', backgroundColor: 'white' })).toBe('c');
   });
   it('hydrates pseudo rule', () => {
     const style = createStyle('.a:hover{color:red}.b:hover{color:green}');
     const injector = createInjector(style);
 
     // Skipping .a
-    expect(injector.injectClassRule({ color: 'green' }, ':hover')).toBe('b');
+    expect(injector.injectClassName({ color: 'green' }, ':hover')).toBe('b');
   });
   it('hydrates keyframes rule', () => {
     const style = createStyle(
@@ -121,20 +121,20 @@ describe('client', () => {
     const injector = createInjector(style);
 
     // Skipping .a
-    expect(injector.injectKeyframesRule({ from: { color: 'black' }, to: { color: 'white' } })).toBe('b');
+    expect(injector.injectKeyframes({ from: { color: 'black' }, to: { color: 'white' } })).toBe('b');
   });
   it('hydrates fallback rule', () => {
     const style = createStyle('.a{color:red;color:green}.b{color:black;color:white}');
     const injector = createInjector(style);
 
     // Skipping .a
-    expect(injector.injectClassRule({ color: ['black', 'white'] })).toBe('b');
+    expect(injector.injectClassName({ color: ['black', 'white'] })).toBe('b');
   });
   it('increments plain hash', () => {
     const style = createStyle('.a{color:red}.b{color:green}');
     const injector = createInjector(style);
 
-    expect(injector.injectClassRule({ color: 'blue' })).toBe('c');
+    expect(injector.injectClassName({ color: 'blue' })).toBe('c');
 
     const sheet = style.sheet as CSSStyleSheet;
 

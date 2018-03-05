@@ -1,13 +1,13 @@
 export interface Query {
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/width
-  width?: number | string;
-  minWidth?: number | string;
-  maxWidth?: number | string;
+  width?: string;
+  minWidth?: string;
+  maxWidth?: string;
 
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/height
-  height?: number | string;
-  minHeight?: number | string;
-  maxHeight?: number | string;
+  height?: string;
+  minHeight?: string;
+  maxHeight?: string;
 
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/aspect-ratio
   aspectRatio?: string;
@@ -18,9 +18,9 @@ export interface Query {
   orientation?: 'portrait' | 'landscape';
 
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/resolution
-  resolution?: number | string;
-  minResolution?: number | string;
-  maxResolution?: number | string;
+  resolution?: string;
+  minResolution?: string;
+  maxResolution?: string;
 
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/scan
   scan?: 'interlace' | 'progressive';

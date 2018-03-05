@@ -66,12 +66,14 @@ describe('client', () => {
     expect(
       client.injectStyle({
         padding: { left: '20px' },
+        color: 'red',
         paddingLeft: '30px',
       }),
-    ).toBe('i');
+    ).toBe('i j');
 
-    expect(sheet.cssRules).toHaveLength(9);
+    expect(sheet.cssRules).toHaveLength(10);
     expect(sheet.cssRules[8].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
@@ -218,12 +220,24 @@ describe('client', () => {
         color: 'red',
         background: { color: 'green' },
         borderColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        backgroundColor: 'white',
+        ':hover': {
+          color: 'red',
+          background: { color: 'green' },
+          borderColor: 'blue',
+          backgroundColor: 'white',
+        },
         '@media (min-width: 768px)': {
           color: 'red',
           background: { color: 'green' },
           borderColor: 'blue',
-          ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+          backgroundColor: 'white',
+          ':hover': {
+            color: 'red',
+            background: { color: 'green' },
+            borderColor: 'blue',
+            backgroundColor: 'white',
+          },
         },
       }),
     ).toBe('a b c d');

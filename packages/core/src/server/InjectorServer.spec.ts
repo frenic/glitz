@@ -5,22 +5,22 @@ describe('server', () => {
   it('injects plain rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectClassRule({ color: 'red' })).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' })).toBe('b');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' })).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassRule({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects font face rule', () => {
     const injector = createInjector();
 
     expect(
-      injector.injectFontFaceRule({
+      injector.injectFontFace({
         fontStyle: 'normal',
         fontWeight: 400,
         src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
@@ -31,41 +31,41 @@ describe('server', () => {
   it('injects keyframes rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects fallback rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectClassRule({ color: ['red', 'green'] })).toBe('a');
+    expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('reuses plain rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectClassRule({ color: 'red' })).toBe('a');
-    expect(injector.injectClassRule({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('reuses pseudo rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassRule({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('reuses keyframes rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
-    expect(injector.injectKeyframesRule({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('reuses fallback rule', () => {
     const injector = createInjector();
 
-    expect(injector.injectClassRule({ color: ['red', 'green'] })).toBe('a');
-    expect(injector.injectClassRule({ color: ['red', 'green'] })).toBe('a');
+    expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
+    expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
 });

@@ -2,10 +2,13 @@ import { FontFace, Properties, PropertiesList } from '@glitz/type';
 import { formatRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
+export const ANIMATION_NAME = 'animationName';
+export const FONT_FAMILY = 'fontFamily';
+
 export default class Injector {
-  public injectClassRule: (declarations: Properties, pseudo?: string) => string;
-  public injectKeyframesRule: (declarationList: PropertiesList) => string;
-  public injectFontFaceRule: (declarations: FontFace) => string;
+  public injectClassName: (declarations: Properties, pseudo?: string) => string;
+  public injectKeyframes: (declarationList: PropertiesList) => string;
+  public injectFontFace: (declarations: FontFace) => string;
   constructor(
     plainDictionary: { [block: string]: string },
     pseudoDictionary: { [pseudo: string]: { [block: string]: string } },
@@ -19,7 +22,7 @@ export default class Injector {
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
     injectNewFontFaceRule?: (block: string) => void,
   ) {
-    this.injectClassRule = (declarations, pseudo) => {
+    this.injectClassName = (declarations, pseudo) => {
       const block = parseDeclarationBlock(declarations);
       if (block) {
         const dictionary = pseudo ? (pseudoDictionary[pseudo] = pseudoDictionary[pseudo] || {}) : plainDictionary;
@@ -38,7 +41,7 @@ export default class Injector {
       return '';
     };
 
-    this.injectKeyframesRule = declarationList => {
+    this.injectKeyframes = declarationList => {
       let blockList = '';
       for (const identifier in declarationList) {
         const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
@@ -60,13 +63,13 @@ export default class Injector {
       return '';
     };
 
-    this.injectFontFaceRule = originalDeclarations => {
+    this.injectFontFace = originalDeclarations => {
       if (process.env.NODE_ENV !== 'production') {
         if ('fontFamily' in originalDeclarations) {
           console.warn('The CSS property `font-family` font face will be ignored in %O', originalDeclarations);
         }
       }
-      delete (originalDeclarations as any).fontFamily;
+      delete (originalDeclarations as any)[FONT_FAMILY];
       const originalBlock = parseDeclarationBlock(originalDeclarations);
       if (originalBlock) {
         const existingClassName = fontFaceOriginalDictionary[originalBlock];
@@ -74,7 +77,7 @@ export default class Injector {
           return existingClassName;
         } else {
           const name = incrementFontFaceHash();
-          const declarations = { ...originalDeclarations, fontFamily: name };
+          const declarations = { ...originalDeclarations, [FONT_FAMILY]: name };
           const block = parseDeclarationBlock(declarations);
           fontFaceDictionary[block] = fontFaceOriginalDictionary[originalBlock] = name;
           if (injectNewFontFaceRule) {

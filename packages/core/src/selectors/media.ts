@@ -11,14 +11,7 @@ export default function media(list: Query | string, style: Style): Style {
 
 export function query(list: Query): string {
   if (process.env.NODE_ENV !== 'production') {
-    let isEmpty = true;
-    for (const x in list) {
-      isEmpty = false;
-      // tslint:disable-next-line no-unused-expression
-      x;
-      break;
-    }
-    if (isEmpty) {
+    if (Object.keys(list).length === 0) {
       console.warn('The media query is empty and will therefor be ignored. Prefer not having empty media queries');
     }
   }
@@ -30,26 +23,8 @@ export function query(list: Query): string {
       result += ' and ';
     }
     const value = list[feature];
-    result +=
-      value === true
-        ? `(${hyphenateProperty(feature)})`
-        : `(${hyphenateProperty(feature)}: ${
-            typeof value === 'string'
-              ? value
-              : // Convert number for the width and height features to `px`
-                endsWith(feature, 'h') || endsWith(feature, 't')
-                ? value + 'px'
-                : // Convert number for the resolution feature to `px`
-                  endsWith(feature, 'n')
-                  ? value + 'dpi'
-                  : // Other
-                    value
-          })`;
+    result += value === true ? `(${hyphenateProperty(feature)})` : `(${hyphenateProperty(feature)}: ${value})`;
   }
 
   return result;
-}
-
-function endsWith(full: string, end: string) {
-  return full.indexOf(end) === full.length - 1;
 }

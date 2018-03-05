@@ -269,7 +269,7 @@ import { media, pseudo } from '@glitz/core';
 
 const className = glitz.injectStyle({
   ...media(
-    { minWidth: 768 },
+    { minWidth: '768px' },
     {
       display: 'block',
     },
@@ -418,7 +418,7 @@ Prefix all class names.
 #### `pseudo`
 
 ```ts
-pseudo(selector: string): string
+pseudo(selector: string, style?: Style): Style
 ```
 
 Validates the pseudo rule. See [example](#unknown-properties).

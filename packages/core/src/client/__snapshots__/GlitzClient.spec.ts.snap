@@ -64,13 +64,13 @@ exports[`client injects media rule 1`] = `".c {color: red;}"`;
 
 exports[`client injects nested pseudo rule 1`] = `".a:first-child:hover {color: red;}"`;
 
-exports[`client injects non-atomic rules 1`] = `".a {color: red; background-color: green; border-color: blue;}"`;
+exports[`client injects non-atomic rules 1`] = `".a {color: red; border-color: blue; background-color: white;}"`;
 
-exports[`client injects non-atomic rules 2`] = `".b:hover {color: red; background-color: green; border-color: blue;}"`;
+exports[`client injects non-atomic rules 2`] = `".b:hover {color: red; border-color: blue; background-color: white;}"`;
 
-exports[`client injects non-atomic rules 3`] = `".c {color: red; background-color: green; border-color: blue;}"`;
+exports[`client injects non-atomic rules 3`] = `".c {color: red; border-color: blue; background-color: white;}"`;
 
-exports[`client injects non-atomic rules 4`] = `".d:hover {color: red; background-color: green; border-color: blue;}"`;
+exports[`client injects non-atomic rules 4`] = `".d:hover {color: red; border-color: blue; background-color: white;}"`;
 
 exports[`client injects plain rule 1`] = `".a {color: red;}"`;
 
@@ -130,4 +130,6 @@ exports[`client injects shorthand rule 7`] = `".g {margin-top: 10px;}"`;
 
 exports[`client injects shorthand rule 8`] = `".h {margin-bottom: 10px;}"`;
 
-exports[`client injects shorthand rule 9`] = `".i {padding-left: 30px;}"`;
+exports[`client injects shorthand rule 9`] = `".i {color: red;}"`;
+
+exports[`client injects shorthand rule 10`] = `".j {padding-left: 30px;}"`;
