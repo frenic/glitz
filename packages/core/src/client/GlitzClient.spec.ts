@@ -66,14 +66,12 @@ describe('client', () => {
     expect(
       client.injectStyle({
         padding: { left: '20px' },
-        color: 'red',
         paddingLeft: '30px',
       }),
-    ).toBe('i j');
+    ).toBe('i');
 
-    expect(sheet.cssRules).toHaveLength(10);
+    expect(sheet.cssRules).toHaveLength(9);
     expect(sheet.cssRules[8].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
@@ -220,24 +218,12 @@ describe('client', () => {
         color: 'red',
         background: { color: 'green' },
         borderColor: 'blue',
-        backgroundColor: 'white',
-        ':hover': {
-          color: 'red',
-          background: { color: 'green' },
-          borderColor: 'blue',
-          backgroundColor: 'white',
-        },
+        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
         '@media (min-width: 768px)': {
           color: 'red',
           background: { color: 'green' },
           borderColor: 'blue',
-          backgroundColor: 'white',
-          ':hover': {
-            color: 'red',
-            background: { color: 'green' },
-            borderColor: 'blue',
-            backgroundColor: 'white',
-          },
+          ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
         },
       }),
     ).toBe('a b c d');
@@ -486,6 +472,52 @@ describe('client', () => {
     expect(mediaSheet.cssRules).toHaveLength(2);
     expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
     expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
+  });
+  it('preserves order', () => {
+    const style1 = createStyle();
+    const atomic = new GlitzClient<TestStyle>([style1]);
+
+    const sheet1 = style1.sheet as CSSStyleSheet;
+
+    expect(
+      atomic.injectStyle({
+        padding: { left: '20px', right: '20px', top: '20px' },
+        color: 'red',
+        paddingRight: '30px',
+        ':hover': {
+          color: 'green',
+        },
+        paddingLeft: '30px',
+      }),
+    ).toBe('a b c d e');
+
+    expect(sheet1.cssRules).toHaveLength(5);
+    expect(sheet1.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet1.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet1.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet1.cssRules[3].cssText).toMatchSnapshot();
+    expect(sheet1.cssRules[4].cssText).toMatchSnapshot();
+
+    const style2 = createStyle();
+    const nonAtomic = new GlitzClient<TestStyle>([style2], { atomic: false });
+
+    const sheet2 = style2.sheet as CSSStyleSheet;
+
+    expect(
+      nonAtomic.injectStyle({
+        padding: { left: '20px', right: '20px', top: '20px' },
+        color: 'red',
+        paddingRight: '30px',
+        ':hover': {
+          color: 'green',
+        },
+        paddingLeft: '30px',
+      }),
+    ).toBe('a b');
+
+    expect(sheet2.cssRules).toHaveLength(2);
+    expect(sheet2.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet2.cssRules[1].cssText).toMatchSnapshot();
   });
   it('hydrates plain rule', () => {
     const style = createStyle(null, '.a{color:red}.b{color:green}');

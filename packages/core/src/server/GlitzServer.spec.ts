@@ -285,6 +285,39 @@ describe('server', () => {
 
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
+  it('preserves order', () => {
+    const atomic = new GlitzServer<TestStyle>();
+
+    expect(
+      atomic.injectStyle({
+        padding: { left: '20px', right: '20px', top: '20px' },
+        color: 'red',
+        paddingRight: '30px',
+        ':hover': {
+          color: 'green',
+        },
+        paddingLeft: '30px',
+      }),
+    ).toBe('a b c d e');
+
+    expect(atomic.getStyleMarkup()).toMatchSnapshot();
+
+    const nonAtomic = new GlitzServer<TestStyle>({ atomic: false });
+
+    expect(
+      nonAtomic.injectStyle({
+        padding: { left: '20px', right: '20px', top: '20px' },
+        color: 'red',
+        paddingRight: '30px',
+        ':hover': {
+          color: 'green',
+        },
+        paddingLeft: '30px',
+      }),
+    ).toBe('a b');
+
+    expect(nonAtomic.getStyleMarkup()).toMatchSnapshot();
+  });
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
       transformer: properties => ({ ...properties, mozAppearance: 'none' }),
