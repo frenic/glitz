@@ -96,7 +96,7 @@ export default class Base<TStyle extends Style> {
 
         // Shorthand objects
         let isValid = true;
-        const longhandDeclarations = {} as Index;
+        const longhandDeclarations: Index = {};
 
         let extension: keyof Index;
         for (extension in value) {
@@ -180,7 +180,7 @@ export default class Base<TStyle extends Style> {
 
             for (const rule in blocks) {
               if (rule === NON_ATOMIC_KEY) {
-                classNames += ' ' + injectClassName(blocks[rule] as Declarations, media, pseudo);
+                classNames += ' ' + injectClassName(blocks[rule], media, pseudo);
               } else {
                 classNames += inject(
                   blocks[rule],
