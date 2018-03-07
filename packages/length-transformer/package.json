@@ -1,0 +1,25 @@
+{
+  "name": "@glitz/length-transformer",
+  "version": "0.0.0",
+  "main": "./cjs/index.js",
+  "module": "./es6/index.js",
+  "types": "./es6/index.d.ts",
+  "license": "MIT",
+  "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
+  "homepage": "https://github.com/frenic/glitz",
+  "repository": "git@github.com:frenic/glitz.git",
+  "bugs": "https://github.com/frenic/glitz/issues",
+  "side-effects": false,
+  "dependencies": {
+    "@glitz/type": "^1.1.0-beta.12"
+  },
+  "scripts": {
+    "clean": "rimraf cjs es6",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index",
+    "prepublish": "npm run clean & npm run build"
+  },
+  "files": [
+    "cjs/",
+    "es6/"
+  ]
+}
