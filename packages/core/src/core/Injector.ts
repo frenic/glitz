@@ -14,13 +14,12 @@ export default class Injector {
     pseudoDictionary: { [pseudo: string]: { [block: string]: string } },
     keyframesDictionary: { [blockList: string]: string },
     fontFaceDictionary: { [block: string]: string },
-    fontFaceOriginalDictionary: { [block: string]: string },
     incrementClassHash: () => string,
     incrementKeyframesHash: () => string,
     incrementFontFaceHash: () => string,
     injectNewClassRule?: (className: string, block: string, pseudo?: string) => void,
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
-    injectNewFontFaceRule?: (block: string) => void,
+    injectNewFontFaceRule?: (name: string, block: string) => void,
   ) {
     this.injectClassName = (declarations, pseudo) => {
       const block = parseDeclarationBlock(declarations);
@@ -63,25 +62,31 @@ export default class Injector {
       return '';
     };
 
-    this.injectFontFace = originalDeclarations => {
+    this.injectFontFace = original => {
       if (process.env.NODE_ENV !== 'production') {
-        if ('fontFamily' in originalDeclarations) {
-          console.warn('The CSS property `font-family` font face will be ignored in %O', originalDeclarations);
+        if (FONT_FAMILY in original) {
+          console.warn('The CSS property `%s` in font face will be ignored in %O', FONT_FAMILY, original);
         }
       }
-      delete (originalDeclarations as any)[FONT_FAMILY];
-      const originalBlock = parseDeclarationBlock(originalDeclarations);
-      if (originalBlock) {
-        const existingClassName = fontFaceOriginalDictionary[originalBlock];
+
+      const declarations: FontFace = {};
+      let property: keyof FontFace | typeof FONT_FAMILY;
+      for (property in original) {
+        if (property !== FONT_FAMILY) {
+          declarations[property] = original[property];
+        }
+      }
+
+      const block = parseDeclarationBlock(declarations);
+      if (block) {
+        const existingClassName = fontFaceDictionary[block];
         if (existingClassName) {
           return existingClassName;
         } else {
           const name = incrementFontFaceHash();
-          const declarations = { ...originalDeclarations, [FONT_FAMILY]: name };
-          const block = parseDeclarationBlock(declarations);
-          fontFaceDictionary[block] = fontFaceOriginalDictionary[originalBlock] = name;
+          fontFaceDictionary[block] = name;
           if (injectNewFontFaceRule) {
-            injectNewFontFaceRule(block);
+            injectNewFontFaceRule(name, block);
           }
           return name;
         }

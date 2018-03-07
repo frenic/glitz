@@ -6,8 +6,7 @@ import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../uti
 
 const CLASS_RULE_REGEX = /\.([a-z0-9])(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9])\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
-const FONT_FACE_REGEX = /@font-face \{([^}]+)\}/g;
-const FONT_FACE_FAMILY_REGEX = /;?font-family:([^;}]+)/;
+const FONT_FACE_REGEX = /@font-face \{(.+);font-family:([^}]+)\}/g;
 
 export default class InjectorClient extends Injector {
   constructor(
@@ -20,7 +19,6 @@ export default class InjectorClient extends Injector {
     const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesDictionary: { [blockList: string]: string } = {};
     const fontFaceDictionary: { [block: string]: string } = {};
-    const fontFaceOriginalDictionary: { [block: string]: string } = {};
 
     // Hydrate
     const css = styleElement.textContent;
@@ -42,12 +40,8 @@ export default class InjectorClient extends Injector {
         keyframesDictionary[rule[2]] = rule[1];
       }
       while ((rule = FONT_FACE_REGEX.exec(css))) {
-        const name = FONT_FACE_FAMILY_REGEX.exec(rule[1]);
         incrementFontFaceHash();
-        if (name) {
-          fontFaceDictionary[rule[1]] = name[1];
-          fontFaceOriginalDictionary[rule[1].replace(FONT_FACE_FAMILY_REGEX, '')] = name[1];
-        }
+        keyframesDictionary[rule[1]] = rule[2];
       }
     }
 
@@ -61,8 +55,8 @@ export default class InjectorClient extends Injector {
       injectSheetRule(styleElement, rule);
     };
 
-    const injectNewFontFaceRule = (block: string) => {
-      const rule = formatFontFaceRule(block);
+    const injectNewFontFaceRule = (name: string, block: string) => {
+      const rule = formatFontFaceRule(name, block);
       injectSheetRule(styleElement, rule);
     };
 
@@ -71,7 +65,6 @@ export default class InjectorClient extends Injector {
       pseudoDictionary,
       keyframesDictionary,
       fontFaceDictionary,
-      fontFaceOriginalDictionary,
       incrementClassHash,
       incrementKeyframesHash,
       incrementFontFaceHash,
