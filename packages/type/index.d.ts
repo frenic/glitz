@@ -63,7 +63,14 @@ interface Background {
 }
 
 interface Border {
+  collapse?: CSS.StandardLonghandPropertiesFallback['borderCollapse'];
   color?: CSS.StandardShorthandPropertiesFallback['borderColor'];
+  blockEnd?: CSS.StandardShorthandPropertiesFallback['borderBlockEnd'];
+  blockStart?: CSS.StandardShorthandPropertiesFallback['borderBlockStart'];
+  inlineEnd?: CSS.StandardShorthandPropertiesFallback['borderInlineEnd'];
+  inlineStart?: CSS.StandardShorthandPropertiesFallback['borderInlineStart'];
+  radius?: CSS.StandardShorthandPropertiesFallback['borderRadius'];
+  spacing?: CSS.StandardLonghandPropertiesFallback['borderSpacing'];
   style?: CSS.StandardShorthandPropertiesFallback['borderStyle'];
   width?: CSS.StandardShorthandPropertiesFallback['borderWidth'];
 }
