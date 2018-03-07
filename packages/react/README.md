@@ -73,7 +73,9 @@ Provides all styled component with the Glitz core instance. It's also possible t
   /* Required, provides instance of `new GlitzClient` or `new GlitzServer` */
   glitz={glitz}
   /* Optional, enables deep composition */
-  enableDeepComposition
+  options={{
+    enableDeepComposition: boolean
+  }}
 >
 ```
 
@@ -251,7 +253,7 @@ import App from './App';
 const glitz = new GlitzClient();
 
 render(
-  <GlitzProvider glitz={glitz} enableDeepComposition>
+  <GlitzProvider glitz={glitz} options={{ enableDeepComposition: true }}>
     <App />
   </GlitzProvider>,
   document.getElementById('container'),

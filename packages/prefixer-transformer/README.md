@@ -17,7 +17,7 @@ const className = glitz.injectStyle({
   //     '-ms-flexbox',
   //     '-webkit-flex',
   //     'flex',
-  //   ];
+  //   ],
   // }
 });
 ```
