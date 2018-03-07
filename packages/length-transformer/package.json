@@ -11,7 +11,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/type": "^1.1.0-beta.12"
+    "@glitz/type": "^1.1.1"
   },
   "scripts": {
     "clean": "rimraf cjs es6",
