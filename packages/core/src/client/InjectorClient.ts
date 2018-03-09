@@ -22,7 +22,6 @@ export default class InjectorClient extends Injector {
 
     // Hydrate
     const css = styleElement.textContent;
-    // console.log(styleElement);
     if (css) {
       let rule: RegExpExecArray | null;
       while ((rule = CLASS_RULE_REGEX.exec(css))) {

@@ -23,21 +23,18 @@ export default class Injector {
   ) {
     this.injectClassName = (declarations, pseudo) => {
       const block = parseDeclarationBlock(declarations);
-      if (block) {
-        const dictionary = pseudo ? (pseudoDictionary[pseudo] = pseudoDictionary[pseudo] || {}) : plainDictionary;
-        const existingClassName = dictionary[block];
-        if (existingClassName) {
-          return existingClassName;
-        } else {
-          const className = incrementClassHash();
-          dictionary[block] = className;
-          if (injectNewClassRule) {
-            injectNewClassRule(className, block, pseudo);
-          }
-          return className;
+      const dictionary = pseudo ? (pseudoDictionary[pseudo] = pseudoDictionary[pseudo] || {}) : plainDictionary;
+      const existingClassName = dictionary[block];
+      if (existingClassName) {
+        return existingClassName;
+      } else {
+        const className = incrementClassHash();
+        dictionary[block] = className;
+        if (injectNewClassRule) {
+          injectNewClassRule(className, block, pseudo);
         }
+        return className;
       }
-      return '';
     };
 
     this.injectKeyframes = declarationList => {
@@ -46,20 +43,17 @@ export default class Injector {
         const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
         blockList += formatRule(identifier, keyframeBlock);
       }
-      if (blockList) {
-        const existingName = keyframesDictionary[blockList];
-        if (existingName) {
-          return existingName;
-        } else {
-          const name = incrementKeyframesHash();
-          keyframesDictionary[blockList] = name;
-          if (injectNewKeyframesRule) {
-            injectNewKeyframesRule(name, blockList);
-          }
-          return name;
+      const existingName = keyframesDictionary[blockList];
+      if (existingName) {
+        return existingName;
+      } else {
+        const name = incrementKeyframesHash();
+        keyframesDictionary[blockList] = name;
+        if (injectNewKeyframesRule) {
+          injectNewKeyframesRule(name, blockList);
         }
+        return name;
       }
-      return '';
     };
 
     this.injectFontFace = original => {
@@ -78,20 +72,17 @@ export default class Injector {
       }
 
       const block = parseDeclarationBlock(declarations);
-      if (block) {
-        const existingClassName = fontFaceDictionary[block];
-        if (existingClassName) {
-          return existingClassName;
-        } else {
-          const name = incrementFontFaceHash();
-          fontFaceDictionary[block] = name;
-          if (injectNewFontFaceRule) {
-            injectNewFontFaceRule(name, block);
-          }
-          return name;
+      const existingClassName = fontFaceDictionary[block];
+      if (existingClassName) {
+        return existingClassName;
+      } else {
+        const name = incrementFontFaceHash();
+        fontFaceDictionary[block] = name;
+        if (injectNewFontFaceRule) {
+          injectNewFontFaceRule(name, block);
         }
+        return name;
       }
-      return '';
     };
   }
 }
