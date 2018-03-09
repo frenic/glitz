@@ -45,15 +45,11 @@ export function parseDeclaration(property: keyof Properties, value?: string | nu
   return '';
 }
 
-const uppercaseRegex = /[A-Z]/g;
-const prefixRegex = /^(ms|moz|webkit)/;
+const hyphenateRegex = /(?:^(ms|moz|webkit))|[A-Z]/g;
 const propertyCache: { [property: string]: string } = {};
 
 export function hyphenateProperty(property: string) {
   return property in propertyCache
     ? propertyCache[property]
-    : (propertyCache[property] = property
-        .replace(uppercaseRegex, '-$&')
-        .replace(prefixRegex, '-$&')
-        .toLowerCase());
+    : (propertyCache[property] = property.replace(hyphenateRegex, '-$&').toLowerCase());
 }
