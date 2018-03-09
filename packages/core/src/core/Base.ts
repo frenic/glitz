@@ -243,12 +243,16 @@ export default class Base<TStyle extends Style> {
             return classNames;
           };
 
-    const reducer = (result: Index, style: TStyle) => resolve(style, result);
-
     this.injectStyle = (styles: TStyle | TStyle[]) => {
-      const result = Array.isArray(styles)
-        ? styles.length > 1 ? styles.reduceRight(reducer, {}) : resolve(styles[0] || {})
-        : resolve(styles);
+      const result: Index = {};
+
+      if (Array.isArray(styles)) {
+        for (let i = styles.length - 1; i >= 0; i--) {
+          resolve(styles[i], result);
+        }
+      } else {
+        resolve(styles, result);
+      }
 
       const classNames = inject(result);
 
