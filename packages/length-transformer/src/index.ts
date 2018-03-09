@@ -1,46 +1,49 @@
 import * as Glitz from '@glitz/type';
 import * as CSS from 'csstype';
 
+export type Unit =
+  | 'cap'
+  | 'ch'
+  | 'em'
+  | 'ex'
+  | 'ic'
+  | 'lh'
+  | 'rem'
+  | 'rlh'
+  | 'vh'
+  | 'vw'
+  | 'vi'
+  | 'vb'
+  | 'vmin'
+  | 'vmax'
+  | 'px'
+  | 'cm'
+  | 'mm'
+  | 'Q'
+  | 'in'
+  | 'pc'
+  | 'pt';
+
 export type Options = {
-  unit?:
-    | 'cap'
-    | 'ch'
-    | 'em'
-    | 'ex'
-    | 'ic'
-    | 'lh'
-    | 'rem'
-    | 'rlh'
-    | 'vh'
-    | 'vw'
-    | 'vi'
-    | 'vb'
-    | 'vmin'
-    | 'vmax'
-    | 'px'
-    | 'cm'
-    | 'mm'
-    | 'Q'
-    | 'in'
-    | 'pc'
-    | 'pt';
-};
+  defaultUnit?: Unit;
+} & { [property in keyof Glitz.Properties]?: Unit };
 
 export function createNumberToLengthTransformer(options: Options = {}) {
-  const unit = options.unit || 'px';
+  const defaultUnit = options.defaultUnit || 'px';
   return (original: Glitz.UntransformedProperties): Glitz.Properties => {
     const declarations: Glitz.Properties = {};
     let property: keyof Glitz.Properties;
     for (property in original) {
+      const propertyUnit = options[property];
       let value = original[property];
-      if (ignoredLengthProperties.indexOf(property) === -1) {
+      if (propertyUnit || ignoredLengthDefaultProperties.indexOf(property) === -1) {
         if (typeof value === 'number' && value !== 0) {
-          value = value + unit;
+          value = value + (propertyUnit || defaultUnit);
         } else if (Array.isArray(value)) {
           const values = [];
           for (const entry of value) {
             if (typeof entry === 'number' && entry !== 0) {
-              values.push(entry + unit);
+              values.push(entry + (propertyUnit || defaultUnit));
             } else {
               values.push(entry);
             }
@@ -56,7 +59,7 @@ export function createNumberToLengthTransformer(options: Options = {}) {
 
 export default createNumberToLengthTransformer();
 
-const ignoredLengthProperties = [
+const ignoredLengthDefaultProperties = [
   'borderImageOutset',
   'borderImageWidth',
   'lineHeight',
