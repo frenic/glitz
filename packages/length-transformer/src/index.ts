@@ -38,10 +38,9 @@ export function createNumberToLengthTransformer(options: Options = {}) {
     const declarations: Glitz.Properties = {};
     let property: keyof Glitz.Properties;
     for (property in original) {
-      const propertyUnit = options[property];
       let value = original[property];
 
-      if (propertyUnit || lengthSafeProperties.indexOf(property) !== -1) {
+      if (property in options || lengthSafeProperties.indexOf(property) !== -1) {
         if (Array.isArray(value)) {
           const values = [];
 
