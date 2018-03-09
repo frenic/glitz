@@ -17,6 +17,7 @@ At this moment, there's officially only [React bindings](https://github.com/fren
 
 ## Table of content
 
+* [Table of content](#table-of-content)
 * [Getting started](#getting-started)
 * [Features](#features)
   * [Pseudos](#pseudos)
@@ -46,6 +47,7 @@ At this moment, there's officially only [React bindings](https://github.com/fren
     * [`query`](#query)
 * [Playground](#playground)
 * [Prefixer](#prefixer)
+* [Number as length](#number-as-length)
 * [Atomic](#atomic)
 
 ## Getting started
@@ -344,21 +346,15 @@ Default: `undefined`
 
 Transform or hook into the injected style. The transform function will receive an object with `string | number | Array<string | number>` as values and expects the same in return. Have in mind that the transformer will receive each unique declaration only ones. The same unique declaration will later use a cached result and will never again reach the transformer.
 
+There's two official transformers to [vendor prefix style](#prefixer) and to convert [numbers to length](#number-as-length).
+
+To use multiple transformers, use the `compose` function:
+
 ```ts
 import GlitzClient, { compose } from '@glitz/core';
 import prefixer from '@glitz/prefixer-transformer';
-
-function numberToRemTransformer(style) {
-  for (const property in style) {
-    const value = style[property];
-    if (typeof value === 'number') {
-      style[property] = value + 'rem';
-    }
-  }
-  return style;
-}
-
-const glitz = new GlitzClient(null, { transformer: compose(prefixer, numberToRemTransformer) });
+import numberToLength from '@glitz/length-transformer';
+const glitz = new GlitzClient(null, { transformer: compose(prefixer, numberToLength) });
 ```
 
 #### `options.mediaOrder`
@@ -471,7 +467,27 @@ const className = glitz.injectStyle({
   //     '-ms-flexbox',
   //     '-webkit-flex',
   //     'flex',
-  //   ];
+  //   ],
+  // }
+});
+```
+
+## Number as length
+
+The [`@glitz/length-transformer`](https://github.com/frenic/glitz/tree/master/packages/length-transformer) converts numbers to lengths for certain properties.
+
+```ts
+import GlitzClient from '@glitz/core';
+import numberToLength from '@glitz/length-transformer';
+const glitz = new GlitzClient(null, { transformer: numberToLength });
+
+const className = glitz.injectStyle({
+  height: 10,
+  width: [100, 'max-content'],
+  // Will be transformed into:
+  // {
+  //   height: '10px',
+  //   width: ['100px', 'max-content'],
   // }
 });
 ```
