@@ -124,6 +124,7 @@ describe('server', () => {
     expect(server.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
     expect(server.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
     expect(server.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
+    expect(server.injectStyle({ animationName: 'some-thing' })).toBe('c');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects font face rule', () => {
@@ -189,6 +190,12 @@ describe('server', () => {
         },
       }),
     ).toBe('c');
+
+    expect(
+      server.injectStyle({
+        fontFamily: 'sans-serif',
+      }),
+    ).toBe('d');
 
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });

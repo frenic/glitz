@@ -50,6 +50,8 @@ exports[`client injects font face rule 4`] = `".b {font-family: b;}"`;
 
 exports[`client injects font face rule 5`] = `".c {font-family: b,sans-serif;}"`;
 
+exports[`client injects font face rule 6`] = `".d {font-family: sans-serif;}"`;
+
 exports[`client injects keyframes rule 1`] = `
 "@keyframes a { 
   from {color: red;} 
@@ -67,6 +69,8 @@ exports[`client injects keyframes rule 3`] = `
 `;
 
 exports[`client injects keyframes rule 4`] = `".b {animation-name: b;}"`;
+
+exports[`client injects keyframes rule 5`] = `".c {animation-name: some-thing;}"`;
 
 exports[`client injects media rule 1`] = `".c {color: red;}"`;
 

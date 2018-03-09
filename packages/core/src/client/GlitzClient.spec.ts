@@ -255,6 +255,11 @@ describe('client', () => {
     expect(sheet.cssRules[3].cssText).toMatchSnapshot();
 
     expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
+
+    expect(client.injectStyle({ animationName: 'some-thing' })).toBe('c');
+
+    expect(sheet.cssRules).toHaveLength(5);
+    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
   });
   it('injects font face rule', () => {
     const style = createStyle();
@@ -333,6 +338,15 @@ describe('client', () => {
 
     expect(sheet.cssRules).toHaveLength(5);
     expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        fontFamily: 'sans-serif',
+      }),
+    ).toBe('d');
+
+    expect(sheet.cssRules).toHaveLength(6);
+    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
   });
   it('injects different combinations', () => {
     const style1 = createStyle();

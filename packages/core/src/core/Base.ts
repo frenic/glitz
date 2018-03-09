@@ -59,7 +59,7 @@ export default class Base<TStyle extends Style> {
           const declarations = getIndex(result, media, pseudo);
 
           if (!(property in declarations)) {
-            if (property === ANIMATION_NAME) {
+            if (property === ANIMATION_NAME && !(isPrimitive(value) || Array.isArray(value))) {
               if (transformer) {
                 const list: PropertiesList = {};
                 for (const identifier in value as UntransformedPropertiesList) {
@@ -71,7 +71,7 @@ export default class Base<TStyle extends Style> {
               value = injector().injectKeyframes(value as PropertiesList);
             }
 
-            if (property === FONT_FAMILY) {
+            if (property === FONT_FAMILY && !isPrimitive(value)) {
               const families = ([] as Array<string | FontFace>).concat(value as
                 | string
                 | FontFace
