@@ -28,12 +28,12 @@ export type Options = {
 
 export function createNumberToLengthTransformer(options: Options = {}) {
   const unit = options.unit || 'px';
-  return (original: Glitz.Properties): Glitz.Properties => {
+  return (original: Glitz.UntransformedProperties): Glitz.Properties => {
     const declarations: Glitz.Properties = {};
     let property: keyof Glitz.Properties;
     for (property in original) {
       let value = original[property];
-      if (lengthProperties.indexOf(property) !== -1) {
+      if (ignoredLengthProperties.indexOf(property) === -1) {
         if (typeof value === 'number' && value !== 0) {
           value = value + unit;
         } else if (Array.isArray(value)) {
@@ -56,56 +56,20 @@ export function createNumberToLengthTransformer(options: Options = {}) {
 
 export default createNumberToLengthTransformer();
 
-const lengthProperties = [
-  'blockSize',
-  'borderSpacing',
-  'bottom',
-  'columnWidth',
-  'flexBasis',
-  'height',
-  'inlineSize',
-  'left',
-  'letterSpacing',
-  'lineHeightStep',
-  'marginBlockEnd',
-  'marginBlockStart',
-  'marginBottom',
-  'marginInlineEnd',
-  'marginInlineStart',
-  'marginLeft',
-  'marginRight',
-  'marginTop',
-  'maxBlockSize',
-  'maxHeight',
-  'maxInlineSize',
-  'maxWidth',
-  'minBlockSize',
-  'minHeight',
-  'minInlineSize',
-  'minInlineSize',
-  'minWidth',
-  'offsetBlockEnd',
-  'offsetBlockStart',
-  'offsetInlineEnd',
-  'offsetInlineStart',
-  'outlineOffset',
-  'paddingBlockEnd',
-  'paddingBlockStart',
-  'paddingBottom',
-  'paddingInlineEnd',
-  'paddingInlineStart',
-  'paddingLeft',
-  'paddingRight',
-  'paddingTop',
-  'perspective',
-  'right',
-  'top',
-  'verticalAlign',
-  'width',
-  'margin',
-  'padding',
-  'webkitBoxReflect',
-  'webkitTextStrokeWidth',
+const ignoredLengthProperties = [
+  'borderImageOutset',
+  'borderImageWidth',
+  'lineHeight',
+  'maskBorderOutset',
+  'maskBorderWidth',
+  'objectPosition',
+  'offsetAnchor',
+  'tabSize',
+  'columns',
+  'flex',
+  'webkitMaskPosition',
+  'webkitMaskPositionX',
+  'webkitMaskPositionY',
 ];
 
 declare module '@glitz/type' {
