@@ -30,27 +30,31 @@ export type Options = {
 
 export function createNumberToLengthTransformer(options: Options = {}) {
   const defaultUnit = options.defaultUnit || 'px';
+
+  const convert = <TValue>(property: keyof Glitz.Properties, value: TValue) =>
+    typeof value === 'number' && value !== 0 ? value + (options[property] || defaultUnit) : value;
+
   return (original: Glitz.UntransformedProperties): Glitz.Properties => {
     const declarations: Glitz.Properties = {};
     let property: keyof Glitz.Properties;
     for (property in original) {
       const propertyUnit = options[property];
       let value = original[property];
-      if (propertyUnit || ignoredLengthDefaultProperties.indexOf(property) === -1) {
-        if (typeof value === 'number' && value !== 0) {
-          value = value + (propertyUnit || defaultUnit);
-        } else if (Array.isArray(value)) {
+
+      if (propertyUnit || lengthSafeProperties.indexOf(property) !== -1) {
+        if (Array.isArray(value)) {
           const values = [];
+
           for (const entry of value) {
-            if (typeof entry === 'number' && entry !== 0) {
-              values.push(entry + (propertyUnit || defaultUnit));
-            } else {
-              values.push(entry);
-            }
+            values.push(convert(property, entry));
           }
+
           value = values;
+        } else {
+          value = convert(property, value);
         }
       }
+
       declarations[property] = value;
     }
     return declarations;
@@ -59,20 +63,114 @@ export function createNumberToLengthTransformer(options: Options = {}) {
 
 export default createNumberToLengthTransformer();
 
-const ignoredLengthDefaultProperties = [
-  'borderImageOutset',
-  'borderImageWidth',
-  'lineHeight',
-  'maskBorderOutset',
-  'maskBorderWidth',
-  'objectPosition',
-  'offsetAnchor',
-  'tabSize',
-  'columns',
-  'flex',
-  'webkitMaskPosition',
-  'webkitMaskPositionX',
-  'webkitMaskPositionY',
+const lengthSafeProperties = [
+  'background',
+  'backgroundPosition',
+  'backgroundPositionX',
+  'backgroundPositionY',
+  'backgroundSize',
+  'blockSize',
+  'border',
+  'borderBlockEnd',
+  'borderBlockEndWidth',
+  'borderBlockStart',
+  'borderBlockStartWidth',
+  'borderBottom',
+  'borderBottomLeftRadius',
+  'borderBottomRightRadius',
+  'borderBottomWidth',
+  'borderInlineEnd',
+  'borderInlineEndWidth',
+  'borderInlineStart',
+  'borderInlineStartWidth',
+  'borderLeft',
+  'borderLeftWidth',
+  'borderRadius',
+  'borderRight',
+  'borderRightWidth',
+  'borderSpacing',
+  'borderTop',
+  'borderTopLeftRadius',
+  'borderTopRightRadius',
+  'borderTopWidth',
+  'borderWidth',
+  'bottom',
+  'boxShadow',
+  'columnGap',
+  'columnRule',
+  'columnRuleWidth',
+  'columnWidth',
+  'flexBasis',
+  'fontSize',
+  'gridAutoColumns',
+  'gridAutoRows',
+  'gridColumnGap',
+  'gridGap',
+  'gridRowGap',
+  'gridTemplateColumns',
+  'gridTemplateRows',
+  'height',
+  'inlineSize',
+  'left',
+  'letterSpacing',
+  'lineHeightStep',
+  'margin',
+  'marginBlockEnd',
+  'marginBlockStart',
+  'marginBottom',
+  'marginInlineEnd',
+  'marginInlineStart',
+  'marginLeft',
+  'marginRight',
+  'marginTop',
+  'mask',
+  'maskPosition',
+  'maskSize',
+  'maxBlockSize',
+  'maxHeight',
+  'maxInlineSize',
+  'maxWidth',
+  'minBlockSize',
+  'minHeight',
+  'minInlineSize',
+  'minWidth',
+  'offset',
+  'offsetBlockEnd',
+  'offsetBlockStart',
+  'offsetDistance',
+  'offsetInlineEnd',
+  'offsetInlineStart',
+  'offsetPosition',
+  'outline',
+  'outlineOffset',
+  'outlineWidth',
+  'padding',
+  'paddingBlockEnd',
+  'paddingBlockStart',
+  'paddingBottom',
+  'paddingInlineEnd',
+  'paddingInlineStart',
+  'paddingLeft',
+  'paddingRight',
+  'paddingTop',
+  'perspective',
+  'perspectiveOrigin',
+  'right',
+  'scrollSnapCoordinate',
+  'scrollSnapDestination',
+  'shapeMargin',
+  'textIndent',
+  'textShadow',
+  'top',
+  'transformOrigin',
+  'verticalAlign',
+  'webkitBorderBefore',
+  'webkitBorderBeforeWidth',
+  'webkitBoxReflect',
+  'webkitTextStroke',
+  'webkitTextStrokeWidth',
+  'width',
+  'wordSpacing',
 ];
 
 declare module '@glitz/type' {

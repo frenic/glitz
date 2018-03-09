@@ -13,8 +13,9 @@ describe('number to unit', () => {
         columns: 1,
         lineHeight: 1,
         left: 0,
+        order: 1,
       }),
-    ).toBe('a b c d e f');
+    ).toBe('a b c d e f g');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects atomic style with numeric values as rem', () => {
@@ -30,8 +31,9 @@ describe('number to unit', () => {
         columns: 1,
         lineHeight: 1,
         left: 0,
+        order: 1,
       }),
-    ).toBe('a b c d e f');
+    ).toBe('a b c d e f g');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects non-atomic style with numeric values as px', () => {
@@ -45,6 +47,7 @@ describe('number to unit', () => {
         columns: 1,
         lineHeight: 1,
         left: 0,
+        order: 1,
       }),
     ).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();
@@ -63,6 +66,7 @@ describe('number to unit', () => {
         columns: 1,
         lineHeight: 1,
         left: 0,
+        order: 1,
       }),
     ).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();
