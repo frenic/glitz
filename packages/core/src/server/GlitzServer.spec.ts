@@ -325,6 +325,20 @@ describe('server', () => {
 
     expect(nonAtomic.getStyleMarkup()).toMatchSnapshot();
   });
+  it('deletes properties', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        color: 'red',
+        paddingRight: '10px',
+        padding: { right: undefined },
+        animationName: { from: { color: 'red' }, to: { color: 'green' } },
+        animation: { name: undefined },
+      }),
+    ).toBe('a');
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
       transformer: properties => {

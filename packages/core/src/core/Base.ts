@@ -5,7 +5,7 @@ import { Transformer } from '../types/options';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
-type StyleValue = string | number | FontFace | UntransformedPropertiesList | Array<string | number | FontFace>;
+type StyleValue = Style[keyof Style] | Style;
 
 type CacheValue = {
   [value: string]: string;
@@ -27,15 +27,15 @@ export default class Base<TStyle extends Style> {
     transformer: Transformer | undefined,
     atomic: boolean | undefined,
   ) {
-    const resolve = (style: Style, result = {} as Index, media?: string, pseudo?: string) => {
-      const properties = Object.keys(style);
+    const resolve = (style: Style, result: Index = {}, media?: string, pseudo?: string) => {
+      const properties = Object.keys(style) as Array<keyof Style>;
 
       for (let i = properties.length - 1; i >= 0; i--) {
         let property = properties[i];
-        let value = (style as Index)[property];
+        let value = style[property];
 
         if (process.env.NODE_ENV !== 'production') {
-          if (value === undefined || value === null || !(isPrimitive(value) || typeof value === 'object')) {
+          if (value === null || !(value === undefined || isPrimitive(value) || typeof value === 'object')) {
             console.error('The style property `%s` was has to be a string, number or object, was %O', property, value);
           }
           if (typeof value === 'object' && Object.keys(value).length === 0) {
@@ -55,35 +55,43 @@ export default class Base<TStyle extends Style> {
           property = FONT_FAMILY;
         }
 
-        if (isPrimitive(value) || Array.isArray(value) || property === ANIMATION_NAME || property === FONT_FAMILY) {
+        if (
+          value === undefined ||
+          isPrimitive(value) ||
+          Array.isArray(value) ||
+          property === ANIMATION_NAME ||
+          property === FONT_FAMILY
+        ) {
           const declarations = getIndex(result, media, pseudo);
 
           if (!(property in declarations)) {
-            if (property === ANIMATION_NAME && !(isPrimitive(value) || Array.isArray(value))) {
-              if (transformer) {
-                const list: PropertiesList = {};
-                for (const identifier in value as UntransformedPropertiesList) {
-                  list[identifier] = transformer((value as UntransformedPropertiesList)[identifier]);
+            if (typeof value === 'object') {
+              if (property === ANIMATION_NAME) {
+                if (transformer) {
+                  const list: PropertiesList = {};
+                  for (const identifier in value as UntransformedPropertiesList) {
+                    list[identifier] = transformer((value as UntransformedPropertiesList)[identifier]);
+                  }
+                  value = list;
                 }
-                value = list;
+
+                value = injector().injectKeyframes(value as PropertiesList);
               }
 
-              value = injector().injectKeyframes(value as PropertiesList);
-            }
-
-            if (property === FONT_FAMILY && !isPrimitive(value)) {
-              const families = ([] as Array<string | FontFace>).concat(value as
-                | string
-                | FontFace
-                | Array<string | FontFace>);
-              let names = '';
-              for (const family of families) {
-                if (names) {
-                  names += ',';
+              if (property === FONT_FAMILY) {
+                const families = ([] as Array<string | FontFace>).concat(value as
+                  | string
+                  | FontFace
+                  | Array<string | FontFace>);
+                let names = '';
+                for (const family of families) {
+                  if (names) {
+                    names += ',';
+                  }
+                  names += isPrimitive(family) ? family : injector().injectFontFace(family);
                 }
-                names += isPrimitive(family) ? family : injector().injectFontFace(family);
+                value = names;
               }
-              value = names;
             }
 
             declarations[property] = value;
@@ -94,7 +102,7 @@ export default class Base<TStyle extends Style> {
         // Media or pseudo
         if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
           resolve(
-            value,
+            value as Style,
             result,
             property[0] === MEDIA_IDENTIFIER ? property : media,
             property[0] === PSEUDO_IDENTIFIER ? (pseudo || '') + property : pseudo,
@@ -122,6 +130,7 @@ export default class Base<TStyle extends Style> {
           const longhandValue = (value as Index)[extension];
 
           if (
+            longhandValue === undefined ||
             isPrimitive(longhandValue) ||
             Array.isArray(longhandValue) ||
             // Objects are only valid for `animation.name` and `font.family`
@@ -167,15 +176,20 @@ export default class Base<TStyle extends Style> {
     const cache: Index<CacheValue> = {};
 
     const inject =
-      // Atomic as default
       atomic === false
-        ? (style: Index, media?: string, pseudo?: string) => {
+        ? // Non-atomic style
+          (style: Index, media?: string, pseudo?: string) => {
             let classNames = '';
             const keys = Object.keys(style);
             const blocks: { [property: string]: Index } = {};
 
             for (let i = keys.length - 1; i >= 0; i--) {
               const key = keys[i];
+
+              if (style[key] === undefined) {
+                continue;
+              }
+
               const object =
                 key[0] === MEDIA_IDENTIFIER || key[0] === PSEUDO_IDENTIFIER
                   ? // Media or pseudo
@@ -200,7 +214,8 @@ export default class Base<TStyle extends Style> {
 
             return classNames;
           }
-        : (style: Index, media?: string, pseudo?: string) => {
+        : // Atomic style
+          (style: Index, media?: string, pseudo?: string) => {
             let classNames = '';
             const properties = Object.keys(style);
             const index = getIndex(cache, media, pseudo);
@@ -208,6 +223,10 @@ export default class Base<TStyle extends Style> {
             for (let i = properties.length - 1; i >= 0; i--) {
               const property = properties[i];
               const value = style[property];
+
+              if (value === undefined) {
+                continue;
+              }
 
               // Media or pseudo
               if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {

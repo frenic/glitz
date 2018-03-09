@@ -10,6 +10,8 @@ exports[`client applies transformer 2`] = `".a {-moz-appearance: none; appearanc
 
 exports[`client applies transformer 3`] = `".b {animation-name: a;}"`;
 
+exports[`client deletes properties 1`] = `".a {color: red;}"`;
+
 exports[`client injects atomic rules 1`] = `".a {color: red;}"`;
 
 exports[`client injects atomic rules 2`] = `".b {background-color: green;}"`;

@@ -533,6 +533,25 @@ describe('client', () => {
     expect(sheet2.cssRules[0].cssText).toMatchSnapshot();
     expect(sheet2.cssRules[1].cssText).toMatchSnapshot();
   });
+  it('deletes properties', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>([style]);
+
+    expect(
+      client.injectStyle({
+        color: 'red',
+        paddingRight: '10px',
+        padding: { right: undefined },
+        animationName: { from: { color: 'red' }, to: { color: 'green' } },
+        animation: { name: undefined },
+      }),
+    ).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
   it('hydrates plain rule', () => {
     const style = createStyle(null, '.a{color:red}.b{color:green}');
     const client = new GlitzClient<TestStyle>([style]);
