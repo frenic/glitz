@@ -17,7 +17,9 @@ const glitz2 = new GlitzClient(null, { transformer: createNumberToLengthTransfor
 
 const c: string = glitz2.injectStyle({ width: 1, height: [1, 'max-content'], padding: { left: 1 } });
 
-const glitz3 = new GlitzClient(null, { transformer: createNumberToLengthTransformer({ lineHeight: 'em' }) });
+const glitz3 = new GlitzClient(null, {
+  transformer: createNumberToLengthTransformer({ animationDuration: 'ms', lineHeight: 'em' }),
+});
 
 const d: string = glitz3.injectStyle({ lineHeight: 2 });
 

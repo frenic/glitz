@@ -25,9 +25,12 @@ export type Unit =
   | 'pc'
   | 'pt';
 
+export type TimeProperties = 'animationDelay' | 'animationDuration' | 'transitionDelay' | 'transitionDuration';
+
 export type Options = {
   defaultUnit?: Unit;
-} & { [property in keyof Glitz.Properties]?: Unit };
+} & { [property in keyof Glitz.Omit<Glitz.Properties, TimeProperties>]?: Unit } &
+  { [property in TimeProperties]?: 'ms' | 's' };
 
 export function createNumberToLengthTransformer(options: Options = {}) {
   const defaultUnit = options.defaultUnit || 'px';
