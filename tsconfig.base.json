@@ -5,12 +5,10 @@
     "strict": true,
     "jsx": "preserve",
     "declaration": true,
-    "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
     "lib": ["es6", "dom"],
     "experimentalDecorators": true
   }
