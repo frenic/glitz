@@ -44,7 +44,7 @@ Unit used for [length safe properties](#safe-properties) (that doesn't accept nu
 
 ```ts
 import GlitzClient, { compose } from '@glitz/core';
-import { createNumberToLengthTransformer } from '@glitz/prefixer-transformer';
+import { createNumberToLengthTransformer } from '@glitz/length-transformer';
 const glitz = new GlitzClient(null, { transformer: createNumberToLengthTransformer({ defaultUnit: 'rem' }) });
 
 const className = glitz.injectStyle({
@@ -70,7 +70,7 @@ Override any CSS property with unit. Works with properties that excepts both num
 
 ```ts
 import GlitzClient, { compose } from '@glitz/core';
-import prefixer from '@glitz/prefixer-transformer';
+import { createNumberToLengthTransformer } from '@glitz/length-transformer';
 const glitz = new GlitzClient(null, {
   transformer: createNumberToLengthTransformer({ lineHeight: 'em', fontSize: 'rem' }),
 });
