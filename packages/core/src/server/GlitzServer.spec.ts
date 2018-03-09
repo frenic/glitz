@@ -320,10 +320,21 @@ describe('server', () => {
   });
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
-      transformer: properties => ({ ...(properties as Properties), mozAppearance: 'none' }),
+      transformer: properties => {
+        const prefixed: Properties = {};
+        let property: keyof Properties;
+        for (property in properties) {
+          const value = properties[property];
+          if (property === 'appearance' && value === 'none') {
+            prefixed.mozAppearance = value;
+          }
+          prefixed[property] = properties[property];
+        }
+        return prefixed;
+      },
     });
 
-    expect(server.injectStyle({ appearance: 'none' })).toBe('a');
+    expect(server.injectStyle({ appearance: 'none', animationName: { from: { appearance: 'none' } } })).toBe('a b');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
 });

@@ -60,6 +60,14 @@ export default class Base<TStyle extends Style> {
 
           if (!(property in declarations)) {
             if (property === ANIMATION_NAME) {
+              if (transformer) {
+                const list: PropertiesList = {};
+                for (const identifier in value as UntransformedPropertiesList) {
+                  list[identifier] = transformer((value as UntransformedPropertiesList)[identifier]);
+                }
+                value = list;
+              }
+
               value = injector().injectKeyframes(value as PropertiesList);
             }
 

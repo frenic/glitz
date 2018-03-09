@@ -602,15 +602,28 @@ describe('client', () => {
   it('applies transformer', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>([style], {
-      transformer: properties => ({ ...(properties as Properties), mozAppearance: 'none' }),
+      transformer: properties => {
+        const prefixed: Properties = {};
+        let property: keyof Properties;
+        for (property in properties) {
+          const value = properties[property];
+          if (property === 'appearance' && value === 'none') {
+            prefixed.mozAppearance = value;
+          }
+          prefixed[property] = properties[property];
+        }
+        return prefixed;
+      },
     });
 
-    expect(client.injectStyle({ appearance: 'none' })).toBe('a');
+    expect(client.injectStyle({ appearance: 'none', animationName: { from: { appearance: 'none' } } })).toBe('a b');
 
     const sheet = style.sheet as CSSStyleSheet;
 
-    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules).toHaveLength(3);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
   });
   it('warns with mixed longhand and shorthand', () => {
     const client = new GlitzClient<TestStyle>();

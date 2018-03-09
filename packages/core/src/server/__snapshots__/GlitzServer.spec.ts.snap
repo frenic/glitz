@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`server applies transformer 1`] = `"<style class=\\"__glitz__\\">.a{appearance:none;-moz-appearance:none}</style>"`;
+exports[`server applies transformer 1`] = `"<style class=\\"__glitz__\\">.a{-moz-appearance:none;appearance:none}.b{animation-name:a}@keyframes a{from{-moz-appearance:none;appearance:none}}</style>"`;
 
 exports[`server injects atomic rules 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b{background-color:green}.c{border-color:blue}.d:hover{color:red}.e:hover{background-color:green}.f:hover{border-color:blue}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.g{color:red}.h{background-color:green}.i{border-color:blue}</style>"`;
 
