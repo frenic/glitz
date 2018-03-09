@@ -2,7 +2,7 @@
   "name": "@glitz/length-transformer",
   "version": "1.0.0-beta.3",
   "main": "./cjs/index.js",
-  "module": "./es6/index.js",
+  "module": "./jsm/index.js",
   "types": "./es6/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
@@ -14,12 +14,13 @@
     "@glitz/type": "^1.1.2-beta.0"
   },
   "scripts": {
-    "clean": "rimraf cjs es6",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index",
+    "clean": "rimraf cjs es6 jsm",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index --jsm index",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
     "cjs/",
-    "es6/"
+    "es6/",
+    "jsm/"
   ]
 }

@@ -1,5 +1,6 @@
 import * as Glitz from '@glitz/type';
 import * as CSS from 'csstype';
+import lengthSafeProperties from './properties';
 
 export type Unit =
   | 'cap'
@@ -34,13 +35,13 @@ export function createNumberToLengthTransformer(options: Options = {}) {
   const convert = <TValue>(property: keyof Glitz.Properties, value: TValue) =>
     typeof value === 'number' && value !== 0 ? value + (options[property] || defaultUnit) : value;
 
-  return (original: Glitz.UntransformedProperties): Glitz.Properties => {
-    const declarations: Glitz.Properties = {};
+  return (declarations: Glitz.UntransformedProperties): Glitz.Properties => {
+    const transformed: Glitz.Properties = {};
     let property: keyof Glitz.Properties;
-    for (property in original) {
-      let value = original[property];
+    for (property in declarations) {
+      let value = declarations[property];
 
-      if (property in options || lengthSafeProperties.indexOf(property) !== -1) {
+      if (property in options || lengthSafeProperties[property] === 0) {
         if (Array.isArray(value)) {
           const values = [];
 
@@ -54,123 +55,13 @@ export function createNumberToLengthTransformer(options: Options = {}) {
         }
       }
 
-      declarations[property] = value;
+      transformed[property] = value;
     }
-    return declarations;
+    return transformed;
   };
 }
 
 export default createNumberToLengthTransformer();
-
-const lengthSafeProperties = [
-  'background',
-  'backgroundPosition',
-  'backgroundPositionX',
-  'backgroundPositionY',
-  'backgroundSize',
-  'blockSize',
-  'border',
-  'borderBlockEnd',
-  'borderBlockEndWidth',
-  'borderBlockStart',
-  'borderBlockStartWidth',
-  'borderBottom',
-  'borderBottomLeftRadius',
-  'borderBottomRightRadius',
-  'borderBottomWidth',
-  'borderInlineEnd',
-  'borderInlineEndWidth',
-  'borderInlineStart',
-  'borderInlineStartWidth',
-  'borderLeft',
-  'borderLeftWidth',
-  'borderRadius',
-  'borderRight',
-  'borderRightWidth',
-  'borderSpacing',
-  'borderTop',
-  'borderTopLeftRadius',
-  'borderTopRightRadius',
-  'borderTopWidth',
-  'borderWidth',
-  'bottom',
-  'boxShadow',
-  'columnGap',
-  'columnRule',
-  'columnRuleWidth',
-  'columnWidth',
-  'flexBasis',
-  'fontSize',
-  'gridAutoColumns',
-  'gridAutoRows',
-  'gridColumnGap',
-  'gridGap',
-  'gridRowGap',
-  'gridTemplateColumns',
-  'gridTemplateRows',
-  'height',
-  'inlineSize',
-  'left',
-  'letterSpacing',
-  'lineHeightStep',
-  'margin',
-  'marginBlockEnd',
-  'marginBlockStart',
-  'marginBottom',
-  'marginInlineEnd',
-  'marginInlineStart',
-  'marginLeft',
-  'marginRight',
-  'marginTop',
-  'mask',
-  'maskPosition',
-  'maskSize',
-  'maxBlockSize',
-  'maxHeight',
-  'maxInlineSize',
-  'maxWidth',
-  'minBlockSize',
-  'minHeight',
-  'minInlineSize',
-  'minWidth',
-  'offset',
-  'offsetBlockEnd',
-  'offsetBlockStart',
-  'offsetDistance',
-  'offsetInlineEnd',
-  'offsetInlineStart',
-  'offsetPosition',
-  'outline',
-  'outlineOffset',
-  'outlineWidth',
-  'padding',
-  'paddingBlockEnd',
-  'paddingBlockStart',
-  'paddingBottom',
-  'paddingInlineEnd',
-  'paddingInlineStart',
-  'paddingLeft',
-  'paddingRight',
-  'paddingTop',
-  'perspective',
-  'perspectiveOrigin',
-  'right',
-  'scrollSnapCoordinate',
-  'scrollSnapDestination',
-  'shapeMargin',
-  'textIndent',
-  'textShadow',
-  'top',
-  'transformOrigin',
-  'verticalAlign',
-  'webkitBorderBefore',
-  'webkitBorderBeforeWidth',
-  'webkitBoxReflect',
-  'webkitTextStroke',
-  'webkitTextStrokeWidth',
-  'width',
-  'wordSpacing',
-];
 
 declare module '@glitz/type' {
   interface TransformerProperties {
@@ -274,11 +165,6 @@ declare module '@glitz/type' {
     top?: CSS.PropertiesFallback<string | number>['top'];
     transformOrigin?: CSS.PropertiesFallback<string | number>['transformOrigin'];
     verticalAlign?: CSS.PropertiesFallback<string | number>['verticalAlign'];
-    webkitBorderBefore?: CSS.PropertiesFallback<string | number>['webkitBorderBefore'];
-    webkitBorderBeforeWidth?: CSS.PropertiesFallback<string | number>['webkitBorderBeforeWidth'];
-    webkitBoxReflect?: CSS.PropertiesFallback<string | number>['webkitBoxReflect'];
-    webkitTextStroke?: CSS.PropertiesFallback<string | number>['webkitTextStroke'];
-    webkitTextStrokeWidth?: CSS.PropertiesFallback<string | number>['webkitTextStrokeWidth'];
     width?: CSS.PropertiesFallback<string | number>['width'];
     wordSpacing?: CSS.PropertiesFallback<string | number>['wordSpacing'];
   }
