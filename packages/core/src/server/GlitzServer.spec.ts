@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { Properties, Style } from '@glitz/type';
 import GlitzServer from './GlitzServer';
 
 interface TestStyle extends Style {
@@ -320,7 +320,7 @@ describe('server', () => {
   });
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
-      transformer: properties => ({ ...properties, mozAppearance: 'none' }),
+      transformer: properties => ({ ...(properties as Properties), mozAppearance: 'none' }),
     });
 
     expect(server.injectStyle({ appearance: 'none' })).toBe('a');

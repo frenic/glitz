@@ -1,11 +1,11 @@
-import { FontFace, PropertiesList, Style } from '@glitz/type';
+import { FontFace, PropertiesList, Style, UntransformedPropertiesList } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
-type StyleValue = string | number | FontFace | PropertiesList | Array<string | number | FontFace>;
+type StyleValue = string | number | FontFace | UntransformedPropertiesList | Array<string | number | FontFace>;
 
 type CacheValue = {
   [value: string]: string;

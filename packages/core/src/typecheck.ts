@@ -1,11 +1,11 @@
 // tslint:disable
 
-import { Properties } from '@glitz/type';
+import { Properties, UntransformedProperties } from '@glitz/type';
 import GlitzClient, { Options, compose, pseudo, media } from './index';
 import GlitzServer from './server';
 
-const transformer: (input: Properties) => Properties = input => input;
-const transformers: (input: Properties) => Properties = compose(transformer, transformer);
+const transformer: (input: UntransformedProperties) => Properties = input => ({ display: input.display });
+const transformers = compose(transformer, transformer);
 
 const options: Options = {
   transformer,

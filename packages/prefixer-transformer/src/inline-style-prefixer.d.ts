@@ -1,5 +1,5 @@
 declare module 'inline-style-prefixer/static' {
-  import { Properties } from '@glitz/type';
-  const prefixAll: (style: Properties) => Properties;
+  import { Properties, UntransformedProperties } from '@glitz/type';
+  const prefixAll: (style: UntransformedProperties) => Properties;
   export = prefixAll;
 }

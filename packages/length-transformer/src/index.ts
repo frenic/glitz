@@ -109,90 +109,113 @@ const lengthProperties = [
 ];
 
 declare module '@glitz/type' {
-  export interface Properties {
-    blockSize?: CSS.StandardLonghandPropertiesFallback<string | number>['blockSize'];
-    borderSpacing?: CSS.StandardLonghandPropertiesFallback<string | number>['borderSpacing'];
-    bottom?: CSS.StandardLonghandPropertiesFallback<string | number>['bottom'];
-    columnWidth?: CSS.StandardLonghandPropertiesFallback<string | number>['columnWidth'];
-    flexBasis?: CSS.StandardLonghandPropertiesFallback<string | number>['flexBasis'];
-    height?: CSS.StandardLonghandPropertiesFallback<string | number>['height'];
-    inlineSize?: CSS.StandardLonghandPropertiesFallback<string | number>['inlineSize'];
-    left?: CSS.StandardLonghandPropertiesFallback<string | number>['left'];
-    letterSpacing?: CSS.StandardLonghandPropertiesFallback<string | number>['letterSpacing'];
-    lineHeightStep?: CSS.StandardLonghandPropertiesFallback<string | number>['lineHeightStep'];
-    marginBlockEnd?: CSS.StandardLonghandPropertiesFallback<string | number>['marginBlockEnd'];
-    marginBlockStart?: CSS.StandardLonghandPropertiesFallback<string | number>['marginBlockStart'];
-    marginBottom?: CSS.StandardLonghandPropertiesFallback<string | number>['marginBottom'];
-    marginInlineEnd?: CSS.StandardLonghandPropertiesFallback<string | number>['marginInlineEnd'];
-    marginInlineStart?: CSS.StandardLonghandPropertiesFallback<string | number>['marginInlineStart'];
-    marginLeft?: CSS.StandardLonghandPropertiesFallback<string | number>['marginLeft'];
-    marginRight?: CSS.StandardLonghandPropertiesFallback<string | number>['marginRight'];
-    marginTop?: CSS.StandardLonghandPropertiesFallback<string | number>['marginTop'];
-    maxBlockSize?: CSS.StandardLonghandPropertiesFallback<string | number>['maxBlockSize'];
-    maxHeight?: CSS.StandardLonghandPropertiesFallback<string | number>['maxHeight'];
-    maxInlineSize?: CSS.StandardLonghandPropertiesFallback<string | number>['maxInlineSize'];
-    maxWidth?: CSS.StandardLonghandPropertiesFallback<string | number>['maxWidth'];
-    minBlockSize?: CSS.StandardLonghandPropertiesFallback<string | number>['minBlockSize'];
-    minHeight?: CSS.StandardLonghandPropertiesFallback<string | number>['minHeight'];
-    minInlineSize?: CSS.StandardLonghandPropertiesFallback<string | number>['minInlineSize'];
-    minWidth?: CSS.StandardLonghandPropertiesFallback<string | number>['minWidth'];
-    offsetBlockEnd?: CSS.StandardLonghandPropertiesFallback<string | number>['offsetBlockEnd'];
-    offsetBlockStart?: CSS.StandardLonghandPropertiesFallback<string | number>['offsetBlockStart'];
-    offsetInlineEnd?: CSS.StandardLonghandPropertiesFallback<string | number>['offsetInlineEnd'];
-    offsetInlineStart?: CSS.StandardLonghandPropertiesFallback<string | number>['offsetInlineStart'];
-    outlineOffset?: CSS.StandardLonghandPropertiesFallback<string | number>['outlineOffset'];
-    paddingBlockEnd?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingBlockEnd'];
-    paddingBlockStart?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingBlockStart'];
-    paddingBottom?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingBottom'];
-    paddingInlineEnd?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingInlineEnd'];
-    paddingInlineStart?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingInlineStart'];
-    paddingLeft?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingLeft'];
-    paddingRight?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingRight'];
-    paddingTop?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingTop'];
-    perspective?: CSS.StandardLonghandPropertiesFallback<string | number>['perspective'];
-    right?: CSS.StandardLonghandPropertiesFallback<string | number>['right'];
-    top?: CSS.StandardLonghandPropertiesFallback<string | number>['top'];
-    verticalAlign?: CSS.StandardLonghandPropertiesFallback<string | number>['verticalAlign'];
-    width?: CSS.StandardLonghandPropertiesFallback<string | number>['width'];
-    webkitBoxReflect?: CSS.VendorPropertiesFallback<string | number>['webkitBoxReflect'];
-    webkitTextStrokeWidth?: CSS.VendorPropertiesFallback<string | number>['webkitTextStrokeWidth'];
-  }
-
-  interface FeaturedProperties {
-    border?: BorderWithNumber;
-    flex?: FlexWithNumber;
-    margin?: MarginWithNumber;
-    padding?: PaddingWithNumber;
-    outline?: OutlineWithNumber;
-  }
-
-  interface BorderWithNumber extends Glitz.Omit<Glitz.Border, 'spacing'> {
-    spacing?: CSS.StandardLonghandPropertiesFallback<string | number>['borderSpacing'];
-  }
-
-  interface FlexWithNumber extends Glitz.Omit<Glitz.Flex, 'basis'> {
-    basis?: CSS.StandardLonghandPropertiesFallback<string | number>['flexBasis'];
-  }
-
-  interface MarginWithNumber {
-    x?: CSS.StandardLonghandPropertiesFallback<string | number>['marginLeft'];
-    y?: CSS.StandardLonghandPropertiesFallback<string | number>['marginTop'];
-    top?: CSS.StandardLonghandPropertiesFallback<string | number>['marginTop'];
-    right?: CSS.StandardLonghandPropertiesFallback<string | number>['marginRight'];
-    bottom?: CSS.StandardLonghandPropertiesFallback<string | number>['marginBottom'];
-    left?: CSS.StandardLonghandPropertiesFallback<string | number>['marginLeft'];
-  }
-
-  interface OutlineWithNumber extends Glitz.Omit<Glitz.Outline, 'offset'> {
-    offset?: CSS.StandardLonghandPropertiesFallback<string | number>['outlineOffset'];
-  }
-
-  interface PaddingWithNumber {
-    x?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingLeft'];
-    y?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingTop'];
-    top?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingTop'];
-    right?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingRight'];
-    bottom?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingBottom'];
-    left?: CSS.StandardLonghandPropertiesFallback<string | number>['paddingLeft'];
+  interface TransformerProperties {
+    background?: CSS.PropertiesFallback<string | number>['background'];
+    backgroundPosition?: CSS.PropertiesFallback<string | number>['backgroundPosition'];
+    backgroundPositionX?: CSS.PropertiesFallback<string | number>['backgroundPositionX'];
+    backgroundPositionY?: CSS.PropertiesFallback<string | number>['backgroundPositionY'];
+    backgroundSize?: CSS.PropertiesFallback<string | number>['backgroundSize'];
+    blockSize?: CSS.PropertiesFallback<string | number>['blockSize'];
+    border?: CSS.PropertiesFallback<string | number>['border'];
+    borderBlockEnd?: CSS.PropertiesFallback<string | number>['borderBlockEnd'];
+    borderBlockEndWidth?: CSS.PropertiesFallback<string | number>['borderBlockEndWidth'];
+    borderBlockStart?: CSS.PropertiesFallback<string | number>['borderBlockStart'];
+    borderBlockStartWidth?: CSS.PropertiesFallback<string | number>['borderBlockStartWidth'];
+    borderBottom?: CSS.PropertiesFallback<string | number>['borderBottom'];
+    borderBottomLeftRadius?: CSS.PropertiesFallback<string | number>['borderBottomLeftRadius'];
+    borderBottomRightRadius?: CSS.PropertiesFallback<string | number>['borderBottomRightRadius'];
+    borderBottomWidth?: CSS.PropertiesFallback<string | number>['borderBottomWidth'];
+    borderInlineEnd?: CSS.PropertiesFallback<string | number>['borderInlineEnd'];
+    borderInlineEndWidth?: CSS.PropertiesFallback<string | number>['borderInlineEndWidth'];
+    borderInlineStart?: CSS.PropertiesFallback<string | number>['borderInlineStart'];
+    borderInlineStartWidth?: CSS.PropertiesFallback<string | number>['borderInlineStartWidth'];
+    borderLeft?: CSS.PropertiesFallback<string | number>['borderLeft'];
+    borderLeftWidth?: CSS.PropertiesFallback<string | number>['borderLeftWidth'];
+    borderRadius?: CSS.PropertiesFallback<string | number>['borderRadius'];
+    borderRight?: CSS.PropertiesFallback<string | number>['borderRight'];
+    borderRightWidth?: CSS.PropertiesFallback<string | number>['borderRightWidth'];
+    borderSpacing?: CSS.PropertiesFallback<string | number>['borderSpacing'];
+    borderTop?: CSS.PropertiesFallback<string | number>['borderTop'];
+    borderTopLeftRadius?: CSS.PropertiesFallback<string | number>['borderTopLeftRadius'];
+    borderTopRightRadius?: CSS.PropertiesFallback<string | number>['borderTopRightRadius'];
+    borderTopWidth?: CSS.PropertiesFallback<string | number>['borderTopWidth'];
+    borderWidth?: CSS.PropertiesFallback<string | number>['borderWidth'];
+    bottom?: CSS.PropertiesFallback<string | number>['bottom'];
+    boxShadow?: CSS.PropertiesFallback<string | number>['boxShadow'];
+    columnGap?: CSS.PropertiesFallback<string | number>['columnGap'];
+    columnRule?: CSS.PropertiesFallback<string | number>['columnRule'];
+    columnRuleWidth?: CSS.PropertiesFallback<string | number>['columnRuleWidth'];
+    columnWidth?: CSS.PropertiesFallback<string | number>['columnWidth'];
+    flexBasis?: CSS.PropertiesFallback<string | number>['flexBasis'];
+    fontSize?: CSS.PropertiesFallback<string | number>['fontSize'];
+    gridAutoColumns?: CSS.PropertiesFallback<string | number>['gridAutoColumns'];
+    gridAutoRows?: CSS.PropertiesFallback<string | number>['gridAutoRows'];
+    gridColumnGap?: CSS.PropertiesFallback<string | number>['gridColumnGap'];
+    gridGap?: CSS.PropertiesFallback<string | number>['gridGap'];
+    gridRowGap?: CSS.PropertiesFallback<string | number>['gridRowGap'];
+    gridTemplateColumns?: CSS.PropertiesFallback<string | number>['gridTemplateColumns'];
+    gridTemplateRows?: CSS.PropertiesFallback<string | number>['gridTemplateRows'];
+    height?: CSS.PropertiesFallback<string | number>['height'];
+    inlineSize?: CSS.PropertiesFallback<string | number>['inlineSize'];
+    left?: CSS.PropertiesFallback<string | number>['left'];
+    letterSpacing?: CSS.PropertiesFallback<string | number>['letterSpacing'];
+    lineHeightStep?: CSS.PropertiesFallback<string | number>['lineHeightStep'];
+    margin?: CSS.PropertiesFallback<string | number>['margin'];
+    marginBlockEnd?: CSS.PropertiesFallback<string | number>['marginBlockEnd'];
+    marginBlockStart?: CSS.PropertiesFallback<string | number>['marginBlockStart'];
+    marginBottom?: CSS.PropertiesFallback<string | number>['marginBottom'];
+    marginInlineEnd?: CSS.PropertiesFallback<string | number>['marginInlineEnd'];
+    marginInlineStart?: CSS.PropertiesFallback<string | number>['marginInlineStart'];
+    marginLeft?: CSS.PropertiesFallback<string | number>['marginLeft'];
+    marginRight?: CSS.PropertiesFallback<string | number>['marginRight'];
+    marginTop?: CSS.PropertiesFallback<string | number>['marginTop'];
+    mask?: CSS.PropertiesFallback<string | number>['mask'];
+    maskPosition?: CSS.PropertiesFallback<string | number>['maskPosition'];
+    maskSize?: CSS.PropertiesFallback<string | number>['maskSize'];
+    maxBlockSize?: CSS.PropertiesFallback<string | number>['maxBlockSize'];
+    maxHeight?: CSS.PropertiesFallback<string | number>['maxHeight'];
+    maxInlineSize?: CSS.PropertiesFallback<string | number>['maxInlineSize'];
+    maxWidth?: CSS.PropertiesFallback<string | number>['maxWidth'];
+    minBlockSize?: CSS.PropertiesFallback<string | number>['minBlockSize'];
+    minHeight?: CSS.PropertiesFallback<string | number>['minHeight'];
+    minInlineSize?: CSS.PropertiesFallback<string | number>['minInlineSize'];
+    minWidth?: CSS.PropertiesFallback<string | number>['minWidth'];
+    offset?: CSS.PropertiesFallback<string | number>['offset'];
+    offsetBlockEnd?: CSS.PropertiesFallback<string | number>['offsetBlockEnd'];
+    offsetBlockStart?: CSS.PropertiesFallback<string | number>['offsetBlockStart'];
+    offsetDistance?: CSS.PropertiesFallback<string | number>['offsetDistance'];
+    offsetInlineEnd?: CSS.PropertiesFallback<string | number>['offsetInlineEnd'];
+    offsetInlineStart?: CSS.PropertiesFallback<string | number>['offsetInlineStart'];
+    offsetPosition?: CSS.PropertiesFallback<string | number>['offsetPosition'];
+    outline?: CSS.PropertiesFallback<string | number>['outline'];
+    outlineOffset?: CSS.PropertiesFallback<string | number>['outlineOffset'];
+    outlineWidth?: CSS.PropertiesFallback<string | number>['outlineWidth'];
+    padding?: CSS.PropertiesFallback<string | number>['padding'];
+    paddingBlockEnd?: CSS.PropertiesFallback<string | number>['paddingBlockEnd'];
+    paddingBlockStart?: CSS.PropertiesFallback<string | number>['paddingBlockStart'];
+    paddingBottom?: CSS.PropertiesFallback<string | number>['paddingBottom'];
+    paddingInlineEnd?: CSS.PropertiesFallback<string | number>['paddingInlineEnd'];
+    paddingInlineStart?: CSS.PropertiesFallback<string | number>['paddingInlineStart'];
+    paddingLeft?: CSS.PropertiesFallback<string | number>['paddingLeft'];
+    paddingRight?: CSS.PropertiesFallback<string | number>['paddingRight'];
+    paddingTop?: CSS.PropertiesFallback<string | number>['paddingTop'];
+    perspective?: CSS.PropertiesFallback<string | number>['perspective'];
+    perspectiveOrigin?: CSS.PropertiesFallback<string | number>['perspectiveOrigin'];
+    right?: CSS.PropertiesFallback<string | number>['right'];
+    scrollSnapCoordinate?: CSS.PropertiesFallback<string | number>['scrollSnapCoordinate'];
+    scrollSnapDestination?: CSS.PropertiesFallback<string | number>['scrollSnapDestination'];
+    shapeMargin?: CSS.PropertiesFallback<string | number>['shapeMargin'];
+    textIndent?: CSS.PropertiesFallback<string | number>['textIndent'];
+    textShadow?: CSS.PropertiesFallback<string | number>['textShadow'];
+    top?: CSS.PropertiesFallback<string | number>['top'];
+    transformOrigin?: CSS.PropertiesFallback<string | number>['transformOrigin'];
+    verticalAlign?: CSS.PropertiesFallback<string | number>['verticalAlign'];
+    webkitBorderBefore?: CSS.PropertiesFallback<string | number>['webkitBorderBefore'];
+    webkitBorderBeforeWidth?: CSS.PropertiesFallback<string | number>['webkitBorderBeforeWidth'];
+    webkitBoxReflect?: CSS.PropertiesFallback<string | number>['webkitBoxReflect'];
+    webkitTextStroke?: CSS.PropertiesFallback<string | number>['webkitTextStroke'];
+    webkitTextStrokeWidth?: CSS.PropertiesFallback<string | number>['webkitTextStrokeWidth'];
+    width?: CSS.PropertiesFallback<string | number>['width'];
+    wordSpacing?: CSS.PropertiesFallback<string | number>['wordSpacing'];
   }
 }

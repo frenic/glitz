@@ -1,6 +1,6 @@
-import { Properties } from '@glitz/type';
+import { Properties, UntransformedProperties } from '@glitz/type';
 
-export type Transformer = (style: Properties) => Properties;
+export type Transformer = (declarations: UntransformedProperties) => Properties;
 
 export type Options = {
   atomic?: boolean;

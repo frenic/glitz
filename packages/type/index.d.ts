@@ -2,208 +2,215 @@ import * as CSS from 'csstype';
 
 export interface Style extends FeaturedProperties, PseudoMap {}
 
-export interface Properties extends CSS.StandardLonghandPropertiesFallback, CSS.VendorPropertiesFallback {}
+export interface Properties extends CSS.PropertiesFallback<string | 0> {}
+
+export interface UntransformedProperties extends Omit<Properties, keyof TransformerProperties>, TransformerProperties {}
+
+// Override properties using module augmentation
+interface TransformerProperties {}
 
 export interface FeaturedProperties
-  extends Omit<Properties, keyof ExtendedProperties>,
-    ExtendedProperties,
-    Omit<CSS.StandardShorthandPropertiesFallback, keyof ShorthandProperties>,
-    ShorthandProperties {
+  extends Omit<UntransformedProperties, keyof ExtendedProperties>,
+    ExtendedProperties {
   '@keyframes'?: PropertiesList;
   '@font-face'?: FontFace;
 }
 
 export interface ExtendedProperties {
-  animationName?: PropertiesList | Properties['animationName'];
-  fontFamily?: FontFamily;
+  // Keyframes
+  animationName?: PropertiesList | UntransformedProperties['animationName'];
+
+  // Font face
+  fontFamily?: FontFamilyProperty;
+
+  // Shorthand objects
+  animation?: AnimationProperty;
+  background?: BackgroundProperty;
+  border?: BorderProperty;
+  borderBottom?: BorderBottomProperty;
+  borderImage?: BorderImageProperty;
+  borderLeft?: BorderLeftProperty;
+  borderRight?: BorderRightProperty;
+  borderTop?: BorderTopProperty;
+  flex?: FlexProperty;
+  font?: FontProperty;
+  grid?: GridProperty;
+  maskBorder?: MaskBorderProperty;
+  mask?: MaskProperty;
+  margin?: MarginProperty;
+  offset?: OffsetProperty;
+  outline?: OutlineProperty;
+  padding?: PaddingProperty;
+  transition?: TransitionProperty;
 }
 
-export interface ShorthandProperties {
-  animation?: Animation;
-  background?: Background;
-  border?: Border;
-  borderBottom?: BorderBottom;
-  borderImage?: BorderImage;
-  borderLeft?: BorderLeft;
-  borderRight?: BorderRight;
-  borderTop?: BorderTop;
-  flex?: Flex;
-  font?: Font;
-  grid?: Grid;
-  maskBorder?: MaskBorder;
-  mask?: Mask;
-  margin?: Margin;
-  offset?: Offset;
-  outline?: Outline;
-  padding?: Padding;
-  transition?: Transition;
+interface AnimationProperty {
+  delay?: UntransformedProperties['animationDelay'];
+  direction?: UntransformedProperties['animationDirection'];
+  duration?: UntransformedProperties['animationDuration'];
+  fillMode?: UntransformedProperties['animationFillMode'];
+  iterationCount?: UntransformedProperties['animationIterationCount'];
+  name?: PropertiesList | UntransformedProperties['animationName'];
+  playState?: UntransformedProperties['animationPlayState'];
+  timingFunction?: UntransformedProperties['animationTimingFunction'];
 }
 
-interface Animation {
-  delay?: CSS.StandardLonghandPropertiesFallback['animationDelay'];
-  direction?: CSS.StandardLonghandPropertiesFallback['animationDirection'];
-  duration?: CSS.StandardLonghandPropertiesFallback['animationDuration'];
-  fillMode?: CSS.StandardLonghandPropertiesFallback['animationFillMode'];
-  iterationCount?: CSS.StandardLonghandPropertiesFallback['animationIterationCount'];
-  name?: PropertiesList | CSS.StandardLonghandPropertiesFallback['animationName'];
-  playState?: CSS.StandardLonghandPropertiesFallback['animationPlayState'];
-  timingFunction?: CSS.StandardLonghandPropertiesFallback['animationTimingFunction'];
+interface BackgroundProperty {
+  attachment?: UntransformedProperties['backgroundAttachment'];
+  blendMode?: UntransformedProperties['backgroundBlendMode'];
+  clip?: UntransformedProperties['backgroundClip'];
+  color?: UntransformedProperties['backgroundColor'];
+  image?: UntransformedProperties['backgroundImage'];
+  origin?: UntransformedProperties['backgroundOrigin'];
+  position?: UntransformedProperties['backgroundPosition'];
+  positionX?: UntransformedProperties['backgroundPositionX'];
+  positionY?: UntransformedProperties['backgroundPositionY'];
+  repeat?: UntransformedProperties['backgroundRepeat'];
+  size?: UntransformedProperties['backgroundSize'];
 }
 
-interface Background {
-  attachment?: CSS.StandardLonghandPropertiesFallback['backgroundAttachment'];
-  blendMode?: CSS.StandardLonghandPropertiesFallback['backgroundBlendMode'];
-  clip?: CSS.StandardLonghandPropertiesFallback['backgroundClip'];
-  color?: CSS.StandardLonghandPropertiesFallback['backgroundColor'];
-  image?: CSS.StandardLonghandPropertiesFallback['backgroundImage'];
-  origin?: CSS.StandardLonghandPropertiesFallback['backgroundOrigin'];
-  position?: CSS.StandardLonghandPropertiesFallback['backgroundPosition'];
-  repeat?: CSS.StandardLonghandPropertiesFallback['backgroundRepeat'];
-  size?: CSS.StandardLonghandPropertiesFallback['backgroundSize'];
+interface BorderProperty {
+  collapse?: UntransformedProperties['borderCollapse'];
+  color?: UntransformedProperties['borderColor'];
+  blockEnd?: UntransformedProperties['borderBlockEnd'];
+  blockStart?: UntransformedProperties['borderBlockStart'];
+  inlineEnd?: UntransformedProperties['borderInlineEnd'];
+  inlineStart?: UntransformedProperties['borderInlineStart'];
+  radius?: UntransformedProperties['borderRadius'];
+  spacing?: UntransformedProperties['borderSpacing'];
+  style?: UntransformedProperties['borderStyle'];
+  width?: UntransformedProperties['borderWidth'];
 }
 
-interface Border {
-  collapse?: CSS.StandardLonghandPropertiesFallback['borderCollapse'];
-  color?: CSS.StandardShorthandPropertiesFallback['borderColor'];
-  blockEnd?: CSS.StandardShorthandPropertiesFallback['borderBlockEnd'];
-  blockStart?: CSS.StandardShorthandPropertiesFallback['borderBlockStart'];
-  inlineEnd?: CSS.StandardShorthandPropertiesFallback['borderInlineEnd'];
-  inlineStart?: CSS.StandardShorthandPropertiesFallback['borderInlineStart'];
-  radius?: CSS.StandardShorthandPropertiesFallback['borderRadius'];
-  spacing?: CSS.StandardLonghandPropertiesFallback['borderSpacing'];
-  style?: CSS.StandardShorthandPropertiesFallback['borderStyle'];
-  width?: CSS.StandardShorthandPropertiesFallback['borderWidth'];
+interface BorderBottomProperty {
+  color?: UntransformedProperties['borderBottomColor'];
+  style?: UntransformedProperties['borderBottomStyle'];
+  width?: UntransformedProperties['borderBottomWidth'];
 }
 
-interface BorderBottom {
-  color?: CSS.StandardLonghandPropertiesFallback['borderBottomColor'];
-  style?: CSS.StandardLonghandPropertiesFallback['borderBottomStyle'];
-  width?: CSS.StandardLonghandPropertiesFallback['borderBottomWidth'];
+interface BorderImageProperty {
+  outset?: UntransformedProperties['borderImageOutset'];
+  repeat?: UntransformedProperties['borderImageRepeat'];
+  slice?: UntransformedProperties['borderImageSlice'];
+  source?: UntransformedProperties['borderImageSource'];
+  width?: UntransformedProperties['borderImageWidth'];
 }
 
-interface BorderImage {
-  outset?: CSS.StandardLonghandPropertiesFallback['borderImageOutset'];
-  repeat?: CSS.StandardLonghandPropertiesFallback['borderImageRepeat'];
-  slice?: CSS.StandardLonghandPropertiesFallback['borderImageSlice'];
-  source?: CSS.StandardLonghandPropertiesFallback['borderImageSource'];
-  width?: CSS.StandardLonghandPropertiesFallback['borderImageWidth'];
+interface BorderLeftProperty {
+  color?: UntransformedProperties['borderLeftColor'];
+  style?: UntransformedProperties['borderLeftStyle'];
+  width?: UntransformedProperties['borderLeftWidth'];
 }
 
-interface BorderLeft {
-  color?: CSS.StandardLonghandPropertiesFallback['borderLeftColor'];
-  style?: CSS.StandardLonghandPropertiesFallback['borderLeftStyle'];
-  width?: CSS.StandardLonghandPropertiesFallback['borderLeftWidth'];
+interface BorderRightProperty {
+  color?: UntransformedProperties['borderRightColor'];
+  style?: UntransformedProperties['borderRightStyle'];
+  width?: UntransformedProperties['borderRightWidth'];
 }
 
-interface BorderRight {
-  color?: CSS.StandardLonghandPropertiesFallback['borderRightColor'];
-  style?: CSS.StandardLonghandPropertiesFallback['borderRightStyle'];
-  width?: CSS.StandardLonghandPropertiesFallback['borderRightWidth'];
+interface BorderTopProperty {
+  color?: UntransformedProperties['borderTopColor'];
+  style?: UntransformedProperties['borderTopStyle'];
+  width?: UntransformedProperties['borderTopWidth'];
 }
 
-interface BorderTop {
-  color?: CSS.StandardLonghandPropertiesFallback['borderTopColor'];
-  style?: CSS.StandardLonghandPropertiesFallback['borderTopStyle'];
-  width?: CSS.StandardLonghandPropertiesFallback['borderTopWidth'];
+interface FlexProperty {
+  basis?: UntransformedProperties['flexBasis'];
+  direction?: UntransformedProperties['flexDirection'];
+  grow?: UntransformedProperties['flexGrow'];
+  shrink?: UntransformedProperties['flexShrink'];
+  wrap?: UntransformedProperties['flexWrap'];
 }
 
-interface Flex {
-  basis?: CSS.StandardLonghandPropertiesFallback['flexBasis'];
-  direction?: CSS.StandardLonghandPropertiesFallback['flexDirection'];
-  grow?: CSS.StandardLonghandPropertiesFallback['flexGrow'];
-  shrink?: CSS.StandardLonghandPropertiesFallback['flexShrink'];
-  wrap?: CSS.StandardLonghandPropertiesFallback['flexWrap'];
+interface FontProperty {
+  family?: FontFamilyProperty;
+  featureSettings?: UntransformedProperties['fontFeatureSettings'];
+  kerning?: UntransformedProperties['fontKerning'];
+  languageOverride?: UntransformedProperties['fontLanguageOverride'];
+  variationSettings?: UntransformedProperties['fontVariationSettings'];
+  size?: UntransformedProperties['fontSize'];
+  sizeAdjust?: UntransformedProperties['fontSizeAdjust'];
+  stretch?: UntransformedProperties['fontStretch'];
+  style?: UntransformedProperties['fontStyle'];
+  synthesis?: UntransformedProperties['fontSynthesis'];
+  variant?: UntransformedProperties['fontVariant'];
+  weight?: UntransformedProperties['fontWeight'];
 }
 
-interface Font {
-  family?: FontFamily;
-  featureSettings?: CSS.StandardLonghandPropertiesFallback['fontFeatureSettings'];
-  kerning?: CSS.StandardLonghandPropertiesFallback['fontKerning'];
-  languageOverride?: CSS.StandardLonghandPropertiesFallback['fontLanguageOverride'];
-  variationSettings?: CSS.StandardLonghandPropertiesFallback['fontVariationSettings'];
-  size?: CSS.StandardLonghandPropertiesFallback['fontSize'];
-  sizeAdjust?: CSS.StandardLonghandPropertiesFallback['fontSizeAdjust'];
-  stretch?: CSS.StandardLonghandPropertiesFallback['fontStretch'];
-  style?: CSS.StandardLonghandPropertiesFallback['fontStyle'];
-  synthesis?: CSS.StandardLonghandPropertiesFallback['fontSynthesis'];
-  variant?: CSS.StandardLonghandPropertiesFallback['fontVariant'];
-  weight?: CSS.StandardLonghandPropertiesFallback['fontWeight'];
+interface GridProperty {
+  autoColumns?: UntransformedProperties['gridAutoColumns'];
+  autoFlow?: UntransformedProperties['gridAutoFlow'];
+  autoRows?: UntransformedProperties['gridAutoRows'];
+  column?: UntransformedProperties['gridColumn'];
+  columnGap?: UntransformedProperties['gridColumnGap'];
+  row?: UntransformedProperties['gridRow'];
+  rowGap?: UntransformedProperties['gridRowGap'];
+  template?: UntransformedProperties['gridTemplate'];
 }
 
-interface Grid {
-  autoColumns?: CSS.StandardLonghandPropertiesFallback['gridAutoColumns'];
-  autoFlow?: CSS.StandardLonghandPropertiesFallback['gridAutoFlow'];
-  autoRows?: CSS.StandardLonghandPropertiesFallback['gridAutoRows'];
-  column?: CSS.StandardShorthandPropertiesFallback['gridColumn'];
-  columnGap?: CSS.StandardLonghandPropertiesFallback['gridColumnGap'];
-  row?: CSS.StandardShorthandPropertiesFallback['gridRow'];
-  rowGap?: CSS.StandardLonghandPropertiesFallback['gridRowGap'];
-  template?: CSS.StandardShorthandPropertiesFallback['gridTemplate'];
+interface MaskBorderProperty {
+  mode?: UntransformedProperties['maskBorderMode'];
+  outset?: UntransformedProperties['maskBorderOutset'];
+  repeat?: UntransformedProperties['maskBorderRepeat'];
+  slice?: UntransformedProperties['maskBorderSlice'];
+  source?: UntransformedProperties['maskBorderSource'];
+  width?: UntransformedProperties['maskBorderWidth'];
 }
 
-interface MaskBorder {
-  mode?: CSS.StandardLonghandPropertiesFallback['maskBorderMode'];
-  outset?: CSS.StandardLonghandPropertiesFallback['maskBorderOutset'];
-  repeat?: CSS.StandardLonghandPropertiesFallback['maskBorderRepeat'];
-  slice?: CSS.StandardLonghandPropertiesFallback['maskBorderSlice'];
-  source?: CSS.StandardLonghandPropertiesFallback['maskBorderSource'];
-  width?: CSS.StandardLonghandPropertiesFallback['maskBorderWidth'];
+interface MaskProperty {
+  clip?: UntransformedProperties['maskClip'];
+  composite?: UntransformedProperties['maskComposite'];
+  image?: UntransformedProperties['maskImage'];
+  mode?: UntransformedProperties['maskMode'];
+  origin?: UntransformedProperties['maskOrigin'];
+  position?: UntransformedProperties['maskPosition'];
+  repeat?: UntransformedProperties['maskRepeat'];
+  size?: UntransformedProperties['maskSize'];
+  type?: UntransformedProperties['maskType'];
 }
 
-interface Mask {
-  clip?: CSS.StandardLonghandPropertiesFallback['maskClip'];
-  composite?: CSS.StandardLonghandPropertiesFallback['maskComposite'];
-  image?: CSS.StandardLonghandPropertiesFallback['maskImage'];
-  mode?: CSS.StandardLonghandPropertiesFallback['maskMode'];
-  origin?: CSS.StandardLonghandPropertiesFallback['maskOrigin'];
-  position?: CSS.StandardLonghandPropertiesFallback['maskPosition'];
-  repeat?: CSS.StandardLonghandPropertiesFallback['maskRepeat'];
-  size?: CSS.StandardLonghandPropertiesFallback['maskSize'];
-  type?: CSS.StandardLonghandPropertiesFallback['maskType'];
+interface MarginProperty {
+  x?: UntransformedProperties['marginLeft'];
+  y?: UntransformedProperties['marginTop'];
+  top?: UntransformedProperties['marginTop'];
+  right?: UntransformedProperties['marginRight'];
+  bottom?: UntransformedProperties['marginBottom'];
+  left?: UntransformedProperties['marginLeft'];
 }
 
-interface Margin {
-  x?: CSS.StandardLonghandPropertiesFallback['marginLeft'];
-  y?: CSS.StandardLonghandPropertiesFallback['marginTop'];
-  top?: CSS.StandardLonghandPropertiesFallback['marginTop'];
-  right?: CSS.StandardLonghandPropertiesFallback['marginRight'];
-  bottom?: CSS.StandardLonghandPropertiesFallback['marginBottom'];
-  left?: CSS.StandardLonghandPropertiesFallback['marginLeft'];
+interface OffsetProperty {
+  anchor?: UntransformedProperties['offsetAnchor'];
+  blockEnd?: UntransformedProperties['offsetBlockEnd'];
+  blockStart?: UntransformedProperties['offsetBlockStart'];
+  inlineEnd?: UntransformedProperties['offsetInlineEnd'];
+  inlineStart?: UntransformedProperties['offsetInlineStart'];
+  distance?: UntransformedProperties['offsetDistance'];
+  path?: UntransformedProperties['offsetPath'];
+  position?: UntransformedProperties['offsetPosition'];
+  rotate?: UntransformedProperties['offsetRotate'];
 }
 
-interface Offset {
-  anchor?: CSS.StandardLonghandPropertiesFallback['offsetAnchor'];
-  blockEnd?: CSS.StandardLonghandPropertiesFallback['offsetBlockEnd'];
-  blockStart?: CSS.StandardLonghandPropertiesFallback['offsetBlockStart'];
-  inlineEnd?: CSS.StandardLonghandPropertiesFallback['offsetInlineEnd'];
-  inlineStart?: CSS.StandardLonghandPropertiesFallback['offsetInlineStart'];
-  distance?: CSS.StandardLonghandPropertiesFallback['offsetDistance'];
-  path?: CSS.StandardLonghandPropertiesFallback['offsetPath'];
-  position?: CSS.StandardLonghandPropertiesFallback['offsetPosition'];
-  rotate?: CSS.StandardLonghandPropertiesFallback['offsetRotate'];
+interface OutlineProperty {
+  color?: UntransformedProperties['outlineColor'];
+  offset?: UntransformedProperties['outlineOffset'];
+  style?: UntransformedProperties['outlineStyle'];
+  width?: UntransformedProperties['outlineWidth'];
 }
 
-interface Outline {
-  color?: CSS.StandardLonghandPropertiesFallback['outlineColor'];
-  offset?: CSS.StandardLonghandPropertiesFallback['outlineOffset'];
-  style?: CSS.StandardLonghandPropertiesFallback['outlineStyle'];
-  width?: CSS.StandardLonghandPropertiesFallback['outlineWidth'];
+interface PaddingProperty {
+  x?: UntransformedProperties['paddingLeft'];
+  y?: UntransformedProperties['paddingTop'];
+  top?: UntransformedProperties['paddingTop'];
+  right?: UntransformedProperties['paddingRight'];
+  bottom?: UntransformedProperties['paddingBottom'];
+  left?: UntransformedProperties['paddingLeft'];
 }
 
-interface Padding {
-  x?: CSS.StandardLonghandPropertiesFallback['paddingLeft'];
-  y?: CSS.StandardLonghandPropertiesFallback['paddingTop'];
-  top?: CSS.StandardLonghandPropertiesFallback['paddingTop'];
-  right?: CSS.StandardLonghandPropertiesFallback['paddingRight'];
-  bottom?: CSS.StandardLonghandPropertiesFallback['paddingBottom'];
-  left?: CSS.StandardLonghandPropertiesFallback['paddingLeft'];
-}
-
-interface Transition {
-  delay?: CSS.StandardLonghandPropertiesFallback['transitionDelay'];
-  duration?: CSS.StandardLonghandPropertiesFallback['transitionDuration'];
-  property?: CSS.StandardLonghandPropertiesFallback['transitionProperty'];
-  timingFunction?: CSS.StandardLonghandPropertiesFallback['transitionTimingFunction'];
+interface TransitionProperty {
+  delay?: UntransformedProperties['transitionDelay'];
+  duration?: UntransformedProperties['transitionDuration'];
+  property?: UntransformedProperties['transitionProperty'];
+  timingFunction?: UntransformedProperties['transitionTimingFunction'];
 }
 
 export type PseudoMap = { [P in CSS.SimplePseudos]?: FeaturedProperties & PseudoMap };
@@ -212,7 +219,11 @@ export interface PropertiesList {
   [identifier: string]: Properties;
 }
 
-export type FontFamily =
+export interface UntransformedPropertiesList {
+  [identifier: string]: UntransformedProperties;
+}
+
+export type FontFamilyProperty =
   | FontFace
   | CSS.StandardLonghandProperties['fontFamily']
   | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>;

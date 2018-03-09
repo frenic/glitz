@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { Properties, Style } from '@glitz/type';
 import GlitzClient from './GlitzClient';
 
 interface TestStyle extends Style {
@@ -151,7 +151,7 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>(null, {
       transformer: declaration => {
         count++;
-        return declaration;
+        return declaration as Properties;
       },
     });
 
@@ -602,7 +602,7 @@ describe('client', () => {
   it('applies transformer', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>([style], {
-      transformer: properties => ({ ...properties, mozAppearance: 'none' }),
+      transformer: properties => ({ ...(properties as Properties), mozAppearance: 'none' }),
     });
 
     expect(client.injectStyle({ appearance: 'none' })).toBe('a');
