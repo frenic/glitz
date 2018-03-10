@@ -12,13 +12,13 @@ interface TransformerProperties {}
 export interface FeaturedProperties
   extends Omit<UntransformedProperties, keyof ExtendedProperties>,
     ExtendedProperties {
-  '@keyframes'?: PropertiesList;
+  '@keyframes'?: UntransformedPropertiesList;
   '@font-face'?: FontFace;
 }
 
 export interface ExtendedProperties {
   // Keyframes
-  animationName?: PropertiesList | UntransformedProperties['animationName'];
+  animationName?: UntransformedPropertiesList | UntransformedProperties['animationName'];
 
   // Font face
   fontFamily?: FontFamilyProperty;
@@ -50,7 +50,7 @@ interface AnimationProperty {
   duration?: UntransformedProperties['animationDuration'];
   fillMode?: UntransformedProperties['animationFillMode'];
   iterationCount?: UntransformedProperties['animationIterationCount'];
-  name?: PropertiesList | UntransformedProperties['animationName'];
+  name?: UntransformedPropertiesList | UntransformedProperties['animationName'];
   playState?: UntransformedProperties['animationPlayState'];
   timingFunction?: UntransformedProperties['animationTimingFunction'];
 }
