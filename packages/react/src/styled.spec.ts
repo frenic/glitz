@@ -141,33 +141,75 @@ describe('react styled', () => {
     );
   });
   it('composes style', () => {
-    const StyledComponent = styled.div({ color: 'red', backgroundColor: 'green' });
+    const StyledComponent = styled.div({ color: 'red' });
 
-    const ComposedComponent = styled(
-      props => {
-        return React.createElement(StyledComponent, {
-          css: props.compose(),
-        });
-      },
-      { color: 'black' },
-    );
+    const ComposedComponent1 = styled(props => {
+      return React.createElement(StyledComponent, {
+        css: props.compose({ color: 'green' }),
+      });
+    });
 
-    const root = mount(
+    const root1 = mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponent, {
-          css: { backgroundColor: 'white' },
+        React.createElement(ComposedComponent1),
+      ),
+    );
+
+    const declaration1 = getComputedStyle(root1.getDOMNode());
+
+    expect(declaration1.getPropertyValue('color')).toBe('green');
+
+    const ComposedComponent2 = styled(
+      props => {
+        return React.createElement(StyledComponent, {
+          css: props.compose({ color: 'green' }),
+        });
+      },
+      { color: 'blue' },
+    );
+
+    const root2 = mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ComposedComponent2),
+      ),
+    );
+
+    const declaration2 = getComputedStyle(root2.getDOMNode());
+
+    expect(declaration2.getPropertyValue('color')).toBe('blue');
+
+    const ComposedComponent3 = styled(
+      props => {
+        return React.createElement(StyledComponent, {
+          css: props.compose({ color: 'green' }),
+        });
+      },
+      { color: 'blue' },
+    );
+
+    const root3 = mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ComposedComponent3, {
+          css: { color: 'white' },
         }),
       ),
     );
 
-    const declaration = getComputedStyle(root.getDOMNode());
+    const declaration3 = getComputedStyle(root3.getDOMNode());
 
-    expect(declaration.getPropertyValue('color')).toBe('black');
-    expect(declaration.getPropertyValue('background-color')).toBe('white');
+    expect(declaration3.getPropertyValue('color')).toBe('white');
   });
   it('caches pure style', () => {
     let count = 0;

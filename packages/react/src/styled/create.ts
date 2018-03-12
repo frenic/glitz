@@ -89,7 +89,7 @@ export function create<TProps>(
           return staticStyle;
         }
 
-        const styles = ([] as Style[]).concat(staticStyle, dynamicStyle || [], additionalStyle || []);
+        const styles = ([] as Style[]).concat(additionalStyle || [], staticStyle, dynamicStyle || []);
 
         if (context.glitz.options.enableDeepComposition) {
           return styles;
