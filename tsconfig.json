@@ -8,5 +8,6 @@
       "@glitz/core/server": ["./packages/core/src/server"]
     },
     "noEmit": true
-  }
+  },
+  "exclude": ["packages/core/server/"]
 }
