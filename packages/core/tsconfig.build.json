@@ -4,5 +4,5 @@
     "rootDir": "./src",
     "outDir": "./es6"
   },
-  "exclude": ["**/*.spec.ts", "**/typecheck.ts", "**/typecheck.tsx"]
+  "exclude": ["server/", "**/*.spec.ts", "**/typecheck.ts", "**/typecheck.tsx"]
 }

@@ -8,7 +8,6 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "skipLibCheck": true,
     "lib": ["es6", "dom"],
     "experimentalDecorators": true
   }
