@@ -43,8 +43,6 @@ export function create<TProps>(
     public static [ASSIGN_METHOD](assigningStyle?: Style) {
       return create(inner, assigningStyle ? originalStaticStyle.concat(assigningStyle) : originalStaticStyle);
     }
-    protected apply: () => string | undefined;
-    protected compose: (additionalStyle?: Style) => Style | Style[];
     constructor(props: TProps, context: Context) {
       super(props, context);
 
@@ -62,8 +60,8 @@ export function create<TProps>(
 
       let cache: string | null = null;
 
-      this.apply = () => {
-        const styles: Style | Style[] = this.compose();
+      const apply = (): string | undefined => {
+        const styles: Style | Style[] = compose();
 
         if (!styles) {
           return;
@@ -82,7 +80,7 @@ export function create<TProps>(
         return classNames;
       };
 
-      this.compose = additionalStyle => {
+      const compose = (additionalStyle?: Style): Style | Style[] => {
         const dynamicStyle: Style | Style[] | undefined = this.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
@@ -102,15 +100,15 @@ export function create<TProps>(
         ? () => {
             const passProps: TProps & StyledProps = passingProps(this.props);
 
-            passProps.apply = this.apply;
-            passProps.compose = this.compose;
+            passProps.apply = apply;
+            passProps.compose = compose;
 
             return React.createElement(inner, passProps);
           }
         : () => {
             const passProps: TProps & StyledElementProps = passingProps(this.props);
 
-            passProps.className = passProps.className ? passProps.className + ' ' + this.apply() : this.apply();
+            passProps.className = passProps.className ? passProps.className + ' ' + apply() : apply();
 
             return React.createElement(inner, passProps);
           };
