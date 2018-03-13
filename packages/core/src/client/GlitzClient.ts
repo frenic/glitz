@@ -63,11 +63,13 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       if (process.env.NODE_ENV !== 'production') {
         if (typeof (styleElements as any)[Symbol.iterator] !== 'function') {
           throw new Error(
-            'The argument needs to be an iterable list of style elements like an array or an array-like object (using e.g. `document.getElementsByClassName`, `document.querySelectorAll`)',
+            'The argument passed to `GlitzClient` needs to be an iterable list of style elements like an array or an array-like object (using e.g. `document.getElementsByClassName`, `document.querySelectorAll`)',
           );
         }
         if (styleElements.length === 0) {
-          console.warn('The argument iterable list is empty and wont hydrate any server rendered rules');
+          console.warn(
+            'The argument passed to `GlitzClient` with style elements was empty so there will be no hydrated CSS from the server',
+          );
         }
       }
 

@@ -113,11 +113,12 @@ if (process.env.NODE_ENV !== 'production') {
         for (const longhand of shorthands[property]) {
           if (longhand in hyphenatedProperties) {
             console.error(
-              'Injected style resulting in class name `%s` had a longhand property `%s` mixed with its corresponding shorthand property `%s` in %O which may likely cause some unexpected behavior. Replace `padding` with longhand properties to solve the issue.',
+              'Injected style resulting in class name `%s` had a longhand property `%s` mixed with its corresponding shorthand property `%s` in %O which may likely cause some unexpected behavior. Replace `%s` with longhand properties to solve the issue.',
               classNames,
               hyphenatedProperties[longhand],
               hyphenatedProperties[property],
               object,
+              hyphenatedProperties[property],
             );
           }
         }
