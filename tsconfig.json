@@ -9,5 +9,5 @@
     },
     "noEmit": true
   },
-  "exclude": ["packages/core/server/"]
+  "exclude": ["packages/core/server/", "**/cjs/", "**/esnext/", "**/jsm/"]
 }

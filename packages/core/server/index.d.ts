@@ -1,2 +1,2 @@
-export * from '../es6/server';
-export { default } from '../es6/server';
+export * from '../esnext/server';
+export { default } from '../esnext/server';

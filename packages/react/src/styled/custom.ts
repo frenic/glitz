@@ -1,6 +1,6 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
-import { create, StyledComponent, StyledProps } from './create';
+import create, { StyledComponent, StyledProps } from './create';
 
 export function customStyled<TProps extends StyledProps>(
   component: React.ComponentType<TProps>,

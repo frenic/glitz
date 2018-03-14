@@ -79,10 +79,9 @@ async function build(input, output, type, production) {
         ...require('./tsconfig.base.json').compilerOptions,
         // @ts-ignore
         ...require('./tsconfig.json').compilerOptions,
-        target: type === JSM_TYPE ? 'es6' : 'es5',
+        target: 'es5',
         module: 'es6',
         declaration: false,
-        importHelpers: true,
       }),
       ...(type === CJS_DOUBLE_TYPE
         ? [

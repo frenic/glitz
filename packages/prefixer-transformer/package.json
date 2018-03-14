@@ -2,8 +2,9 @@
   "name": "@glitz/prefixer-transformer",
   "version": "1.1.2",
   "main": "./cjs/index.js",
-  "module": "./es6/index.js",
-  "types": "./es6/index.d.ts",
+  "module": "./jsm/index.js",
+  "esnext": "./esnext/index.js",
+  "types": "./esnext/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
@@ -15,12 +16,13 @@
     "inline-style-prefixer": "^4.0.0"
   },
   "scripts": {
-    "clean": "rimraf cjs es6",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index",
+    "clean": "rimraf cjs esnext jsm",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index --jsm index",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
     "cjs/",
-    "es6/"
+    "esnext/",
+    "jsm"
   ]
 }

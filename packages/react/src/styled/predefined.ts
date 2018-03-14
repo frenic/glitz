@@ -1,5 +1,5 @@
 import { Style } from '@glitz/type';
-import { create } from './create';
+import create from './create';
 import { StyledElementComponents, StyledElementFunctions } from './types';
 
 function createPredefined(component: string) {

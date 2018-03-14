@@ -26,7 +26,7 @@ type InnerType<TProps> = React.ComponentType<TProps & StyledProps> | StyledCompo
 
 const ASSIGN_METHOD = '__GLITZ_ASSIGN';
 
-export function create<TProps>(
+export default function create<TProps>(
   inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
   originalStaticStyle: Style[],
 ): StyledComponent<TProps> {
