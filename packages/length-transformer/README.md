@@ -18,7 +18,9 @@ const className = glitz.injectStyle({
 });
 ```
 
-The default unit is `px` for for [length safe properties](#safe-properties) only. You can create a new transformer using `createNumberToLengthTransformer(options)` with the [`defaultUnit` option](#optionsdefaultunit) if you prefer another unit or [override units](#optionscssproperty) for any other property.
+The default length unit is `px` for [length safe properties](#safe-properties). You can create a new transformer using `createNumberToLengthTransformer(options)` with the [`defaultUnit` option](#optionsdefaultunit) if you prefer another unit or [override units](#optionscssproperty) for any other property.
+
+Numeric time value for `animationDelay`, `animationDuration`, `transitionDelay` and `transitionDuration` are also supported and has `ms` as default unit.
 
 ## Getting started
 
@@ -90,7 +92,7 @@ const className = glitz.injectStyle({
 
 ## Safe properties
 
-The default unit will only transform a specific set of properties because some properties e.g. `lineHeight` accepts both length and numbers. Here's the full list of length safe properties it will transform:
+The default length unit will only transform a specific set of properties because some properties e.g. `lineHeight` accepts both length and numbers. Here's the full list of length safe properties it will transform:
 
 * `bottom`
 * `flexBasis`
@@ -112,6 +114,13 @@ The default unit will only transform a specific set of properties because some p
 * `right`
 * `top`
 * `width`
+
+For these, 'ms' is used as unit instead:
+
+* `animationDelay`
+* `animationDuration`
+* `transitionDelay`
+* `transitionDuration`
 
 _Shorthand objects like `margin: { left: 10 }` will be resolved to `marginLeft: 10` before reaching the transformer, so these values will be transformed as well._
 

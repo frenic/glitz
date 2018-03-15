@@ -1,6 +1,6 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight [_(~2.1KB gz)_](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
+A fast, lightweight [_(~2.3KB gz)_](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
 
 The most basic implementation is really easy. You don't need any config or module loaders to get started.
 
