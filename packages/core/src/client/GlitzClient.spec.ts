@@ -643,7 +643,7 @@ describe('client', () => {
           if (property === 'appearance' && value === 'none') {
             prefixed.mozAppearance = value;
           }
-          prefixed[property] = properties[property];
+          prefixed[property] = properties[property] as Properties[typeof property];
         }
         return prefixed;
       },

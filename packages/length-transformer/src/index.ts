@@ -1,8 +1,8 @@
 import * as Glitz from '@glitz/type';
 import * as CSS from 'csstype';
-import lengthSafeProperties from './properties';
+import { lengthSafeProperties, TimeProperties, timeSafeProperties } from './properties';
 
-export type Unit =
+export type LengthUnit =
   | 'cap'
   | 'ch'
   | 'em'
@@ -25,18 +25,24 @@ export type Unit =
   | 'pc'
   | 'pt';
 
-export type TimeProperties = 'animationDelay' | 'animationDuration' | 'transitionDelay' | 'transitionDuration';
+export type TimeUnit = 'ms' | 's';
 
 export type Options = {
-  defaultUnit?: Unit;
-} & { [property in keyof Glitz.Omit<Glitz.Properties, TimeProperties>]?: Unit } &
-  { [property in TimeProperties]?: 'ms' | 's' };
+  defaultUnit?: LengthUnit;
+} & { [property in keyof Glitz.Omit<Glitz.Properties, TimeProperties>]?: LengthUnit } &
+  { [property in TimeProperties]?: TimeUnit };
+
+const defaultTimeUnit = 'ms';
 
 export function createNumberToLengthTransformer(options: Options = {}) {
-  const defaultUnit = options.defaultUnit || 'px';
+  const defaultLengthUnit = options.defaultUnit || 'px';
 
   const convert = <TValue>(property: keyof Glitz.Properties, value: TValue) =>
-    typeof value === 'number' && value !== 0 ? value + (options[property] || defaultUnit) : value;
+    typeof value === 'number' &&
+    // Don't add unit for `0` lengths
+    !(lengthSafeProperties[property] === 0 && value === 0)
+      ? value + (options[property] || (timeSafeProperties[property] === 0 ? defaultTimeUnit : defaultLengthUnit))
+      : value;
 
   return (declarations: Glitz.UntransformedProperties): Glitz.Properties => {
     const transformed: Glitz.Properties = {};
@@ -44,7 +50,7 @@ export function createNumberToLengthTransformer(options: Options = {}) {
     for (property in declarations) {
       let value = declarations[property];
 
-      if (property in options || lengthSafeProperties[property] === 0) {
+      if (property in options || lengthSafeProperties[property] === 0 || timeSafeProperties[property] === 0) {
         if (Array.isArray(value)) {
           const values = [];
 
@@ -58,7 +64,7 @@ export function createNumberToLengthTransformer(options: Options = {}) {
         }
       }
 
-      transformed[property] = value;
+      transformed[property] = value as Glitz.Properties[typeof property];
     }
     return transformed;
   };
@@ -67,7 +73,10 @@ export function createNumberToLengthTransformer(options: Options = {}) {
 export default createNumberToLengthTransformer();
 
 declare module '@glitz/type' {
+  type NumberWithFallback<T> = T | number | Array<T | number>;
+
   interface TransformerProperties {
+    // Length
     background?: CSS.PropertiesFallback<string | number>['background'];
     backgroundPosition?: CSS.PropertiesFallback<string | number>['backgroundPosition'];
     backgroundPositionX?: CSS.PropertiesFallback<string | number>['backgroundPositionX'];
@@ -170,5 +179,11 @@ declare module '@glitz/type' {
     verticalAlign?: CSS.PropertiesFallback<string | number>['verticalAlign'];
     width?: CSS.PropertiesFallback<string | number>['width'];
     wordSpacing?: CSS.PropertiesFallback<string | number>['wordSpacing'];
+
+    // Time
+    animationDelay?: NumberWithFallback<CSS.Properties['animationDelay']>;
+    animationDuration?: NumberWithFallback<CSS.Properties['animationDuration']>;
+    transitionDelay?: NumberWithFallback<CSS.Properties['transitionDelay']>;
+    transitionDuration?: NumberWithFallback<CSS.Properties['transitionDuration']>;
   }
 }

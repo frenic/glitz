@@ -4,9 +4,13 @@ import GlitzClient from '@glitz/core';
 import numberToLength, { createNumberToLengthTransformer } from './';
 
 const a = numberToLength({
+  // Length
   borderSpacing: 1,
   marginLeft: 1,
   width: 1,
+
+  // Time
+  animationDuration: 1,
 });
 
 const glitz1 = new GlitzClient(null, { transformer: numberToLength });

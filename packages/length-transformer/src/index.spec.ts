@@ -2,7 +2,7 @@ import GlitzServer from '@glitz/core/server';
 import numberToLength, { createNumberToLengthTransformer } from './';
 
 describe('number to unit', () => {
-  it('injects atomic style with numeric values as px', () => {
+  it('injects atomic style with numeric values with default units', () => {
     const server = new GlitzServer({ transformer: numberToLength });
 
     expect(
@@ -14,13 +14,20 @@ describe('number to unit', () => {
         lineHeight: 1,
         left: 0,
         order: 1,
+        animationDuration: 1,
+        transitionDuration: 0,
       }),
-    ).toBe('a b c d e f g');
+    ).toBe('a b c d e f g h i');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
-  it('injects atomic style with numeric values as rem', () => {
+  it('injects atomic style with numeric values with different units', () => {
     const server = new GlitzServer({
-      transformer: createNumberToLengthTransformer({ defaultUnit: 'rem', columns: 'em', paddingLeft: 'px' }),
+      transformer: createNumberToLengthTransformer({
+        defaultUnit: 'rem',
+        columns: 'em',
+        paddingLeft: 'px',
+        animationDuration: 's',
+      }),
     });
 
     expect(
@@ -32,11 +39,13 @@ describe('number to unit', () => {
         lineHeight: 1,
         left: 0,
         order: 1,
+        animationDuration: 1,
+        transitionDuration: 0,
       }),
-    ).toBe('a b c d e f g');
+    ).toBe('a b c d e f g h i');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
-  it('injects non-atomic style with numeric values as px', () => {
+  it('injects non-atomic style with numeric values with default units', () => {
     const server = new GlitzServer({ transformer: numberToLength, atomic: false });
 
     expect(
@@ -48,13 +57,20 @@ describe('number to unit', () => {
         lineHeight: 1,
         left: 0,
         order: 1,
+        animationDuration: 1,
+        transitionDuration: 0,
       }),
     ).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
-  it('injects non-atomic style with numeric values as rem', () => {
+  it('injects non-atomic style with numeric values with different units', () => {
     const server = new GlitzServer({
-      transformer: createNumberToLengthTransformer({ defaultUnit: 'rem', columns: 'em', paddingLeft: 'px' }),
+      transformer: createNumberToLengthTransformer({
+        defaultUnit: 'rem',
+        columns: 'em',
+        paddingLeft: 'px',
+        animationDuration: 's',
+      }),
       atomic: false,
     });
 
@@ -67,6 +83,8 @@ describe('number to unit', () => {
         lineHeight: 1,
         left: 0,
         order: 1,
+        animationDuration: 1,
+        transitionDuration: 0,
       }),
     ).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();

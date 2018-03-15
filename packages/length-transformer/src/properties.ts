@@ -1,4 +1,4 @@
-const lengthSafeProperties: { [property: string]: 0 } = {
+export const lengthSafeProperties: { [property: string]: 0 } = {
   background: 0,
   backgroundPosition: 0,
   backgroundPositionX: 0,
@@ -103,10 +103,19 @@ const lengthSafeProperties: { [property: string]: 0 } = {
   wordSpacing: 0,
 };
 
+export type TimeProperties = 'animationDelay' | 'animationDuration' | 'transitionDelay' | 'transitionDuration';
+
+export const timeSafeProperties: { [property: string]: 0 } = {
+  animationDelay: 0,
+  animationDuration: 0,
+  transitionDelay: 0,
+  transitionDuration: 0,
+};
+
 // Hyphenate properties
 const uppercaseRegex = /[A-Z]/g;
-for (const property in lengthSafeProperties) {
-  lengthSafeProperties[property.replace(uppercaseRegex, '-$&').toLowerCase()] = 0;
+for (const properties of [lengthSafeProperties, timeSafeProperties]) {
+  for (const property in properties) {
+    properties[property.replace(uppercaseRegex, '-$&').toLowerCase()] = 0;
+  }
 }
-
-export default lengthSafeProperties;
