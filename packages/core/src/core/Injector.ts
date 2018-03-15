@@ -17,7 +17,7 @@ export default class Injector {
     incrementClassHash: () => string,
     incrementKeyframesHash: () => string,
     incrementFontFaceHash: () => string,
-    injectNewClassRule?: (className: string, block: string, pseudo?: string) => void,
+    injectNewClassRule?: (className: string, block: string, pseudo?: string) => CSSStyleRule,
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
     injectNewFontFaceRule?: (name: string, block: string) => void,
   ) {
@@ -31,7 +31,28 @@ export default class Injector {
         const className = incrementClassHash();
         dictionary[block] = className;
         if (injectNewClassRule) {
-          injectNewClassRule(className, block, pseudo);
+          const rule = injectNewClassRule(className, block, pseudo);
+
+          if (process.env.NODE_ENV !== 'production') {
+            const declarationsLength = Object.keys(declarations).length;
+            if (rule.style.length !== declarationsLength) {
+              let property: keyof Properties;
+              for (property in declarations) {
+                if (!rule.style[property as keyof CSSStyleDeclaration]) {
+                  if (declarationsLength > 1) {
+                    console.warn('An invalid CSS declaration %o in %O was ignored by the browser', {
+                      [property]: declarations[property],
+                      declarations,
+                    });
+                  } else {
+                    console.warn('An invalid CSS declaration %o was ignored by the browser', {
+                      [property]: declarations[property],
+                    });
+                  }
+                }
+              }
+            }
+          }
         }
         return className;
       }

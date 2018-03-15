@@ -1,6 +1,8 @@
 export function injectSheetRule(styleElement: HTMLStyleElement, rule: string) {
   const sheet = styleElement.sheet as CSSStyleSheet;
-  sheet.insertRule(rule, sheet.cssRules.length);
+  const index = sheet.cssRules.length;
+  sheet.insertRule(rule, index);
+  return sheet.cssRules[index] as CSSStyleRule;
 }
 
 export function createStyleElement(media?: string | null) {

@@ -46,7 +46,7 @@ export default class InjectorClient extends Injector {
 
     const injectNewClassRule = (className: string, block: string, pseudo?: string) => {
       const rule = formatClassRule(className, block, pseudo);
-      injectSheetRule(styleElement, rule);
+      return injectSheetRule(styleElement, rule);
     };
 
     const injectNewKeyframesRule = (name: string, blockList: string) => {
