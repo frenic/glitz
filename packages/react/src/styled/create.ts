@@ -98,18 +98,12 @@ export default function create<TProps>(
 
       this.render = isCustomComponent(inner)
         ? () => {
-            const passProps: TProps & StyledProps = passingProps(this.props);
-
-            passProps.apply = apply;
-            passProps.compose = compose;
-
+            const passProps = passingProps<TProps & StyledProps>({ apply, compose }, this.props);
             return React.createElement(inner, passProps);
           }
         : () => {
-            const passProps: TProps & StyledElementProps = passingProps(this.props);
-
-            passProps.className = passProps.className ? passProps.className + ' ' + apply() : apply();
-
+            const className = (this.props as any).className ? (this.props as any).className + ' ' + apply() : apply();
+            const passProps = passingProps<TProps & StyledElementProps>({ className }, this.props);
             return React.createElement(inner, passProps);
           };
     }
@@ -136,17 +130,18 @@ function flatten(styles: Style[]) {
   return result;
 }
 
-function passingProps(props: any) {
-  const newProps = { ...props };
-
-  delete newProps.css;
-
-  if (newProps.innerRef) {
-    newProps.ref = newProps.innerRef;
-    delete newProps.innerRef;
+function passingProps<T>(destination: any, props: any): T {
+  for (let name in props) {
+    const value = props[name];
+    if (name !== 'css') {
+      if (name === 'innerRef') {
+        name = 'ref';
+      }
+      // Don't override preexisting props
+      destination[name] = destination[name] || value;
+    }
   }
-
-  return newProps;
+  return destination;
 }
 
 function isStyledComponent<TProps>(inner: InnerType<TProps>): inner is StyledComponent<TProps> {
