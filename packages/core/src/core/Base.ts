@@ -111,60 +111,28 @@ export default class Base<TStyle extends Style> {
         }
 
         // Shorthand objects
-        let isValid = true;
         const longhandDeclarations: Index = {};
-
         let extension: keyof Index;
-        for (extension in value) {
-          if (process.env.NODE_ENV !== 'production') {
-            if (!/^[a-z]+$/i.test(extension)) {
-              console.error(
-                "The property `%s['%s']` in %O isn't a valid shorthand extension and will likely cause a failure",
-                property,
-                extension,
-                value,
-              );
-            }
-          }
 
+        for (extension in value) {
           const longhandValue = (value as Index)[extension];
 
-          if (
-            longhandValue === undefined ||
-            isPrimitive(longhandValue) ||
-            Array.isArray(longhandValue) ||
-            // Objects are only valid for `animation.name` and `font.family`
-            (property === 'animation' && extension === 'name') ||
-            (property === 'font' && extension === 'family')
-          ) {
-            if (extension === 'x') {
-              longhandDeclarations[property + 'Left'] = longhandValue;
-              longhandDeclarations[property + 'Right'] = longhandValue;
-              continue;
-            }
-
-            if (extension === 'y') {
-              longhandDeclarations[property + 'Top'] = longhandValue;
-              longhandDeclarations[property + 'Bottom'] = longhandValue;
-              continue;
-            }
-
-            // Convert to camel cased CSS property due to cache
-            longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+          if (extension === 'x') {
+            longhandDeclarations[property + 'Left'] = longhandValue;
+            longhandDeclarations[property + 'Right'] = longhandValue;
             continue;
           }
 
-          if (process.env.NODE_ENV !== 'production') {
-            console.error('The style property `%s` does not support the value %O', property, value);
+          if (extension === 'y') {
+            longhandDeclarations[property + 'Top'] = longhandValue;
+            longhandDeclarations[property + 'Bottom'] = longhandValue;
+            continue;
           }
 
-          isValid = false;
-          break;
+          longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
         }
 
-        if (isValid) {
-          resolve(longhandDeclarations, result, media, pseudo);
-        }
+        resolve(longhandDeclarations, result, media, pseudo);
       }
 
       return result;
