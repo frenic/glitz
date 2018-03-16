@@ -40,10 +40,13 @@ export default class Injector {
               for (property in declarations) {
                 if (!rule.style[property as keyof CSSStyleDeclaration]) {
                   if (declarationsLength > 1) {
-                    console.warn('An invalid CSS declaration %o in %O was ignored by the browser', {
-                      [property]: declarations[property],
+                    console.warn(
+                      'An invalid CSS declaration %o in %O was ignored by the browser',
+                      {
+                        [property]: declarations[property],
+                      },
                       declarations,
-                    });
+                    );
                   } else {
                     console.warn('An invalid CSS declaration %o was ignored by the browser', {
                       [property]: declarations[property],
