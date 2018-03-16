@@ -35,14 +35,22 @@ export default class Base<TStyle extends Style> {
         let value = style[property];
 
         if (process.env.NODE_ENV !== 'production') {
-          if (value === null || !(value === undefined || isPrimitive(value) || typeof value === 'object')) {
-            console.error('The style property `%s` was has to be a string, number or object, was %O', property, value);
-          }
-          if (typeof value === 'object' && Object.keys(value).length === 0) {
+          if (
+            value === null ||
+            !(
+              typeof value === 'undefined' ||
+              typeof value === 'string' ||
+              typeof value === 'number' ||
+              typeof value === 'object'
+            )
+          ) {
+            console.error('The style value %O of property `%s` has to be a string, number or object', value, property);
+          } else if ((typeof value === 'object' && Object.keys(value).length === 0) || String(value).trim() === '') {
             console.error(
-              'The style property `%s` was an empty %s and should be removed because it can cause unexpected behavior',
+              'The style property `%s` in %O was an empty %s and should be removed because it can cause unexpected behavior',
               property,
-              Array.isArray(value) ? 'array' : 'object',
+              style,
+              Array.isArray(value) ? 'array' : typeof value,
             );
           }
         }
