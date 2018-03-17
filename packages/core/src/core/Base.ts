@@ -35,16 +35,12 @@ export default class Base<TStyle extends Style> {
         let value = style[property];
 
         if (process.env.NODE_ENV !== 'production') {
-          if (
-            value === null ||
-            !(
-              typeof value === 'undefined' ||
-              typeof value === 'string' ||
-              typeof value === 'number' ||
-              typeof value === 'object'
-            )
-          ) {
-            console.error('The style value %O of property `%s` has to be a string, number or object', value, property);
+          if (value === null || ['undefined', 'string', 'number', 'object'].indexOf(typeof value) === -1) {
+            console.error(
+              'The style value %O of property `%s` has to be a string, number, plain object or array',
+              value,
+              property,
+            );
           } else if ((typeof value === 'object' && Object.keys(value).length === 0) || String(value).trim() === '') {
             console.error(
               'The style property `%s` in %O was an empty %s and should be removed because it can cause unexpected behavior',
@@ -64,42 +60,42 @@ export default class Base<TStyle extends Style> {
         }
 
         if (
-          value === undefined ||
-          isPrimitive(value) ||
-          Array.isArray(value) ||
           property === ANIMATION_NAME ||
-          property === FONT_FAMILY
+          property === FONT_FAMILY ||
+          // String, number or undefined
+          typeof value !== 'object' ||
+          Array.isArray(value)
         ) {
           const declarations = getIndex(result, media, pseudo);
 
           if (!(property in declarations)) {
-            if (typeof value === 'object') {
-              if (property === ANIMATION_NAME) {
-                if (transformer) {
-                  const list: PropertiesList = {};
-                  for (const identifier in value as UntransformedPropertiesList) {
-                    list[identifier] = transformer((value as UntransformedPropertiesList)[identifier]);
-                  }
-                  value = list;
+            if (property === ANIMATION_NAME && typeof value === 'object' && !Array.isArray(value)) {
+              // Resolve `animationName` objects
+              const list = value as PropertiesList;
+              if (transformer) {
+                for (const identifier in value) {
+                  list[identifier] = transformer((value as UntransformedPropertiesList)[identifier]);
                 }
-
-                value = injector().injectKeyframes(value as PropertiesList);
               }
 
-              if (property === FONT_FAMILY) {
-                const families = ([] as Array<string | FontFace>).concat(value as
-                  | string
-                  | FontFace
-                  | Array<string | FontFace>);
-                let names = '';
-                for (const family of families) {
-                  if (names) {
-                    names += ',';
-                  }
-                  names += isPrimitive(family) ? family : injector().injectFontFace(family);
+              value = injector().injectKeyframes(list);
+            }
+
+            if (property === FONT_FAMILY && typeof value === 'object') {
+              // Resolve `fontFace` object
+              const families = ([] as Array<string | FontFace>).concat(value as
+                | string
+                | FontFace
+                | Array<string | FontFace>);
+              let names = '';
+              for (const family of families) {
+                if (names) {
+                  names += ',';
                 }
-                value = names;
+                names += typeof family === 'object' ? injector().injectFontFace(family) : family;
               }
+
+              value = names;
             }
 
             declarations[property] = value;
@@ -216,7 +212,7 @@ export default class Base<TStyle extends Style> {
 
               const declaration = { [property]: value };
 
-              if (isPrimitive(value)) {
+              if (typeof value === 'string' || typeof value === 'number') {
                 // Only supports caching of primitive values
                 const cachedValues = (index[property] = index[property] || {});
 
@@ -276,8 +272,4 @@ function getIndex<TValue>(
   } else {
     return index as Declarations<TValue>;
   }
-}
-
-function isPrimitive(value: any): value is string | number {
-  return typeof value === 'string' || typeof value === 'number';
 }
