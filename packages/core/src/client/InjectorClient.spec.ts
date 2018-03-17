@@ -123,6 +123,22 @@ describe('client', () => {
     // Skipping .a
     expect(injector.injectKeyframes({ from: { color: 'black' }, to: { color: 'white' } })).toBe('b');
   });
+  it('hydrates font face rule', () => {
+    const style = createStyle(
+      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}" +
+        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:b}",
+    );
+    const injector = createInjector(style);
+
+    // Skipping .a
+    expect(
+      injector.injectFontFace({
+        fontStyle: 'normal',
+        fontWeight: 400,
+        src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+      }),
+    ).toBe('b');
+  });
   it('hydrates fallback rule', () => {
     const style = createStyle('.a{color:red;color:green}.b{color:black;color:white}');
     const injector = createInjector(style);

@@ -10,10 +10,10 @@ export default class Injector {
   public injectKeyframes: (declarationList: PropertiesList) => string;
   public injectFontFace: (declarations: FontFace) => string;
   constructor(
-    plainDictionary: { [block: string]: string },
-    pseudoDictionary: { [pseudo: string]: { [block: string]: string } },
-    keyframesDictionary: { [blockList: string]: string },
-    fontFaceDictionary: { [block: string]: string },
+    plainIndex: { [block: string]: string },
+    pseudoIndex: { [pseudo: string]: { [block: string]: string } },
+    keyframesIndex: { [blockList: string]: string },
+    fontFaceIndex: { [block: string]: string },
     incrementClassHash: () => string,
     incrementKeyframesHash: () => string,
     incrementFontFaceHash: () => string,
@@ -23,42 +23,44 @@ export default class Injector {
   ) {
     this.injectClassName = (declarations, pseudo) => {
       const block = parseDeclarationBlock(declarations);
-      const dictionary = pseudo ? (pseudoDictionary[pseudo] = pseudoDictionary[pseudo] || {}) : plainDictionary;
-      const existingClassName = dictionary[block];
-      if (existingClassName) {
-        return existingClassName;
-      } else {
-        const className = incrementClassHash();
-        dictionary[block] = className;
-        if (injectNewClassRule) {
-          const rule = injectNewClassRule(className, block, pseudo);
+      const index = pseudo ? (pseudoIndex[pseudo] = pseudoIndex[pseudo] || {}) : plainIndex;
 
-          if (process.env.NODE_ENV !== 'production') {
-            const declarationsLength = Object.keys(declarations).length;
-            if (rule.style.length !== declarationsLength) {
-              let property: keyof Properties;
-              for (property in declarations) {
-                if (!rule.style[property as keyof CSSStyleDeclaration]) {
-                  if (declarationsLength > 1) {
-                    console.warn(
-                      'An invalid CSS declaration %o in %O was ignored by the browser',
-                      {
-                        [property]: declarations[property],
-                      },
-                      declarations,
-                    );
-                  } else {
-                    console.warn('An invalid CSS declaration %o was ignored by the browser', {
+      if (index[block]) {
+        return index[block];
+      }
+
+      const className = incrementClassHash();
+      index[block] = className;
+
+      if (injectNewClassRule) {
+        const rule = injectNewClassRule(className, block, pseudo);
+
+        if (process.env.NODE_ENV !== 'production') {
+          const declarationsLength = Object.keys(declarations).length;
+          if (rule.style.length !== declarationsLength) {
+            let property: keyof Properties;
+            for (property in declarations) {
+              if (!rule.style[property as keyof CSSStyleDeclaration]) {
+                if (declarationsLength > 1) {
+                  console.warn(
+                    'An invalid CSS declaration %o in %O was ignored by the browser',
+                    {
                       [property]: declarations[property],
-                    });
-                  }
+                    },
+                    declarations,
+                  );
+                } else {
+                  console.warn('An invalid CSS declaration %o was ignored by the browser', {
+                    [property]: declarations[property],
+                  });
                 }
               }
             }
           }
         }
-        return className;
       }
+
+      return className;
     };
 
     this.injectKeyframes = declarationList => {
@@ -67,17 +69,19 @@ export default class Injector {
         const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
         blockList += formatRule(identifier, keyframeBlock);
       }
-      const existingName = keyframesDictionary[blockList];
-      if (existingName) {
-        return existingName;
-      } else {
-        const name = incrementKeyframesHash();
-        keyframesDictionary[blockList] = name;
-        if (injectNewKeyframesRule) {
-          injectNewKeyframesRule(name, blockList);
-        }
-        return name;
+
+      if (keyframesIndex[blockList]) {
+        return keyframesIndex[blockList];
       }
+
+      const name = incrementKeyframesHash();
+      keyframesIndex[blockList] = name;
+
+      if (injectNewKeyframesRule) {
+        injectNewKeyframesRule(name, blockList);
+      }
+
+      return name;
     };
 
     this.injectFontFace = original => {
@@ -96,17 +100,19 @@ export default class Injector {
       }
 
       const block = parseDeclarationBlock(declarations);
-      const existingClassName = fontFaceDictionary[block];
-      if (existingClassName) {
-        return existingClassName;
-      } else {
-        const name = incrementFontFaceHash();
-        fontFaceDictionary[block] = name;
-        if (injectNewFontFaceRule) {
-          injectNewFontFaceRule(name, block);
-        }
-        return name;
+
+      if (fontFaceIndex[block]) {
+        return fontFaceIndex[block];
       }
+
+      const name = incrementFontFaceHash();
+      fontFaceIndex[block] = name;
+
+      if (injectNewFontFaceRule) {
+        injectNewFontFaceRule(name, block);
+      }
+
+      return name;
     };
   }
 }

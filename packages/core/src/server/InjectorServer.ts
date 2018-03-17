@@ -8,16 +8,16 @@ export default class InjectorServer extends Injector {
     incrementKeyframesHash: () => string,
     incrementFontFaceHash: () => string,
   ) {
-    const plainDictionary: { [block: string]: string } = {};
-    const pseudoDictionary: { [pseudo: string]: { [block: string]: string } } = {};
-    const keyframesDictionary: { [block: string]: string } = {};
-    const fontFaceDictionary: { [block: string]: string } = {};
+    const plainIndex: { [block: string]: string } = {};
+    const pseudoIndex: { [pseudo: string]: { [block: string]: string } } = {};
+    const keyframesIndex: { [block: string]: string } = {};
+    const fontFaceIndex: { [block: string]: string } = {};
 
     super(
-      plainDictionary,
-      pseudoDictionary,
-      keyframesDictionary,
-      fontFaceDictionary,
+      plainIndex,
+      pseudoIndex,
+      keyframesIndex,
+      fontFaceIndex,
       incrementClassHash,
       incrementKeyframesHash,
       incrementFontFaceHash,
@@ -25,20 +25,20 @@ export default class InjectorServer extends Injector {
 
     this.getStyle = () => {
       let css = '';
-      for (const block in plainDictionary) {
-        css += formatClassRule(plainDictionary[block], block);
+      for (const block in plainIndex) {
+        css += formatClassRule(plainIndex[block], block);
       }
-      for (const pseudo in pseudoDictionary) {
-        const dictionary = pseudoDictionary[pseudo];
-        for (const block in dictionary) {
-          css += formatClassRule(dictionary[block], block, pseudo);
+      for (const pseudo in pseudoIndex) {
+        const index = pseudoIndex[pseudo];
+        for (const block in index) {
+          css += formatClassRule(index[block], block, pseudo);
         }
       }
-      for (const blockList in keyframesDictionary) {
-        css += formatKeyframesRule(keyframesDictionary[blockList], blockList);
+      for (const blockList in keyframesIndex) {
+        css += formatKeyframesRule(keyframesIndex[blockList], blockList);
       }
-      for (const block in fontFaceDictionary) {
-        css += formatFontFaceRule(fontFaceDictionary[block], block);
+      for (const block in fontFaceIndex) {
+        css += formatFontFaceRule(fontFaceIndex[block], block);
       }
       return css;
     };
