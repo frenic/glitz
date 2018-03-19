@@ -9,7 +9,7 @@
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "dependencies": {
-    "csstype": "^1.8.1"
+    "csstype": "^2.0.0"
   },
   "files": [
     "index.d.ts"

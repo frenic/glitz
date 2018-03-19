@@ -40,6 +40,7 @@ export function parseDeclaration(property: keyof Properties, value?: string | nu
   return `${hyphenateProperty(property)}:${value}`;
 }
 
+// Accept both camel cased and capitalized vendor properties
 const hyphenateRegex = /(?:^(ms|moz|webkit))|[A-Z]/g;
 const propertyCache: { [property: string]: string } = {};
 
