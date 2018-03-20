@@ -138,14 +138,26 @@ interface FontProperty {
 }
 
 interface GridProperty {
-  autoColumns?: UntransformedProperties['gridAutoColumns'];
-  autoFlow?: UntransformedProperties['gridAutoFlow'];
-  autoRows?: UntransformedProperties['gridAutoRows'];
-  column?: UntransformedProperties['gridColumn'];
-  columnGap?: UntransformedProperties['gridColumnGap'];
-  row?: UntransformedProperties['gridRow'];
-  rowGap?: UntransformedProperties['gridRowGap'];
-  template?: UntransformedProperties['gridTemplate'];
+  auto?: {
+    columns?: UntransformedProperties['gridAutoColumns'];
+    flow?: UntransformedProperties['gridAutoFlow'];
+    rows?: UntransformedProperties['gridAutoRows'];
+  };
+  column?: {
+    end?: UntransformedProperties['gridColumnEnd'];
+    gap?: UntransformedProperties['gridColumnGap'];
+    start?: UntransformedProperties['gridColumnStart'];
+  };
+  row?: {
+    end?: UntransformedProperties['gridRowEnd'];
+    gap?: UntransformedProperties['gridRowGap'];
+    start?: UntransformedProperties['gridRowStart'];
+  };
+  template?: {
+    areas?: UntransformedProperties['gridTemplateAreas'];
+    columns?: UntransformedProperties['gridTemplateColumns'];
+    rows?: UntransformedProperties['gridTemplateRows'];
+  };
 }
 
 interface MaskBorderProperty {
