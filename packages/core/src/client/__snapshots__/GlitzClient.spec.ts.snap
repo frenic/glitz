@@ -136,15 +136,29 @@ exports[`client injects shorthand rule 3`] = `".c {padding-top: 10px;}"`;
 
 exports[`client injects shorthand rule 4`] = `".d {padding-bottom: 10px;}"`;
 
-exports[`client injects shorthand rule 5`] = `".e {margin-left: 10px;}"`;
+exports[`client injects shorthand rule 5`] = `".e {grid-column-gap: 10px;}"`;
 
-exports[`client injects shorthand rule 6`] = `".f {margin-right: 10px;}"`;
+exports[`client injects shorthand rule 6`] = `".f {margin-left: 10px;}"`;
 
-exports[`client injects shorthand rule 7`] = `".g {margin-top: 10px;}"`;
+exports[`client injects shorthand rule 7`] = `".g {margin-right: 10px;}"`;
 
-exports[`client injects shorthand rule 8`] = `".h {margin-bottom: 10px;}"`;
+exports[`client injects shorthand rule 8`] = `".h {margin-top: 10px;}"`;
 
-exports[`client injects shorthand rule 9`] = `".i {padding-left: 30px;}"`;
+exports[`client injects shorthand rule 9`] = `".i {margin-bottom: 10px;}"`;
+
+exports[`client injects shorthand rule 10`] = `".j {padding-left: 30px;}"`;
+
+exports[`client injects shorthand rule 11`] = `
+"@keyframes a { 
+  from {padding-left: 20px;} 
+}"
+`;
+
+exports[`client injects shorthand rule 12`] = `".k {animation-name: a;}"`;
+
+exports[`client injects shorthand rule 13`] = `"@font-face {font-weight: bold; font-family: a;}"`;
+
+exports[`client injects shorthand rule 14`] = `".l {font-family: a;}"`;
 
 exports[`client preserves order 1`] = `".a {padding-top: 20px;}"`;
 

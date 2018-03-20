@@ -12,13 +12,13 @@ interface TransformerProperties {}
 export interface FeaturedProperties
   extends Omit<UntransformedProperties, keyof ExtendedProperties>,
     ExtendedProperties {
-  '@keyframes'?: UntransformedPropertiesList;
-  '@font-face'?: FontFace;
+  '@keyframes'?: FeaturedPropertiesList;
+  '@font-face'?: FeaturedFontFace;
 }
 
 export interface ExtendedProperties {
   // Keyframes
-  animationName?: UntransformedPropertiesList | UntransformedProperties['animationName'];
+  animationName?: FeaturedPropertiesList | UntransformedProperties['animationName'];
 
   // Font face
   fontFamily?: FontFamilyProperty;
@@ -50,7 +50,7 @@ interface AnimationProperty {
   duration?: UntransformedProperties['animationDuration'];
   fillMode?: UntransformedProperties['animationFillMode'];
   iterationCount?: UntransformedProperties['animationIterationCount'];
-  name?: UntransformedPropertiesList | UntransformedProperties['animationName'];
+  name?: FeaturedPropertiesList | UntransformedProperties['animationName'];
   playState?: UntransformedProperties['animationPlayState'];
   timingFunction?: UntransformedProperties['animationTimingFunction'];
 }
@@ -231,16 +231,28 @@ export interface PropertiesList {
   [identifier: string]: Properties;
 }
 
-export interface UntransformedPropertiesList {
-  [identifier: string]: UntransformedProperties;
+export interface FeaturedPropertiesList {
+  [identifier: string]: Style;
+}
+
+export interface FontFace extends Omit<CSS.FontFaceFallback, 'fontFamily'> {}
+
+export interface FeaturedFontFace extends FontFace {
+  font?: {
+    display?: FontFace['fontDisplay'];
+    featureSettings?: FontFace['fontFeatureSettings'];
+    variationSettings?: FontFace['fontVariationSettings'];
+    stretch?: FontFace['fontStretch'];
+    style?: FontFace['fontStyle'];
+    weight?: FontFace['fontWeight'];
+    variant?: FontFace['fontVariant'];
+  };
 }
 
 export type FontFamilyProperty =
-  | FontFace
+  | FeaturedFontFace
   | CSS.StandardLonghandProperties['fontFamily']
-  | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>;
-
-export type FontFace = Omit<CSS.FontFaceFallback, 'fontFamily'>;
+  | Array<FeaturedFontFace | CSS.StandardLonghandProperties['fontFamily']>;
 
 type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;

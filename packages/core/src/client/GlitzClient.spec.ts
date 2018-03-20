@@ -45,33 +45,62 @@ describe('client', () => {
 
     expect(
       client.injectStyle({
+        grid: { column: { gap: '10px' } },
+      }),
+    ).toBe('e');
+
+    expect(sheet.cssRules).toHaveLength(5);
+    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
         margin: { x: '10px' },
       }),
-    ).toBe('e f');
+    ).toBe('f g');
 
-    expect(sheet.cssRules).toHaveLength(6);
-    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(7);
     expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
 
     expect(
       client.injectStyle({
         margin: { y: '10px' },
       }),
-    ).toBe('g h');
+    ).toBe('h i');
 
-    expect(sheet.cssRules).toHaveLength(8);
-    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(9);
     expect(sheet.cssRules[7].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[8].cssText).toMatchSnapshot();
 
     expect(
       client.injectStyle({
         padding: { left: '20px' },
         paddingLeft: '30px',
       }),
-    ).toBe('i');
+    ).toBe('j');
 
-    expect(sheet.cssRules).toHaveLength(9);
-    expect(sheet.cssRules[8].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(10);
+    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        animationName: { from: { padding: { left: '20px' } } },
+      }),
+    ).toBe('k');
+
+    expect(sheet.cssRules).toHaveLength(12);
+    expect(sheet.cssRules[10].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[11].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        fontFamily: { font: { weight: 'bold' } },
+      }),
+    ).toBe('l');
+
+    expect(sheet.cssRules).toHaveLength(14);
+    expect(sheet.cssRules[12].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[13].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();

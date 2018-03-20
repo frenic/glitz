@@ -1,19 +1,13 @@
-import { FontFace, PropertiesList, Style, UntransformedPropertiesList } from '@glitz/type';
+import { FontFace, PropertiesList, Style } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
-type StyleValue = Style[keyof Style] | Style;
+type Declarations<TValue = string | number | Array<string | number>> = { [property: string]: TValue };
 
-type CacheValue = {
-  [value: string]: string;
-};
-
-type Declarations<TValue = StyleValue> = { [property: string]: TValue };
-
-interface Index<TValue = StyleValue> extends Declarations<TValue | Index<TValue>> {}
+interface Index<TValue = string | number | Array<string | number>> extends Declarations<TValue | Index<TValue>> {}
 
 export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
 const NON_ATOMIC_KEY = '$';
@@ -27,11 +21,11 @@ export default class Base<TStyle extends Style> {
     transformer: Transformer | undefined,
     atomic: boolean | undefined,
   ) {
-    const resolve = (style: Style, result: Index = {}, media?: string, pseudo?: string) => {
-      const properties = Object.keys(style) as Array<keyof Style>;
+    const resolve = (style: any, result: Index = {}, media?: string, pseudo?: string) => {
+      const properties = Object.keys(style);
 
-      for (let i = properties.length - 1; i >= 0; i--) {
-        let property = properties[i];
+      for (let i = properties.length; i > 0; i--) {
+        let property = properties[i - 1];
         let value = style[property];
 
         if (process.env.NODE_ENV !== 'production') {
@@ -71,11 +65,10 @@ export default class Base<TStyle extends Style> {
           if (!(property in declarations)) {
             if (property === ANIMATION_NAME && typeof value === 'object' && !Array.isArray(value)) {
               // Resolve `animationName` objects
-              const list = value as PropertiesList;
-              if (transformer) {
-                for (const identifier in value) {
-                  list[identifier] = transformer((value as UntransformedPropertiesList)[identifier]);
-                }
+              const list: PropertiesList = {};
+              for (const identifier in value) {
+                const block = reverse(resolve(value[identifier]));
+                list[identifier] = transformer ? transformer(block) : block;
               }
 
               value = injector().injectKeyframes(list);
@@ -83,16 +76,18 @@ export default class Base<TStyle extends Style> {
 
             if (property === FONT_FAMILY && typeof value === 'object') {
               // Resolve `fontFace` object
-              const families = ([] as Array<string | FontFace>).concat(value as
-                | string
-                | FontFace
-                | Array<string | FontFace>);
+              const families = ([] as any[]).concat(value);
               let names = '';
               for (const family of families) {
                 if (names) {
                   names += ',';
                 }
-                names += typeof family === 'object' ? injector().injectFontFace(family) : family;
+                if (typeof family === 'object') {
+                  const fontFace = reverse(resolve(family));
+                  names += injector().injectFontFace((transformer ? transformer(fontFace) : fontFace) as FontFace);
+                } else {
+                  names += family;
+                }
               }
 
               value = names;
@@ -106,7 +101,7 @@ export default class Base<TStyle extends Style> {
         // Media or pseudo
         if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
           resolve(
-            value as Style,
+            value,
             result,
             property[0] === MEDIA_IDENTIFIER ? property : media,
             property[0] === PSEUDO_IDENTIFIER ? (pseudo || '') + property : pseudo,
@@ -115,11 +110,10 @@ export default class Base<TStyle extends Style> {
         }
 
         // Shorthand objects
-        const longhandDeclarations: Index = {};
-        let extension: keyof Index;
+        const longhandDeclarations: any = {};
 
-        for (extension in value) {
-          const longhandValue = (value as Index)[extension];
+        for (const extension in value) {
+          const longhandValue = value[extension];
 
           if (extension === 'x') {
             longhandDeclarations[property + 'Left'] = longhandValue;
@@ -145,7 +139,9 @@ export default class Base<TStyle extends Style> {
     const injectClassName = (declarations: Declarations, media: string | undefined, pseudo: string | undefined) =>
       injector(media).injectClassName(transformer ? transformer(declarations) : declarations, pseudo);
 
-    const cache: Index<CacheValue> = {};
+    const cache: Index<{
+      [value: string]: string;
+    }> = {};
 
     const inject =
       atomic === false
@@ -174,7 +170,7 @@ export default class Base<TStyle extends Style> {
 
             for (const rule in blocks) {
               if (rule === NON_ATOMIC_KEY) {
-                classNames += ' ' + injectClassName(blocks[rule], media, pseudo);
+                classNames += ' ' + injectClassName(blocks[rule] as Declarations, media, pseudo);
               } else {
                 classNames += inject(
                   blocks[rule],
@@ -187,14 +183,14 @@ export default class Base<TStyle extends Style> {
             return classNames;
           }
         : // Atomic style
-          (style: Index, media?: string, pseudo?: string) => {
+          (result: Index, media?: string, pseudo?: string) => {
             let classNames = '';
-            const properties = Object.keys(style);
+            const properties = Object.keys(result);
             const index = getIndex(cache, media, pseudo);
 
             for (let i = properties.length - 1; i >= 0; i--) {
               const property = properties[i];
-              const value = style[property];
+              const value = result[property];
 
               if (value === undefined) {
                 continue;
@@ -221,14 +217,14 @@ export default class Base<TStyle extends Style> {
                   continue;
                 }
 
-                const className = injectClassName(declaration, media, pseudo);
+                const className = injectClassName(declaration as Declarations, media, pseudo);
                 classNames += ' ' + (cachedValues[value] = className);
 
                 continue;
               }
 
               // Array
-              classNames += ' ' + injectClassName(declaration, media, pseudo);
+              classNames += ' ' + injectClassName(declaration as Declarations, media, pseudo);
             }
 
             return classNames;
@@ -272,4 +268,13 @@ function getIndex<TValue>(
   } else {
     return index as Declarations<TValue>;
   }
+}
+
+function reverse(object: any) {
+  const reversed: any = {};
+  const properties = Object.keys(object);
+  for (let i = properties.length; i > 0; i--) {
+    reversed[properties[i - 1]] = object[properties[i - 1]];
+  }
+  return reversed;
 }

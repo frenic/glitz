@@ -26,7 +26,7 @@ exports[`server injects pseudo rule 1`] = `"<style class=\\"__glitz__\\">.a{colo
 
 exports[`server injects rule deeply 1`] = `"<style class=\\"__glitz__\\">.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:a}.h{font-family:b}.c:hover{color:red}.d:first-child:hover{color:red}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:a}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:b}</style><style class=\\"__glitz__\\" media=\\"(min-width: 768px)\\">.i{color:red}.j:hover{color:red}</style>"`;
 
-exports[`server injects shorthand rule 1`] = `"<style class=\\"__glitz__\\">.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{margin-left:10px}.f{margin-right:10px}.g{margin-top:10px}.h{margin-bottom:10px}.i{padding-left:30px}</style>"`;
+exports[`server injects shorthand rule 1`] = `"<style class=\\"__glitz__\\">.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{grid-column-gap:10px}.f{margin-left:10px}.g{margin-right:10px}.h{margin-top:10px}.i{margin-bottom:10px}.j{padding-left:30px}.k{animation-name:a}.l{font-family:a}@keyframes a{from{padding-left:20px}}@font-face {font-weight:bold;font-family:a}</style>"`;
 
 exports[`server preserves order 1`] = `"<style class=\\"__glitz__\\">.a{padding-top:20px}.b{color:red}.c{padding-right:30px}.e{padding-left:30px}.d:hover{color:green}</style>"`;
 

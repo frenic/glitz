@@ -27,22 +27,40 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
+        grid: { column: { gap: '10px' } },
+      }),
+    ).toBe('e');
+
+    expect(
+      server.injectStyle({
         margin: { x: '10px' },
       }),
-    ).toBe('e f');
+    ).toBe('f g');
 
     expect(
       server.injectStyle({
         margin: { y: '10px' },
       }),
-    ).toBe('g h');
+    ).toBe('h i');
 
     expect(
       server.injectStyle({
         padding: { left: '20px' },
         paddingLeft: '30px',
       }),
-    ).toBe('i');
+    ).toBe('j');
+
+    expect(
+      server.injectStyle({
+        animationName: { from: { padding: { left: '20px' } } },
+      }),
+    ).toBe('k');
+
+    expect(
+      server.injectStyle({
+        fontFamily: { font: { weight: 'bold' } },
+      }),
+    ).toBe('l');
 
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
