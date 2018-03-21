@@ -3,6 +3,7 @@
 import Injector from '../core/Injector';
 import { injectSheetRule } from '../utils/dom';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
+// import { validateStyle } from '../utils/style-validation';
 
 const CLASS_RULE_REGEX = /\.([a-z0-9]+)(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9]+)\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;

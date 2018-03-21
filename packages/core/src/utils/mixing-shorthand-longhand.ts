@@ -1,7 +1,7 @@
 import { hyphenateProperty } from '../utils/parse';
 
 export let validateMixingShorthandLonghand: (object: { [property: string]: any }, classNames: string) => void = () => {
-  /* noop */
+  // noop
 };
 
 if (process.env.NODE_ENV !== 'production') {
