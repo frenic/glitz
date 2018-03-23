@@ -1,6 +1,6 @@
 import { Properties, UntransformedProperties } from '@glitz/type';
 
-let clientValidationTransformer: (declarations: UntransformedProperties) => Properties = (
+let devToolTransformer: (declarations: UntransformedProperties) => Properties = (
   declarations: UntransformedProperties,
 ) => declarations as Properties;
 
@@ -17,6 +17,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
 
     const dummy = document.createElement('div').style;
+
     function validateDeclaration(property: string, value: string | number) {
       dummy.setProperty(property, String(value));
 
@@ -29,7 +30,7 @@ if (process.env.NODE_ENV !== 'production') {
       return isValid;
     }
 
-    clientValidationTransformer = declarations => {
+    devToolTransformer = declarations => {
       const properties = Object.keys(declarations) as Array<keyof UntransformedProperties>;
 
       for (const property of properties) {
@@ -75,4 +76,4 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-export default clientValidationTransformer;
+export default devToolTransformer;

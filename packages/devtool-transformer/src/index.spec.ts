@@ -1,23 +1,23 @@
 import { Properties } from '@glitz/type';
-import clientValidationTransformer from './index';
+import devToolTransformer from './index';
 
 describe('style validation', () => {
   it('invalidates', () => {
     const logger = (console.warn = jest.fn());
 
-    clientValidationTransformer({
+    devToolTransformer({
       colour: 'red',
     } as Properties);
 
     expect(logger).toHaveBeenCalledTimes(1);
 
-    clientValidationTransformer({
+    devToolTransformer({
       color: 'bläck',
     });
 
     expect(logger).toHaveBeenCalledTimes(2);
 
-    clientValidationTransformer({
+    devToolTransformer({
       backgroundColour: 'red',
     } as Properties);
 
@@ -26,19 +26,19 @@ describe('style validation', () => {
   it('validates', () => {
     const logger = (console.warn = jest.fn());
 
-    clientValidationTransformer({
+    devToolTransformer({
       color: 'red',
     });
 
     expect(logger).toHaveBeenCalledTimes(0);
 
-    clientValidationTransformer({
+    devToolTransformer({
       color: ['red'],
     });
 
     expect(logger).toHaveBeenCalledTimes(0);
 
-    clientValidationTransformer({
+    devToolTransformer({
       backgroundColor: 'red',
     });
 

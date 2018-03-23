@@ -1,10 +1,10 @@
 // tslint:disable
 
 import { Properties } from '@glitz/type';
-import clientValidationTransformer from './';
+import devToolTransformer from './';
 
 const a: Properties = {};
-const b: Properties = clientValidationTransformer(a);
+const b: Properties = devToolTransformer(a);
 
 // Avoid unread variables type error
 b;
