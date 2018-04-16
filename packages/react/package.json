@@ -1,6 +1,6 @@
 {
   "name": "@glitz/react",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": "./cjs/index.js",
   "module": "./jsm/index.js",
   "esnext": "./esnext/index.js",
