@@ -670,7 +670,7 @@ describe('client', () => {
         for (property in properties) {
           const value = properties[property];
           if (property === 'appearance' && value === 'none') {
-            prefixed.mozAppearance = value;
+            prefixed.MozAppearance = value;
           }
           prefixed[property] = properties[property] as Properties[typeof property];
         }

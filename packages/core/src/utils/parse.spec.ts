@@ -6,8 +6,8 @@ describe('parse', () => {
     expect(parseDeclaration('backgroundColor', 'green')).toMatchSnapshot();
 
     expect(parseDeclaration('msOverflowStyle', 'auto')).toMatchSnapshot();
-    expect(parseDeclaration('mozAppearance', 'button')).toMatchSnapshot();
-    expect(parseDeclaration('webkitBorderBefore', 'red')).toMatchSnapshot();
+    expect(parseDeclaration('MozAppearance', 'button')).toMatchSnapshot();
+    expect(parseDeclaration('WebkitBorderBefore', 'red')).toMatchSnapshot();
   });
   it('parses block', () => {
     expect(parseDeclarationBlock({ color: 'red' })).toMatchSnapshot();
