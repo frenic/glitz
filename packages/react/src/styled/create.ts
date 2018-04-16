@@ -22,8 +22,6 @@ export type InnerRefProp = {
   innerRef?: React.Ref<any>;
 };
 
-type InnerType<TProps> = React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string;
-
 const ASSIGN_METHOD = '__GLITZ_ASSIGN';
 
 export default function create<TProps>(
@@ -144,10 +142,12 @@ function passingProps<T>(destination: any, props: any): T {
   return destination;
 }
 
-function isStyledComponent<TProps>(inner: InnerType<TProps>): inner is StyledComponent<TProps> {
+export function isStyledComponent<TProps>(inner: StyledComponent<TProps> | any): inner is StyledComponent<TProps> {
   return typeof inner === 'function' && ASSIGN_METHOD in inner;
 }
 
-function isCustomComponent<TProps>(inner: InnerType<TProps>): inner is React.ComponentType<TProps & StyledProps> {
+function isCustomComponent<TProps>(
+  inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
+): inner is React.ComponentType<TProps & StyledProps> {
   return typeof inner === 'function';
 }
