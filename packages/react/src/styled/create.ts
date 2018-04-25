@@ -6,7 +6,7 @@ export interface StyledComponent<TProps> extends React.ComponentClass<TProps & C
 
 export type StyledProps = {
   apply: () => string | undefined;
-  compose: (style?: Style) => Style | Style[];
+  compose: (style?: Style | Style[]) => Style | Style[];
 };
 
 export type StyledElementProps = {

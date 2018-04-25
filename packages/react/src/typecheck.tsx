@@ -86,6 +86,14 @@ const M = k(
 );
 <M css={{}} innerRef={c => c} />;
 
+function factory() {
+  return styled(
+    class extends React.Component<StyledProps> {
+      x = styled(({ compose }: StyledProps) => <styled.Div css={compose(this.props.compose())} />);
+    },
+  );
+}
+
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881
 // @styled({})
@@ -103,3 +111,6 @@ const M = k(
 //   }
 // };
 // <M css={{}} innerRef={c => c} />;
+
+// Avoid unread variables type error
+factory;
