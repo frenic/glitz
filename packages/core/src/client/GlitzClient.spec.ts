@@ -576,6 +576,18 @@ describe('client', () => {
       }),
     ).toBe('a');
 
+    expect(
+      client.injectStyle([
+        {
+          color: 'red',
+          paddingRight: '10px',
+        },
+        {
+          paddingRight: undefined,
+        },
+      ]),
+    ).toBe('a');
+
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
