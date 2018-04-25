@@ -78,7 +78,7 @@ export default function create<TProps>(
         return classNames;
       };
 
-      const compose = (additionalStyle?: Style): Style | Style[] => {
+      const compose = (additionalStyle?: Style | Style[]): Style | Style[] => {
         const dynamicStyle: Style | Style[] | undefined = this.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
@@ -142,7 +142,9 @@ function passingProps<T>(destination: any, props: any): T {
   return destination;
 }
 
-export function isStyledComponent<TProps>(inner: StyledComponent<TProps> | any): inner is StyledComponent<TProps> {
+function isStyledComponent<TProps>(
+  inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
+): inner is StyledComponent<TProps> {
   return typeof inner === 'function' && ASSIGN_METHOD in inner;
 }
 
