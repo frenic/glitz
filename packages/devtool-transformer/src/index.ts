@@ -18,8 +18,10 @@ if (process.env.NODE_ENV !== 'production') {
 
     const dummy = document.createElement('div').style;
 
-    function validateDeclaration(property: string, value: string | number) {
-      dummy.setProperty(property, String(value));
+    function validateDeclaration(property: string, fullValue: string | number) {
+      const [value, priority] = String(fullValue).split(/(?: !(important))$/);
+
+      dummy.setProperty(property, value, priority);
 
       const isValid = dummy.length > 0;
 

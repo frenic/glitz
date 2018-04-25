@@ -43,5 +43,11 @@ describe('style validation', () => {
     });
 
     expect(logger).toHaveBeenCalledTimes(0);
+
+    devToolTransformer({
+      backgroundColor: 'red !important',
+    });
+
+    expect(logger).toHaveBeenCalledTimes(0);
   });
 });
