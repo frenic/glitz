@@ -4,7 +4,9 @@ import { Context } from '../GlitzProvider';
 
 export const STYLED_ASSIGN_METHOD = '__GLITZ_ASSIGN';
 
-export interface StyledComponent<TProps> extends React.ComponentClass<TProps & CSSProp & InnerRefProp> {
+export type ExternalProps<TProps> = Pick<TProps, Exclude<keyof TProps, keyof StyledProps>>;
+
+export interface StyledComponent<TProps> extends React.ComponentClass<ExternalProps<TProps> & CSSProp & InnerRefProp> {
   [STYLED_ASSIGN_METHOD]: (assigningStyle?: Style[]) => StyledComponent<TProps>;
 }
 
@@ -27,7 +29,7 @@ export type InnerRefProp = {
 };
 
 export default function create<TProps>(
-  inner: string | StyledComponent<TProps> | React.ComponentType<TProps & StyledProps>,
+  inner: string | StyledComponent<TProps> | React.ComponentType<TProps>,
   originalStaticStyle: Style[],
 ): StyledComponent<TProps> {
   return isStyledComponent(inner)
@@ -36,10 +38,12 @@ export default function create<TProps>(
 }
 
 function factory<TProps>(
-  inner: string | React.ComponentType<TProps & StyledProps>,
+  inner: string | React.ComponentType<TProps>,
   originalStaticStyle: Style[],
 ): StyledComponent<TProps> {
-  class GlitzStyled extends React.Component<TProps & CSSProp & InnerRefProp> {
+  type InnerProps = ExternalProps<TProps>;
+
+  class GlitzStyled extends React.Component<InnerProps & CSSProp & InnerRefProp> {
     public static contextTypes = {
       glitz: () => null, // Just pass the damn thing
     };
@@ -47,7 +51,7 @@ function factory<TProps>(
     public static [STYLED_ASSIGN_METHOD](assigningStyle?: Style[]) {
       return factory(inner, assigningStyle ? originalStaticStyle.concat(assigningStyle) : originalStaticStyle);
     }
-    constructor(props: TProps, context: Context) {
+    constructor(props: InnerProps, context: Context) {
       super(props, context);
 
       if (process.env.NODE_ENV !== 'production') {
@@ -150,7 +154,7 @@ function passingProps<T>(destination: any, props: any): T {
 }
 
 function isStyledComponent<TProps>(
-  inner: string | StyledComponent<TProps> | React.ComponentType<TProps & StyledProps>,
+  inner: string | StyledComponent<TProps> | React.ComponentType<TProps>,
 ): inner is StyledComponent<TProps> {
   return typeof inner === 'function' && STYLED_ASSIGN_METHOD in inner;
 }
