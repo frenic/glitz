@@ -2,7 +2,11 @@ import { Style } from '@glitz/type';
 import * as React from 'react';
 import { Context } from '../GlitzProvider';
 
-export interface StyledComponent<TProps> extends React.ComponentClass<TProps & CSSProp & InnerRefProp> {}
+export const STYLED_ASSIGN_METHOD = '__GLITZ_ASSIGN';
+
+export interface StyledComponent<TProps> extends React.ComponentClass<TProps & CSSProp & InnerRefProp> {
+  [STYLED_ASSIGN_METHOD]: (assigningStyle?: Style[]) => StyledComponent<TProps>;
+}
 
 export type StyledProps = {
   apply: () => string | undefined;
@@ -22,24 +26,26 @@ export type InnerRefProp = {
   innerRef?: React.Ref<any>;
 };
 
-const ASSIGN_METHOD = '__GLITZ_ASSIGN';
-
 export default function create<TProps>(
-  inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
+  inner: string | StyledComponent<TProps> | React.ComponentType<TProps & StyledProps>,
   originalStaticStyle: Style[],
 ): StyledComponent<TProps> {
-  if (isStyledComponent(inner)) {
-    // @ts-ignore
-    return inner[ASSIGN_METHOD](originalStaticStyle);
-  }
+  return isStyledComponent(inner)
+    ? inner[STYLED_ASSIGN_METHOD](originalStaticStyle)
+    : factory(inner, originalStaticStyle);
+}
 
+function factory<TProps>(
+  inner: string | React.ComponentType<TProps & StyledProps>,
+  originalStaticStyle: Style[],
+): StyledComponent<TProps> {
   class GlitzStyled extends React.Component<TProps & CSSProp & InnerRefProp> {
     public static contextTypes = {
       glitz: () => null, // Just pass the damn thing
     };
     public static displayName: string;
-    public static [ASSIGN_METHOD](assigningStyle?: Style) {
-      return create(inner, assigningStyle ? originalStaticStyle.concat(assigningStyle) : originalStaticStyle);
+    public static [STYLED_ASSIGN_METHOD](assigningStyle?: Style[]) {
+      return factory(inner, assigningStyle ? originalStaticStyle.concat(assigningStyle) : originalStaticStyle);
     }
     constructor(props: TProps, context: Context) {
       super(props, context);
@@ -94,16 +100,17 @@ export default function create<TProps>(
         }
       };
 
-      this.render = isCustomComponent(inner)
-        ? () => {
-            const passProps = passingProps<TProps & StyledProps>({ apply, compose }, this.props);
-            return React.createElement(inner, passProps);
-          }
-        : () => {
-            const className = (this.props as any).className ? (this.props as any).className + ' ' + apply() : apply();
-            const passProps = passingProps<TProps & StyledElementProps>({ className }, this.props);
-            return React.createElement(inner, passProps);
-          };
+      this.render =
+        typeof inner === 'string'
+          ? () => {
+              const className = (this.props as any).className ? (this.props as any).className + ' ' + apply() : apply();
+              const passProps = passingProps<TProps & StyledElementProps>({ className }, this.props);
+              return React.createElement(inner, passProps);
+            }
+          : () => {
+              const passProps = passingProps<TProps & StyledProps>({ apply, compose }, this.props);
+              return React.createElement(inner, passProps);
+            };
     }
   }
 
@@ -143,13 +150,7 @@ function passingProps<T>(destination: any, props: any): T {
 }
 
 function isStyledComponent<TProps>(
-  inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
+  inner: string | StyledComponent<TProps> | React.ComponentType<TProps & StyledProps>,
 ): inner is StyledComponent<TProps> {
-  return typeof inner === 'function' && ASSIGN_METHOD in inner;
-}
-
-function isCustomComponent<TProps>(
-  inner: React.ComponentType<TProps & StyledProps> | StyledComponent<TProps> | string,
-): inner is React.ComponentType<TProps & StyledProps> {
-  return typeof inner === 'function';
+  return typeof inner === 'function' && STYLED_ASSIGN_METHOD in inner;
 }
