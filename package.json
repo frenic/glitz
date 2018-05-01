@@ -12,6 +12,7 @@
     "@types/react-test-renderer": "^16.0.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-context-patch": "^0.0.7",
     "gzip-size": "^4.1.0",
     "jest": "^22.4.3",
     "lerna": "^2.11.0",
