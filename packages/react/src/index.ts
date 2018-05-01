@@ -1,2 +1,2 @@
-export { default as GlitzProvider } from './GlitzProvider';
+export { default as GlitzProvider } from './components/GlitzProvider';
 export * from './styled';

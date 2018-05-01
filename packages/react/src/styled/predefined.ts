@@ -1,14 +1,14 @@
 import { Style } from '@glitz/type';
-import create from './create';
+import { factory } from './create';
 import { StyledElementComponents, StyledElementFunctions } from './types';
 
 function createPredefined(component: string) {
-  return (style: Style) => create(component, [style]);
+  return (style: Style) => factory(component, [style]);
 }
 
 export function assignPredefined<TTarget>(target: TTarget) {
   for (const element of predefinedElements) {
-    (target as any)[element[0].toUpperCase() + element.slice(1)] = create(element, []);
+    (target as any)[element[0].toUpperCase() + element.slice(1)] = factory(element, []);
     (target as any)[element] = createPredefined(element);
   }
   return target as TTarget & StyledElementFunctions & StyledElementComponents;

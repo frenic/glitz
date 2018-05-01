@@ -3,7 +3,7 @@
 import GlitzClient from '@glitz/core';
 import GlitzServer from '@glitz/core/server';
 import * as React from 'react';
-import GlitzProvider from './GlitzProvider';
+import GlitzProvider from './components/GlitzProvider';
 import { styled, StyledProps } from './styled';
 
 const client = new GlitzClient();

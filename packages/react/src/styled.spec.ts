@@ -4,7 +4,7 @@ import GlitzClient from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import GlitzProvider from './GlitzProvider';
+import GlitzProvider from './components/GlitzProvider';
 import { styled, StyledProps } from './styled';
 
 describe('react styled', () => {
@@ -12,7 +12,7 @@ describe('react styled', () => {
     const StyledComponent = styled(
       props => {
         expect(props.apply()).toBe('a');
-        expect(props.compose()).toEqual({ color: 'red' });
+        expect(props.compose()).toEqual([{ color: 'red' }]);
         return React.createElement('div');
       },
       { color: 'red' },
@@ -33,13 +33,13 @@ describe('react styled', () => {
 
     const StyledComponent1 = embeddedStyle(props => {
       expect(props.apply()).toBe('a');
-      expect(props.compose()).toEqual({ color: 'red' });
+      expect(props.compose()).toEqual([{ color: 'red' }]);
       return React.createElement('div');
     });
     const StyledComponent2 = embeddedStyle(
       props => {
         expect(props.apply()).toBe('b');
-        expect(props.compose()).toEqual({ color: 'green' });
+        expect(props.compose()).toEqual([{ color: 'red' }, { color: 'green' }]);
         return React.createElement('div');
       },
       { color: 'green' },
@@ -59,7 +59,7 @@ describe('react styled', () => {
   it('creates predefined styled component', () => {
     const StyledComponent = styled.div({ color: 'red' });
 
-    const component = renderer.create(
+    const tree = renderer.create(
       React.createElement(
         GlitzProvider,
         {
@@ -69,8 +69,6 @@ describe('react styled', () => {
       ),
     );
 
-    const tree = component.toJSON();
-
     expect(tree).toMatchSnapshot();
   });
   it('renders predefined styled component', () => {
@@ -79,7 +77,7 @@ describe('react styled', () => {
         css: { color: 'red' },
       });
 
-    const component = renderer.create(
+    const tree = renderer.create(
       React.createElement(
         GlitzProvider,
         {
@@ -89,32 +87,9 @@ describe('react styled', () => {
       ),
     );
 
-    const tree = component.toJSON();
-
     expect(tree).toMatchSnapshot();
   });
   it('assigns styled component', () => {
-    const FlattenComponentA = styled(
-      props => {
-        expect(props.compose()).toEqual({ fontSize: '24px', ':hover': { backgroundColor: 'green' } });
-        expect(props.apply()).toBe('a b');
-        return React.createElement('div');
-      },
-      { fontSize: '18px', ':hover': { color: 'red' } },
-    );
-
-    const FlattenComponentB = styled(FlattenComponentA, { fontSize: '24px', ':hover': { backgroundColor: 'green' } });
-
-    renderer.create(
-      React.createElement(
-        GlitzProvider,
-        {
-          glitz: new GlitzClient(),
-        },
-        React.createElement(FlattenComponentB),
-      ),
-    );
-
     const DeepComponentA = styled(
       props => {
         expect(props.compose()).toEqual([
@@ -134,7 +109,6 @@ describe('react styled', () => {
         GlitzProvider,
         {
           glitz: new GlitzClient(),
-          options: { enableDeepComposition: true },
         },
         React.createElement(DeepComponentB),
       ),
@@ -149,7 +123,7 @@ describe('react styled', () => {
       });
     });
 
-    const root1 = mount(
+    const tree1 = mount(
       React.createElement(
         GlitzProvider,
         {
@@ -159,7 +133,7 @@ describe('react styled', () => {
       ),
     );
 
-    const declaration1 = getComputedStyle(root1.getDOMNode());
+    const declaration1 = getComputedStyle(tree1.getDOMNode());
 
     expect(declaration1.getPropertyValue('color')).toBe('green');
 
@@ -172,7 +146,7 @@ describe('react styled', () => {
       { color: 'blue' },
     );
 
-    const root2 = mount(
+    const tree2 = mount(
       React.createElement(
         GlitzProvider,
         {
@@ -182,7 +156,7 @@ describe('react styled', () => {
       ),
     );
 
-    const declaration2 = getComputedStyle(root2.getDOMNode());
+    const declaration2 = getComputedStyle(tree2.getDOMNode());
 
     expect(declaration2.getPropertyValue('color')).toBe('blue');
 
