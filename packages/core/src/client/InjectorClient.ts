@@ -3,7 +3,6 @@
 import Injector from '../core/Injector';
 import { injectSheetRule } from '../utils/dom';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
-// import { validateStyle } from '../utils/style-validation';
 
 const CLASS_RULE_REGEX = /\.([a-z0-9]+)(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9]+)\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
@@ -42,7 +41,7 @@ export default class InjectorClient extends Injector {
 
     const injectNewClassRule = (className: string, block: string, pseudo?: string) => {
       const rule = formatClassRule(className, block, pseudo);
-      return injectSheetRule(styleElement, rule);
+      injectSheetRule(styleElement, rule);
     };
 
     const injectNewKeyframesRule = (name: string, blockList: string) => {

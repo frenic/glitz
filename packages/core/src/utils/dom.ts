@@ -1,8 +1,11 @@
 export function injectSheetRule(styleElement: HTMLStyleElement, rule: string) {
   const sheet = styleElement.sheet as CSSStyleSheet;
   const index = sheet.cssRules.length;
-  sheet.insertRule(rule, index);
-  return sheet.cssRules[index] as CSSStyleRule;
+  try {
+    sheet.insertRule(rule, index);
+  } finally {
+    // Ignore failing rules
+  }
 }
 
 export function createStyleElement(media?: string | null) {

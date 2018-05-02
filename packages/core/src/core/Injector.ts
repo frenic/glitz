@@ -17,7 +17,7 @@ export default class Injector {
     incrementClassHash: () => string,
     incrementKeyframesHash: () => string,
     incrementFontFaceHash: () => string,
-    injectNewClassRule?: (className: string, block: string, pseudo?: string) => CSSStyleRule,
+    injectNewClassRule?: (className: string, block: string, pseudo?: string) => void,
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
     injectNewFontFaceRule?: (name: string, block: string) => void,
   ) {
