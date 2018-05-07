@@ -4,13 +4,15 @@ export interface Style extends FeaturedProperties, PseudoMap {}
 
 export interface Properties extends CSS.PropertiesFallback<string | 0> {}
 
-export interface UntransformedProperties extends Omit<Properties, keyof TransformerProperties>, TransformerProperties {}
+export interface UntransformedProperties
+  extends Pick<Properties, Exclude<keyof Properties, keyof TransformerProperties>>,
+    TransformerProperties {}
 
 // Override properties using module augmentation
 interface TransformerProperties {}
 
 export interface FeaturedProperties
-  extends Omit<UntransformedProperties, keyof ExtendedProperties>,
+  extends Pick<UntransformedProperties, Exclude<keyof UntransformedProperties, keyof ExtendedProperties>>,
     ExtendedProperties {
   '@keyframes'?: FeaturedPropertiesList;
   '@font-face'?: FeaturedFontFace;
@@ -235,7 +237,7 @@ export interface FeaturedPropertiesList {
   [identifier: string]: Style;
 }
 
-export interface FontFace extends Omit<CSS.FontFaceFallback, 'fontFamily'> {}
+export interface FontFace extends Pick<CSS.FontFaceFallback, Exclude<keyof CSS.FontFaceFallback, 'fontFamily'>> {}
 
 export interface FeaturedFontFace extends FontFace {
   font?: {
@@ -253,6 +255,3 @@ export type FontFamilyProperty =
   | FeaturedFontFace
   | CSS.StandardLonghandProperties['fontFamily']
   | Array<FeaturedFontFace | CSS.StandardLonghandProperties['fontFamily']>;
-
-type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
-type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;

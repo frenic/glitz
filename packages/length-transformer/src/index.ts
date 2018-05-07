@@ -29,7 +29,7 @@ export type TimeUnit = 'ms' | 's';
 
 export type Options = {
   defaultUnit?: LengthUnit;
-} & { [property in keyof Glitz.Omit<Glitz.Properties, TimeProperties>]?: LengthUnit } &
+} & { [property in Exclude<keyof Glitz.Properties, TimeProperties>]?: LengthUnit } &
   { [property in TimeProperties]?: TimeUnit };
 
 const defaultTimeUnit = 'ms';
