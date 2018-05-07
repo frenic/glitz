@@ -2,9 +2,9 @@
   "name": "@glitz/core",
   "version": "1.1.5",
   "main": "./cjs/index.js",
-  "module": "./jsm/index.js",
+  "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
-  "types": "./esnext/index.d.ts",
+  "types": "./types/index.d.ts",
   "license": "MIT",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
@@ -15,14 +15,15 @@
     "@glitz/type": "^1.1.4"
   },
   "scripts": {
-    "clean": "rimraf cjs esnext jsm",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjsx2 index --jsm index && node ../../bundle.js src/server.ts --cjs server --jsm server",
+    "clean": "rimraf cjs esnext mjs types",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjsx2 index --esnext index --mjs index && node ../../bundle.js src/server.ts --cjs server --mjs server",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
     "cjs/",
     "esnext/",
-    "jsm/",
-    "server/"
+    "mjs/",
+    "server/",
+    "types"
   ]
 }

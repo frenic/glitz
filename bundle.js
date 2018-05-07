@@ -7,16 +7,18 @@ const typescript = require('rollup-plugin-typescript');
 const uglify = require('rollup-plugin-uglify');
 const resolver = require('rollup-plugin-node-resolve');
 
-const JSM_TYPE = Symbol();
 const CJS_SINGLE_TYPE = Symbol();
 const CJS_DOUBLE_TYPE = Symbol();
+const ESNEXT_TYPE = Symbol();
+const MJS_TYPE = Symbol();
 
 const [input, ...args] = process.argv.slice(process.argv.findIndex(arg => arg.endsWith('bundle.js')) + 1);
 const inputPath = path.join(process.cwd(), input);
 
-const jsm = args.indexOf('--jsm') !== -1;
 const cjsDouble = args.indexOf('--cjsx2') !== -1;
 const cjsSingle = args.indexOf('--cjs') !== -1;
+const esnext = args.indexOf('--esnext') !== -1;
+const mjs = args.indexOf('--mjs') !== -1;
 
 if (cjsSingle || cjsDouble) {
   const template = args[args.indexOf('--cjsx2') !== -1 ? args.indexOf('--cjsx2') + 1 : args.indexOf('--cjs') + 1];
@@ -53,17 +55,26 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-if (jsm) {
-  const template = args[args.indexOf('--jsm') + 1];
-  const developmentJsmBundlePath = resolvePath(template + '.js', true);
-  build(inputPath, developmentJsmBundlePath, JSM_TYPE, false).catch(error => {
+if (mjs) {
+  const template = args[args.indexOf('--mjs') + 1];
+  const developmentmjsBundlePath = resolvePath(template + '.js', MJS_TYPE);
+  build(inputPath, developmentmjsBundlePath, MJS_TYPE, false).catch(error => {
     console.log(error);
     process.exit(1);
   });
 }
 
-function resolvePath(relative, jsm = false) {
-  return path.join(process.cwd(), jsm ? 'jsm' : 'cjs', relative);
+if (esnext) {
+  const template = args[args.indexOf('--esnext') + 1];
+  const developmentmjsBundlePath = resolvePath(template + '.js', ESNEXT_TYPE);
+  build(inputPath, developmentmjsBundlePath, ESNEXT_TYPE, false).catch(error => {
+    console.log(error);
+    process.exit(1);
+  });
+}
+
+function resolvePath(relative, type) {
+  return path.join(process.cwd(), type === MJS_TYPE ? 'mjs' : type === ESNEXT_TYPE ? 'esnext' : 'cjs', relative);
 }
 
 async function build(input, output, type, production) {
@@ -79,7 +90,7 @@ async function build(input, output, type, production) {
         ...require('./tsconfig.base.json').compilerOptions,
         // @ts-ignore
         ...require('./tsconfig.json').compilerOptions,
-        target: 'es5',
+        target: type === ESNEXT_TYPE ? 'esnext' : 'es5',
         module: 'es6',
         declaration: false,
       }),
@@ -96,7 +107,7 @@ async function build(input, output, type, production) {
 
   const generate = bundle.generate({
     name: 'glitz',
-    format: type === JSM_TYPE ? 'es' : 'cjs',
+    format: type === MJS_TYPE || type === ESNEXT_TYPE ? 'es' : 'cjs',
     globals: { react: 'React' },
   });
 

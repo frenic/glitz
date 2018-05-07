@@ -2,7 +2,8 @@ node_modules/
 .cache/
 cjs/
 esnext/
-jsm/
+mjs/
+types/
 etc/
 dist/
 package.json

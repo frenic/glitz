@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./esnext"
+    "outDir": "./types",
+    "emitDeclarationOnly": true
   },
   "exclude": ["server/", "**/*.spec.ts", "**/typecheck.ts", "**/typecheck.tsx"]
 }
