@@ -8,13 +8,18 @@ export const STYLED_ASSIGN_METHOD = '__GLITZ_ASSIGN';
 
 export type ExternalProps<TProps> = Pick<TProps, Exclude<keyof TProps, keyof StyledProps>>;
 
+// To provide proper type errors for `Style` we create an interface of `Style[]`
+// and makes sure it's first in order
+export interface ArrayStyle extends Array<Style> {}
+export type Styles = ArrayStyle | Style;
+
 export interface StyledComponent<TProps> extends React.ComponentClass<ExternalProps<TProps> & CSSProp & InnerRefProp> {
-  [STYLED_ASSIGN_METHOD]: (assigningStyle?: Style[]) => StyledComponent<TProps>;
+  [STYLED_ASSIGN_METHOD]: (assigningStyle?: ArrayStyle) => StyledComponent<TProps>;
 }
 
 export type StyledProps = {
   apply: () => string | undefined;
-  compose: (style?: Style | Style[]) => Style | Style[];
+  compose: (style?: Styles) => Styles;
 };
 
 export type StyledElementProps = {
@@ -22,8 +27,7 @@ export type StyledElementProps = {
 };
 
 export type CSSProp = {
-  // `any[]` details type error details on `Style`, should be `Style[]` when conditional types are released
-  css?: Style | any[];
+  css?: Styles;
 };
 
 export type InnerRefProp = {
@@ -32,7 +36,7 @@ export type InnerRefProp = {
 
 export default function create<TProps>(
   Inner: string | StyledComponent<TProps> | React.ComponentType<TProps>,
-  originalStaticStyle: Style[],
+  originalStaticStyle: ArrayStyle,
 ): StyledComponent<TProps> {
   return isStyledComponent(Inner)
     ? Inner[STYLED_ASSIGN_METHOD](originalStaticStyle)
@@ -41,7 +45,7 @@ export default function create<TProps>(
 
 export function factory<TProps>(
   Inner: string | React.ComponentType<TProps>,
-  staticStyle: Style[],
+  staticStyle: ArrayStyle,
 ): StyledComponent<TProps> {
   type Props = ExternalProps<TProps> & CSSProp & InnerRefProp;
   type InternalProps = {
@@ -65,7 +69,7 @@ export function factory<TProps>(
       let cache: string | null = null;
 
       const apply = (): string | undefined => {
-        const styles: Style | Style[] = compose();
+        const styles: Styles = compose();
 
         if (!styles) {
           return;
@@ -84,14 +88,14 @@ export function factory<TProps>(
         return classNames;
       };
 
-      const compose = (additionalStyle?: Style | Style[]): Style | Style[] => {
-        const dynamicStyle: Style | Style[] | undefined = this.props.props.css;
+      const compose = (additionalStyle?: Styles): Styles => {
+        const dynamicStyle: Styles | undefined = this.props.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
           return staticStyle;
         }
 
-        const styles = ([] as Style[]).concat(additionalStyle || [], staticStyle, dynamicStyle || []);
+        const styles = ([] as ArrayStyle).concat(additionalStyle || [], staticStyle, dynamicStyle || []);
 
         return styles;
       };
@@ -119,7 +123,7 @@ export function factory<TProps>(
   }
 
   class GlitzContext extends React.Component<Props> {
-    public static [STYLED_ASSIGN_METHOD](assigningStyle?: Style[]) {
+    public static [STYLED_ASSIGN_METHOD](assigningStyle?: ArrayStyle) {
       return factory(Inner, assigningStyle ? staticStyle.concat(assigningStyle) : staticStyle);
     }
     public render() {
