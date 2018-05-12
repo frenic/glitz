@@ -1,6 +1,7 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
-import create, { StyledComponent, StyledProps } from './create';
+import create from './create';
+import { StyledComponent, StyledProps } from './types';
 
 export interface StyledDecorator {
   <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
