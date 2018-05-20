@@ -3,7 +3,7 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
 import { Consumer, Context } from '../components/context';
-import { CSSProp, InnerRefProp, StyledComponent, StyledElementProps, StyledProps } from './types';
+import { CSSProp, StyledComponent, StyledElementProps, StyledProps } from './types';
 
 export const STYLED_ASSIGN_METHOD = '__GLITZ_ASSIGN';
 
@@ -29,7 +29,7 @@ export function factory<TProps>(
   inner: string | React.ComponentType<TProps>,
   staticStyle: StyleArray,
 ): StyledComponent<TProps> {
-  type Props = ExternalProps<TProps> & CSSProp & InnerRefProp;
+  type Props = ExternalProps<TProps> & CSSProp;
 
   class GlitzStyled extends React.Component<Props> {
     public static displayName: string;

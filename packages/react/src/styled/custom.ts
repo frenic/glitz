@@ -1,19 +1,31 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
 import create from './create';
-import { StyledComponent, StyledProps } from './types';
+import { StyledComponent, StyledProps, WithInnerRefProp } from './types';
 
 export interface StyledDecorator {
   <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
-  <TProps extends StyledProps>(component: React.ComponentType<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps extends StyledProps>(component: React.StatelessComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
+    component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
+    style?: Style,
+  ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
 }
 
 export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
 
 export function customStyled<TProps extends StyledProps>(
-  component: React.ComponentType<TProps>,
+  component: React.StatelessComponent<TProps>,
   style?: Style,
 ): StyledComponent<TProps>;
+
+export function customStyled<
+  TProps extends StyledProps,
+  TInstance extends React.Component<TProps, React.ComponentState>
+>(
+  component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
+  style?: Style,
+): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
 
 export function customStyled(style: Style): StyledDecorator;
 
