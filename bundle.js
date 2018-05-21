@@ -57,8 +57,8 @@ if (process.env.NODE_ENV === 'production') {
 
 if (mjs) {
   const template = args[args.indexOf('--mjs') + 1];
-  const developmentmjsBundlePath = resolvePath(template + '.js', MJS_TYPE);
-  build(inputPath, developmentmjsBundlePath, MJS_TYPE, false).catch(error => {
+  const developmentMjsBundlePath = resolvePath(template + '.js', MJS_TYPE);
+  build(inputPath, developmentMjsBundlePath, MJS_TYPE, false).catch(error => {
     console.log(error);
     process.exit(1);
   });
@@ -66,8 +66,8 @@ if (mjs) {
 
 if (esnext) {
   const template = args[args.indexOf('--esnext') + 1];
-  const developmentmjsBundlePath = resolvePath(template + '.js', ESNEXT_TYPE);
-  build(inputPath, developmentmjsBundlePath, ESNEXT_TYPE, false).catch(error => {
+  const developmentEsnextBundlePath = resolvePath(template + '.js', ESNEXT_TYPE);
+  build(inputPath, developmentEsnextBundlePath, ESNEXT_TYPE, false).catch(error => {
     console.log(error);
     process.exit(1);
   });

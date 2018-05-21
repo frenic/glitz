@@ -1,4 +1,4 @@
-import GlitzServer from '@glitz/core/server';
+import { GlitzServer } from '@glitz/core';
 import numberToLength, { createNumberToLengthTransformer } from './';
 
 describe('number to unit', () => {

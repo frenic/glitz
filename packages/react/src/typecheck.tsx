@@ -1,7 +1,6 @@
 // tslint:disable
 
-import GlitzClient from '@glitz/core';
-import GlitzServer from '@glitz/core/server';
+import { GlitzClient, GlitzServer } from '@glitz/core';
 import * as React from 'react';
 import GlitzProvider from './components/GlitzProvider';
 import { styled, StyledProps } from './styled';

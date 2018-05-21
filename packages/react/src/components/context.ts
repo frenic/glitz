@@ -1,5 +1,4 @@
-import GlitzClient from '@glitz/core';
-import GlitzServer from '@glitz/core/server';
+import { GlitzClient, GlitzServer } from '@glitz/core';
 import * as React from 'react';
 
 type Default = {

@@ -28,6 +28,6 @@
     "cjs/",
     "esnext/",
     "mjs/",
-    "types"
+    "types/"
   ]
 }

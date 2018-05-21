@@ -1,4 +1,4 @@
-import GlitzServer from '@glitz/core/server';
+import { GlitzServer } from '@glitz/core';
 import prefixer from './';
 
 describe('prefixer', () => {

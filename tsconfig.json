@@ -4,10 +4,9 @@
     "baseUrl": ".",
     "paths": {
       "@glitz/*": ["./packages/*/src"],
-      "@glitz/type": ["./packages/type"],
-      "@glitz/core/server": ["./packages/core/src/server"]
+      "@glitz/type": ["./packages/type"]
     },
     "noEmit": true
   },
-  "exclude": ["packages/core/server/", "**/cjs/", "**/esnext/", "**/mjs/", "**/types/"]
+  "exclude": ["**/cjs/", "**/esnext/", "**/mjs/", "**/types/"]
 }

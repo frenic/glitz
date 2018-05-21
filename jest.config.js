@@ -2,7 +2,6 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js'],
   moduleNameMapper: {
     '^@glitz/core$': '<rootDir>/packages/core/src',
-    '^@glitz/core/server$': '<rootDir>/packages/core/src/server',
     '^@glitz/react$': '<rootDir>/packages/react/src',
     '^@glitz/prefixer$': '<rootDir>/packages/prefixer/src',
   },
