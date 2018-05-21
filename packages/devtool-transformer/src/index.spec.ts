@@ -1,5 +1,5 @@
 import { Properties } from '@glitz/type';
-import devToolTransformer from './index';
+import devToolTransformer, { createDevToolTransformer } from './index';
 
 describe('style validation', () => {
   it('invalidates', () => {
@@ -47,6 +47,28 @@ describe('style validation', () => {
     devToolTransformer({
       backgroundColor: 'red !important',
     });
+
+    expect(logger).toHaveBeenCalledTimes(0);
+  });
+  it('ignores property', () => {
+    const logger = (console.warn = jest.fn());
+
+    createDevToolTransformer({ ignoreProperties: 'colour' })({
+      colour: 'red',
+    } as Properties);
+
+    expect(logger).toHaveBeenCalledTimes(0);
+
+    createDevToolTransformer({ ignoreProperties: /^background/ })({
+      backgroundColour: 'red',
+    } as Properties);
+
+    expect(logger).toHaveBeenCalledTimes(0);
+
+    createDevToolTransformer({ ignoreProperties: ['colour', /^background/] })({
+      colour: 'red',
+      backgroundColour: 'red',
+    } as Properties);
 
     expect(logger).toHaveBeenCalledTimes(0);
   });

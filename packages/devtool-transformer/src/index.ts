@@ -1,8 +1,13 @@
 import { Properties, UntransformedProperties } from '@glitz/type';
 
-let devToolTransformer: (declarations: UntransformedProperties) => Properties = (
-  declarations: UntransformedProperties,
-) => declarations as Properties;
+export type Options = {
+  ignoreProperties?: string | RegExp | Array<string | RegExp>;
+};
+
+export let createDevToolTransformer: (
+  options?: Options,
+) => (declarations: UntransformedProperties) => Properties = () => (declarations: UntransformedProperties) =>
+  declarations as Properties;
 
 if (process.env.NODE_ENV !== 'production') {
   if (typeof document !== 'undefined') {
@@ -32,12 +37,27 @@ if (process.env.NODE_ENV !== 'production') {
       return isValid;
     }
 
-    devToolTransformer = declarations => {
+    createDevToolTransformer = (options = {}) => declarations => {
       const properties = Object.keys(declarations) as Array<keyof UntransformedProperties>;
+      const ignores =
+        typeof options.ignoreProperties === 'string' || options.ignoreProperties instanceof RegExp
+          ? [options.ignoreProperties]
+          : options.ignoreProperties;
 
       for (const property of properties) {
         const hyphenatedProperty = hyphenateProperty(property);
         const value = declarations[property];
+
+        if (
+          ignores &&
+          !ignores.every(
+            ignore =>
+              (typeof ignore === 'string' && ignore !== hyphenatedProperty) ||
+              (ignore instanceof RegExp && !ignore.test(hyphenatedProperty)),
+          )
+        ) {
+          continue;
+        }
 
         if (Array.isArray(value)) {
           for (const entry of value) {
@@ -78,4 +98,4 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-export default devToolTransformer;
+export default createDevToolTransformer();
