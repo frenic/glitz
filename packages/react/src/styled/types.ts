@@ -1,6 +1,6 @@
-import { Style } from '@glitz/type';
+import { Style, StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
-import { ExternalProps, StyleArray, STYLED_ASSIGN_METHOD, Styles } from './create';
+import { ExternalProps, STYLED_ASSIGN_METHOD } from './create';
 
 export interface StyledComponent<TProps> extends React.ComponentClass<ExternalProps<TProps> & CSSProp> {
   [STYLED_ASSIGN_METHOD]: (assigningStyle?: StyleArray) => StyledComponent<TProps>;
@@ -8,7 +8,7 @@ export interface StyledComponent<TProps> extends React.ComponentClass<ExternalPr
 
 export type StyledProps = {
   apply: () => string | undefined;
-  compose: (style?: Styles) => Styles;
+  compose: (style?: StyleOrStyleArray) => StyleOrStyleArray;
 };
 
 export type StyledElementProps = {
@@ -16,7 +16,7 @@ export type StyledElementProps = {
 };
 
 export type CSSProp = {
-  css?: Styles;
+  css?: StyleOrStyleArray;
 };
 
 export type InnerRefProp<TInstance> = {

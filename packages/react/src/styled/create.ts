@@ -1,6 +1,4 @@
-// tslint:disable max-classes-per-file
-
-import { Style } from '@glitz/type';
+import { StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
 import { Consumer, Context } from '../components/context';
 import { CSSProp, StyledComponent, StyledElementProps, StyledProps } from './types';
@@ -8,11 +6,6 @@ import { CSSProp, StyledComponent, StyledElementProps, StyledProps } from './typ
 export const STYLED_ASSIGN_METHOD = '__GLITZ_ASSIGN';
 
 export type ExternalProps<TProps> = Pick<TProps, Exclude<keyof TProps, keyof StyledProps>>;
-
-// To provide proper type errors for `Style` we create an interface of `Style[]`
-// and makes sure it's first in order
-export interface StyleArray extends Array<Style> {}
-export type Styles = StyleArray | Style;
 
 type ApplyFunction = () => string | undefined;
 
@@ -52,7 +45,7 @@ export function factory<TProps>(
         lastContext = context;
 
         return (lastApplier = () => {
-          const styles: Styles = compose();
+          const styles: StyleOrStyleArray = compose();
 
           if (!styles) {
             return;
@@ -72,8 +65,8 @@ export function factory<TProps>(
         });
       };
 
-      const compose = (additionalStyle?: Styles): Styles => {
-        const dynamicStyle: Styles | undefined = this.props.css;
+      const compose = (additionalStyle?: StyleOrStyleArray): StyleOrStyleArray => {
+        const dynamicStyle: StyleOrStyleArray | undefined = this.props.css;
 
         if (!dynamicStyle && !additionalStyle) {
           return staticStyle;

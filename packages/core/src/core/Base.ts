@@ -1,4 +1,4 @@
-import { FontFace, PropertiesList, Style } from '@glitz/type';
+import { FontFace, PropertiesList, Style, StyleOrStyleArray } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
@@ -15,7 +15,7 @@ const MEDIA_IDENTIFIER = '@';
 const PSEUDO_IDENTIFIER = ':';
 
 export default class Base<TStyle extends Style> {
-  public injectStyle: (styles: TStyle | TStyle[]) => string;
+  public injectStyle: (styles: StyleOrStyleArray<TStyle>) => string;
   constructor(
     injector: (media?: string) => InjectorClient | InjectorServer,
     transformer: Transformer | undefined,
@@ -230,7 +230,7 @@ export default class Base<TStyle extends Style> {
             return classNames;
           };
 
-    this.injectStyle = (styles: TStyle | TStyle[]) => {
+    this.injectStyle = (styles: StyleOrStyleArray<TStyle>) => {
       const result: Index = {};
 
       if (Array.isArray(styles)) {

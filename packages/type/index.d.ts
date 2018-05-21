@@ -4,6 +4,11 @@ export interface Style extends FeaturedProperties, PseudoMap {}
 
 export interface Properties extends CSS.PropertiesFallback<string | 0> {}
 
+// To provide proper type errors for `Style` we create an interface of `Style[]`
+// and makes sure it's first in order
+export interface StyleArray<TStyle = Style> extends Array<TStyle> {}
+export type StyleOrStyleArray<TStyle = Style> = StyleArray<TStyle> | TStyle;
+
 export interface UntransformedProperties
   extends Pick<Properties, Exclude<keyof Properties, keyof TransformerProperties>>,
     TransformerProperties {}
