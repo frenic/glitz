@@ -4,7 +4,7 @@ const gzipSize = require('gzip-size');
 const { rollup } = require('rollup');
 const replace = require('rollup-plugin-replace');
 const typescript = require('rollup-plugin-typescript');
-const uglify = require('rollup-plugin-uglify');
+const { uglify } = require('rollup-plugin-uglify');
 const resolver = require('rollup-plugin-node-resolve');
 
 const CJS_SINGLE_TYPE = Symbol();
