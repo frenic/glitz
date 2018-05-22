@@ -23,20 +23,20 @@ const Box = styled.div({
 
 ## Table of content
 
-- [!Glitz](#glitzhttps---githubcom-frenic-glitz-raw-master-glitzsvgsanitizetrue)
-  - [Table of content](#table-of-content)
-  - [Getting started](#getting-started)
-  - [API](#api)
-    - [`<GlitzProvider />`](#glitzprovider)
-    - [`styled.tagname`](#styledtagnamestaticstyle--style)
-    - [`<styled.[Tagname] />`](#styledtagname)
-    - [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent--componenttype--staticstyle--style)
-      - [Prop `apply()`](#prop-apply)
-      - [Prop `compose(composedStyle?: Style)`](#prop-composecomposedstyle--style)
-    - [`styled(embeddedStyle: Style)`](#styledembeddedstyle--style)
-  - [Deep style composition](#deep-style-composition)
-  - [TypeScript](#typescript)
-  - [Server rendering](#server-rendering)
+* [!Glitz](#glitzhttps---githubcom-frenic-glitz-raw-master-glitzsvgsanitizetrue)
+  * [Table of content](#table-of-content)
+  * [Getting started](#getting-started)
+  * [API](#api)
+    * [`<GlitzProvider />`](#glitzprovider)
+    * [`styled.tagname`](#styledtagnamestaticstyle--style)
+    * [`<styled.[Tagname] />`](#styledtagname)
+    * [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent--componenttype--staticstyle--style)
+      * [Prop `apply()`](#prop-apply)
+      * [Prop `compose(composedStyle?: Style)`](#prop-composecomposedstyle--style)
+    * [`styled(embeddedStyle: Style)`](#styledembeddedstyle--style)
+  * [Deep style composition](#deep-style-composition)
+  * [TypeScript](#typescript)
+  * [Server rendering](#server-rendering)
 
 ## Getting started
 

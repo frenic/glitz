@@ -1,4 +1,4 @@
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 import { Consumer, Context } from './context';

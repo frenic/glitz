@@ -1,15 +1,12 @@
 import { Style } from '@glitz/type';
-import Base, { DEFAULT_HYDRATE_CLASS_NAME } from '../core/Base';
-import { Options } from '../types/options';
+import Base from '../core/Base';
+import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 
 export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
-  constructor(
-    styleElements?: HTMLStyleElement[] | NodeListOf<Element> | HTMLCollectionOf<Element> | 'auto' | null,
-    options: Options = {},
-  ) {
+  constructor(options: Options = {}) {
     const prefix = options.prefix;
     const classHasher = createHashCounter(prefix);
     const keyframesHasher = createHashCounter(prefix);
@@ -55,25 +52,12 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
     super(injector, options.transformer, options.atomic);
 
-    if (styleElements === 'auto') {
-      styleElements = document.getElementsByClassName(DEFAULT_HYDRATE_CLASS_NAME) as HTMLCollectionOf<HTMLStyleElement>;
-    }
+    const preRenderStyles = document.querySelectorAll(
+      `[data-${options.identifier || DEFAULT_HYDRATION_IDENTIFIER}]`,
+    ) as NodeListOf<HTMLStyleElement>;
 
-    if (styleElements) {
-      if (process.env.NODE_ENV !== 'production') {
-        if (typeof (styleElements as any)[Symbol.iterator] !== 'function') {
-          throw new Error(
-            'The argument passed to `GlitzClient` needs to be an iterable list of style elements like an array or an array-like object (using e.g. `document.getElementsByClassName`, `document.querySelectorAll`)',
-          );
-        }
-        if (styleElements.length === 0) {
-          console.warn(
-            'The argument passed to `GlitzClient` with style elements was empty so there will be no hydrated CSS from the server',
-          );
-        }
-      }
-
-      for (const element of (styleElements as any) as Iterable<HTMLStyleElement>) {
+    if (preRenderStyles) {
+      for (const element of preRenderStyles) {
         // Injector for style elements without `media` is stored with an empty key. So if there's any reason to have
         // more than one of these in the future we need to change that part.
         const media = element.media;

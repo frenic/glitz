@@ -8,7 +8,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "lib": ["es6", "dom"],
+    "lib": ["es6", "dom", "dom.iterable"],
     "experimentalDecorators": true
   }
 }

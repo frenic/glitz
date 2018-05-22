@@ -1,4 +1,4 @@
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import prefixerTransformer from '@glitz/prefixer-transformer';
 import { GlitzProvider } from '@glitz/react';
 import * as React from 'react';
@@ -13,7 +13,7 @@ function mediaQuerySorter(a: string, b: string) {
   return indexA - indexB;
 }
 
-const glitz = new GlitzClient(null, { transformer: prefixerTransformer, mediaOrder: mediaQuerySorter });
+const glitz = new GlitzClient({ transformer: prefixerTransformer, mediaOrder: mediaQuerySorter });
 
 render(
   <GlitzProvider glitz={glitz}>

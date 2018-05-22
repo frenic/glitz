@@ -1,5 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`prefixer injects prefixed atomic style 1`] = `"<style class=\\"__glitz__\\">.a{display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}</style>"`;
+exports[`prefixer injects prefixed atomic style 1`] = `"<style data-glitz>.a{display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}</style>"`;
 
-exports[`prefixer injects prefixed non-atomic style 1`] = `"<style class=\\"__glitz__\\">.a{display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}</style>"`;
+exports[`prefixer injects prefixed non-atomic style 1`] = `"<style data-glitz>.a{display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}</style>"`;

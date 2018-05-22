@@ -1,6 +1,6 @@
 // tslint:disable
 
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import numberToLength, { createNumberToLengthTransformer } from './';
 
 const a = numberToLength({
@@ -13,15 +13,15 @@ const a = numberToLength({
   animationDuration: 1,
 });
 
-const glitz1 = new GlitzClient(null, { transformer: numberToLength });
+const glitz1 = new GlitzClient({ transformer: numberToLength });
 
 const b: string = glitz1.injectStyle({ width: 1, height: [1, 'max-content'], padding: { left: 1 } });
 
-const glitz2 = new GlitzClient(null, { transformer: createNumberToLengthTransformer({ defaultUnit: 'rem' }) });
+const glitz2 = new GlitzClient({ transformer: createNumberToLengthTransformer({ defaultUnit: 'rem' }) });
 
 const c: string = glitz2.injectStyle({ width: 1, height: [1, 'max-content'], padding: { left: 1 } });
 
-const glitz3 = new GlitzClient(null, {
+const glitz3 = new GlitzClient({
   transformer: createNumberToLengthTransformer({ animationDuration: 'ms', lineHeight: 'em' }),
 });
 

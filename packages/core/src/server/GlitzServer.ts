@@ -1,6 +1,6 @@
 import { Style } from '@glitz/type';
-import Base, { DEFAULT_HYDRATE_CLASS_NAME } from '../core/Base';
-import { Options } from '../types/options';
+import Base from '../core/Base';
+import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 
@@ -24,14 +24,15 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
 
     super(injector, options.transformer, options.atomic);
 
-    this.getStyleMarkup = (className = DEFAULT_HYDRATE_CLASS_NAME) => {
+    this.getStyleMarkup = () => {
+      const attribute = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
       let markup = '';
       if (plain) {
-        markup += `<style class="${className}">${plain.getStyle()}</style>`;
+        markup += `<style data-${attribute}>${plain.getStyle()}</style>`;
       }
       const medias = options.mediaOrder ? Object.keys(mediaIndex).sort(options.mediaOrder) : Object.keys(mediaIndex);
       for (const media of medias) {
-        markup += `<style class="${className}" media="${media}">${mediaIndex[media].getStyle()}</style>`;
+        markup += `<style data-${attribute} media="${media}">${mediaIndex[media].getStyle()}</style>`;
       }
       return markup;
     };

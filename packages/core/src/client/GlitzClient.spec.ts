@@ -16,7 +16,7 @@ beforeEach(() => {
 describe('client', () => {
   it('injects plain rule', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
 
@@ -27,7 +27,7 @@ describe('client', () => {
   });
   it('injects shorthand rule', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
@@ -104,7 +104,7 @@ describe('client', () => {
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
     expect(client.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
@@ -116,7 +116,7 @@ describe('client', () => {
   });
   it('injects nested pseudo rule', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ ':first-child': { ':hover': { color: 'red' } } })).toBe('a');
 
@@ -128,7 +128,7 @@ describe('client', () => {
   it('injects media rule', () => {
     const style = createStyle();
     const media = createStyle('(min-width: 768px)');
-    const client = new GlitzClient<TestStyle>([style, media]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
     expect(client.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
@@ -144,7 +144,7 @@ describe('client', () => {
   });
   it('injects media elements in certain order', () => {
     const order = ['(min-width: 100px)', '(min-width: 200px)', '(min-width: 1000px)'];
-    const client = new GlitzClient<TestStyle>(null, {
+    const client = new GlitzClient<TestStyle>({
       mediaOrder: (a: string, b: string) => {
         const indexA = order.indexOf(a);
         const indexB = order.indexOf(b);
@@ -177,7 +177,7 @@ describe('client', () => {
   });
   it('cache declarations', () => {
     let count = 0;
-    const client = new GlitzClient<TestStyle>(null, {
+    const client = new GlitzClient<TestStyle>({
       transformer: declaration => {
         count++;
         return declaration as Properties;
@@ -200,7 +200,7 @@ describe('client', () => {
   it('injects atomic rules', () => {
     const style = createStyle();
     const media = createStyle('(min-width: 768px)');
-    const client = new GlitzClient<TestStyle>([style, media]);
+    const client = new GlitzClient<TestStyle>();
     const sheet = style.sheet as CSSStyleSheet;
     const mediaSheet = media.sheet as CSSStyleSheet;
 
@@ -238,7 +238,7 @@ describe('client', () => {
   it('injects non-atomic rules', () => {
     const style = createStyle();
     const media = createStyle('(min-width: 768px)');
-    const client = new GlitzClient<TestStyle>([style, media], { atomic: false });
+    const client = new GlitzClient<TestStyle>({ atomic: false });
     const sheet = style.sheet as CSSStyleSheet;
     const mediaSheet = media.sheet as CSSStyleSheet;
 
@@ -267,7 +267,7 @@ describe('client', () => {
   });
   it('injects keyframes rule', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
 
@@ -292,7 +292,7 @@ describe('client', () => {
   });
   it('injects font face rule', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
@@ -381,7 +381,7 @@ describe('client', () => {
     const style1 = createStyle();
     const style2 = createStyle('(min-width: 768px)');
     const style3 = createStyle('(min-width: 992px)');
-    const client = new GlitzClient<TestStyle>([style1, style2, style3]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
@@ -409,7 +409,7 @@ describe('client', () => {
   it('injects rule deeply', () => {
     const style = createStyle();
     const media = createStyle('(min-width: 768px)');
-    const client = new GlitzClient<TestStyle>([style, media]);
+    const client = new GlitzClient<TestStyle>();
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(client.injectStyle([{ color: 'green' }, { color: 'red' }])).toBe('a');
@@ -518,7 +518,7 @@ describe('client', () => {
   });
   it('preserves order', () => {
     const style1 = createStyle();
-    const atomic = new GlitzClient<TestStyle>([style1]);
+    const atomic = new GlitzClient<TestStyle>();
 
     const sheet1 = style1.sheet as CSSStyleSheet;
 
@@ -541,8 +541,10 @@ describe('client', () => {
     expect(sheet1.cssRules[3].cssText).toMatchSnapshot();
     expect(sheet1.cssRules[4].cssText).toMatchSnapshot();
 
+    style1.remove();
+
     const style2 = createStyle();
-    const nonAtomic = new GlitzClient<TestStyle>([style2], { atomic: false });
+    const nonAtomic = new GlitzClient<TestStyle>({ atomic: false });
 
     const sheet2 = style2.sheet as CSSStyleSheet;
 
@@ -564,7 +566,7 @@ describe('client', () => {
   });
   it('deletes properties', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
@@ -594,39 +596,39 @@ describe('client', () => {
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
   });
   it('hydrates plain rule', () => {
-    const style = createStyle(null, '.a{color:red}.b{color:green}');
-    const client = new GlitzClient<TestStyle>([style]);
+    createStyle(null, '.a{color:red}.b{color:green}');
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ color: 'green' })).toBe('b');
   });
   it('hydrates media rule', () => {
-    const style = createStyle(null, '.a{color:red}.b:hover{color:green}');
-    const media = createStyle('(min-width: 768px)', '.c{color:blue}.d:hover{color:white}');
-    const client = new GlitzClient<TestStyle>([style, media]);
+    createStyle(null, '.a{color:red}.b:hover{color:green}');
+    createStyle('(min-width: 768px)', '.c{color:blue}.d:hover{color:white}');
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'blue', ':hover': { color: 'white' } } })).toBe(
       'c d',
     );
   });
   it('hydrates keyframes rule', () => {
-    const style = createStyle(
+    createStyle(
       null,
       '.a{animation-name:a}.b{animation-name:b}@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}',
     );
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ '@keyframes': { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
     expect(client.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
     expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
   });
   it('hydrates font face rule', () => {
-    const style = createStyle(
+    createStyle(
       null,
       '.a{font-family:a}.b{font-family:b}.c{font-family:b,sans-serif}' +
         "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}" +
         "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:b}",
     );
-    const client = new GlitzClient<TestStyle>([style]);
+    const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
@@ -660,10 +662,10 @@ describe('client', () => {
     ).toBe('c');
   });
   it('hydrates multiple different combinations', () => {
-    const style1 = createStyle(null, '.a{color:red}');
-    const style2 = createStyle('(min-width: 768px)', '.b{color:green}');
-    const style3 = createStyle('(min-width: 992px)', '.c{color:blue}');
-    const client = new GlitzClient<TestStyle>([style1, style2, style3]);
+    createStyle(null, '.a{color:red}');
+    createStyle('(min-width: 768px)', '.b{color:green}');
+    createStyle('(min-width: 992px)', '.c{color:blue}');
+    const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
@@ -675,7 +677,7 @@ describe('client', () => {
   });
   it('applies transformer', () => {
     const style = createStyle();
-    const client = new GlitzClient<TestStyle>([style], {
+    const client = new GlitzClient<TestStyle>({
       transformer: properties => {
         const prefixed: Properties = {};
         let property: keyof Properties;
@@ -722,6 +724,7 @@ describe('client', () => {
 
 function createStyle(media?: string | null, css?: string) {
   const element = document.createElement('style');
+  element.dataset.glitz = undefined;
   document.head.appendChild(element);
 
   if (media) {

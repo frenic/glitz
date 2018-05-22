@@ -9,7 +9,6 @@ type Declarations<TValue = string | number | Array<string | number>> = { [proper
 
 interface Index<TValue = string | number | Array<string | number>> extends Declarations<TValue | Index<TValue>> {}
 
-export const DEFAULT_HYDRATE_CLASS_NAME = '__glitz__';
 const NON_ATOMIC_KEY = '$';
 const MEDIA_IDENTIFIER = '@';
 const PSEUDO_IDENTIFIER = ':';
