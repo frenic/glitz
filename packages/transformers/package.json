@@ -1,0 +1,28 @@
+{
+  "name": "@glitz/transformers",
+  "version": "0.0.0",
+  "main": "./cjs/index.js",
+  "module": "./mjs/index.js",
+  "esnext": "./esnext/index.js",
+  "types": "./types/index.d.ts",
+  "license": "MIT",
+  "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
+  "homepage": "https://github.com/frenic/glitz",
+  "repository": "git@github.com:frenic/glitz.git",
+  "bugs": "https://github.com/frenic/glitz/issues",
+  "side-effects": false,
+  "dependencies": {
+    "@glitz/type": "^2.0.0-alpha.0"
+  },
+  "scripts": {
+    "clean": "rimraf cjs esnext mjs types",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjsx2 index --esnext index --mjs index",
+    "prepublish": "npm run clean & npm run build"
+  },
+  "files": [
+    "cjs/",
+    "esnext/",
+    "mjs/",
+    "types/"
+  ]
+}
