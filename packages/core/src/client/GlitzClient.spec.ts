@@ -74,33 +74,45 @@ describe('client', () => {
 
     expect(
       client.injectStyle({
+        margin: { xy: '20px' },
+      }),
+    ).toBe('j k l m');
+
+    expect(sheet.cssRules).toHaveLength(13);
+    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[10].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[11].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[12].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
         padding: { left: '20px' },
         paddingLeft: '30px',
       }),
-    ).toBe('j');
+    ).toBe('n');
 
-    expect(sheet.cssRules).toHaveLength(10);
-    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(14);
+    expect(sheet.cssRules[13].cssText).toMatchSnapshot();
 
     expect(
       client.injectStyle({
         animationName: { from: { padding: { left: '20px' } } },
       }),
-    ).toBe('k');
+    ).toBe('o');
 
-    expect(sheet.cssRules).toHaveLength(12);
-    expect(sheet.cssRules[10].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[11].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(16);
+    expect(sheet.cssRules[14].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[15].cssText).toMatchSnapshot();
 
     expect(
       client.injectStyle({
         fontFamily: { font: { weight: 'bold' } },
       }),
-    ).toBe('l');
+    ).toBe('p');
 
-    expect(sheet.cssRules).toHaveLength(14);
-    expect(sheet.cssRules[12].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[13].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(18);
+    expect(sheet.cssRules[16].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[17].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();

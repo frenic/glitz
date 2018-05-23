@@ -189,6 +189,7 @@ interface MaskProperty {
 }
 
 interface MarginProperty {
+  xy?: UntransformedProperties['marginLeft'];
   x?: UntransformedProperties['marginLeft'];
   y?: UntransformedProperties['marginTop'];
   top?: UntransformedProperties['marginTop'];
@@ -217,6 +218,7 @@ interface OutlineProperty {
 }
 
 interface PaddingProperty {
+  xy?: UntransformedProperties['paddingLeft'];
   x?: UntransformedProperties['paddingLeft'];
   y?: UntransformedProperties['paddingTop'];
   top?: UntransformedProperties['paddingTop'];

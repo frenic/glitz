@@ -45,22 +45,28 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
+        margin: { xy: '20px' },
+      }),
+    ).toBe('j k l m');
+
+    expect(
+      server.injectStyle({
         padding: { left: '20px' },
         paddingLeft: '30px',
       }),
-    ).toBe('j');
+    ).toBe('n');
 
     expect(
       server.injectStyle({
         animationName: { from: { padding: { left: '20px' } } },
       }),
-    ).toBe('k');
+    ).toBe('o');
 
     expect(
       server.injectStyle({
         fontFamily: { font: { weight: 'bold' } },
       }),
-    ).toBe('l');
+    ).toBe('p');
 
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });

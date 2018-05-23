@@ -113,20 +113,23 @@ export default class Base<TStyle extends Style> {
 
         for (const extension in value) {
           const longhandValue = value[extension];
+          let alias = false;
 
-          if (extension === 'x') {
+          if (extension === 'x' || extension === 'xy') {
+            alias = true;
             longhandDeclarations[property + 'Left'] = longhandValue;
             longhandDeclarations[property + 'Right'] = longhandValue;
-            continue;
           }
 
-          if (extension === 'y') {
+          if (extension === 'y' || extension === 'xy') {
+            alias = true;
             longhandDeclarations[property + 'Top'] = longhandValue;
             longhandDeclarations[property + 'Bottom'] = longhandValue;
-            continue;
           }
 
-          longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+          if (!alias) {
+            longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+          }
         }
 
         resolve(longhandDeclarations, result, media, pseudo);
