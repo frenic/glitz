@@ -12,6 +12,10 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
+    "@glitz/devtool-transformer": "^2.0.0",
+    "@glitz/core": "^2.0.0-alpha.0",
+    "@glitz/length-transformer": "^2.0.0",
+    "@glitz/prefixer-transformer": "^2.0.0",
     "@glitz/type": "^2.0.0-alpha.0"
   },
   "scripts": {
