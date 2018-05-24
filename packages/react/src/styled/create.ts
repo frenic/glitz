@@ -3,7 +3,8 @@ import * as React from 'react';
 import { Consumer, Context } from '../components/context';
 import { CSSProp, StyledComponent, StyledElementProps, StyledProps } from './types';
 
-export const STYLED_ASSIGN_METHOD = '__GLITZ_ASSIGN';
+export const STYLED_ASSIGN_METHOD = '__a$glitz';
+export const APPLY_CLASS_NAME_PROPERTY = '__b$glitz';
 
 export type ExternalProps<TProps> = Pick<TProps, Exclude<keyof TProps, keyof StyledProps>>;
 
@@ -78,7 +79,7 @@ export function factory<TProps>(
       };
 
       const renderer =
-        typeof inner === 'string'
+        typeof inner === 'string' || (inner as any)[APPLY_CLASS_NAME_PROPERTY]
           ? (apply: ApplyFunction) => {
               const className = (this.props as any).className ? (this.props as any).className + ' ' + apply() : apply();
               const passProps = passingProps<TProps & StyledElementProps>({ className }, this.props);

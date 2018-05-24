@@ -9,5 +9,6 @@ import { assignPredefined } from './styled/predefined';
 import { StyledElementComponents, StyledElementFunctions } from './styled/types';
 
 export * from './styled/types';
+export { applyClassName } from './styled/apply-class-name';
 
 export const styled = assignPredefined(customStyled);

@@ -3,7 +3,7 @@
 import { GlitzClient, GlitzServer } from '@glitz/core';
 import * as React from 'react';
 import GlitzProvider from './components/GlitzProvider';
-import { styled, StyledProps } from './styled';
+import { styled, StyledProps, applyClassName, StyledElementProps } from './styled';
 
 const client = new GlitzClient();
 <GlitzProvider glitz={client} />;
@@ -92,6 +92,20 @@ function factory() {
     },
   );
 }
+
+const N = styled(applyClassName(props => <div className={props.className} />));
+<N css={{}} />;
+
+const O = styled(
+  applyClassName(
+    class extends React.Component<StyledElementProps> {
+      render() {
+        return <div className={this.props.className} />;
+      }
+    },
+  ),
+);
+<O css={{}} innerRef={c => c} />;
 
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881

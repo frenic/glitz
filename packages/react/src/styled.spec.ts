@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 import GlitzProvider from './components/GlitzProvider';
-import { styled, StyledProps } from './styled';
+import { applyClassName, styled, StyledProps } from './styled';
 
 describe('react styled', () => {
   it('creates custom styled component', () => {
@@ -70,6 +70,25 @@ describe('react styled', () => {
     );
 
     expect(tree).toMatchSnapshot();
+  });
+  it('creates `className` styled component', () => {
+    const StyledComponent = styled(
+      applyClassName(props => {
+        expect(props.className).toBe('a');
+        return React.createElement('div');
+      }),
+      { color: 'red' },
+    );
+
+    renderer.create(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponent),
+      ),
+    );
   });
   it('renders predefined styled component', () => {
     const Component = () =>
