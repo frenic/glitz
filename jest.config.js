@@ -3,7 +3,6 @@ module.exports = {
   moduleNameMapper: {
     '^@glitz/core$': '<rootDir>/packages/core/src',
     '^@glitz/react$': '<rootDir>/packages/react/src',
-    '^@glitz/prefixer$': '<rootDir>/packages/prefixer/src',
   },
   transformIgnorePatterns: ['node_modules'],
   transform: {

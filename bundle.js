@@ -81,7 +81,14 @@ async function build(input, output, type, production) {
   // @ts-ignore
   const bundle = await rollup({
     input,
-    external: ['react', 'inline-style-prefixer/static'],
+    external: [
+      '@glitz/core',
+      '@glitz/devtool-transformer',
+      '@glitz/length-transformer',
+      '@glitz/prefixer-transformer',
+      'react',
+      'inline-style-prefixer/static',
+    ],
     plugins: [
       resolver(),
       typescript({
