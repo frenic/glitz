@@ -8,10 +8,17 @@ export type ClassNameComponent<
   [APPLY_CLASS_NAME_PROPERTY]: true;
 };
 
-export function applyClassName<
-  TComponent extends React.ComponentType<TProps>,
-  TProps extends StyledElementProps = StyledElementProps
->(component: TComponent): ClassNameComponent<TComponent, TProps> {
-  (component as ClassNameComponent<TComponent, TProps>)[APPLY_CLASS_NAME_PROPERTY] = true;
-  return component as ClassNameComponent<TComponent, TProps>;
+export function applyClassName<TProps extends StyledElementProps, TComponent extends React.ComponentClass<TProps>>(
+  component: React.ClassType<TProps, React.Component<TProps, React.ComponentState>, TComponent>,
+): ClassNameComponent<TComponent, TProps>;
+
+export function applyClassName<TProps extends StyledElementProps>(
+  component: React.StatelessComponent<TProps>,
+): ClassNameComponent<React.StatelessComponent<TProps>, TProps>;
+
+export function applyClassName<TProps extends StyledElementProps>(
+  component: React.ComponentType<TProps>,
+): ClassNameComponent<React.ComponentType<TProps>, TProps> {
+  (component as ClassNameComponent<typeof component, TProps>)[APPLY_CLASS_NAME_PROPERTY] = true;
+  return component as ClassNameComponent<typeof component, TProps>;
 }
