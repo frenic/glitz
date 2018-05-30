@@ -1,9 +1,9 @@
 import { Style, StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
-import { ExternalProps, STYLED_ASSIGN_METHOD } from './create';
+import { ExternalProps } from './create';
 
 export interface StyledComponent<TProps> extends React.ComponentClass<ExternalProps<TProps> & CSSProp> {
-  [STYLED_ASSIGN_METHOD]: (assigningStyle?: StyleArray) => StyledComponent<TProps>;
+  compose: (assigningStyle?: StyleArray) => StyledComponent<TProps>;
 }
 
 export type StyledProps = {

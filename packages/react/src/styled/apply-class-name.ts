@@ -1,11 +1,11 @@
-import { APPLY_CLASS_NAME_PROPERTY } from './create';
+import { APPLY_CLASS_NAME_IDENTIFIER } from './create';
 import { StyledElementProps } from './types';
 
 export type ClassNameComponent<
   TInner extends React.ComponentType<TProps>,
   TProps extends StyledElementProps
 > = TInner & {
-  [APPLY_CLASS_NAME_PROPERTY]: true;
+  [APPLY_CLASS_NAME_IDENTIFIER]: 1;
 };
 
 export function applyClassName<TProps extends StyledElementProps, TComponent extends React.ComponentClass<TProps>>(
@@ -19,6 +19,6 @@ export function applyClassName<TProps extends StyledElementProps>(
 export function applyClassName<TProps extends StyledElementProps>(
   component: React.ComponentType<TProps>,
 ): ClassNameComponent<React.ComponentType<TProps>, TProps> {
-  (component as ClassNameComponent<typeof component, TProps>)[APPLY_CLASS_NAME_PROPERTY] = true;
+  (component as ClassNameComponent<typeof component, TProps>)[APPLY_CLASS_NAME_IDENTIFIER] = 1;
   return component as ClassNameComponent<typeof component, TProps>;
 }
