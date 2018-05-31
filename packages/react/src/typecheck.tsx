@@ -2,8 +2,7 @@
 
 import { GlitzClient, GlitzServer } from '@glitz/core';
 import * as React from 'react';
-import GlitzProvider from './components/GlitzProvider';
-import { styled, StyledProps, applyClassName, StyledElementProps } from './styled';
+import { GlitzProvider, styled, StyledProps, applyClassName, StyledElementProps } from './';
 
 const client = new GlitzClient();
 <GlitzProvider glitz={client} />;

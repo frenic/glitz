@@ -4,8 +4,7 @@ import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import GlitzProvider from './components/GlitzProvider';
-import { applyClassName, styled, StyledProps } from './styled';
+import { applyClassName, GlitzProvider, styled, StyledProps } from './';
 
 describe('react styled', () => {
   it('creates custom styled component', () => {

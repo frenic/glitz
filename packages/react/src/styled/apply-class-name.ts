@@ -1,5 +1,5 @@
+import { StyledElementProps } from '../components/Base';
 import { APPLY_CLASS_NAME_IDENTIFIER } from './create';
-import { StyledElementProps } from './types';
 
 export type ClassNameComponent<
   TInner extends React.ComponentType<TProps>,
