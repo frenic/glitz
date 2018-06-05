@@ -1,8 +1,8 @@
 import { StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
-import { Consumer, Context } from './context';
-
-export const APPLY_CLASS_NAME_IDENTIFIER = '__b$glitz';
+import { Consumer, Context } from '../components/context';
+import { isElementLikeType, StyledElementLike } from '../styled/apply-class-name';
+import { isElementType, StyledElement } from '../styled/predefined';
 
 export type CSSProp = {
   css?: StyleOrStyleArray;
@@ -29,12 +29,16 @@ export type InnerRefProp<TInstance> = {
 
 export type WithInnerRefProp<TProps, TInstance> = TProps & InnerRefProp<TInstance>;
 
-export type ApplyFunction = () => string | undefined;
+type ApplyFunction = () => string | undefined;
 
-export default class GlitzBase<TProps> extends React.Component<ExternalProps<TProps>> {
-  protected renderer: (apply: ApplyFunction) => React.ReactElement<any>;
-  protected createApplier: (context: Context) => ApplyFunction;
-  constructor(inner: string | React.ComponentType<TProps>, statics: StyleArray, props: ExternalProps<TProps>) {
+export default class StyledSuper<TProps> extends React.Component<ExternalProps<TProps>> {
+  private renderer: (apply: ApplyFunction) => React.ReactElement<any>;
+  private createApplier: (context: Context) => ApplyFunction;
+  constructor(
+    type: StyledElement | StyledElementLike<React.ComponentType<TProps>> | React.ComponentType<TProps>,
+    statics: StyleArray,
+    props: ExternalProps<TProps>,
+  ) {
     super(props);
 
     let lastContext: Context | undefined;
@@ -83,15 +87,15 @@ export default class GlitzBase<TProps> extends React.Component<ExternalProps<TPr
     };
 
     this.renderer =
-      typeof inner === 'string' || (inner as any)[APPLY_CLASS_NAME_IDENTIFIER]
-        ? (apply: ApplyFunction) => {
+      isElementType(type) || isElementLikeType<TProps>(type)
+        ? apply => {
             const className = (this.props as any).className ? (this.props as any).className + ' ' + apply() : apply();
             const passProps = passingProps<TProps & StyledElementProps>({ className }, this.props);
-            return React.createElement(inner, passProps);
+            return React.createElement(type.value, passProps);
           }
-        : (apply: ApplyFunction) => {
+        : apply => {
             const passProps = passingProps<TProps & StyledProps>({ apply, compose }, this.props);
-            return React.createElement(inner, passProps);
+            return React.createElement(type, passProps);
           };
   }
   public render() {
@@ -109,10 +113,8 @@ export default class GlitzBase<TProps> extends React.Component<ExternalProps<TPr
   }
 }
 
-export function isStyledComponent<TProps>(
-  inner: string | StyledComponent<TProps> | React.ComponentType<TProps>,
-): inner is StyledComponent<TProps> {
-  return typeof inner === 'function' && inner.prototype instanceof GlitzBase;
+export function isStyledComponent<TProps>(type: any): type is StyledComponent<TProps> {
+  return typeof type === 'function' && type.prototype instanceof StyledSuper;
 }
 
 function passingProps<T>(destination: any, props: any): T {

@@ -91,12 +91,11 @@ function factory() {
     },
   );
 }
-
 const N = styled(applyClassName(props => <div className={props.className} />));
-<N css={{}} />;
+<N className="" css={{}} />;
 
 const O = styled(applyClassName((props: { x: string } & StyledElementProps) => <div className={props.className} />));
-<O x="" css={{}} />;
+<O x="" className="" css={{}} />;
 
 const P = styled(
   applyClassName(
@@ -107,7 +106,7 @@ const P = styled(
     },
   ),
 );
-<P css={{}} innerRef={c => c} />;
+<P className="" css={{}} innerRef={c => c} />;
 
 const Q = styled(
   applyClassName(
@@ -118,7 +117,7 @@ const Q = styled(
     },
   ),
 );
-<Q x="" css={{}} innerRef={c => c} />;
+<Q x="" className="" css={{}} innerRef={c => c} />;
 
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881

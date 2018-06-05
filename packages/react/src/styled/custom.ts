@@ -1,35 +1,44 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
-import { StyledComponent, StyledElementProps, StyledProps, WithInnerRefProp } from '../components/Base';
-import { ClassNameComponent } from './apply-class-name';
+import { StyledElementLike } from './apply-class-name';
 import create from './create';
+import { isType } from './internals';
+import { StyledComponent, StyledElementProps, StyledProps, WithInnerRefProp } from './Super';
 
 export interface StyledDecorator {
   <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
-  <TProps extends StyledProps>(component: React.StatelessComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps extends StyledElementProps>(
-    component: ClassNameComponent<React.StatelessComponent<TProps>, TProps>,
+    component: StyledElementLike<React.StatelessComponent<TProps>>,
     style?: Style,
   ): StyledComponent<TProps>;
-  <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
-    component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
+  <TProps extends StyledElementProps, TInstance extends React.Component<TProps, React.ComponentState>>(
+    component: StyledElementLike<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>>,
     style?: Style,
   ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
-  <TProps extends StyledElementProps, TInstance extends React.Component<TProps, React.ComponentState>>(
-    component: ClassNameComponent<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>, TProps>,
+  <TProps extends StyledProps>(component: React.StatelessComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
+    component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
     style?: Style,
   ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
 }
 
 export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
 
-export function customStyled<TProps extends StyledProps>(
-  component: React.StatelessComponent<TProps>,
+export function customStyled<TProps extends StyledElementProps>(
+  component: StyledElementLike<React.StatelessComponent<TProps>>,
   style?: Style,
 ): StyledComponent<TProps>;
 
-export function customStyled<TProps extends StyledElementProps>(
-  component: ClassNameComponent<React.StatelessComponent<TProps>, TProps>,
+export function customStyled<
+  TProps extends StyledElementProps,
+  TInstance extends React.Component<TProps, React.ComponentState>
+>(
+  component: StyledElementLike<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>>,
+  style?: Style,
+): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
+
+export function customStyled<TProps extends StyledProps>(
+  component: React.StatelessComponent<TProps>,
   style?: Style,
 ): StyledComponent<TProps>;
 
@@ -41,28 +50,25 @@ export function customStyled<
   style?: Style,
 ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
 
-export function customStyled<
-  TProps extends StyledElementProps,
-  TInstance extends React.Component<TProps, React.ComponentState>
->(
-  component: ClassNameComponent<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>, TProps>,
-  style?: Style,
-): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
-
 export function customStyled(style: Style): StyledDecorator;
 
 export function customStyled<TProps>(
-  arg1: StyledComponent<TProps> | React.ComponentType<TProps> | Style,
+  arg1: StyledElementLike<React.ComponentType<TProps>> | StyledComponent<TProps> | React.ComponentType<TProps> | Style,
   arg2?: Style,
 ): StyledComponent<TProps> | StyledDecorator {
-  return isStyle(arg1) ? decorator(arg1) : create(arg1, arg2 ? [arg2] : []);
+  return isStyle(arg1) ? decorator<TProps>(arg1) : create<TProps>(arg1, arg2 ? [arg2] : []);
 }
 
 function decorator<TProps>(style: Style): StyledDecorator {
-  return (innerComponent: StyledComponent<TProps> | React.ComponentType<TProps>, additionalStyle?: Style) =>
-    create(innerComponent, additionalStyle ? [style, additionalStyle] : [style]);
+  return (
+    innerComponent:
+      | StyledElementLike<React.ComponentType<TProps>>
+      | StyledComponent<TProps>
+      | React.ComponentType<TProps>,
+    additionalStyle?: Style,
+  ) => create(innerComponent, additionalStyle ? [style, additionalStyle] : [style]);
 }
 
-function isStyle(arg: StyledComponent<any> | React.ComponentType<any> | Style): arg is Style {
-  return typeof arg === 'object';
+function isStyle(arg: any): arg is Style {
+  return typeof arg === 'object' && !isType(arg);
 }

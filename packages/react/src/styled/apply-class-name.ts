@@ -1,24 +1,31 @@
-import { StyledElementProps } from '../components/Base';
-import { APPLY_CLASS_NAME_IDENTIFIER } from './create';
+import * as React from 'react';
+import { isType, STYLED_TYPE_PROPERTY, StyledType, Type } from './internals';
+import { StyledElementProps } from './Super';
 
-export type ClassNameComponent<
-  TInner extends React.ComponentType<TProps>,
-  TProps extends StyledElementProps
-> = TInner & {
-  [APPLY_CLASS_NAME_IDENTIFIER]: 1;
-};
+export interface StyledElementLike<TComponent> extends StyledType {
+  [STYLED_TYPE_PROPERTY]: Type.ElementLike;
+  value: TComponent;
+}
+
+export function applyClassName<TProps extends StyledElementProps = StyledElementProps>(
+  component: React.StatelessComponent<TProps>,
+): StyledElementLike<React.StatelessComponent<TProps>>;
 
 export function applyClassName<TProps extends StyledElementProps, TComponent extends React.ComponentClass<TProps>>(
   component: React.ClassType<TProps, React.Component<TProps, React.ComponentState>, TComponent>,
-): ClassNameComponent<TComponent, TProps>;
-
-export function applyClassName<TProps extends StyledElementProps>(
-  component: React.StatelessComponent<TProps>,
-): ClassNameComponent<React.StatelessComponent<TProps>, TProps>;
+): StyledElementLike<TComponent>;
 
 export function applyClassName<TProps extends StyledElementProps>(
   component: React.ComponentType<TProps>,
-): ClassNameComponent<React.ComponentType<TProps>, TProps> {
-  (component as ClassNameComponent<typeof component, TProps>)[APPLY_CLASS_NAME_IDENTIFIER] = 1;
-  return component as ClassNameComponent<typeof component, TProps>;
+): StyledElementLike<React.ComponentType<TProps>> {
+  return {
+    [STYLED_TYPE_PROPERTY]: Type.ElementLike,
+    value: component,
+  };
+}
+
+export function isElementLikeType<TProps extends StyledElementProps>(
+  type: any,
+): type is StyledElementLike<React.ComponentType<TProps>> {
+  return isType(type) && type[STYLED_TYPE_PROPERTY] === Type.ElementLike;
 }

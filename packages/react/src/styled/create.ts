@@ -1,35 +1,38 @@
 import { StyleArray } from '@glitz/type';
 import * as React from 'react';
-import GlitzBase, { ExternalProps, isStyledComponent, StyledComponent } from '../components/Base';
-
-export const APPLY_CLASS_NAME_IDENTIFIER = '__b$glitz';
+import { isElementLikeType, StyledElementLike } from './apply-class-name';
+import { isElementType, StyledElement } from './predefined';
+import StyledSuper, { ExternalProps, isStyledComponent, StyledComponent } from './Super';
 
 export default function create<TProps>(
-  Inner: string | StyledComponent<TProps> | React.ComponentType<TProps>,
+  type:
+    | StyledElement
+    | StyledElementLike<React.ComponentType<TProps>>
+    | StyledComponent<TProps>
+    | React.ComponentType<TProps>,
   statics: StyleArray,
 ): StyledComponent<TProps> {
-  return isStyledComponent(Inner) ? Inner.compose(statics) : factory(Inner, statics);
+  return isStyledComponent<TProps>(type) ? type.compose(statics) : factory(type, statics);
 }
 
 export function factory<TProps>(
-  inner: string | React.ComponentType<TProps>,
+  type: StyledElement | StyledElementLike<React.ComponentType<TProps>> | React.ComponentType<TProps>,
   statics: StyleArray,
 ): StyledComponent<TProps> {
-  class GlitzStyled extends GlitzBase<TProps> {
+  class Styled extends StyledSuper<TProps> {
     public static displayName: string;
     public static compose(additionals?: StyleArray) {
-      return factory(inner, additionals ? statics.concat(additionals) : statics);
+      return factory(type, additionals ? statics.concat(additionals) : statics);
     }
     constructor(props: ExternalProps<TProps>) {
-      super(inner, statics, props);
+      super(type, statics, props);
     }
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    GlitzStyled.displayName = `Styled(${
-      typeof inner === 'string' ? inner : inner.displayName || inner.name || 'Unknown'
-    })`;
+    const inner = isElementType(type) || isElementLikeType<TProps>(type) ? type.value : type;
+    Styled.displayName = `Styled(${typeof inner === 'string' ? inner : inner.displayName || inner.name || 'Unknown'})`;
   }
 
-  return GlitzStyled;
+  return Styled;
 }

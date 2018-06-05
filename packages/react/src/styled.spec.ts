@@ -4,7 +4,7 @@ import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import { applyClassName, GlitzProvider, styled, StyledProps } from './';
+import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledProps } from './';
 
 describe('react styled', () => {
   it('creates custom styled component', () => {
@@ -278,13 +278,14 @@ describe('react styled', () => {
     );
   });
   it('passes innerRef prop', () => {
-    class Spy extends React.Component<StyledProps> {
+    class Spy extends React.Component<StyledProps & StyledElementProps> {
       public render() {
         return React.createElement('div');
       }
     }
 
-    const StyledComponent = styled(Spy);
+    const StyledComponentA = styled(Spy);
+    const StyledComponentB = styled(applyClassName(Spy));
 
     mount(
       React.createElement(
@@ -292,19 +293,16 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponent, {
+        React.createElement(StyledComponentA, {
           innerRef: (el: Spy) => {
             expect(el).toBeInstanceOf(Spy);
           },
         }),
-      ),
-    );
-    mount(
-      React.createElement(
-        GlitzProvider,
-        {
-          glitz: new GlitzClient(),
-        },
+        React.createElement(StyledComponentB, {
+          innerRef: (el: Spy) => {
+            expect(el).toBeInstanceOf(Spy);
+          },
+        }),
         React.createElement(styled.Div, {
           innerRef: (el: HTMLDivElement) => {
             expect(el).toBeInstanceOf(HTMLDivElement);

@@ -1,6 +1,6 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
-import { StyledComponent, WithInnerRefProp } from '../components/Base';
+import { StyledComponent, WithInnerRefProp } from './Super';
 
 export type StyledFunction<TProps> = (style: Style) => StyledComponent<TProps>;
 

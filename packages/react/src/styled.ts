@@ -8,7 +8,9 @@ import { assignPredefined } from './styled/predefined';
 // @ts-ignore
 import { StyledElementComponents, StyledElementFunctions } from './styled/types';
 
-export * from './styled/types';
+export { default as StyledSuper } from './styled/Super';
 export { applyClassName } from './styled/apply-class-name';
+export * from './styled/Super';
+export * from './styled/types';
 
 export const styled = assignPredefined(customStyled);

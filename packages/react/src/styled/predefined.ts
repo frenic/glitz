@@ -1,15 +1,32 @@
 import { Style } from '@glitz/type';
 import { factory } from './create';
+import { isType, STYLED_TYPE_PROPERTY, StyledType, Type } from './internals';
 import { StyledElementComponents, StyledElementFunctions } from './types';
 
-function createPredefined(component: string) {
-  return (style: Style) => factory(component, [style]);
+export interface StyledElement extends StyledType {
+  [STYLED_TYPE_PROPERTY]: Type.Element;
+  value: string;
+}
+
+function createElementType(tag: string): StyledElement {
+  return {
+    [STYLED_TYPE_PROPERTY]: Type.Element,
+    value: tag,
+  };
+}
+
+export function isElementType(type: any): type is StyledElement {
+  return isType(type) && type[STYLED_TYPE_PROPERTY] === Type.Element;
+}
+
+function createPredefined(tag: string) {
+  return (style: Style) => factory(createElementType(tag), [style]);
 }
 
 export function assignPredefined<TTarget>(target: TTarget) {
-  for (const element of predefinedElements) {
-    (target as any)[element[0].toUpperCase() + element.slice(1)] = factory(element, []);
-    (target as any)[element] = createPredefined(element);
+  for (const tag of predefinedElements) {
+    (target as any)[tag[0].toUpperCase() + tag.slice(1)] = factory(createElementType(tag), []);
+    (target as any)[tag] = createPredefined(tag);
   }
   return target as TTarget & StyledElementFunctions & StyledElementComponents;
 }
