@@ -2,6 +2,7 @@ import { StyleArray } from '@glitz/type';
 import * as React from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { isElementType, StyledElement } from './predefined';
+import createRenderer from './renderer';
 import StyledSuper, { ExternalProps, isStyledComponent, StyledComponent } from './Super';
 
 export default function create<TProps>(
@@ -25,7 +26,9 @@ export function factory<TProps>(
       return factory(type, additionals ? statics.concat(additionals) : statics);
     }
     constructor(props: ExternalProps<TProps>) {
-      super(type, statics, props);
+      super(props);
+      const renderWithProps = createRenderer(type, statics);
+      this.render = () => renderWithProps(this.props);
     }
   }
 
