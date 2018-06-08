@@ -17,39 +17,39 @@ At this moment, there's officially only [React bindings](https://github.com/fren
 
 ## Table of content
 
-* [!Glitz](#glitzhttps---githubcom-frenic-glitz-raw-master-glitzsvgsanitizetrue)
-  * [Table of content](#table-of-content)
-  * [Getting started](#getting-started)
-  * [Features](#features)
-    * [Pseudos](#pseudos)
-    * [Fallback values](#fallback-values)
-    * [Keyframes](#keyframes)
-    * [Font faces](#font-faces)
-    * [Media queries](#media-queries)
-  * [Server rendering](#server-rendering)
-  * [Shorthand properties](#shorthand-properties)
-  * [TypeScript](#typescript)
-    * [Unknown properties](#unknown-properties)
-    * [Add custom properties](#add-custom-properties)
-  * [API](#api)
-    * [`new GlitzClient(elements: HTMLStyleElement[], options: Options)`](#new-glitzclientelements--htmlstyleelement--options--options)
-      * [Method `injectStyle(style: Style)`](#method-injectstylestyle--style)
-    * [`new GlitzServer(options?: Options)`](#new-glitzserveroptions--options)
-      * [Method `injectStyle(style: Style)`](#method-injectstylestyle--style)
-      * [Method `getStyleMarkup(className?: string)`](#method-getstylemarkupclassname--string)
-    * [Options](#options)
-      * [`options.transformer`](#optionstransformer)
-      * [`options.mediaOrder`](#optionsmediaorder)
-      * [`options.atomic`](#optionsatomic)
-      * [`options.prefix`](#optionsprefix)
-    * [Helpers](#helpers)
-      * [`pseudo`](#pseudo)
-      * [`media`](#media)
-      * [`query`](#query)
-  * [Playground](#playground)
-  * [Prefixer](#prefixer)
-  * [Number as length](#number-as-length)
-  * [Atomic](#atomic)
+- [!Glitz](#glitzhttps---githubcom-frenic-glitz-raw-master-glitzsvgsanitizetrue)
+  - [Table of content](#table-of-content)
+  - [Getting started](#getting-started)
+  - [Features](#features)
+    - [Pseudos](#pseudos)
+    - [Fallback values](#fallback-values)
+    - [Keyframes](#keyframes)
+    - [Font faces](#font-faces)
+    - [Media queries](#media-queries)
+  - [Server rendering](#server-rendering)
+  - [Shorthand properties](#shorthand-properties)
+  - [TypeScript](#typescript)
+    - [Unknown properties](#unknown-properties)
+    - [Add custom properties](#add-custom-properties)
+  - [API](#api)
+    - [`new GlitzClient(elements: HTMLStyleElement[], options: Options)`](#new-glitzclientelements--htmlstyleelement--options--options)
+      - [Method `injectStyle(style: Style)`](#method-injectstylestyle--style)
+    - [`new GlitzServer(options?: Options)`](#new-glitzserveroptions--options)
+      - [Method `injectStyle(style: Style)`](#method-injectstylestyle--style)
+      - [Method `getStyleMarkup(className?: string)`](#method-getstylemarkupclassname--string)
+    - [Options](#options)
+      - [`options.transformer`](#optionstransformer)
+      - [`options.mediaOrder`](#optionsmediaorder)
+      - [`options.atomic`](#optionsatomic)
+      - [`options.prefix`](#optionsprefix)
+    - [Helpers](#helpers)
+      - [`pseudo`](#pseudo)
+      - [`media`](#media)
+      - [`query`](#query)
+  - [Playground](#playground)
+  - [Prefixer](#prefixer)
+  - [Number as length](#number-as-length)
+  - [Atomic](#atomic)
 
 ## Getting started
 
@@ -186,8 +186,8 @@ const className = glitz.injectStyle({
 
 The difference between `GlitzServer` class and `GlitzClient` class is that `GlitzClient` inserts new rules into the DOM directly. Instead `GlitzServer` collects the rendered style as a string for you to put in the `<head>`. The client side will then hydrate the CSS and reuse it.
 
-* [API reference](#glitzserver)
-* [Example implementation](https://github.com/frenic/glitz/blob/master/packages/react/#server-rendering)
+- [API reference](#glitzserver)
+- [Example implementation](https://github.com/frenic/glitz/blob/master/packages/react/#server-rendering)
 
 ## Shorthand properties
 
@@ -353,7 +353,12 @@ To use multiple transformers, use the `compose` function:
 import GlitzClient, { compose } from '@glitz/core';
 import prefixer from '@glitz/prefixer-transformer';
 import numberToLength from '@glitz/length-transformer';
-const glitz = new GlitzClient(null, { transformer: compose(prefixer, numberToLength) });
+const glitz = new GlitzClient(null, {
+  transformer: compose(
+    prefixer,
+    numberToLength,
+  ),
+});
 ```
 
 #### `options.mediaOrder`

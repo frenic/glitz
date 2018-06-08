@@ -94,33 +94,33 @@ const className = glitz.injectStyle({
 
 The default length unit will only transform a specific set of properties because some properties e.g. `lineHeight` accepts both length and numbers. Here's the full list of length safe properties it will transform:
 
-* `bottom`
-* `flexBasis`
-* `fontSize`
-* `height`
-* `left`
-* `marginBottom`
-* `marginLeft`
-* `marginRight`
-* `marginTop`
-* `maxHeight`
-* `maxWidth`
-* `minHeight`
-* `minWidth`
-* `paddingBottom`
-* `paddingLeft`
-* `paddingRight`
-* `paddingTop`
-* `right`
-* `top`
-* `width`
+- `bottom`
+- `flexBasis`
+- `fontSize`
+- `height`
+- `left`
+- `marginBottom`
+- `marginLeft`
+- `marginRight`
+- `marginTop`
+- `maxHeight`
+- `maxWidth`
+- `minHeight`
+- `minWidth`
+- `paddingBottom`
+- `paddingLeft`
+- `paddingRight`
+- `paddingTop`
+- `right`
+- `top`
+- `width`
 
 For these, 'ms' is used as unit instead:
 
-* `animationDelay`
-* `animationDuration`
-* `transitionDelay`
-* `transitionDuration`
+- `animationDelay`
+- `animationDuration`
+- `transitionDelay`
+- `transitionDuration`
 
 _Shorthand objects like `margin: { left: 10 }` will be resolved to `marginLeft: 10` before reaching the transformer, so these values will be transformed as well._
 
