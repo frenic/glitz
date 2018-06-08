@@ -17,7 +17,7 @@
     "@types/react": "*"
   },
   "peerDependencies": {
-    "react": "15.x - 16.x"
+    "react": "16.3 - 17.x"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
