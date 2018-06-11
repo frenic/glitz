@@ -5,12 +5,12 @@ import { isElementLikeType, StyledElementLike } from '../styled/apply-class-name
 import { isElementType, StyledElement } from '../styled/predefined';
 import { ExternalProps, StyledElementProps, StyledProps } from './Super';
 
-type ApplyFunction = () => string | undefined;
-type ComposeFunction = (additionals?: StyleOrStyleArray) => StyleOrStyleArray;
+type ApplyFunction = (additionals?: StyleOrStyleArray) => string | undefined;
+type ComposeFunction = (additionals?: StyleOrStyleArray) => StyleOrStyleArray | undefined;
 
 export default function createRenderer(
   type: StyledElement | StyledElementLike<React.ComponentType<any>> | React.ComponentType<any>,
-  statics: StyleArray,
+  statics?: StyleArray,
 ) {
   let lastDynamics: StyleOrStyleArray | undefined;
   let lastComposer: ComposeFunction | undefined;
@@ -27,7 +27,7 @@ export default function createRenderer(
         return statics;
       }
 
-      const styles = ([] as StyleArray).concat(additionals || [], statics, dynamics || []);
+      const styles = ([] as StyleArray).concat(additionals || [], statics || [], dynamics || []);
 
       return styles;
     });
@@ -47,8 +47,8 @@ export default function createRenderer(
     lastContext = context;
     lastApplierComposer = compose;
 
-    return (lastApplier = () => {
-      const styles: StyleOrStyleArray = compose();
+    return (lastApplier = additionals => {
+      const styles: StyleOrStyleArray | undefined = compose(additionals);
 
       if (!styles) {
         return;

@@ -30,12 +30,12 @@ describe('react styled', () => {
   it('creates embedded styled component', () => {
     const embeddedStyle = styled({ color: 'red' });
 
-    const StyledComponent1 = embeddedStyle(props => {
+    const StyledComponentA = embeddedStyle(props => {
       expect(props.apply()).toBe('a');
       expect(props.compose()).toEqual([{ color: 'red' }]);
       return React.createElement('div');
     });
-    const StyledComponent2 = embeddedStyle(
+    const StyledComponentB = embeddedStyle(
       props => {
         expect(props.apply()).toBe('b');
         expect(props.compose()).toEqual([{ color: 'red' }, { color: 'green' }]);
@@ -50,8 +50,8 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponent1),
-        React.createElement(StyledComponent2),
+        React.createElement(StyledComponentA),
+        React.createElement(StyledComponentB),
       ),
     );
   });
@@ -135,73 +135,100 @@ describe('react styled', () => {
   it('composes style', () => {
     const StyledComponent = styled.div({ color: 'red' });
 
-    const ComposedComponent1 = styled(props => {
+    const ComposedComponentA = styled(props => {
       return React.createElement(StyledComponent, {
-        css: props.compose({ color: 'green' }),
+        css: props.compose({ color: 'green', backgroundColor: 'red' }),
       });
     });
 
-    const tree1 = mount(
+    const treeA = mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponent1),
+        React.createElement(ComposedComponentA),
       ),
     );
 
-    const declaration1 = getComputedStyle(tree1.getDOMNode());
+    const declarationA = getComputedStyle(treeA.getDOMNode());
 
-    expect(declaration1.getPropertyValue('color')).toBe('green');
+    expect(declarationA.getPropertyValue('color')).toBe('green');
+    expect(declarationA.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponent2 = styled(
+    const ComposedComponentB = styled(
       props => {
         return React.createElement(StyledComponent, {
-          css: props.compose({ color: 'green' }),
+          css: props.compose({ color: 'green', backgroundColor: 'red' }),
         });
       },
       { color: 'blue' },
     );
 
-    const tree2 = mount(
+    const treeB = mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponent2),
+        React.createElement(ComposedComponentB),
       ),
     );
 
-    const declaration2 = getComputedStyle(tree2.getDOMNode());
+    const declarationB = getComputedStyle(treeB.getDOMNode());
 
-    expect(declaration2.getPropertyValue('color')).toBe('blue');
+    expect(declarationB.getPropertyValue('color')).toBe('blue');
+    expect(declarationB.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponent3 = styled(
+    const ComposedComponentC = styled(
       props => {
         return React.createElement(StyledComponent, {
-          css: props.compose({ color: 'green' }),
+          css: props.compose({ color: 'green', backgroundColor: 'red' }),
         });
       },
       { color: 'blue' },
     );
 
-    const root3 = mount(
+    const treeC = mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponent3, {
+        React.createElement(ComposedComponentC, {
           css: { color: 'white' },
         }),
       ),
     );
 
-    const declaration3 = getComputedStyle(root3.getDOMNode());
+    const declarationC = getComputedStyle(treeC.getDOMNode());
 
-    expect(declaration3.getPropertyValue('color')).toBe('white');
+    expect(declarationC.getPropertyValue('color')).toBe('white');
+    expect(declarationC.getPropertyValue('background-color')).toBe('red');
+
+    const ComposedComponentD = styled(
+      props => {
+        return React.createElement('div', {
+          className: props.apply({ color: 'green', backgroundColor: 'red' }),
+        });
+      },
+      { color: 'red' },
+    );
+
+    const treeD = mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ComposedComponentD),
+      ),
+    );
+
+    const declarationD = getComputedStyle(treeD.getDOMNode());
+
+    expect(declarationD.getPropertyValue('color')).toBe('red');
+    expect(declarationD.getPropertyValue('background-color')).toBe('red');
   });
   it('caches pure style', () => {
     let count = 0;

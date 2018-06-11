@@ -6,7 +6,7 @@ export type CSSProp = {
 };
 
 export type StyledProps = {
-  apply: () => string | undefined;
+  apply: (style?: StyleOrStyleArray) => string | undefined;
   compose: (style?: StyleOrStyleArray) => StyleOrStyleArray;
 };
 
@@ -17,7 +17,7 @@ export type StyledElementProps = {
 export type ExternalProps<TProps> = Pick<TProps, Exclude<keyof TProps, keyof StyledProps>> & CSSProp;
 
 export interface StyledComponent<TProps> extends React.ComponentClass<ExternalProps<TProps> & CSSProp> {
-  compose: (style?: StyleArray) => StyledComponent<TProps>;
+  compose(style?: StyleArray): StyledComponent<TProps>;
 }
 
 export type InnerRefProp<TInstance> = {
