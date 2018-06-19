@@ -77,15 +77,16 @@ export default function createRenderer(
 
   const createElement =
     isElementType(type) || isElementLikeType<any>(type)
-      ? (currentProps: ExternalProps<any>, apply: ApplyFunction) => {
-          const className = currentProps.className ? currentProps.className + ' ' + apply() : apply();
-          const passProps = passingProps<StyledElementProps>({ className }, currentProps);
-          return React.createElement(type.value, passProps);
-        }
-      : (currentProps: ExternalProps<any>, apply: ApplyFunction, compose: ComposeFunction) => {
-          const passProps = passingProps<StyledProps>({ apply, compose }, currentProps);
-          return React.createElement(type, passProps);
-        };
+      ? (currentProps: ExternalProps<any>, apply: ApplyFunction) =>
+          React.createElement(
+            type.value,
+            passingProps<StyledElementProps>(
+              { className: combineClassNames(currentProps.className, apply()) },
+              currentProps,
+            ),
+          )
+      : (currentProps: ExternalProps<any>, apply: ApplyFunction, compose: ComposeFunction) =>
+          React.createElement(type, passingProps<StyledProps>({ apply, compose }, currentProps));
 
   return (currentProps: ExternalProps<any>) => {
     return React.createElement(Consumer, null, (context: Context) => {
@@ -101,6 +102,10 @@ export default function createRenderer(
       return createElement(currentProps, createApplier(context, compose), compose);
     });
   };
+}
+
+function combineClassNames(a: string | undefined, b: string | undefined) {
+  return a && b ? `${a} ${b}` : a ? a : b;
 }
 
 function passingProps<T>(destination: any, props: any): T {
