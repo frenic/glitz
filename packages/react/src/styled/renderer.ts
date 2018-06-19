@@ -22,14 +22,23 @@ export default function createRenderer(
 
     lastDynamics = dynamics;
 
+    let lastStyles: StyleOrStyleArray | undefined;
+    let lastAdditionals: StyleOrStyleArray | undefined;
+
     return (lastComposer = additionals => {
-      if (!dynamics && !additionals) {
-        return statics;
+      const isPure = lastAdditionals === additionals;
+
+      if (isPure && lastStyles) {
+        return lastStyles;
       }
 
-      const styles = ([] as StyleArray).concat(additionals || [], statics || [], dynamics || []);
+      lastAdditionals = additionals;
 
-      return styles;
+      if (!dynamics && !additionals) {
+        return (lastStyles = statics);
+      }
+
+      return (lastStyles = ([] as StyleArray).concat(additionals || [], statics || [], dynamics || []));
     });
   };
 
@@ -42,29 +51,27 @@ export default function createRenderer(
       return lastApplier;
     }
 
-    let cache: string | null = null;
-
     lastContext = context;
     lastApplierComposer = compose;
 
+    let lastStyles: StyleOrStyleArray | undefined;
+    let lastClassName: string | null;
+
     return (lastApplier = additionals => {
       const styles: StyleOrStyleArray | undefined = compose(additionals);
+
+      const isPure = styles === lastStyles;
+      lastStyles = styles;
 
       if (!styles) {
         return;
       }
 
-      const isPure = styles === statics;
-
-      if (isPure && cache) {
-        return cache;
+      if (isPure && lastClassName) {
+        return lastClassName;
       }
 
-      const classNames = context.glitz.injectStyle(styles);
-
-      cache = isPure ? classNames : null;
-
-      return classNames;
+      return (lastClassName = context.glitz.injectStyle(styles));
     });
   };
 

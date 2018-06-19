@@ -236,12 +236,13 @@ describe('react styled', () => {
 
     const StyledComponentCount = styled(
       class extends React.Component<StyledProps> {
+        private css = {};
         public componentDidMount() {
           this.forceUpdate();
         }
         public render() {
           renders++;
-          return React.createElement('div', { className: this.props.apply() });
+          return React.createElement('div', { className: this.props.apply(this.css) });
         }
       },
       {
@@ -252,13 +253,15 @@ describe('react styled', () => {
       },
     );
 
+    const css = {};
+
     mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponentCount),
+        React.createElement(StyledComponentCount, { css }),
       ),
     );
 
