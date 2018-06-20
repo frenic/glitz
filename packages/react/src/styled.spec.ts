@@ -2,6 +2,7 @@
 
 import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
+import momoize from 'memoize-one';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledProps } from './';
@@ -234,7 +235,7 @@ describe('react styled', () => {
     let count = 0;
     let renders = 0;
 
-    const StyledComponentCount = styled(
+    const StyledComponentPure = styled(
       class extends React.Component<StyledProps> {
         private css = {};
         public componentDidMount() {
@@ -261,7 +262,42 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponentCount, { css }),
+        React.createElement(StyledComponentPure, { css }),
+      ),
+    );
+
+    expect(count).toBe(1);
+    expect(renders).toBe(2);
+
+    count = 0;
+    renders = 0;
+
+    const StyledComponentMomoize = styled(
+      class extends React.Component<StyledProps> {
+        private css = momoize((color: string) => ({ color }));
+        public componentDidMount() {
+          this.forceUpdate();
+        }
+        public render() {
+          renders++;
+          return React.createElement('div', { className: this.props.apply(this.css('green')) });
+        }
+      },
+      {
+        get backgroundColor() {
+          count++;
+          return 'red';
+        },
+      },
+    );
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponentMomoize),
       ),
     );
 
