@@ -314,8 +314,8 @@ describe('react styled', () => {
       }
     }
 
-    const StyledComponentA = styled(Spy);
-    const StyledComponentB = styled(applyClassName(Spy));
+    const StyledComponent = styled(Spy);
+    const StyledElementLike = styled(applyClassName(Spy));
 
     mount(
       React.createElement(
@@ -323,12 +323,12 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponentA, {
+        React.createElement(StyledComponent, {
           innerRef: (el: Spy) => {
             expect(el).toBeInstanceOf(Spy);
           },
         }),
-        React.createElement(StyledComponentB, {
+        React.createElement(StyledElementLike, {
           innerRef: (el: Spy) => {
             expect(el).toBeInstanceOf(Spy);
           },
@@ -336,6 +336,34 @@ describe('react styled', () => {
         React.createElement(styled.Div, {
           innerRef: (el: HTMLDivElement) => {
             expect(el).toBeInstanceOf(HTMLDivElement);
+          },
+        }),
+      ),
+    );
+  });
+  it('passes className prop', () => {
+    const StyledElementLike = styled(
+      applyClassName(props => {
+        expect(props.className).toBe('some-class a');
+        return React.createElement('div');
+      }),
+      { color: 'red' },
+    );
+    const StyledElement = styled.div({ color: 'red' });
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledElementLike, {
+          className: 'some-class',
+        }),
+        React.createElement(StyledElement, {
+          className: 'some-class',
+          innerRef: (el: HTMLDivElement) => {
+            expect(el.className).toBe('some-class a');
           },
         }),
       ),
