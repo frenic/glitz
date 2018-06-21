@@ -5,7 +5,7 @@ import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 
 export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
-  public getStyleMarkup: (className?: string) => string;
+  public getStyleMarkup: () => string;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
     const classHasher = createHashCounter(prefix);

@@ -1,46 +1,43 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-React bindings for [Glitz](https://github.com/frenic/glitz/).
+[![npm (scoped)](https://img.shields.io/npm/v/@glitz/react.svg)](https://www.npmjs.com/package/@glitz/react) [![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/@glitz/react.svg)](https://bundlephobia.com/result?p=@glitz/react)
 
-```tsx
+Flexible and composable React bindings for [Glitz](https://github.com/frenic/glitz/).
+
+```jsx
 import { styled } from '@glitz/react';
-
-export default function Message(props) {
-  return (
-    <Box
-      css={{ color: props.important ? 'maroon' : 'teal' }}
-      /* Will be styled as `<div />` with `18px` and `maroon` or `teal` */
-    >
-      {props.children}
-    </Box>
-  );
-}
 
 const Box = styled.div({
   fontSize: '18px',
 });
+
+export default function Message(props) {
+  return (
+    <Box css={{ color: props.important ? 'maroon' : 'teal' }}>
+      Hi and <styled.Span css={{ fontWeight: 'bold' }}>welcome!</styled.Span>
+    </Box>
+  );
+}
 ```
 
 ## Table of content
 
-- [!Glitz](#glitzhttps---githubcom-frenic-glitz-raw-master-glitzsvgsanitizetrue)
-  - [Table of content](#table-of-content)
-  - [Getting started](#getting-started)
-  - [API](#api)
-    - [`<GlitzProvider />`](#glitzprovider)
-    - [`styled.tagname`](#styledtagnamestaticstyle--style)
-    - [`<styled.[Tagname] />`](#styledtagname)
-    - [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent--componenttype--staticstyle--style)
-      - [Prop `apply()`](#prop-apply)
-      - [Prop `compose(composedStyle?: Style)`](#prop-composecomposedstyle--style)
-    - [`styled(embeddedStyle: Style)`](#styledembeddedstyle--style)
-  - [Deep style composition](#deep-style-composition)
-  - [TypeScript](#typescript)
-  - [Server rendering](#server-rendering)
+- [Getting started](#getting-started)
+- [Caching](#caching)
+- [API](#api)
+  - [`<GlitzProvider />`](#glitzprovider)
+  - [`styled.tagname`](#styledtagname)
+  - [`<styled.[Tagname] />`](#styledtagname)
+  - [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent-componenttype-staticstyle-style)
+  - [`styled(embeddedStyle: Style)`](#styledembeddedstyle-style)
+  - [`<ThemeProvider />`](#themeprovider)
+- [Deep style composition](#deep-style-composition)
+- [TypeScript](#typescript)
+- [Server rendering](#server-rendering)
 
 ## Getting started
 
-```bash
+```sh
 $ yarn add @glitz/react
 
 // or
@@ -48,13 +45,15 @@ $ yarn add @glitz/react
 $ npm install @glitz/react
 ```
 
-```tsx
+```jsx
+import React from 'react';
 import { render } from 'react-dom';
 import GlitzClient from '@glitz/core';
+import transformer from '@glitz/transformers';
 import { GlitzProvider } from '@glitz/react';
 import App from './App';
 
-const glitz = new GlitzClient();
+const glitz = new GlitzClient({ transformer });
 
 render(
   <GlitzProvider glitz={glitz}>
@@ -64,35 +63,52 @@ render(
 );
 ```
 
+## Caching
+
+Class names are hardly cached within the styled component. This cache invalidates as new style or theme objects are passed into the styled component.
+
+```tsx
+// Fast due to intact cache
+const Success = styled.div({ color: 'green' });
+
+// Fast due to intact cache
+const successStyle = { color: 'green' };
+function Success() {
+  <styled.Div css={successStyle} />;
+}
+
+// Fast, but not as fast as the other two due to cache invalidation on each render
+function Error() {
+  <styled.Div css={{ color: 'red' }} />;
+}
+```
+
 ## API
 
 ### `<GlitzProvider />`
 
-Provides all styled component with the Glitz core instance. It's also possible to [enable deep composition](#deep-style-composition).
+Provides all styled component with the Glitz core instance.
 
-```tsx
+```jsx
 <GlitzProvider
   /* Required, provides instance of `new GlitzClient` or `new GlitzServer` */
-  glitz={glitz}
-  /* Optional, enables deep composition */
-  options={{
-    enableDeepComposition: boolean
-  }}
+  glitz={GlitzClient | GlitzServer}
 >
 ```
 
-Composed styles are shallow merged by default. But [deep composition](#deep-style-composition) is possible by the `enableDeepComposition`.
-
 ### `styled.[tagname](staticStyle: Style)`
+
+Where `[tagname]` is lowercase e.g. `div` or `span` like `styled.div(staticStyle: Style)`.
 
 Returns a component:
 
 ```tsx
 <StyledComponent
-  /* Optional, compose with e.g. dynamic styles */
-  css={...}
-  /* Optional, passes a function to the inner element as `ref` */
-  innerRef={...}
+  /* Any valid prop that `<[tagname] />` accepts */
+  /* Optional, compose with so called dynamic styles */
+  css={[style]}
+  /* Optional, forwards a function to the inner element as `ref` */
+  innerRef={[ref]}
 />
 ```
 
@@ -100,11 +116,11 @@ Tag name functions can be any valid React tag name (lower cased). It provides th
 
 Dynamic style are in the other hand inside using the `css` prop _(see next example)_. In this way, the logical parts of the code becomes centralized to where you receive props and the typing remains manageable, if you use TypeScript.
 
-```tsx
+```jsx
 import { styled } from '@glitz/react';
 
 export default function Message(props) {
-  return <Box>{props.children}</Box>;
+  return <Box>Hi and welcome!</Box>;
 }
 
 const Box = styled.div({
@@ -114,20 +130,23 @@ const Box = styled.div({
 
 ### `<styled.[Tagname] />`
 
+Where `[Tagname]` is capitalized e.g. `Div` or `Span` like `<styled.Div />`.
+
 Returns a component:
 
-```tsx
+```jsx
 <styled.[Tagname]
+  /* Any valid prop that `<[tagname] />` accepts */
   /* Optional, compose with e.g. dynamic styles */
-  css={...}
-  /* Optional, passes a function to the inner element as `ref` */
-  innerRef={...}
+  css={[style]}
+  /* Optional, forwards a function to the inner element as `ref` */
+  innerRef={[ref]}
 />
 ```
 
 You can also use capitalized tag name (initial letter upper cased) which exposes a component directly. _When you don't have or want to use static style._
 
-```tsx
+```jsx
 import { styled } from '@glitz/react';
 
 export default function Message(props) {
@@ -136,7 +155,7 @@ export default function Message(props) {
       css={{
         fontSize: props.xlarge: '24px' : '18px',
       }}
-    >{props.children}</styled.Div>
+    >Hi and welcome!</styled.Div>
   );
 }
 ```
@@ -145,61 +164,38 @@ export default function Message(props) {
 
 Returns a component:
 
-```tsx
+```jsx
 <StyledComponent
+  /* Any prop that `innerComponent` accepts */
   /* Optional, compose with e.g. dynamic styles */
-  css={...}
-  /* Optional, passes a function to the inner element as `ref` */
-  innerRef={...}
+  css={[style]}
+  /* Optional, forwards a function to the inner element as `ref` */
+  innerRef={[ref]}
 />
 ```
 
 You can also use `styled` as a HOC. This enables you to compose external components locally without having to create wrapping elements. This can be useful with your shared components.
 
-The inner component will receive two props:
-
-#### Prop `apply()`
-
-Returns a string with class names of the injected style. This method is used to **apply style on built in components** (HTML and SVG elements).
-
-```tsx
-import { styled } from '@glitz/react';
-
-class Message extends React.Component {
-  render() {
-    return (
-      <div
-        className={this.props.apply()}
-        /* Will be styled with `18px` */
-      >
-        {this.props.children}
-      </div>
-    );
-  }
-}
-
-export default styled(Message, {
-  fontSize: '18px',
-});
-```
+The inner component will receive one `compose` prop:
 
 #### Prop `compose(composedStyle?: Style)`
 
-Compose style from one styled component to another styled element. This method is used to **apply style on other Glitz styled components**.
+Compose style from one styled component to another styled component. This method is used to **forward style to other Glitz styled components**.
 
-```tsx
+```jsx
 import { styled } from '@glitz/react';
 import Message from './Message';
 
 class Welcome extends React.Component {
   render() {
     return (
-      <Message
+      <styled.Div
         css={this.props.compose({
-          textDecoration: 'underline'
+          textDecoration: 'underline',
         })}
-        /* Will be styled with `18px`, `bold` and `underline` */
-      >Hi and welcome!</div>
+      >
+        Hi and welcome!
+      </styled.Div>
     );
   }
 }
@@ -215,12 +211,12 @@ Returns: `styled(innerComponent: ComponentType, staticStyle?: Style)`
 
 It's also possible to pass style as a single argument to `styled`. In that case, it will return a new `styled` function with that static style embedded and assigned by any other style. _Note that it only returns a function. Not the properties like `styled.div` or `styled.Div`._
 
-```tsx
+```jsx
 import { styled } from '@glitz/react';
 
 class List extends React.Component {
   render() {
-    return <ul className={props.apply()}>{props.items.map((item = <li key={item.key}>{item.text}</li>))}</ul>;
+    return <styled.Ul css={props.compose()}>{props.items.map((item = <li key={item.key}>{item.text}</li>))}</styled.Ul>;
   }
 }
 
@@ -240,27 +236,51 @@ export const LargeList = listStyled(List, {
 });
 ```
 
+### `<ThemeProvider />`
+
+Provides a theme to the style object.
+
+```jsx
+<ThemeProvider
+  /* Required, provides theme object to styles */
+  theme={Object}
+>
+```
+
+Any theme can be used and replaced anywhere and you receive them by using a function for a property that returns a value.
+
+```jsx
+import React from 'react';
+import { styled, ThemeProvider } from '@glitz/react';
+
+const theme1 = {
+  linkColor: 'maroon',
+};
+
+const theme2 = {
+  linkColor: 'teal',
+};
+
+const Link = styled.a({
+  // This function will be called when rendered
+  color: theme => theme.linkColor,
+});
+
+export default function() {
+  return (
+    <ThemeProvider theme={theme1}>
+      <Link>Link is maroon</Link>
+      <ThemeProvider theme={theme2}>
+        <Link>Link is teal</Link>
+      </ThemeProvider>
+    </ThemeProvider>
+  );
+}
+```
+
 ## Deep style composition
 
-Default is shallow merge of multiple style objects. But enabling deep composition means that multiple style objects will be **treated** deeply instead.
-
-_They are **not** deeply merged. Instead, Glitz will keep an index of applied rules and ignore those that are overridden. So `@keyframes` and `@font-face` objects wont be merged in any way._
-
-```tsx
-import { render } from 'react-dom';
-import GlitzClient from '@glitz/core';
-import { GlitzProvider } from '@glitz/react';
-import App from './App';
-
-const glitz = new GlitzClient();
-
-render(
-  <GlitzProvider glitz={glitz} options={{ enableDeepComposition: true }}>
-    <App />
-  </GlitzProvider>,
-  document.getElementById('container'),
-);
-```
+Styles are deeply composed which means that multiple style objects will be **treated** deeply. They are **not** deeply merged. Instead, Glitz will keep track of of applied rules and ignore those that are overridden. But `@keyframes` and `@font-face` objects wont be treated deeply in any way.
 
 Here's an example of the different results:
 
@@ -279,20 +299,12 @@ export const InvertedLink = styled(Link, {
   ':hover': {
     color: 'white',
   },
-  // With deep composition enabled:
+  // Results in:
   // {
   //   color: 'grey',
   //   ':hover': {
   //     color: 'white',
   //     textDecoration: 'underline',
-  //   }
-  // }
-  //
-  // With deep composition disabled:
-  // {
-  //   color: 'grey',
-  //   ':hover': {
-  //     color: 'white',
   //   }
   // }
 });
@@ -313,10 +325,10 @@ type Props = {
 class Message extends React.Component<Props & StyledProps> {
   render() {
     return (
-      <div className={this.props.apply()}>
+      <styled.Div css={this.props.compose()}>
         <h1>{this.props.title}</h1>
         {this.props.children}
-      </div>
+      </styled.Div>
     );
   }
 }
@@ -336,6 +348,19 @@ const HelloWorld = styled(Message, {
 export default class Feature extends React.Component {
   render() {
     return <HelloWorld title="Hello world">Welcome</HelloWorld>;
+  }
+}
+```
+
+If you're using theming, make sure you type it using module augmentation.
+
+```tsx
+import * as Glitz from '@glitz/type';
+
+declare module '@glitz/type' {
+  interface Theme {
+    linkColor: string;
+    backgroundColor: string;
   }
 }
 ```

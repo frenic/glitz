@@ -5,7 +5,7 @@ A TypeScript and Glitz wrapper for [`inline-style-prefixer/static`](https://gith
 ```ts
 import GlitzClient from '@glitz/core';
 import prefixer from '@glitz/prefixer-transformer';
-const glitz = new GlitzClient(null, { transformer: prefixer });
+const glitz = new GlitzClient({ transformer: prefixer });
 
 const className = glitz.injectStyle({
   display: 'flex',
@@ -27,7 +27,7 @@ This is basically the same thing as:
 ```ts
 import GlitzClient from '@glitz/core';
 import prefixAll from 'inline-style-prefixer/static';
-const glitz = new GlitzClient(null, { transformer: prefixAll });
+const glitz = new GlitzClient({ transformer: prefixAll });
 ```
 
 But with correct types for TypeScript when used with `@glitz/core`.

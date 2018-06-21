@@ -5,7 +5,7 @@ Transforms numeric values from properties like `height` and `left` to a length w
 ```ts
 import GlitzClient from '@glitz/core';
 import numberToLength from '@glitz/length-transformer';
-const glitz = new GlitzClient(null, { transformer: numberToLength });
+const glitz = new GlitzClient({ transformer: numberToLength });
 
 const className = glitz.injectStyle({
   height: 10,
@@ -45,9 +45,9 @@ Default: `"px"`
 Unit used for [length safe properties](#safe-properties) (that doesn't accept number and length the same time like `lineHeight`).
 
 ```ts
-import GlitzClient, { compose } from '@glitz/core';
+import GlitzClient from '@glitz/core';
 import { createNumberToLengthTransformer } from '@glitz/length-transformer';
-const glitz = new GlitzClient(null, { transformer: createNumberToLengthTransformer({ defaultUnit: 'rem' }) });
+const glitz = new GlitzClient({ transformer: createNumberToLengthTransformer({ defaultUnit: 'rem' }) });
 
 const className = glitz.injectStyle({
   height: 10,
@@ -71,9 +71,9 @@ Default: `undefined`
 Override any CSS property with unit. Works with properties that excepts both number and length.
 
 ```ts
-import GlitzClient, { compose } from '@glitz/core';
+import GlitzClient from '@glitz/core';
 import { createNumberToLengthTransformer } from '@glitz/length-transformer';
-const glitz = new GlitzClient(null, {
+const glitz = new GlitzClient({
   transformer: createNumberToLengthTransformer({ lineHeight: 'em', fontSize: 'rem' }),
 });
 

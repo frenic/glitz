@@ -1,67 +1,101 @@
 # ![Glitz](https://github.com/frenic/glitz/raw/master/glitz.svg?sanitize=true)
 
-A fast, lightweight [_(~2.3KB gz)_](https://bundlephobia.com/result?p=@glitz/core) and type safe way of styling by the CSS-in-JS concept using Atomic CSS.
+Glitz is a CSS-in-JS library that is strictly focused on:
+
+:zap: **Performance** by caching and avoiding unnecessary re-renders whenever possible<br>
+:policeman: **Type safety** by TypeScript<br>
+:balance_scale: **Lightweight** ![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/react.svg?style=flat-square) by keeping things simple<br>
+:muscle: **Flexibility** by composition to avoid wrapping elements<br>
+:fire: Official [**React** bindings](https://github.com/frenic/glitz/blob/master/packages/react/)<br>
+
+Along with other built-in features like:
+
+- Atomic CSS (and non-Atmoic CSS)
+- Shorthand expansion
+- Pseudo selectors/elements
+- Fallback values
+- `@media` support
+- `@keyframes` support
+- `@font-face` support
+- Media query ordering
+- Server rendering
+- Vendor prefixing _(with `@glitz/transformers`)_
+- Number to unit conversion `10 -> "10px"`_(with `@glitz/transformers`)_
+- Warnings and errors when things goes wrong in development _(with `@glitz/transformers`)_
+
+## Table of content
+
+- [Getting started](#getting-started)
+- [Features](#features)
+  - [Atomic](#atomic)
+  - [Pseudos](#pseudos)
+  - [Fallback values](#fallback-values)
+  - [Keyframes](#keyframes)
+  - [Font faces](#font-faces)
+  - [Media queries](#media-queries)
+- [React](#react)
+- [Server rendering](#server-rendering)
+- [Shorthand properties](#shorthand-properties)
+- [TypeScript](#typescript)
+  - [Unknown properties](#unknown-properties)
+  - [Add custom properties](#add-custom-properties)
+- [Transformers](#transformers)
+  - [All](#all)
+  - [Prefixer](#prefixer)
+  - [Number as length](#number-as-length)
+  - [DevTool](#devtool)
+- [API](#api)
+  - [`new GlitzClient(options?: Options)`](#new-glitzclientoptions-options)
+  - [`new GlitzServer(options?: Options)`](#new-glitzserveroptions-options)
+  - [Options](#options)
+  - [Helpers](#helpers)
+- [Playground](#playground)
+
+## Getting started
+
+```bash
+$ yarn add @glitz/core @glitz/transformers
+
+// or
+
+$ npm install @glitz/core @glitz/transformers
+```
 
 The most basic implementation is really easy. You don't need any config or module loaders to get started.
 
 ```ts
 import GlitzClient from '@glitz/core';
-const glitz = new GlitzClient();
+import transformer from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer });
 
 const className = glitz.injectStyle({
   color: 'green',
 });
 ```
 
-At this moment, there's officially only [React bindings](https://github.com/frenic/glitz/blob/master/packages/react/) available.
+## Features
 
-## Table of content
+### Atomic
 
-- [!Glitz](#glitzhttps---githubcom-frenic-glitz-raw-master-glitzsvgsanitizetrue)
-  - [Table of content](#table-of-content)
-  - [Getting started](#getting-started)
-  - [Features](#features)
-    - [Pseudos](#pseudos)
-    - [Fallback values](#fallback-values)
-    - [Keyframes](#keyframes)
-    - [Font faces](#font-faces)
-    - [Media queries](#media-queries)
-  - [Server rendering](#server-rendering)
-  - [Shorthand properties](#shorthand-properties)
-  - [TypeScript](#typescript)
-    - [Unknown properties](#unknown-properties)
-    - [Add custom properties](#add-custom-properties)
-  - [API](#api)
-    - [`new GlitzClient(elements: HTMLStyleElement[], options: Options)`](#new-glitzclientelements--htmlstyleelement--options--options)
-      - [Method `injectStyle(style: Style)`](#method-injectstylestyle--style)
-    - [`new GlitzServer(options?: Options)`](#new-glitzserveroptions--options)
-      - [Method `injectStyle(style: Style)`](#method-injectstylestyle--style)
-      - [Method `getStyleMarkup(className?: string)`](#method-getstylemarkupclassname--string)
-    - [Options](#options)
-      - [`options.transformer`](#optionstransformer)
-      - [`options.mediaOrder`](#optionsmediaorder)
-      - [`options.atomic`](#optionsatomic)
-      - [`options.prefix`](#optionsprefix)
-    - [Helpers](#helpers)
-      - [`pseudo`](#pseudo)
-      - [`media`](#media)
-      - [`query`](#query)
-  - [Playground](#playground)
-  - [Prefixer](#prefixer)
-  - [Number as length](#number-as-length)
-  - [Atomic](#atomic)
+Each declaration will be injected individually by default which means that declaration blocks are divided into as small atomic rules as possible before they are injected into a virtual style sheet using the [`CSSStyleSheet.insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) method. This results in minimal output and maximum performance because each class becomes highly reusable.
 
-## Getting started
-
-```bash
-$ yarn add @glitz/core
-
-// or
-
-$ npm install @glitz/core
+```ts
+const className = glitz.injectStyle({
+  display: 'flex',
+  color: 'green',
+  // Will be injected as:
+  // .a {
+  //   display: flex;
+  // }
+  // .b {
+  //   color: green;
+  // }
+});
 ```
 
-## Features
+So the next time you use `display: 'flex'` it will reuse `a` instead of injecting a new rule.
+
+_However, the side-effect of this is that you cannot guarantee the order of the CSS. That why it's recommended to always use longhand properties. More info about using [shorthand properties](#shorthand-properties) here. You're able to [disable this feature](#optionsatomic) but it's not recommended._
 
 ### Pseudos
 
@@ -85,11 +119,11 @@ An array of values will be injected as one rule.
 
 ```ts
 const className = glitz.injectStyle({
-  display: ['-webkit-flex', 'flex'],
+  width: ['50%', 'fit-content'],
   // Will be injected as:
   // .a {
-  //   display: -webkit-flex;
-  //   display: flex;
+  //   width: 50%;
+  //   width: fit-content;
   // }
 });
 ```
@@ -173,8 +207,6 @@ const className = glitz.injectStyle({
 You can define any `@media` property as you like.
 
 ```ts
-import { media } from '@glitz/core';
-
 const className = glitz.injectStyle({
   '@media (min-width: 768px)': {
     display: 'block',
@@ -182,11 +214,15 @@ const className = glitz.injectStyle({
 });
 ```
 
+## React
+
+The official [React bindings](https://github.com/frenic/glitz/blob/master/packages/react/) for Glitz are highly flexible and composable.
+
 ## Server rendering
 
 The difference between `GlitzServer` class and `GlitzClient` class is that `GlitzClient` inserts new rules into the DOM directly. Instead `GlitzServer` collects the rendered style as a string for you to put in the `<head>`. The client side will then hydrate the CSS and reuse it.
 
-- [API reference](#glitzserver)
+- [API reference](#new-glitzserveroptions-options)
 - [Example implementation](https://github.com/frenic/glitz/blob/master/packages/react/#server-rendering)
 
 ## Shorthand properties
@@ -194,58 +230,64 @@ The difference between `GlitzServer` class and `GlitzClient` class is that `Glit
 Problems mixing CSS shorthand and longhand properties are common with styling techniques like this and doesn't only affects Glitz. It often causes unexpected behaviors.
 
 ```ts
-import { media } from '@glitz/core';
-
 const first = glitz.injectStyle({
-  marginLeft: '10px',
+  marginLeft: 10,
 });
 
 // Bad
 const second = glitz.injectStyle({
-  margin: '20px',
-  marginLeft: '10px', // <- The order of the CSS will result in this never being applied as expected
+  margin: 20,
+  marginLeft: 10, // <- The order of the CSS will result in this never being applied as expected
 });
 
 // Good
 const second = glitz.injectStyle({
-  marginTop: '20px',
-  marginRight: '20px',
-  marginBottom: '20px',
-  marginLeft: '10px',
+  marginTop: 20,
+  marginRight: 20,
+  marginBottom: 20,
+  marginLeft: 10,
 });
 ```
 
 Instead of writing each longhand property separately, you're able to use objects with shorthand properties.
 
 ```ts
-import { media } from '@glitz/core';
-
 // Good
 const second = glitz.injectStyle({
   margin: {
-    top: '20px',
-    right: '20px',
-    bottom: '20px',
-    left: '10px',
+    top: 20,
+    right: 20,
+    bottom: 20,
+    left: 10,
   },
 });
 ```
 
-For `margin` and `padding` the `x` property is an alias for `left` and `right`. The `y` property is an alias for `top` and `bottom`.
+For `margin`, `padding` and `border` there's some property aliases to make this easier:
+
+- `x` is an alias for `left` and `right`
+- `y` is an alias for `top` and `bottom`
+- `xy` is an alias for `left`, `right`, `top` and `bottom`
 
 ```ts
-import { media } from '@glitz/core';
-
 // Bad
 const second = glitz.injectStyle({
-  padding: '10px',
+  padding: '10px 20px',
+  border: 'red solid 5px',
 });
 
 // Good
 const second = glitz.injectStyle({
   padding: {
-    x: '10px',
-    y: '10px',
+    y: 10,
+    x: 20,
+  },
+  border: {
+    xy: {
+      color: 'red',
+      style: 'solid',
+      width: 5,
+    },
   },
 });
 ```
@@ -258,8 +300,8 @@ You don't need TypeScript to use Glitz. But if you do, everything is typed! Even
 
 ```ts
 const className = glitz.injectStyle({
-  alignSelf: 'stretsh', // Type error on value
   colour: 'white', // Type error on property
+  overflow: 'hide', // Type error on value
 });
 ```
 
@@ -305,9 +347,88 @@ declare module '@glitz/type' {
 }
 ```
 
+## Transformers
+
+Styles will be processed by transformers before they are injected. A transform function will receive a flat object with `string | number | Array<string | number>` values and expects the same in return. Have in mind that the transformer will receive each unique declaration only ones. The same unique declaration will later use a cached result and will never again reach the transformer.
+
+These are not built in by default because it gives the users the freedom of choice and makes it easier to adopt to other platforms in the future.
+
+### All
+
+The `@glitz/transformers` module includes all official transformers:
+
+- [`@glitz/prefixer-transformer`](https://github.com/frenic/glitz/tree/master/packages/prefixer-transformer)
+- [`@glitz/length-transformer`](https://github.com/frenic/glitz/tree/master/packages/length-transformer)
+- [`@glitz/devtool-transformer`](https://github.com/frenic/glitz/tree/master/packages/devtool-transformer)
+
+```ts
+import GlitzClient from '@glitz/core';
+import transformer from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer });
+```
+
+### Prefixer
+
+The [`@glitz/prefixer-transformer`](https://github.com/frenic/glitz/tree/master/packages/prefixer-transformer) is basically just a TypeScript wrapper for [`inline-style-prefixer/static`](https://github.com/rofrischmann/inline-style-prefixer).
+
+```ts
+import GlitzClient from '@glitz/core';
+import prefixer from '@glitz/prefixer-transformer';
+const glitz = new GlitzClient({ transformer: prefixer });
+
+const className = glitz.injectStyle({
+  display: 'flex',
+  // Will be transformed into:
+  // {
+  //   display: [
+  //     '-webkit-box',
+  //     '-moz-box',
+  //     '-ms-flexbox',
+  //     '-webkit-flex',
+  //     'flex',
+  //   ],
+  // }
+});
+```
+
+### Number as length
+
+The [`@glitz/length-transformer`](https://github.com/frenic/glitz/tree/master/packages/length-transformer) converts numbers to lengths for certain properties.
+
+```ts
+import GlitzClient from '@glitz/core';
+import numberToLength from '@glitz/length-transformer';
+const glitz = new GlitzClient({ transformer: numberToLength });
+
+const className = glitz.injectStyle({
+  height: 10,
+  width: [100, 'max-content'],
+  // Will be transformed into:
+  // {
+  //   height: '10px',
+  //   width: ['100px', 'max-content'],
+  // }
+});
+```
+
+### DevTool
+
+The [`@glitz/devtool-transformer`](https://github.com/frenic/glitz/tree/master/packages/devtool-transformer) produces warnings and errors when something does wrong in development.
+
+```ts
+import GlitzClient from '@glitz/core';
+import devTool from '@glitz/devtool-transformer';
+const glitz = new GlitzClient({ transformer: devTool });
+
+const className = glitz.injectStyle({
+  width: 'calc(100)',
+  // Will warn that `width` was ignored by the browser due to an error (unit missing)
+});
+```
+
 ## API
 
-### `new GlitzClient(elements: HTMLStyleElement[], options: Options)`
+### `new GlitzClient(options?: Options)`
 
 The Glitz core class for browsers.
 
@@ -327,13 +448,23 @@ Returns: `string`
 
 Class names of the injected style.
 
-#### Method `getStyleMarkup(className?: string)`
+#### Method `getStyleMarkup()`
 
 Returns: `string`
 
 Markup with style sheets to render into `<head>` that the Glitz core class for browsers will reuse.
 
 ### Options
+
+#### `options.identifier`
+
+```ts
+identifier: string;
+```
+
+Default: `"glitz"`
+
+The dataset name that will be used to identify Glitz style elements.
 
 #### `options.transformer`
 
@@ -343,22 +474,20 @@ transformer(style: Properties): Properties
 
 Default: `undefined`
 
-Transform or hook into the injected style. The transform function will receive an object with `string | number | Array<string | number>` as values and expects the same in return. Have in mind that the transformer will receive each unique declaration only ones. The same unique declaration will later use a cached result and will never again reach the transformer.
+Styles will be processed by transformers before they are injected. A transform function will receive a flat object with `string | number | Array<string | number>` values and expects the same in return. Have in mind that the transformer will receive each unique declaration only ones. The same unique declaration will later use a cached result and will never again reach the transformer.
 
-There's two official transformers to [vendor prefix style](#prefixer) and to convert [numbers to length](#number-as-length).
+Official transformers are:
 
-To use multiple transformers, use the `compose` function:
+- [Vendor prefix](#prefixer) style
+- [Number to unit conversion](#number-as-length)
+- [Warnings and errors](#devtool) when things goes wrong in development
+
+To use all the official transformers, use `@glitz/transformers`:
 
 ```ts
-import GlitzClient, { compose } from '@glitz/core';
-import prefixer from '@glitz/prefixer-transformer';
-import numberToLength from '@glitz/length-transformer';
-const glitz = new GlitzClient(null, {
-  transformer: compose(
-    prefixer,
-    numberToLength,
-  ),
-});
+import GlitzClient from '@glitz/core';
+import transformer from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer });
 ```
 
 #### `options.mediaOrder`
@@ -374,7 +503,7 @@ Unordered media style may sometimes cause some unwanted behavior. With this func
 It's recommended that you create your own with the media queries you use.
 
 ```ts
-import {query} from '@glitz/core';
+import { query } from '@glitz/core';
 
 const mediaQueryOrder = [
   query({minWidth: 320}),
@@ -388,7 +517,7 @@ function mediaQuerySorter(a, b) {
   return indexA - indexB;
 }
 
-const glitz = new GlitzClient(null, { mediaOrder: mediaQuerySorter });
+const glitz = new GlitzClient({ mediaOrder: mediaQuerySorter });
 ```
 
 It's also possible to use [`sort-css-media-queries`](https://github.com/dutchenkoOleg/sort-css-media-queries/) if you don't have a specific list of media queries.
@@ -451,77 +580,3 @@ $ yarn example
 ```
 
 Open http://localhost:1234 in your browser and edit the code in `packages/example`.
-
-## Prefixer
-
-The [`@glitz/prefixer-transformer`](https://github.com/frenic/glitz/tree/master/packages/prefixer-transformer) is basically just a TypeScript wrapper for [`inline-style-prefixer/static`](https://github.com/rofrischmann/inline-style-prefixer).
-
-```ts
-import GlitzClient from '@glitz/core';
-import prefixer from '@glitz/prefixer-transformer';
-const glitz = new GlitzClient(null, { transformer: prefixer });
-
-const className = glitz.injectStyle({
-  display: 'flex',
-  // Will be transformed into:
-  // {
-  //   display: [
-  //     '-webkit-box',
-  //     '-moz-box',
-  //     '-ms-flexbox',
-  //     '-webkit-flex',
-  //     'flex',
-  //   ],
-  // }
-});
-```
-
-## Number as length
-
-The [`@glitz/length-transformer`](https://github.com/frenic/glitz/tree/master/packages/length-transformer) converts numbers to lengths for certain properties.
-
-```ts
-import GlitzClient from '@glitz/core';
-import numberToLength from '@glitz/length-transformer';
-const glitz = new GlitzClient(null, { transformer: numberToLength });
-
-const className = glitz.injectStyle({
-  height: 10,
-  width: [100, 'max-content'],
-  // Will be transformed into:
-  // {
-  //   height: '10px',
-  //   width: ['100px', 'max-content'],
-  // }
-});
-```
-
-## Atomic
-
-Glitz breaks down each declaration into as small atomic rules as possible and injects them to a virtual style sheet using the [`CSSStyleSheet.insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) method. This results in minimal output and maximum performance.
-
-```ts
-const className = glitz.injectStyle({
-  display: 'flex',
-  color: 'white',
-  fontWeight: 'bold',
-});
-
-console.log(className); // -> "a b c"
-```
-
-The injected rules would in this case look like:
-
-```css
-.a {
-  display: flex;
-}
-.b {
-  color: white;
-}
-.c {
-  font-weight: bold;
-}
-```
-
-So the next time you use `display: 'flex'` it will reuse `a` instead of injecting a new rule.

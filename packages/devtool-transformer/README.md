@@ -7,7 +7,7 @@ _It will **only** work in the browser and in development mode (`process.env.NODE
 ```ts
 import GlitzClient from '@glitz/core';
 import devTool from '@glitz/devtool-transformer';
-const glitz = new GlitzClient(null, { transformer: devTool });
+const glitz = new GlitzClient({ transformer: devTool });
 
 const className = glitz.injectStyle({
   colour: 'red',
@@ -22,7 +22,7 @@ import GlitzClient, { compose } from '@glitz/core';
 import numberToLength from '@glitz/length-transformer';
 import devTool from '@glitz/devtool-transformer';
 import prefixer from '@glitz/prefixer-transformer';
-const glitz = new GlitzClient(null, {
+const glitz = new GlitzClient({
   transformer: compose(
     prefixer,
     devTool,
