@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Consumer, Context } from '../components/context';
 import { isElementLikeType, StyledElementLike } from '../styled/apply-class-name';
 import { isElementType, StyledElement } from '../styled/predefined';
-import { ExternalProps, StyledElementProps, StyledProps } from './Super';
+import { ExternalProps, isStyledComponent, StyledElementProps, StyledProps } from './Super';
 
 type ApplyFunction = (additionals?: StyleOrStyleArray) => string | undefined;
 type ComposeFunction = (additionals?: StyleOrStyleArray) => StyleOrStyleArray | undefined;
@@ -75,9 +75,13 @@ export default function createRenderer(
     });
   };
 
-  const createElement =
+  const createElement: (
+    currentProps: ExternalProps<any>,
+    apply: ApplyFunction,
+    compose: ComposeFunction,
+  ) => React.ReactElement<any> =
     isElementType(type) || isElementLikeType<any>(type)
-      ? (currentProps: ExternalProps<any>, apply: ApplyFunction) =>
+      ? (currentProps, apply) =>
           React.createElement(
             type.value,
             passingProps<StyledElementProps>(
@@ -85,8 +89,11 @@ export default function createRenderer(
               currentProps,
             ),
           )
-      : (currentProps: ExternalProps<any>, apply: ApplyFunction, compose: ComposeFunction) =>
-          React.createElement(type, passingProps<StyledProps>({ apply, compose }, currentProps));
+      : isStyledComponent(type)
+        ? (currentProps, {}, compose) =>
+            React.createElement(type, passingProps<StyledProps>({ css: compose() }, currentProps))
+        : (currentProps, apply, compose) =>
+            React.createElement(type, passingProps<StyledProps>({ apply, compose }, currentProps));
 
   return (currentProps: ExternalProps<any>) => {
     return React.createElement(Consumer, null, (context: Context) => {

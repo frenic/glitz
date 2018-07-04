@@ -59,14 +59,14 @@ export function customStyled<TProps>(
   return isStyle(arg1) ? decorator<TProps>(arg1) : create<TProps>(arg1, arg2 ? [arg2] : []);
 }
 
-function decorator<TProps>(style: Style): StyledDecorator {
+function decorator<TProps>(preStyle: Style): StyledDecorator {
   return (
     innerComponent:
       | StyledElementLike<React.ComponentType<TProps>>
       | StyledComponent<TProps>
       | React.ComponentType<TProps>,
-    additionalStyle?: Style,
-  ) => create(innerComponent, additionalStyle ? [style, additionalStyle] : [style]);
+    style?: Style,
+  ) => create(innerComponent, style ? [preStyle, style] : [preStyle]);
 }
 
 function isStyle(arg: any): arg is Style {

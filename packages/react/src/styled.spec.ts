@@ -136,19 +136,15 @@ describe('react styled', () => {
   it('composes style', () => {
     const StyledComponent = styled.div({ color: 'red' });
 
-    const ComposedComponentA = styled(props => {
-      return React.createElement(StyledComponent, {
-        css: props.compose({ color: 'green', backgroundColor: 'red' }),
-      });
-    });
-
     const treeA = mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponentA),
+        React.createElement(StyledComponent, {
+          css: { color: 'green', backgroundColor: 'red' },
+        }),
       ),
     );
 
@@ -157,7 +153,7 @@ describe('react styled', () => {
     expect(declarationA.getPropertyValue('color')).toBe('green');
     expect(declarationA.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponentB = styled(
+    const ComposedComponentA = styled(
       props => {
         return React.createElement(StyledComponent, {
           css: props.compose({ color: 'green', backgroundColor: 'red' }),
@@ -172,7 +168,7 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponentB),
+        React.createElement(ComposedComponentA),
       ),
     );
 
@@ -181,7 +177,7 @@ describe('react styled', () => {
     expect(declarationB.getPropertyValue('color')).toBe('blue');
     expect(declarationB.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponentC = styled(
+    const ComposedComponentB = styled(
       props => {
         return React.createElement(StyledComponent, {
           css: props.compose({ color: 'green', backgroundColor: 'red' }),
@@ -196,7 +192,7 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponentC, {
+        React.createElement(ComposedComponentB, {
           css: { color: 'white' },
         }),
       ),
@@ -207,7 +203,7 @@ describe('react styled', () => {
     expect(declarationC.getPropertyValue('color')).toBe('white');
     expect(declarationC.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponentD = styled(
+    const ComposedComponentC = styled(
       props => {
         return React.createElement('div', {
           className: props.apply({ color: 'green', backgroundColor: 'red' }),
@@ -222,7 +218,7 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(ComposedComponentD),
+        React.createElement(ComposedComponentC),
       ),
     );
 
