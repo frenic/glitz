@@ -382,4 +382,10 @@ describe('server', () => {
     expect(server.injectStyle({ appearance: 'none', animationName: { from: { appearance: 'none' } } })).toBe('a b');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
+  it('passes theme', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(server.injectStyle({ color: (theme: any) => theme.text }, { text: 'red' })).toBe('a');
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
 });

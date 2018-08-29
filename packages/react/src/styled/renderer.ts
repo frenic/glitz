@@ -1,6 +1,7 @@
-import { StyleArray, StyleOrStyleArray } from '@glitz/type';
+import { GlitzClient, GlitzServer } from '@glitz/core';
+import { StyleArray, StyleOrStyleArray, Theme } from '@glitz/type';
 import * as React from 'react';
-import { Consumer, Context } from '../components/context';
+import { GlitzContext, GlitzContextConsumer, ThemeContext, ThemeContextConsumer } from '../components/context';
 import { isElementLikeType, StyledElementLike } from '../styled/apply-class-name';
 import { isElementType, StyledElement } from '../styled/predefined';
 import { ExternalProps, isStyledComponent, StyledElementProps, StyledProps } from './Super';
@@ -42,16 +43,18 @@ export default function createRenderer(
     });
   };
 
-  let lastContext: Context | undefined;
+  let lastGlitz: GlitzClient | GlitzServer | undefined;
+  let lastTheme: Theme | undefined;
   let lastApplier: ApplyFunction | undefined;
   let lastApplierComposer: ComposeFunction | undefined;
 
-  const createApplier = (context: Context, compose: ComposeFunction): ApplyFunction => {
-    if (lastContext === context && lastApplierComposer === compose && lastApplier) {
+  const createApplier = (glitz: GlitzClient | GlitzServer, theme: Theme, compose: ComposeFunction): ApplyFunction => {
+    if (lastGlitz === glitz && lastApplierComposer === compose && lastTheme === theme && lastApplier) {
       return lastApplier;
     }
 
-    lastContext = context;
+    lastGlitz = glitz;
+    lastTheme = theme;
     lastApplierComposer = compose;
 
     let lastStyles: StyleOrStyleArray | undefined;
@@ -71,7 +74,7 @@ export default function createRenderer(
         return lastClassName;
       }
 
-      return (lastClassName = context.glitz.injectStyle(styles));
+      return (lastClassName = glitz.injectStyle(styles, theme));
     });
   };
 
@@ -96,17 +99,19 @@ export default function createRenderer(
             React.createElement(type, passingProps<StyledProps>({ apply, compose }, currentProps));
 
   return (currentProps: ExternalProps<any>) => {
-    return React.createElement(Consumer, null, (context: Context) => {
-      if (process.env.NODE_ENV !== 'production') {
-        if (!(context && context.glitz && context.glitz)) {
-          throw new Error(
-            "The `<GlitzProvider>` doesn't seem to be used correctly because the core instance couldn't be found",
-          );
+    return React.createElement(GlitzContextConsumer, null, ({ glitz }: GlitzContext = {} as GlitzContext) => {
+      return React.createElement(ThemeContextConsumer, null, ({ theme }: ThemeContext = {} as ThemeContext) => {
+        if (process.env.NODE_ENV !== 'production') {
+          if (!glitz) {
+            throw new Error(
+              "The `<GlitzProvider>` doesn't seem to be used correctly because the core instance couldn't be found",
+            );
+          }
         }
-      }
 
-      const compose = createComposer(currentProps.css);
-      return createElement(currentProps, createApplier(context, compose), compose);
+        const compose = createComposer(currentProps.css);
+        return createElement(currentProps, createApplier(glitz, theme, compose), compose);
+      });
     });
   };
 }

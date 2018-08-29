@@ -5,7 +5,7 @@ import { mount } from 'enzyme';
 import momoize from 'memoize-one';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledProps } from './';
+import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledProps, ThemeProvider } from './';
 
 describe('react styled', () => {
   it('creates custom styled component', () => {
@@ -400,5 +400,51 @@ describe('react styled', () => {
         }),
       ),
     );
+  });
+  it('updates when theme changes', () => {
+    class Theming extends React.Component {
+      public state = {
+        text: 'red',
+      };
+      public componentDidMount() {
+        this.setState({ text: 'green' });
+      }
+      public render() {
+        return React.createElement(ThemeProvider, { theme: this.state }, this.props.children);
+      }
+    }
+
+    let renders = 0;
+
+    const StyledComponent = styled(
+      props => {
+        if (renders === 0) {
+          expect(props.apply()).toBe('a');
+        } else {
+          expect(props.apply()).toBe('b');
+        }
+
+        renders++;
+
+        return React.createElement('div', { className: props.apply() });
+      },
+      {
+        color: (theme: any) => {
+          return theme.text;
+        },
+      },
+    );
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(Theming, null, React.createElement(StyledComponent)),
+      ),
+    );
+
+    expect(renders).toBe(2);
   });
 });

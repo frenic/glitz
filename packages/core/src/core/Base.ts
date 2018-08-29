@@ -1,4 +1,4 @@
-import { FontFace, PropertiesList, Style, StyleOrStyleArray } from '@glitz/type';
+import { FontFace, PropertiesList, Style, StyleOrStyleArray, Theme } from '@glitz/type';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
@@ -14,18 +14,22 @@ const MEDIA_IDENTIFIER = '@';
 const PSEUDO_IDENTIFIER = ':';
 
 export default class Base<TStyle extends Style> {
-  public injectStyle: (styles: StyleOrStyleArray<TStyle>) => string;
+  public injectStyle: (styles: StyleOrStyleArray<TStyle>, theme?: Theme) => string;
   constructor(
     injector: (media?: string) => InjectorClient | InjectorServer,
     transformer: Transformer | undefined,
     atomic: boolean | undefined,
   ) {
-    const resolve = (style: any, result: Index = {}, media?: string, pseudo?: string) => {
+    const resolve = (style: any, theme: Theme | undefined, result: Index = {}, media?: string, pseudo?: string) => {
       const properties = Object.keys(style);
 
       for (let i = properties.length; i > 0; i--) {
         let property = properties[i - 1];
         let value = style[property];
+
+        if (typeof value === 'function') {
+          value = value(theme);
+        }
 
         if (process.env.NODE_ENV !== 'production') {
           if (value === null || ['undefined', 'string', 'number', 'object'].indexOf(typeof value) === -1) {
@@ -66,7 +70,7 @@ export default class Base<TStyle extends Style> {
               // Resolve `animationName` objects
               const list: PropertiesList = {};
               for (const identifier in value) {
-                const block = reverse(resolve(value[identifier]));
+                const block = reverse(resolve(value[identifier], theme));
                 list[identifier] = transformer ? transformer(block) : block;
               }
 
@@ -82,7 +86,7 @@ export default class Base<TStyle extends Style> {
                   names += ',';
                 }
                 if (typeof family === 'object') {
-                  const fontFace = reverse(resolve(family));
+                  const fontFace = reverse(resolve(family, theme));
                   names += injector().injectFontFace((transformer ? transformer(fontFace) : fontFace) as FontFace);
                 } else {
                   names += family;
@@ -101,6 +105,7 @@ export default class Base<TStyle extends Style> {
         if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
           resolve(
             value,
+            theme,
             result,
             property[0] === MEDIA_IDENTIFIER ? property : media,
             property[0] === PSEUDO_IDENTIFIER ? (pseudo || '') + property : pseudo,
@@ -132,7 +137,7 @@ export default class Base<TStyle extends Style> {
           }
         }
 
-        resolve(longhandDeclarations, result, media, pseudo);
+        resolve(longhandDeclarations, theme, result, media, pseudo);
       }
 
       return result;
@@ -232,15 +237,15 @@ export default class Base<TStyle extends Style> {
             return classNames;
           };
 
-    this.injectStyle = (styles: StyleOrStyleArray<TStyle>) => {
+    this.injectStyle = (styles, theme) => {
       const result: Index = {};
 
       if (Array.isArray(styles)) {
         for (let i = styles.length - 1; i >= 0; i--) {
-          resolve(styles[i], result);
+          resolve(styles[i], theme, result);
         }
       } else {
-        resolve(styles, result);
+        resolve(styles, theme, result);
       }
 
       const classNames = inject(result);

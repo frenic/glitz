@@ -168,6 +168,8 @@ exports[`client injects shorthand rule 17`] = `"@font-face {font-weight: bold; f
 
 exports[`client injects shorthand rule 18`] = `".p {font-family: a;}"`;
 
+exports[`client passes theme 1`] = `".a {color: red;}"`;
+
 exports[`client preserves order 1`] = `".a {padding-top: 20px;}"`;
 
 exports[`client preserves order 2`] = `".b {color: red;}"`;

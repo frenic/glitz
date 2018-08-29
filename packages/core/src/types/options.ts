@@ -1,4 +1,4 @@
-import { Properties, UntransformedProperties } from '@glitz/type';
+import { Properties, UntransformedProperties} from '@glitz/type';
 
 export const DEFAULT_HYDRATION_IDENTIFIER = 'glitz';
 

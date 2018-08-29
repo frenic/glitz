@@ -28,6 +28,8 @@ exports[`server injects rule deeply 1`] = `"<style data-glitz>.a{color:red}.b{pa
 
 exports[`server injects shorthand rule 1`] = `"<style data-glitz>.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{grid-column-gap:10px}.f{margin-left:10px}.g{margin-right:10px}.h{margin-top:10px}.i{margin-bottom:10px}.j{margin-left:20px}.k{margin-right:20px}.l{margin-top:20px}.m{margin-bottom:20px}.n{padding-left:30px}.o{animation-name:a}.p{font-family:a}@keyframes a{from{padding-left:20px}}@font-face {font-weight:bold;font-family:a}</style>"`;
 
+exports[`server passes theme 1`] = `"<style data-glitz>.a{color:red}</style>"`;
+
 exports[`server preserves order 1`] = `"<style data-glitz>.a{padding-top:20px}.b{color:red}.c{padding-right:30px}.e{padding-left:30px}.d:hover{color:green}</style>"`;
 
 exports[`server preserves order 2`] = `"<style data-glitz>.a{padding-top:20px;color:red;padding-right:30px;padding-left:30px}.b:hover{color:green}</style>"`;

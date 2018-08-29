@@ -9,6 +9,8 @@ export interface Properties extends CSS.PropertiesFallback<string | 0> {}
 export interface StyleArray<TStyle = Style> extends Array<TStyle> {}
 export type StyleOrStyleArray<TStyle = Style> = StyleArray<TStyle> | TStyle;
 
+export interface Theme {}
+
 export interface UntransformedProperties
   extends Pick<Properties, Exclude<keyof Properties, keyof TransformerProperties>>,
     TransformerProperties {}
@@ -16,8 +18,15 @@ export interface UntransformedProperties
 // Override properties using module augmentation
 interface TransformerProperties {}
 
+type WithThemeFunction<TValue> = TValue | ((theme: Theme) => TValue);
+
+type WithThemeFunctionMap<TProperties> = { [key in keyof TProperties]: WithThemeFunction<TProperties[key]> };
+
 export interface FeaturedProperties
-  extends Pick<UntransformedProperties, Exclude<keyof UntransformedProperties, keyof ExtendedProperties>>,
+  extends Pick<
+      WithThemeFunctionMap<UntransformedProperties>,
+      Exclude<keyof UntransformedProperties, keyof ExtendedProperties>
+    >,
     ExtendedProperties {
   '@keyframes'?: FeaturedPropertiesList;
   '@font-face'?: FeaturedFontFace;
@@ -25,7 +34,7 @@ export interface FeaturedProperties
 
 export interface ExtendedProperties {
   // Keyframes
-  animationName?: FeaturedPropertiesList | UntransformedProperties['animationName'];
+  animationName?: WithThemeFunction<FeaturedPropertiesList | UntransformedProperties['animationName']>;
 
   // Font face
   fontFamily?: FontFamilyProperty;
@@ -52,186 +61,186 @@ export interface ExtendedProperties {
 }
 
 interface AnimationProperty {
-  delay?: UntransformedProperties['animationDelay'];
-  direction?: UntransformedProperties['animationDirection'];
-  duration?: UntransformedProperties['animationDuration'];
-  fillMode?: UntransformedProperties['animationFillMode'];
-  iterationCount?: UntransformedProperties['animationIterationCount'];
-  name?: FeaturedPropertiesList | UntransformedProperties['animationName'];
-  playState?: UntransformedProperties['animationPlayState'];
-  timingFunction?: UntransformedProperties['animationTimingFunction'];
+  delay?: WithThemeFunction<UntransformedProperties['animationDelay']>;
+  direction?: WithThemeFunction<UntransformedProperties['animationDirection']>;
+  duration?: WithThemeFunction<UntransformedProperties['animationDuration']>;
+  fillMode?: WithThemeFunction<UntransformedProperties['animationFillMode']>;
+  iterationCount?: WithThemeFunction<UntransformedProperties['animationIterationCount']>;
+  name?: FeaturedPropertiesList | WithThemeFunction<UntransformedProperties['animationName']>;
+  playState?: WithThemeFunction<UntransformedProperties['animationPlayState']>;
+  timingFunction?: WithThemeFunction<UntransformedProperties['animationTimingFunction']>;
 }
 
 interface BackgroundProperty {
-  attachment?: UntransformedProperties['backgroundAttachment'];
-  blendMode?: UntransformedProperties['backgroundBlendMode'];
-  clip?: UntransformedProperties['backgroundClip'];
-  color?: UntransformedProperties['backgroundColor'];
-  image?: UntransformedProperties['backgroundImage'];
-  origin?: UntransformedProperties['backgroundOrigin'];
-  position?: UntransformedProperties['backgroundPosition'];
-  positionX?: UntransformedProperties['backgroundPositionX'];
-  positionY?: UntransformedProperties['backgroundPositionY'];
-  repeat?: UntransformedProperties['backgroundRepeat'];
-  size?: UntransformedProperties['backgroundSize'];
+  attachment?: WithThemeFunction<UntransformedProperties['backgroundAttachment']>;
+  blendMode?: WithThemeFunction<UntransformedProperties['backgroundBlendMode']>;
+  clip?: WithThemeFunction<UntransformedProperties['backgroundClip']>;
+  color?: WithThemeFunction<UntransformedProperties['backgroundColor']>;
+  image?: WithThemeFunction<UntransformedProperties['backgroundImage']>;
+  origin?: WithThemeFunction<UntransformedProperties['backgroundOrigin']>;
+  position?: WithThemeFunction<UntransformedProperties['backgroundPosition']>;
+  positionX?: WithThemeFunction<UntransformedProperties['backgroundPositionX']>;
+  positionY?: WithThemeFunction<UntransformedProperties['backgroundPositionY']>;
+  repeat?: WithThemeFunction<UntransformedProperties['backgroundRepeat']>;
+  size?: WithThemeFunction<UntransformedProperties['backgroundSize']>;
 }
 
 interface BorderProperty {
-  collapse?: UntransformedProperties['borderCollapse'];
-  color?: UntransformedProperties['borderColor'];
-  blockEnd?: UntransformedProperties['borderBlockEnd'];
-  blockStart?: UntransformedProperties['borderBlockStart'];
-  inlineEnd?: UntransformedProperties['borderInlineEnd'];
-  inlineStart?: UntransformedProperties['borderInlineStart'];
-  radius?: UntransformedProperties['borderRadius'];
-  spacing?: UntransformedProperties['borderSpacing'];
-  style?: UntransformedProperties['borderStyle'];
-  width?: UntransformedProperties['borderWidth'];
+  collapse?: WithThemeFunction<UntransformedProperties['borderCollapse']>;
+  color?: WithThemeFunction<UntransformedProperties['borderColor']>;
+  blockEnd?: WithThemeFunction<UntransformedProperties['borderBlockEnd']>;
+  blockStart?: WithThemeFunction<UntransformedProperties['borderBlockStart']>;
+  inlineEnd?: WithThemeFunction<UntransformedProperties['borderInlineEnd']>;
+  inlineStart?: WithThemeFunction<UntransformedProperties['borderInlineStart']>;
+  radius?: WithThemeFunction<UntransformedProperties['borderRadius']>;
+  spacing?: WithThemeFunction<UntransformedProperties['borderSpacing']>;
+  style?: WithThemeFunction<UntransformedProperties['borderStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['borderWidth']>;
 }
 
 interface BorderBottomProperty {
-  color?: UntransformedProperties['borderBottomColor'];
-  style?: UntransformedProperties['borderBottomStyle'];
-  width?: UntransformedProperties['borderBottomWidth'];
+  color?: WithThemeFunction<UntransformedProperties['borderBottomColor']>;
+  style?: WithThemeFunction<UntransformedProperties['borderBottomStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['borderBottomWidth']>;
 }
 
 interface BorderImageProperty {
-  outset?: UntransformedProperties['borderImageOutset'];
-  repeat?: UntransformedProperties['borderImageRepeat'];
-  slice?: UntransformedProperties['borderImageSlice'];
-  source?: UntransformedProperties['borderImageSource'];
-  width?: UntransformedProperties['borderImageWidth'];
+  outset?: WithThemeFunction<UntransformedProperties['borderImageOutset']>;
+  repeat?: WithThemeFunction<UntransformedProperties['borderImageRepeat']>;
+  slice?: WithThemeFunction<UntransformedProperties['borderImageSlice']>;
+  source?: WithThemeFunction<UntransformedProperties['borderImageSource']>;
+  width?: WithThemeFunction<UntransformedProperties['borderImageWidth']>;
 }
 
 interface BorderLeftProperty {
-  color?: UntransformedProperties['borderLeftColor'];
-  style?: UntransformedProperties['borderLeftStyle'];
-  width?: UntransformedProperties['borderLeftWidth'];
+  color?: WithThemeFunction<UntransformedProperties['borderLeftColor']>;
+  style?: WithThemeFunction<UntransformedProperties['borderLeftStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['borderLeftWidth']>;
 }
 
 interface BorderRightProperty {
-  color?: UntransformedProperties['borderRightColor'];
-  style?: UntransformedProperties['borderRightStyle'];
-  width?: UntransformedProperties['borderRightWidth'];
+  color?: WithThemeFunction<UntransformedProperties['borderRightColor']>;
+  style?: WithThemeFunction<UntransformedProperties['borderRightStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['borderRightWidth']>;
 }
 
 interface BorderTopProperty {
-  color?: UntransformedProperties['borderTopColor'];
-  style?: UntransformedProperties['borderTopStyle'];
-  width?: UntransformedProperties['borderTopWidth'];
+  color?: WithThemeFunction<UntransformedProperties['borderTopColor']>;
+  style?: WithThemeFunction<UntransformedProperties['borderTopStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['borderTopWidth']>;
 }
 
 interface FlexProperty {
-  basis?: UntransformedProperties['flexBasis'];
-  direction?: UntransformedProperties['flexDirection'];
-  grow?: UntransformedProperties['flexGrow'];
-  shrink?: UntransformedProperties['flexShrink'];
-  wrap?: UntransformedProperties['flexWrap'];
+  basis?: WithThemeFunction<UntransformedProperties['flexBasis']>;
+  direction?: WithThemeFunction<UntransformedProperties['flexDirection']>;
+  grow?: WithThemeFunction<UntransformedProperties['flexGrow']>;
+  shrink?: WithThemeFunction<UntransformedProperties['flexShrink']>;
+  wrap?: WithThemeFunction<UntransformedProperties['flexWrap']>;
 }
 
 interface FontProperty {
   family?: FontFamilyProperty;
-  featureSettings?: UntransformedProperties['fontFeatureSettings'];
-  kerning?: UntransformedProperties['fontKerning'];
-  languageOverride?: UntransformedProperties['fontLanguageOverride'];
-  variationSettings?: UntransformedProperties['fontVariationSettings'];
-  size?: UntransformedProperties['fontSize'];
-  sizeAdjust?: UntransformedProperties['fontSizeAdjust'];
-  stretch?: UntransformedProperties['fontStretch'];
-  style?: UntransformedProperties['fontStyle'];
-  synthesis?: UntransformedProperties['fontSynthesis'];
-  variant?: UntransformedProperties['fontVariant'];
-  weight?: UntransformedProperties['fontWeight'];
+  featureSettings?: WithThemeFunction<UntransformedProperties['fontFeatureSettings']>;
+  kerning?: WithThemeFunction<UntransformedProperties['fontKerning']>;
+  languageOverride?: WithThemeFunction<UntransformedProperties['fontLanguageOverride']>;
+  variationSettings?: WithThemeFunction<UntransformedProperties['fontVariationSettings']>;
+  size?: WithThemeFunction<UntransformedProperties['fontSize']>;
+  sizeAdjust?: WithThemeFunction<UntransformedProperties['fontSizeAdjust']>;
+  stretch?: WithThemeFunction<UntransformedProperties['fontStretch']>;
+  style?: WithThemeFunction<UntransformedProperties['fontStyle']>;
+  synthesis?: WithThemeFunction<UntransformedProperties['fontSynthesis']>;
+  variant?: WithThemeFunction<UntransformedProperties['fontVariant']>;
+  weight?: WithThemeFunction<UntransformedProperties['fontWeight']>;
 }
 
 interface GridProperty {
   auto?: {
-    columns?: UntransformedProperties['gridAutoColumns'];
-    flow?: UntransformedProperties['gridAutoFlow'];
-    rows?: UntransformedProperties['gridAutoRows'];
+    columns?: WithThemeFunction<UntransformedProperties['gridAutoColumns']>;
+    flow?: WithThemeFunction<UntransformedProperties['gridAutoFlow']>;
+    rows?: WithThemeFunction<UntransformedProperties['gridAutoRows']>;
   };
   column?: {
-    end?: UntransformedProperties['gridColumnEnd'];
-    gap?: UntransformedProperties['gridColumnGap'];
-    start?: UntransformedProperties['gridColumnStart'];
+    end?: WithThemeFunction<UntransformedProperties['gridColumnEnd']>;
+    gap?: WithThemeFunction<UntransformedProperties['gridColumnGap']>;
+    start?: WithThemeFunction<UntransformedProperties['gridColumnStart']>;
   };
   row?: {
-    end?: UntransformedProperties['gridRowEnd'];
-    gap?: UntransformedProperties['gridRowGap'];
-    start?: UntransformedProperties['gridRowStart'];
+    end?: WithThemeFunction<UntransformedProperties['gridRowEnd']>;
+    gap?: WithThemeFunction<UntransformedProperties['gridRowGap']>;
+    start?: WithThemeFunction<UntransformedProperties['gridRowStart']>;
   };
   template?: {
-    areas?: UntransformedProperties['gridTemplateAreas'];
-    columns?: UntransformedProperties['gridTemplateColumns'];
-    rows?: UntransformedProperties['gridTemplateRows'];
+    areas?: WithThemeFunction<UntransformedProperties['gridTemplateAreas']>;
+    columns?: WithThemeFunction<UntransformedProperties['gridTemplateColumns']>;
+    rows?: WithThemeFunction<UntransformedProperties['gridTemplateRows']>;
   };
 }
 
 interface MaskBorderProperty {
-  mode?: UntransformedProperties['maskBorderMode'];
-  outset?: UntransformedProperties['maskBorderOutset'];
-  repeat?: UntransformedProperties['maskBorderRepeat'];
-  slice?: UntransformedProperties['maskBorderSlice'];
-  source?: UntransformedProperties['maskBorderSource'];
-  width?: UntransformedProperties['maskBorderWidth'];
+  mode?: WithThemeFunction<UntransformedProperties['maskBorderMode']>;
+  outset?: WithThemeFunction<UntransformedProperties['maskBorderOutset']>;
+  repeat?: WithThemeFunction<UntransformedProperties['maskBorderRepeat']>;
+  slice?: WithThemeFunction<UntransformedProperties['maskBorderSlice']>;
+  source?: WithThemeFunction<UntransformedProperties['maskBorderSource']>;
+  width?: WithThemeFunction<UntransformedProperties['maskBorderWidth']>;
 }
 
 interface MaskProperty {
-  clip?: UntransformedProperties['maskClip'];
-  composite?: UntransformedProperties['maskComposite'];
-  image?: UntransformedProperties['maskImage'];
-  mode?: UntransformedProperties['maskMode'];
-  origin?: UntransformedProperties['maskOrigin'];
-  position?: UntransformedProperties['maskPosition'];
-  repeat?: UntransformedProperties['maskRepeat'];
-  size?: UntransformedProperties['maskSize'];
-  type?: UntransformedProperties['maskType'];
+  clip?: WithThemeFunction<UntransformedProperties['maskClip']>;
+  composite?: WithThemeFunction<UntransformedProperties['maskComposite']>;
+  image?: WithThemeFunction<UntransformedProperties['maskImage']>;
+  mode?: WithThemeFunction<UntransformedProperties['maskMode']>;
+  origin?: WithThemeFunction<UntransformedProperties['maskOrigin']>;
+  position?: WithThemeFunction<UntransformedProperties['maskPosition']>;
+  repeat?: WithThemeFunction<UntransformedProperties['maskRepeat']>;
+  size?: WithThemeFunction<UntransformedProperties['maskSize']>;
+  type?: WithThemeFunction<UntransformedProperties['maskType']>;
 }
 
 interface MarginProperty {
-  xy?: UntransformedProperties['marginLeft'];
-  x?: UntransformedProperties['marginLeft'];
-  y?: UntransformedProperties['marginTop'];
-  top?: UntransformedProperties['marginTop'];
-  right?: UntransformedProperties['marginRight'];
-  bottom?: UntransformedProperties['marginBottom'];
-  left?: UntransformedProperties['marginLeft'];
+  xy?: WithThemeFunction<UntransformedProperties['marginLeft']>;
+  x?: WithThemeFunction<UntransformedProperties['marginLeft']>;
+  y?: WithThemeFunction<UntransformedProperties['marginTop']>;
+  top?: WithThemeFunction<UntransformedProperties['marginTop']>;
+  right?: WithThemeFunction<UntransformedProperties['marginRight']>;
+  bottom?: WithThemeFunction<UntransformedProperties['marginBottom']>;
+  left?: WithThemeFunction<UntransformedProperties['marginLeft']>;
 }
 
 interface OffsetProperty {
-  anchor?: UntransformedProperties['offsetAnchor'];
-  blockEnd?: UntransformedProperties['offsetBlockEnd'];
-  blockStart?: UntransformedProperties['offsetBlockStart'];
-  inlineEnd?: UntransformedProperties['offsetInlineEnd'];
-  inlineStart?: UntransformedProperties['offsetInlineStart'];
-  distance?: UntransformedProperties['offsetDistance'];
-  path?: UntransformedProperties['offsetPath'];
-  position?: UntransformedProperties['offsetPosition'];
-  rotate?: UntransformedProperties['offsetRotate'];
+  anchor?: WithThemeFunction<UntransformedProperties['offsetAnchor']>;
+  blockEnd?: WithThemeFunction<UntransformedProperties['offsetBlockEnd']>;
+  blockStart?: WithThemeFunction<UntransformedProperties['offsetBlockStart']>;
+  inlineEnd?: WithThemeFunction<UntransformedProperties['offsetInlineEnd']>;
+  inlineStart?: WithThemeFunction<UntransformedProperties['offsetInlineStart']>;
+  distance?: WithThemeFunction<UntransformedProperties['offsetDistance']>;
+  path?: WithThemeFunction<UntransformedProperties['offsetPath']>;
+  position?: WithThemeFunction<UntransformedProperties['offsetPosition']>;
+  rotate?: WithThemeFunction<UntransformedProperties['offsetRotate']>;
 }
 
 interface OutlineProperty {
-  color?: UntransformedProperties['outlineColor'];
-  offset?: UntransformedProperties['outlineOffset'];
-  style?: UntransformedProperties['outlineStyle'];
-  width?: UntransformedProperties['outlineWidth'];
+  color?: WithThemeFunction<UntransformedProperties['outlineColor']>;
+  offset?: WithThemeFunction<UntransformedProperties['outlineOffset']>;
+  style?: WithThemeFunction<UntransformedProperties['outlineStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['outlineWidth']>;
 }
 
 interface PaddingProperty {
-  xy?: UntransformedProperties['paddingLeft'];
-  x?: UntransformedProperties['paddingLeft'];
-  y?: UntransformedProperties['paddingTop'];
-  top?: UntransformedProperties['paddingTop'];
-  right?: UntransformedProperties['paddingRight'];
-  bottom?: UntransformedProperties['paddingBottom'];
-  left?: UntransformedProperties['paddingLeft'];
+  xy?: WithThemeFunction<UntransformedProperties['paddingLeft']>;
+  x?: WithThemeFunction<UntransformedProperties['paddingLeft']>;
+  y?: WithThemeFunction<UntransformedProperties['paddingTop']>;
+  top?: WithThemeFunction<UntransformedProperties['paddingTop']>;
+  right?: WithThemeFunction<UntransformedProperties['paddingRight']>;
+  bottom?: WithThemeFunction<UntransformedProperties['paddingBottom']>;
+  left?: WithThemeFunction<UntransformedProperties['paddingLeft']>;
 }
 
 interface TransitionProperty {
-  delay?: UntransformedProperties['transitionDelay'];
-  duration?: UntransformedProperties['transitionDuration'];
-  property?: UntransformedProperties['transitionProperty'];
-  timingFunction?: UntransformedProperties['transitionTimingFunction'];
+  delay?: WithThemeFunction<UntransformedProperties['transitionDelay']>;
+  duration?: WithThemeFunction<UntransformedProperties['transitionDuration']>;
+  property?: WithThemeFunction<UntransformedProperties['transitionProperty']>;
+  timingFunction?: WithThemeFunction<UntransformedProperties['transitionTimingFunction']>;
 }
 
 export type PseudoMap = { [P in CSS.SimplePseudos]?: FeaturedProperties & PseudoMap };
@@ -248,17 +257,17 @@ export interface FontFace extends Pick<CSS.FontFaceFallback, Exclude<keyof CSS.F
 
 export interface FeaturedFontFace extends FontFace {
   font?: {
-    display?: FontFace['fontDisplay'];
-    featureSettings?: FontFace['fontFeatureSettings'];
-    variationSettings?: FontFace['fontVariationSettings'];
-    stretch?: FontFace['fontStretch'];
-    style?: FontFace['fontStyle'];
-    weight?: FontFace['fontWeight'];
-    variant?: FontFace['fontVariant'];
+    display?: WithThemeFunction<FontFace['fontDisplay']>;
+    featureSettings?: WithThemeFunction<FontFace['fontFeatureSettings']>;
+    variationSettings?: WithThemeFunction<FontFace['fontVariationSettings']>;
+    stretch?: WithThemeFunction<FontFace['fontStretch']>;
+    style?: WithThemeFunction<FontFace['fontStyle']>;
+    weight?: WithThemeFunction<FontFace['fontWeight']>;
+    variant?: WithThemeFunction<FontFace['fontVariant']>;
   };
 }
 
 export type FontFamilyProperty =
   | FeaturedFontFace
-  | CSS.StandardLonghandProperties['fontFamily']
-  | Array<FeaturedFontFace | CSS.StandardLonghandProperties['fontFamily']>;
+  | WithThemeFunction<CSS.StandardLonghandProperties['fontFamily']>
+  | WithThemeFunction<Array<FeaturedFontFace | CSS.StandardLonghandProperties['fontFamily']>>;

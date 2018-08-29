@@ -732,6 +732,16 @@ describe('client', () => {
     client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle);
     expect(logger).toHaveBeenCalledTimes(3);
   });
+  it('passes theme', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>();
+
+    expect(client.injectStyle({ color: (theme: any) => theme.text }, { text: 'red' })).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
 });
 
 function createStyle(media?: string | null, css?: string) {
