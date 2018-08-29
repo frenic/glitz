@@ -259,11 +259,11 @@ export interface FeaturedFontFace extends FontFace {
   font?: {
     display?: WithThemeFunction<FontFace['fontDisplay']>;
     featureSettings?: WithThemeFunction<FontFace['fontFeatureSettings']>;
-    variationSettings?: WithThemeFunction<FontFace['fontVariationSettings']>;
     stretch?: WithThemeFunction<FontFace['fontStretch']>;
     style?: WithThemeFunction<FontFace['fontStyle']>;
-    weight?: WithThemeFunction<FontFace['fontWeight']>;
     variant?: WithThemeFunction<FontFace['fontVariant']>;
+    variationSettings?: WithThemeFunction<FontFace['fontVariationSettings']>;
+    weight?: WithThemeFunction<FontFace['fontWeight']>;
   };
 }
 
@@ -271,3 +271,5 @@ export type FontFamilyProperty =
   | FeaturedFontFace
   | WithThemeFunction<CSS.StandardLonghandProperties['fontFamily']>
   | WithThemeFunction<Array<FeaturedFontFace | CSS.StandardLonghandProperties['fontFamily']>>;
+
+export type Declarations = { [index: string]: string | number | Array<string | number> };

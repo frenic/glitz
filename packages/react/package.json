@@ -17,7 +17,7 @@
     "@types/react": "*"
   },
   "peerDependencies": {
-    "react": "16.3 - 17.x"
+    "react": "^16.3"
   },
   "devDependencies": {
     "@types/memoize-one": "^3.1.1",

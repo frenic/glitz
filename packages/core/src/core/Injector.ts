@@ -1,4 +1,4 @@
-import { FontFace, Properties, PropertiesList } from '@glitz/type';
+import { Declarations, FontFace, Properties, PropertiesList } from '@glitz/type';
 import { formatRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
@@ -22,7 +22,7 @@ export default class Injector {
     injectNewFontFaceRule?: (name: string, block: string) => void,
   ) {
     this.injectClassName = (declarations, pseudo) => {
-      const block = parseDeclarationBlock(declarations);
+      const block = parseDeclarationBlock(declarations as Declarations);
       const index = pseudo ? (pseudoIndex[pseudo] = pseudoIndex[pseudo] || {}) : plainIndex;
 
       if (index[block]) {
@@ -42,7 +42,7 @@ export default class Injector {
     this.injectKeyframes = declarationList => {
       let blockList = '';
       for (const identifier in declarationList) {
-        const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
+        const keyframeBlock = parseDeclarationBlock(declarationList[identifier] as Declarations);
         blockList += formatRule(identifier, keyframeBlock);
       }
 
@@ -75,7 +75,7 @@ export default class Injector {
         }
       }
 
-      const block = parseDeclarationBlock(declarations);
+      const block = parseDeclarationBlock(declarations as Declarations);
 
       if (fontFaceIndex[block]) {
         return fontFaceIndex[block];

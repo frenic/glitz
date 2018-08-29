@@ -1,8 +1,8 @@
-import { Properties } from '@glitz/type';
+import { Declarations } from '@glitz/type';
 
-export function parseDeclarationBlock(declarations: Properties) {
+export function parseDeclarationBlock(declarations: Declarations) {
   let block = '';
-  let property: keyof Properties;
+  let property: string;
   for (property in declarations) {
     const value = declarations[property];
     if (typeof value === 'object') {
@@ -22,7 +22,7 @@ export function parseDeclarationBlock(declarations: Properties) {
   return block;
 }
 
-export function parseDeclaration(property: keyof Properties, value?: string | number) {
+export function parseDeclaration(property: string, value?: string | number) {
   if (process.env.NODE_ENV !== 'production') {
     if (!(typeof value === 'string' || typeof value === 'number')) {
       console.error('The style value %O of property `%s` has to be a string, number', value, property);
