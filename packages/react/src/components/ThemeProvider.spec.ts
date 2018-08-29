@@ -1,24 +1,33 @@
 import { GlitzClient } from '@glitz/core';
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
-import { GlitzContext, GlitzContextConsumer } from './context';
+import { styled } from '../styled';
 import GlitzProvider from './GlitzProvider';
+import ThemeProvider from './ThemeProvider';
 
 describe('react provider', () => {
   it('provides instance', () => {
     const glitz = new GlitzClient();
+    const theme = { text: 'red' };
     // @ts-ignore
-    const Spy: React.StatelessComponent<GlitzContext> = props => {
-      expect(props.glitz).toBe(glitz);
-      return React.createElement('div');
-    };
     renderer.create(
       React.createElement(
         GlitzProvider,
         {
           glitz,
         },
-        React.createElement(GlitzContextConsumer, null, (value: GlitzContext) => React.createElement(Spy, value)),
+        React.createElement(
+          ThemeProvider,
+          { theme },
+          React.createElement(styled.Div, {
+            css: {
+              color: (themeOut: any) => {
+                expect(themeOut).toBe(themeOut);
+                return 'red';
+              },
+            },
+          }),
+        ),
       ),
     );
   });
