@@ -374,6 +374,22 @@ describe('react styled', () => {
     );
   });
   it('passes className prop', () => {
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(styled.Div, {
+          className: 'some-class',
+          css: { color: 'red' },
+          innerRef: (el: HTMLDivElement) => {
+            expect(el.className).toBe('some-class a');
+          },
+        }),
+      ),
+    );
+
     const StyledElementLike = styled(
       applyClassName(props => {
         expect(props.className).toBe('some-class a');
@@ -381,7 +397,6 @@ describe('react styled', () => {
       }),
       { color: 'red' },
     );
-    const StyledElement = styled.div({ color: 'red' });
 
     mount(
       React.createElement(
@@ -392,6 +407,17 @@ describe('react styled', () => {
         React.createElement(StyledElementLike, {
           className: 'some-class',
         }),
+      ),
+    );
+
+    const StyledElement = styled.div({ color: 'red' });
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
         React.createElement(StyledElement, {
           className: 'some-class',
           innerRef: (el: HTMLDivElement) => {
@@ -400,6 +426,44 @@ describe('react styled', () => {
         }),
       ),
     );
+
+    let renders = 0;
+
+    class ClassNameUpdates extends React.Component {
+      public state = {
+        className: 'some-class',
+      };
+      private ref = React.createRef<HTMLDivElement>();
+      public componentDidMount() {
+        // @ts-ignore
+        expect(this.ref.current.className).toBe('some-class a');
+        this.setState({ className: 'another-class' });
+      }
+      public componentDidUpdate() {
+        // @ts-ignore
+        expect(this.ref.current.className).toBe('another-class a');
+      }
+      public render() {
+        renders++;
+
+        return React.createElement(StyledElement, {
+          className: this.state.className,
+          innerRef: this.ref,
+        });
+      }
+    }
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ClassNameUpdates),
+      ),
+    );
+
+    expect(renders).toBe(2);
   });
   it('updates when theme changes', () => {
     class Theming extends React.Component {
@@ -418,13 +482,13 @@ describe('react styled', () => {
 
     const StyledComponent = styled(
       props => {
-        if (renders === 0) {
+        renders++;
+
+        if (renders === 1) {
           expect(props.apply()).toBe('a');
         } else {
           expect(props.apply()).toBe('b');
         }
-
-        renders++;
 
         return React.createElement('div', { className: props.apply() });
       },
