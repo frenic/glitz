@@ -119,6 +119,13 @@ const Q = styled(
 );
 <Q x="" className="" css={{}} innerRef={c => c} />;
 
+function connect<TProps>(Component: React.ComponentType<TProps>): React.StatelessComponent<TProps> {
+  return props => <Component {...props} />;
+}
+
+const R = connect(B);
+<R css={{}} />;
+
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881
 // @styled({})

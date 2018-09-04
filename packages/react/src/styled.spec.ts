@@ -525,4 +525,47 @@ describe('react styled', () => {
 
     expect(renders).toBe(2);
   });
+  it('styles with HOC in between', () => {
+    function hoc<TProps>(Component: React.ComponentType<TProps>): React.StatelessComponent<TProps> {
+      return props => React.createElement(Component, props);
+    }
+
+    const ConnectedStyledComponentA = hoc(
+      styled(
+        props => {
+          expect(props.compose()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+          return React.createElement(styled.Div, {
+            css: props.compose(),
+            innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
+          });
+        },
+        { color: 'red' },
+      ),
+    );
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ConnectedStyledComponentA, { css: { backgroundColor: 'green' } }),
+      ),
+    );
+
+    const ConnectedStyledComponentB = hoc(styled.div({ color: 'red' }));
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ConnectedStyledComponentB, {
+          css: { backgroundColor: 'green' },
+          innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
+        }),
+      ),
+    );
+  });
 });
