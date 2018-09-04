@@ -50,6 +50,13 @@ export function customStyled<
   style?: Style,
 ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
 
+// This overload prevents errors on `component` when `style` is incorrect
+export function customStyled<TProps>(
+  // tslint:disable-next-line unified-signatures
+  component: StyledElementLike<React.ComponentType<TProps>> | StyledComponent<TProps> | React.ComponentType<TProps>,
+  style?: Style,
+): StyledComponent<TProps>;
+
 export function customStyled(style: Style): StyledDecorator;
 
 export function customStyled<TProps>(
