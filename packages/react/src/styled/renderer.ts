@@ -95,8 +95,8 @@ export default function createRenderer(
       : isStyledComponent(type)
         ? (currentProps, {}, compose) =>
             React.createElement(type, passingProps<StyledProps>({ css: compose() }, currentProps))
-        : (currentProps, apply, compose) =>
-            React.createElement(type, passingProps<StyledProps>({ apply, compose }, currentProps));
+        : (currentProps, {}, compose) =>
+            React.createElement(type, passingProps<StyledProps>({ compose }, currentProps));
 
   return (currentProps: ExternalProps<any>) => {
     return React.createElement(GlitzContextConsumer, null, ({ glitz }: GlitzContext = {} as GlitzContext) => {

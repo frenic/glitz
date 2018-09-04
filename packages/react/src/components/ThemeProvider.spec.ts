@@ -1,6 +1,6 @@
 import { GlitzClient } from '@glitz/core';
+import { mount } from 'enzyme';
 import * as React from 'react';
-import * as renderer from 'react-test-renderer';
 import { styled } from '../styled';
 import GlitzProvider from './GlitzProvider';
 import ThemeProvider from './ThemeProvider';
@@ -10,7 +10,7 @@ describe('react provider', () => {
     const glitz = new GlitzClient();
     const theme = { text: 'red' };
     // @ts-ignore
-    renderer.create(
+    mount(
       React.createElement(
         GlitzProvider,
         {

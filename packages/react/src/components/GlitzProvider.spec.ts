@@ -1,6 +1,6 @@
 import { GlitzClient } from '@glitz/core';
+import { mount } from 'enzyme';
 import * as React from 'react';
-import * as renderer from 'react-test-renderer';
 import { GlitzContext, GlitzContextConsumer } from './context';
 import GlitzProvider from './GlitzProvider';
 
@@ -12,7 +12,7 @@ describe('react provider', () => {
       expect(props.glitz).toBe(glitz);
       return React.createElement('div');
     };
-    renderer.create(
+    mount(
       React.createElement(
         GlitzProvider,
         {

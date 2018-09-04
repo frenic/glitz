@@ -6,7 +6,6 @@ export type CSSProp = {
 };
 
 export type StyledProps = {
-  apply: (style?: StyleOrStyleArray) => string | undefined;
   compose: (style?: StyleOrStyleArray) => StyleOrStyleArray;
 };
 

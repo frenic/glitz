@@ -15,16 +15,16 @@ const A = styled.button({});
 
 <styled.Button type="" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
 
-const B = styled(props => <div className={props.apply()} />);
+const B = styled(props => <styled.Div css={props.compose({})} />);
 <B css={{}} />;
 
-const C = styled(props => <B css={props.compose({})} />);
+const C = styled(props => <B css={props.compose()} />);
 <C css={{}} />;
 
-const D = styled(props => <div className={props.apply()} />, {});
+const D = styled(props => <styled.Div css={props.compose()} />, {});
 <D css={{}} />;
 
-const E = styled((props: { x: string } & StyledProps) => <div className={props.apply()} />);
+const E = styled((props: { x: string } & StyledProps) => <styled.Div css={props.compose()} />);
 <E x="" css={{}} />;
 
 const F = styled(E);
@@ -33,7 +33,7 @@ const F = styled(E);
 const G = styled(
   class extends React.Component<StyledProps> {
     render() {
-      return <div className={this.props.apply()} />;
+      return <styled.Div css={this.props.compose()} />;
     }
   },
 );
@@ -51,7 +51,7 @@ const H = styled(
 const I = styled(
   class extends React.Component<StyledProps> {
     render() {
-      return <div className={this.props.apply()} />;
+      return <styled.Div css={this.props.compose()} />;
     }
   },
   {},
@@ -61,7 +61,7 @@ const I = styled(
 const J = styled(
   class extends React.Component<{ x: string } & StyledProps> {
     render() {
-      return <div className={this.props.apply()} />;
+      return <styled.Div css={this.props.compose()} />;
     }
   },
 );
@@ -71,14 +71,14 @@ const K = styled(J);
 <K x="" css={{}} innerRef={c => c} />;
 
 const j = styled({});
-const L = j(props => <div className={props.apply()} />);
+const L = j(props => <styled.Div css={props.compose()} />);
 <L css={{}} />;
 
 const k = styled({});
 const M = k(
   class extends React.Component<StyledProps> {
     render() {
-      return <div className={this.props.apply()} />;
+      return <styled.Div css={this.props.compose()} />;
     }
   },
 );
