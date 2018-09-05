@@ -21,13 +21,15 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       [media: string]: InjectorClient;
     } = {};
 
+    const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
+
     const injector = (media?: string) => {
       if (media) {
         if (mediaIndex[media]) {
           return mediaIndex[media];
         }
 
-        const element = (mediaSheets[media] = createStyleElement(media));
+        const element = (mediaSheets[media] = createStyleElement(media, identifier));
 
         let insertBefore: HTMLStyleElement | null = null;
         if (mediaOrderOption) {
@@ -44,7 +46,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
           return plain;
         }
 
-        const element = insertStyleElement(createStyleElement(media), initialMediaSheet);
+        const element = insertStyleElement(createStyleElement(media, identifier), initialMediaSheet);
 
         return (plain = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher));
       }
@@ -52,9 +54,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
     super(injector, options.transformer, options.atomic);
 
-    const preRenderStyles = document.querySelectorAll(
-      `[data-${options.identifier || DEFAULT_HYDRATION_IDENTIFIER}]`,
-    ) as NodeListOf<HTMLStyleElement>;
+    const preRenderStyles = document.head.querySelectorAll(`[data-${identifier}]`) as NodeListOf<HTMLStyleElement>;
 
     if (preRenderStyles) {
       for (const element of preRenderStyles) {

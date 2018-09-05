@@ -8,12 +8,14 @@ export function injectSheetRule(styleElement: HTMLStyleElement, rule: string) {
   }
 }
 
-export function createStyleElement(media?: string | null) {
+export function createStyleElement(media: string | undefined, identifier: string) {
   const element = document.createElement('style');
 
   if (media) {
     element.media = media;
   }
+
+  element.dataset[identifier] = '';
 
   return element;
 }

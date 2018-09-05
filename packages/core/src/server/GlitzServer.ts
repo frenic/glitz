@@ -25,14 +25,14 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
     super(injector, options.transformer, options.atomic);
 
     this.getStyleMarkup = () => {
-      const attribute = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
+      const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
       let markup = '';
       if (plain) {
-        markup += `<style data-${attribute}>${plain.getStyle()}</style>`;
+        markup += `<style data-${identifier}>${plain.getStyle()}</style>`;
       }
       const medias = options.mediaOrder ? Object.keys(mediaIndex).sort(options.mediaOrder) : Object.keys(mediaIndex);
       for (const media of medias) {
-        markup += `<style data-${attribute} media="${media}">${mediaIndex[media].getStyle()}</style>`;
+        markup += `<style data-${identifier} media="${media}">${mediaIndex[media].getStyle()}</style>`;
       }
       return markup;
     };
