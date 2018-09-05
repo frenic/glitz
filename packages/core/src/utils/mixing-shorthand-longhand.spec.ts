@@ -2,7 +2,7 @@ import { validateMixingShorthandLonghand } from './mixing-shorthand-longhand';
 
 describe('mixing shorthand longhand', () => {
   it('will log error', () => {
-    const logger = (console.error = jest.fn());
+    const logger = (console.warn = jest.fn());
 
     validateMixingShorthandLonghand(
       {
@@ -38,7 +38,7 @@ describe('mixing shorthand longhand', () => {
     expect(logger).toHaveBeenCalledTimes(5);
   });
   it('wont log error', () => {
-    const logger = (console.error = jest.fn());
+    const logger = (console.warn = jest.fn());
 
     validateMixingShorthandLonghand(
       {

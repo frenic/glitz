@@ -715,7 +715,7 @@ describe('client', () => {
   });
   it('warns with mixed longhand and shorthand', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.error = jest.fn());
+    const logger = (console.warn = jest.fn());
 
     client.injectStyle({ border: { width: 0 }, borderWidth: 0 });
     expect(logger).toHaveBeenCalledTimes(0);

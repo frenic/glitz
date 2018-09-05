@@ -39,7 +39,7 @@ export default class Base<TStyle extends Style> {
               property,
             );
           } else if ((typeof value === 'object' && Object.keys(value).length === 0) || String(value).trim() === '') {
-            console.error(
+            console.warn(
               'The style property `%s` in %O was an empty %s and should be removed because it can cause unexpected behavior',
               property,
               style,

@@ -80,7 +80,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
           const orderedMedias = medias.sort(mediaOrderOption);
           for (const index in medias) {
             if (medias[index] !== orderedMedias[index]) {
-              console.error(
+              console.warn(
                 'The order of media queries rendered by the server did not meet the expected ' +
                   'order by the browser. Make sure you pass the same function to the `mediaOrder`' +
                   'option for both `GlitzServer` and `GlitzClient`.',
