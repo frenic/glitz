@@ -15,6 +15,9 @@ if (process.env.NODE_ENV !== 'production') {
     const hyphenateRegex = /(?:^(ms|moz|webkit))|[A-Z]/g;
     const propertyCache: { [property: string]: string } = {};
 
+    // Default ignore some font face properties that doesn't exist on elements
+    const defaultIgnores: Array<string | RegExp> = ['font-display', 'src', 'unicode-range'];
+
     function hyphenateProperty(property: string) {
       return property in propertyCache
         ? propertyCache[property]
@@ -37,63 +40,66 @@ if (process.env.NODE_ENV !== 'production') {
       return isValid;
     }
 
-    createDevToolTransformer = (options = {}) => declarations => {
-      const properties = Object.keys(declarations) as Array<keyof UntransformedProperties>;
-      const ignores =
-        typeof options.ignoreProperties === 'string' || options.ignoreProperties instanceof RegExp
-          ? [options.ignoreProperties]
-          : options.ignoreProperties;
+    createDevToolTransformer = (options = {}) => {
+      const ignores = defaultIgnores.concat(options.ignoreProperties || []);
 
-      for (const property of properties) {
-        const hyphenatedProperty = hyphenateProperty(property);
-        const value = declarations[property];
+      return declarations => {
+        const properties = Object.keys(declarations) as Array<keyof UntransformedProperties>;
 
-        if (
-          ignores &&
-          !ignores.every(
-            ignore =>
-              (typeof ignore === 'string' && ignore !== hyphenatedProperty) ||
-              (ignore instanceof RegExp && !ignore.test(hyphenatedProperty)),
-          )
-        ) {
-          continue;
-        }
+        for (const property of properties) {
+          const hyphenatedProperty = hyphenateProperty(property);
+          const value = declarations[property];
 
-        if (Array.isArray(value)) {
-          for (const entry of value) {
-            if (!validateDeclaration(hyphenatedProperty, entry as string | number)) {
-              const declaration = { [property]: entry };
+          if (
+            !ignores.every(
+              ignore =>
+                (typeof ignore === 'string' && ignore !== hyphenatedProperty) ||
+                (ignore instanceof RegExp && !ignore.test(hyphenatedProperty)),
+            )
+          ) {
+            continue;
+          }
+
+          if (Array.isArray(value)) {
+            for (const entry of value) {
+              if (!validateDeclaration(hyphenatedProperty, entry as string | number)) {
+                const declaration = { [property]: entry };
+
+                if (properties.length > 1) {
+                  console.warn(
+                    'An invalid CSS fallback declaration %o with values %O in %O was ignored by the browser',
+                    declaration,
+                    value,
+                    declarations,
+                  );
+                } else {
+                  console.warn(
+                    'An invalid CSS fallback declaration %o in %O was ignored by the browser',
+                    declaration,
+                    declarations,
+                  );
+                }
+              }
+            }
+          } else {
+            if (!validateDeclaration(hyphenatedProperty, value as string | number)) {
+              const declaration = { [property]: value };
 
               if (properties.length > 1) {
                 console.warn(
-                  'An invalid CSS fallback declaration %o with values %O in %O was ignored by the browser',
+                  'An invalid CSS declaration %o in %O was ignored by the browser',
                   declaration,
-                  value,
                   declarations,
                 );
               } else {
-                console.warn(
-                  'An invalid CSS fallback declaration %o in %O was ignored by the browser',
-                  declaration,
-                  declarations,
-                );
+                console.warn('An invalid CSS declaration %o was ignored by the browser', declaration);
               }
             }
           }
-        } else {
-          if (!validateDeclaration(hyphenatedProperty, value as string | number)) {
-            const declaration = { [property]: value };
-
-            if (properties.length > 1) {
-              console.warn('An invalid CSS declaration %o in %O was ignored by the browser', declaration, declarations);
-            } else {
-              console.warn('An invalid CSS declaration %o was ignored by the browser', declaration);
-            }
-          }
         }
-      }
 
-      return declarations as Properties;
+        return declarations as Properties;
+      };
     };
   }
 }
