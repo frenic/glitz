@@ -1,4 +1,4 @@
-import { Properties, Style } from '@glitz/type';
+import { Properties, Style, UntransformedProperties } from '@glitz/type';
 import GlitzClient from './GlitzClient';
 
 interface TestStyle extends Style {
@@ -686,6 +686,21 @@ describe('client', () => {
         '@media (min-width: 992px)': { color: 'blue' },
       }),
     ).toBe('a b c');
+  });
+  it('hydrates transformed properties', () => {
+    function transformer(style: UntransformedProperties) {
+      return {
+        ...(Object.keys(style) as Array<keyof UntransformedProperties>).reduce(
+          (result, key) => ({ ...result, [`-moz-${key}`]: `${style[key]}px`, [key]: `${style[key]}px` }),
+          {},
+        ),
+      };
+    }
+
+    createStyle(null, '.a{-moz-column-gap:1px;column-gap:1px}');
+    const client = new GlitzClient<TestStyle>({ transformer });
+
+    expect(client.injectStyle({ columnGap: 1 as 0 })).toBe('a');
   });
   it('applies transformer', () => {
     const style = createStyle();
