@@ -1,6 +1,6 @@
 {
   "name": "@glitz/length-transformer",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,7 +12,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/type": "^2.0.0-alpha.2"
+    "@glitz/type": "^2.0.0-alpha.3"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
