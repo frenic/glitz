@@ -68,6 +68,12 @@ describe('server', () => {
       }),
     ).toBe('p');
 
+    expect(
+      server.injectStyle({
+        border: { xy: { width: 0 } },
+      }),
+    ).toBe('q r s t');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
@@ -119,9 +125,9 @@ describe('server', () => {
       server.injectStyle({
         color: 'red',
         background: { color: 'green' },
-        borderColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
-        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        borderLeftColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
       }),
     ).toBe('a b c d e f g h i');
 
@@ -134,9 +140,9 @@ describe('server', () => {
       server.injectStyle({
         color: 'red',
         background: { color: 'green' },
-        borderColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
-        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        borderLeftColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
       }),
     ).toBe('a b c');
 

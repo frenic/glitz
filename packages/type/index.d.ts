@@ -22,10 +22,12 @@ type WithThemeFunction<TValue> = TValue | ((theme: Theme) => TValue);
 
 type WithThemeFunctionMap<TProperties> = { [key in keyof TProperties]: WithThemeFunction<TProperties[key]> };
 
+type ExcludedShorthands = 'borderColor' | 'borderStyle' | 'borderWidth';
+
 export interface FeaturedProperties
   extends Pick<
       WithThemeFunctionMap<UntransformedProperties>,
-      Exclude<keyof UntransformedProperties, keyof ExtendedProperties>
+      Exclude<keyof UntransformedProperties, keyof ExtendedProperties | ExcludedShorthands>
     >,
     ExtendedProperties {
   '@keyframes'?: FeaturedPropertiesList;
@@ -87,15 +89,19 @@ interface BackgroundProperty {
 
 interface BorderProperty {
   collapse?: WithThemeFunction<UntransformedProperties['borderCollapse']>;
-  color?: WithThemeFunction<UntransformedProperties['borderColor']>;
   blockEnd?: WithThemeFunction<UntransformedProperties['borderBlockEnd']>;
   blockStart?: WithThemeFunction<UntransformedProperties['borderBlockStart']>;
   inlineEnd?: WithThemeFunction<UntransformedProperties['borderInlineEnd']>;
   inlineStart?: WithThemeFunction<UntransformedProperties['borderInlineStart']>;
   radius?: WithThemeFunction<UntransformedProperties['borderRadius']>;
   spacing?: WithThemeFunction<UntransformedProperties['borderSpacing']>;
-  style?: WithThemeFunction<UntransformedProperties['borderStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['borderWidth']>;
+  top?: BorderTopProperty;
+  right?: BorderRightProperty;
+  bottom?: BorderBottomProperty;
+  left?: BorderLeftProperty;
+  xy?: BorderLeftProperty;
+  x?: BorderLeftProperty;
+  y?: BorderTopProperty;
 }
 
 interface BorderBottomProperty {

@@ -4,7 +4,7 @@ exports[`server applies transformer 1`] = `"<style data-glitz>.a{-moz-appearance
 
 exports[`server deletes properties 1`] = `"<style data-glitz>.a{color:red}</style>"`;
 
-exports[`server injects atomic rules 1`] = `"<style data-glitz>.a{color:red}.b{background-color:green}.c{border-color:blue}.d:hover{color:red}.e:hover{background-color:green}.f:hover{border-color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.g{color:red}.h{background-color:green}.i{border-color:blue}</style>"`;
+exports[`server injects atomic rules 1`] = `"<style data-glitz>.a{color:red}.b{background-color:green}.c{border-left-color:blue}.d:hover{color:red}.e:hover{background-color:green}.f:hover{border-left-color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.g{color:red}.h{background-color:green}.i{border-left-color:blue}</style>"`;
 
 exports[`server injects different combinations 1`] = `"<style data-glitz>.a{color:red}</style><style data-glitz media=\\"(min-width: 768px)\\">.b{color:green}</style><style data-glitz media=\\"(min-width: 992px)\\">.c{color:blue}</style>"`;
 
@@ -18,7 +18,7 @@ exports[`server injects media rule 1`] = `"<style data-glitz>.a{color:red}.b:hov
 
 exports[`server injects nested pseudo rule 1`] = `"<style data-glitz>.a:first-child:hover{color:red}</style>"`;
 
-exports[`server injects non-atomic rules 1`] = `"<style data-glitz>.a{color:red;background-color:green;border-color:blue}.b:hover{color:red;background-color:green;border-color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.c{color:red;background-color:green;border-color:blue}</style>"`;
+exports[`server injects non-atomic rules 1`] = `"<style data-glitz>.a{color:red;background-color:green;border-left-color:blue}.b:hover{color:red;background-color:green;border-left-color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.c{color:red;background-color:green;border-left-color:blue}</style>"`;
 
 exports[`server injects plain rule 1`] = `"<style data-glitz>.a{color:red}</style>"`;
 
@@ -26,7 +26,7 @@ exports[`server injects pseudo rule 1`] = `"<style data-glitz>.a{color:red}.b:ho
 
 exports[`server injects rule deeply 1`] = `"<style data-glitz>.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:a}.h{font-family:b}.c:hover{color:red}.d:first-child:hover{color:red}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:a}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:b}</style><style data-glitz media=\\"(min-width: 768px)\\">.i{color:red}.j:hover{color:red}</style>"`;
 
-exports[`server injects shorthand rule 1`] = `"<style data-glitz>.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{grid-column-gap:10px}.f{margin-left:10px}.g{margin-right:10px}.h{margin-top:10px}.i{margin-bottom:10px}.j{margin-left:20px}.k{margin-right:20px}.l{margin-top:20px}.m{margin-bottom:20px}.n{padding-left:30px}.o{animation-name:a}.p{font-family:a}@keyframes a{from{padding-left:20px}}@font-face {font-weight:bold;font-family:a}</style>"`;
+exports[`server injects shorthand rule 1`] = `"<style data-glitz>.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{grid-column-gap:10px}.f{margin-left:10px}.g{margin-right:10px}.h{margin-top:10px}.i{margin-bottom:10px}.j{margin-left:20px}.k{margin-right:20px}.l{margin-top:20px}.m{margin-bottom:20px}.n{padding-left:30px}.o{animation-name:a}.p{font-family:a}.q{border-left-width:0}.r{border-right-width:0}.s{border-top-width:0}.t{border-bottom-width:0}@keyframes a{from{padding-left:20px}}@font-face {font-weight:bold;font-family:a}</style>"`;
 
 exports[`server passes theme 1`] = `"<style data-glitz>.a{color:red}</style>"`;
 

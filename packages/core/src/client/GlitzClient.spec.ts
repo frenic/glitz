@@ -113,6 +113,18 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(18);
     expect(sheet.cssRules[16].cssText).toMatchSnapshot();
     expect(sheet.cssRules[17].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        border: { xy: { width: 0 } },
+      }),
+    ).toBe('q r s t');
+
+    expect(sheet.cssRules).toHaveLength(22);
+    expect(sheet.cssRules[18].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[19].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[20].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[21].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
@@ -220,13 +232,13 @@ describe('client', () => {
       client.injectStyle({
         color: 'red',
         background: { color: 'green' },
-        borderColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        borderLeftColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
         '@media (min-width: 768px)': {
           color: 'red',
           background: { color: 'green' },
-          borderColor: 'blue',
-          ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+          borderLeftColor: 'blue',
+          ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
         },
       }),
     ).toBe('a b c d e f g h i j k l');
@@ -258,7 +270,7 @@ describe('client', () => {
       client.injectStyle({
         color: 'red',
         background: { color: 'green' },
-        borderColor: 'blue',
+        borderLeftColor: 'blue',
         ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
         '@media (min-width: 768px)': {
           color: 'red',
@@ -732,7 +744,7 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>();
     const logger = (console.warn = jest.fn());
 
-    client.injectStyle({ border: { width: 0 }, borderWidth: 0 });
+    client.injectStyle({ border: { left: { width: 0 } }, borderLeftWidth: 0 });
     expect(logger).toHaveBeenCalledTimes(0);
 
     client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle);
