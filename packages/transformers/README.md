@@ -8,6 +8,6 @@ Includes all official transformers:
 
 ```ts
 import GlitzClient from '@glitz/core';
-import transformer from '@glitz/transformers';
-const glitz = new GlitzClient({ transformer });
+import transformers from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer: transformers() });
 ```

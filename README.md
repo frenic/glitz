@@ -4,7 +4,7 @@ Glitz is a CSS-in-JS library that is strictly focused on:
 
 :zap: **Performance** by caching and avoiding unnecessary re-renders whenever possible<br>
 :policeman: **Type safety** by TypeScript<br>
-:balance_scale: **Lightweight** ![npm bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/react.svg?style=flat-square) by keeping things simple<br>
+:balance_scale: **Lightweight** [![@glitz/core bundle size (minified + gzip)](https://img.shields.io/bundlephobia/minzip/@glitz/core.svg?style=flat-square)](https://bundlephobia.com/result?p=@glitz/core) by keeping things simple<br>
 :muscle: **Flexibility** by composition to avoid wrapping elements<br>
 :fire: Official [**React** bindings](https://github.com/frenic/glitz/blob/master/packages/react/)<br>
 
@@ -65,8 +65,8 @@ The most basic implementation is really easy. You don't need any config or modul
 
 ```ts
 import GlitzClient from '@glitz/core';
-import transformer from '@glitz/transformers';
-const glitz = new GlitzClient({ transformer });
+import transformers from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer: transformers() });
 
 const className = glitz.injectStyle({
   color: 'green',
@@ -363,8 +363,8 @@ The `@glitz/transformers` module includes all official transformers:
 
 ```ts
 import GlitzClient from '@glitz/core';
-import transformer from '@glitz/transformers';
-const glitz = new GlitzClient({ transformer });
+import transformers from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer: transformers() });
 ```
 
 ### Prefixer
@@ -486,8 +486,8 @@ To use all the official transformers, use `@glitz/transformers`:
 
 ```ts
 import GlitzClient from '@glitz/core';
-import transformer from '@glitz/transformers';
-const glitz = new GlitzClient({ transformer });
+import transformers from '@glitz/transformers';
+const glitz = new GlitzClient({ transformer: transformers() });
 ```
 
 #### `options.mediaOrder`
