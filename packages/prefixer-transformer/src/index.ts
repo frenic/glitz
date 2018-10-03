@@ -1,5 +1,5 @@
-// @ts-ignore
 import { Properties, UntransformedProperties } from '@glitz/type';
-import * as prefixer from 'inline-style-prefixer/static';
+// @ts-ignore
+import { prefix } from 'inline-style-prefixer';
 
-export default prefixer as typeof prefixer;
+export default prefix as (style: UntransformedProperties) => Properties;

@@ -18,14 +18,13 @@ new GlitzServer(options);
 const server = new GlitzServer(options);
 const a: string = server.injectStyle({});
 const b: string = server.getStyleMarkup();
-const c: string = server.getStyleMarkup('');
 
 new GlitzClient(options);
 
 const client = new GlitzClient(options);
-const d: string = client.injectStyle({});
+const c: string = client.injectStyle({});
 
-const e: string = client.injectStyle({
+const d: string = client.injectStyle({
   ...pseudo('', {}),
   ...media({}, {}),
 });
@@ -36,4 +35,3 @@ a;
 b;
 c;
 d;
-e;

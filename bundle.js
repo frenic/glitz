@@ -86,8 +86,10 @@ async function build(input, output, type, production) {
       '@glitz/devtool-transformer',
       '@glitz/length-transformer',
       '@glitz/prefixer-transformer',
+      '@glitz/react',
+      '@glitz/transformers',
       'react',
-      'inline-style-prefixer/static',
+      'inline-style-prefixer',
     ],
     plugins: [
       resolver(),

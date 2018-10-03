@@ -2,7 +2,7 @@ import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 
 beforeEach(() => {
-  document.head.innerHTML = '';
+  (document.head as HTMLHeadElement).innerHTML = '';
 });
 
 describe('client', () => {
@@ -160,7 +160,7 @@ describe('client', () => {
 
 function createStyle(css?: string) {
   const element = document.createElement('style');
-  document.head.appendChild(element);
+  (document.head as HTMLHeadElement).appendChild(element);
 
   if (css) {
     element.appendChild(document.createTextNode(css));

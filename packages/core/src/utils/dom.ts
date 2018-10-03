@@ -21,6 +21,6 @@ export function createStyleElement(media: string | undefined, identifier: string
 }
 
 export function insertStyleElement(element: HTMLStyleElement, insertBefore: HTMLStyleElement | null) {
-  document.head.insertBefore(element, insertBefore);
+  (document.head as HTMLHeadElement).insertBefore(element, insertBefore);
   return element;
 }
