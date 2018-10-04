@@ -10,7 +10,7 @@ Glitz is a CSS-in-JS library that is strictly focused on:
 
 Along with other built-in features like:
 
-- Atomic CSS (and non-Atmoic CSS)
+- Atomic CSS (and non-Atomic CSS)
 - Shorthand expansion
 - Pseudo selectors/elements
 - Fallback values
