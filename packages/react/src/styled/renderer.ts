@@ -47,6 +47,7 @@ export default function createRenderer(
   let lastTheme: Theme | undefined;
   let lastApplier: ApplyFunction | undefined;
   let lastApplierComposer: ComposeFunction | undefined;
+  let totalCacheInvalidations: number = 0;
 
   const createApplier = (glitz: GlitzClient | GlitzServer, theme: Theme, compose: ComposeFunction): ApplyFunction => {
     if (lastGlitz === glitz && lastApplierComposer === compose && lastTheme === theme && lastApplier) {
@@ -72,6 +73,29 @@ export default function createRenderer(
 
       if (isPure && lastClassName) {
         return lastClassName;
+      }
+
+      if (process.env.NODE_ENV !== 'production') {
+        if (typeof requestAnimationFrame === 'function') {
+          totalCacheInvalidations++;
+
+          if (totalCacheInvalidations === 3) {
+            console.warn(
+              "Multiple re-renders of a styled component with invalidated cache was detected. Either make sure it doesn't re-render or make sure the cache is intact. More info: https://git.io/fxYyd",
+            );
+          }
+
+          const currentCacheInvalidations = totalCacheInvalidations;
+
+          // Jump two frames to reset counter if there hasn't been any more renders with cache invalidation
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (totalCacheInvalidations === currentCacheInvalidations) {
+                totalCacheInvalidations = 0;
+              }
+            });
+          });
+        }
       }
 
       return (lastClassName = glitz.injectStyle(styles, theme));

@@ -1,6 +1,7 @@
 // tslint:disable max-classes-per-file
 
 import { GlitzClient } from '@glitz/core';
+import { Style } from '@glitz/type';
 import { mount } from 'enzyme';
 import momoize from 'memoize-one';
 import * as React from 'react';
@@ -567,5 +568,77 @@ describe('react styled', () => {
         }),
       ),
     );
+  });
+  it('warns of multiple re-renders with invalidated cache', async () => {
+    const logger = (console.warn = jest.fn());
+    let renders = 0;
+
+    await new Promise(resolve => {
+      const css: Style = {
+        color: 'red',
+      };
+
+      const CacheValidated = class extends React.Component<StyledProps> {
+        public componentDidMount() {
+          requestAnimationFrame(() => {
+            this.forceUpdate();
+            requestAnimationFrame(() => {
+              this.forceUpdate();
+              requestAnimationFrame(() => requestAnimationFrame(resolve));
+            });
+          });
+        }
+        public render() {
+          renders++;
+          return React.createElement(styled.Div, { css });
+        }
+      };
+
+      mount(
+        React.createElement(
+          GlitzProvider,
+          {
+            glitz: new GlitzClient(),
+          },
+          React.createElement(CacheValidated),
+        ),
+      );
+    });
+
+    expect(logger).toHaveBeenCalledTimes(0);
+    expect(renders).toBe(3);
+
+    renders = 0;
+
+    await new Promise(resolve => {
+      const CacheInvalidated = class extends React.Component<StyledProps> {
+        public componentDidMount() {
+          requestAnimationFrame(() => {
+            this.forceUpdate();
+            requestAnimationFrame(() => {
+              this.forceUpdate();
+              requestAnimationFrame(() => requestAnimationFrame(resolve));
+            });
+          });
+        }
+        public render() {
+          renders++;
+          return React.createElement(styled.Div, { css: { color: 'red' } });
+        }
+      };
+
+      mount(
+        React.createElement(
+          GlitzProvider,
+          {
+            glitz: new GlitzClient(),
+          },
+          React.createElement(CacheInvalidated),
+        ),
+      );
+    });
+
+    expect(logger).toHaveBeenCalledTimes(1);
+    expect(renders).toBe(3);
   });
 });
