@@ -34,6 +34,7 @@ export default function Message(props) {
   - [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent-componenttype-staticstyle-style)
   - [`styled(embeddedStyle: Style)`](#styledembeddedstyle-style)
   - [`<ThemeProvider />`](#themeprovider)
+  - [`applyClassName(component: ComponentType)`](#applyclassnamecomponent-componenttype)
 
 ## Getting started
 
@@ -391,4 +392,21 @@ export default function() {
     </ThemeProvider>
   );
 }
+```
+
+### `applyClassName(component: ComponentType)`
+
+Applies class names as string directly through `className`-prop instead of passing the `compose()`-prop. This works great with third-party components that accepts a `className`-prop for styling.
+
+```jsx
+import React from 'react';
+import { styled, applyClassName } from '@glitz/react';
+import { Link } from 'react-router-dom';
+
+const CustomLink = styled(applyClassName(Link), {
+  color: 'green',
+  ':hover': {
+    color: 'darkgreen',
+  },
+});
 ```
