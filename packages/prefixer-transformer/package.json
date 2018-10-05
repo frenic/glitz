@@ -1,6 +1,6 @@
 {
   "name": "@glitz/prefixer-transformer",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "types": "./types/index.d.ts",
