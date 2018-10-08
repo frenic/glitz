@@ -15,6 +15,8 @@ export default function App() {
 const Main = styled.main({
   height: '100vh',
   backgroundColor: 'ghostwhite',
-  fontFamily: 'sans-serif',
-  fontWeight: 'lighter',
+  font: {
+    family: 'sans-serif',
+    weight: 'lighter',
+  },
 });

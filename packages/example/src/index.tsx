@@ -4,8 +4,9 @@ import transformers from '@glitz/transformers';
 import * as React from 'react';
 import { render } from 'react-dom';
 import App from './App';
+import { minDesktop, minTablet } from './queries';
 
-const mediaQueryOrder = ['(min-width: 320px)', '(min-width: 768px)'];
+const mediaQueryOrder = [minTablet, minDesktop];
 
 function mediaQuerySorter(a: string, b: string) {
   const indexA = mediaQueryOrder.indexOf(a);

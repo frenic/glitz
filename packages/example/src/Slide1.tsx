@@ -21,8 +21,10 @@ const Text = styled.h1({
   top: '50%',
   left: '50%',
   lineHeight: '15vh',
-  fontFamily: '"Paytone One", sans-serif',
-  fontSize: '15vh',
+  font: {
+    family: '"Paytone One", sans-serif',
+    size: '15vh',
+  },
   color: 'white',
   willChange: 'transform',
   transform: 'translate(-50%, -50%)',
@@ -31,15 +33,17 @@ const Text = styled.h1({
 const Gradient = styled.div({
   height: '250vh',
   backgroundImage: 'linear-gradient(to bottom, slateblue, steelblue, teal, slateblue, steelblue)',
-  animationTimingFunction: 'linear',
-  animationDuration: '8s',
-  animationIterationCount: 'infinite',
-  '@keyframes': {
-    from: {
-      transform: 'translateY(-80%)',
+  animation: {
+    name: {
+      from: {
+        transform: 'translateY(-80%)',
+      },
+      to: {
+        transform: 'translateY(0)',
+      },
     },
-    to: {
-      transform: 'translateY(0)',
-    },
+    timingFunction: 'linear',
+    duration: '8s',
+    iterationCount: 'infinite',
   },
 });
