@@ -506,8 +506,8 @@ It's recommended that you create your own with the media queries you use.
 import { query } from '@glitz/core';
 
 const mediaQueryOrder = [
-  query({minWidth: 320}),
-  query({minWidth: 768}),
+  query({minWidth: '320px'}),
+  query({minWidth: '768px'}),
   ...
 ];
 
