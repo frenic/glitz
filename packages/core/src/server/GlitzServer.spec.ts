@@ -367,6 +367,19 @@ describe('server', () => {
         animation: { name: undefined },
       }),
     ).toBe('a');
+
+    expect(
+      server.injectStyle([
+        {
+          color: 'red',
+          paddingRight: '10px',
+        },
+        {
+          paddingRight: (null as any) as undefined,
+        },
+      ]),
+    ).toBe('a');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('applies transformer', () => {

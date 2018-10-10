@@ -609,7 +609,7 @@ describe('client', () => {
           paddingRight: '10px',
         },
         {
-          paddingRight: undefined,
+          paddingRight: (null as any) as undefined,
         },
       ]),
     ).toBe('a');

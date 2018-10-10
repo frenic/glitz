@@ -31,8 +31,13 @@ export default class Base<TStyle extends Style> {
           value = value(theme);
         }
 
+        // Treat null as undefined
+        if (value === null) {
+          value = undefined;
+        }
+
         if (process.env.NODE_ENV !== 'production') {
-          if (value === null || ['undefined', 'string', 'number', 'object'].indexOf(typeof value) === -1) {
+          if (['undefined', 'string', 'number', 'object'].indexOf(typeof value) === -1) {
             console.error(
               'The style value %O of property `%s` has to be a string, number, plain object or array',
               value,
