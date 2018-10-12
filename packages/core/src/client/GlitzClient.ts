@@ -1,13 +1,14 @@
 import { Style } from '@glitz/type';
 import Base from '../core/Base';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
+import { createSourceMapper } from '../utils/create-source-mapper';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 
 export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
   constructor(options: Options = {}) {
-    const prefix = options.prefix;
+    const prefix = options.prefix || '';
     const classHasher = createHashCounter(prefix);
     const keyframesHasher = createHashCounter(prefix);
     const fontFaceHasher = createHashCounter(prefix);
@@ -52,7 +53,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       }
     };
 
-    super(injector, options.transformer, options.atomic);
+    super(injector, createSourceMapper(prefix), options.transformer, options.atomic);
 
     const preRenderStyles = (document.head as HTMLHeadElement).querySelectorAll(`[data-${identifier}]`) as NodeListOf<
       HTMLStyleElement

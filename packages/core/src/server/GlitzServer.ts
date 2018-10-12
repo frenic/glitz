@@ -1,13 +1,14 @@
 import { Style } from '@glitz/type';
 import Base from '../core/Base';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
+import { createDebugClassName } from '../utils/create-source-mapper';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 
 export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
   public getStyleMarkup: () => string;
   constructor(options: Options = {}) {
-    const prefix = options.prefix;
+    const prefix = options.prefix || '';
     const classHasher = createHashCounter(prefix);
     const keyframesHasher = createHashCounter(prefix);
     const fontFaceHasher = createHashCounter(prefix);
@@ -22,7 +23,7 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
         ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classHasher, keyframesHasher, fontFaceHasher))
         : (plain = plain || new InjectorServer(classHasher, keyframesHasher, fontFaceHasher));
 
-    super(injector, options.transformer, options.atomic);
+    super(injector, createDebugClassName(prefix), options.transformer, options.atomic);
 
     this.getStyleMarkup = () => {
       const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;

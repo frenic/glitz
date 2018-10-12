@@ -2,6 +2,7 @@ import { FontFace, PropertiesList, Style, StyleOrStyleArray, Theme } from '@glit
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
+import { SourceMapper } from '../utils/create-source-mapper';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
@@ -17,6 +18,7 @@ export default class Base<TStyle extends Style> {
   public injectStyle: (styles: StyleOrStyleArray<TStyle>, theme?: Theme) => string;
   constructor(
     injector: (media?: string) => InjectorClient | InjectorServer,
+    sourceMapper: SourceMapper,
     transformer: Transformer | undefined,
     atomic: boolean | undefined,
   ) {
@@ -280,7 +282,9 @@ export default class Base<TStyle extends Style> {
         validateMixingShorthandLonghand(result, classNames);
       }
 
-      return classNames.slice(1);
+      const { stack, stacktrace, message } = new Error('') as any;
+
+      return sourceMapper(1, { stack, stacktrace, message }) + classNames;
     };
   }
 }

@@ -1,4 +1,4 @@
-export function createHashCounter(prefix: string = '') {
+export function createHashCounter(prefix = '') {
   let count = 0;
   let offset = 10;
   let msb = 35;
