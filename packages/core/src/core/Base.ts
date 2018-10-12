@@ -71,34 +71,45 @@ export default class Base<TStyle extends Style> {
           const declarations = getIndex(result, media, pseudo);
 
           if (!(property in declarations)) {
-            if (property === ANIMATION_NAME && typeof value === 'object' && !Array.isArray(value)) {
-              // Resolve `animationName` objects
-              const list: PropertiesList = {};
-              for (const identifier in value) {
-                const block = reverse(resolve(value[identifier], theme));
-                list[identifier] = transformer ? transformer(block) : block;
+            if (typeof value === 'object') {
+              if (property === ANIMATION_NAME) {
+                // Resolve `animationName` objects
+                const animations = ([] as any[]).concat(value);
+
+                for (let j = 0; j < animations.length; j++) {
+                  if (typeof animations[j] === 'object') {
+                    const list: PropertiesList = {};
+                    for (const identifier in animations[j]) {
+                      const block = reverse(resolve(value[identifier], theme));
+                      list[identifier] = transformer ? transformer(block) : block;
+                    }
+
+                    animations[j] = injector().injectKeyframes(list);
+                  }
+                }
+
+                value = animations.length === 1 ? animations[0] : animations;
               }
 
-              value = injector().injectKeyframes(list);
-            }
+              if (property === FONT_FAMILY) {
+                // Resolve `fontFace` object
+                const families = ([] as any[]).concat(value);
 
-            if (property === FONT_FAMILY && typeof value === 'object') {
-              // Resolve `fontFace` object
-              const families = ([] as any[]).concat(value);
-              let names = '';
-              for (const family of families) {
-                if (names) {
-                  names += ',';
+                let names = '';
+                for (const family of families) {
+                  if (names) {
+                    names += ',';
+                  }
+                  if (typeof family === 'object') {
+                    const fontFace = reverse(resolve(family, theme));
+                    names += injector().injectFontFace((transformer ? transformer(fontFace) : fontFace) as FontFace);
+                  } else {
+                    names += family;
+                  }
                 }
-                if (typeof family === 'object') {
-                  const fontFace = reverse(resolve(family, theme));
-                  names += injector().injectFontFace((transformer ? transformer(fontFace) : fontFace) as FontFace);
-                } else {
-                  names += family;
-                }
+
+                value = names;
               }
-
-              value = names;
             }
 
             declarations[property] = value;
