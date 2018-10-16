@@ -5,7 +5,7 @@ Development tool to validate style declarations using `CSSStyleDeclaration` in t
 _It will **only** work in the browser and in development mode (`process.env.NODE_ENV !== 'production'`). In production, it will compile to: `function (style) { return style }`_
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import devTool from '@glitz/devtool-transformer';
 const glitz = new GlitzClient({ transformer: devTool });
 
@@ -18,7 +18,7 @@ const className = glitz.injectStyle({
 The order of this transformer is quite important if you're using multiple transformers. It should be before the [prefixer-transformer](https://github.com/frenic/glitz/tree/master/packages/prefixer-transformer) for not bloating your console with warnings about other vendors specific declarations and it should be after the [length-transformer](https://github.com/frenic/glitz/tree/master/packages/length-transformer) for not receive warnings when lengths doesn't have units.
 
 ```ts
-import GlitzClient, { compose } from '@glitz/core';
+import { GlitzClient, compose } from '@glitz/core';
 import numberToLength from '@glitz/length-transformer';
 import devTool from '@glitz/devtool-transformer';
 import prefixer from '@glitz/prefixer-transformer';

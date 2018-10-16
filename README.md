@@ -64,7 +64,7 @@ $ npm install @glitz/core @glitz/transformers
 The most basic implementation is really easy. You don't need any config or module loaders to get started.
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import transformers from '@glitz/transformers';
 const glitz = new GlitzClient({ transformer: transformers() });
 
@@ -362,7 +362,7 @@ The `@glitz/transformers` module includes all official transformers:
 - [`@glitz/devtool-transformer`](https://github.com/frenic/glitz/tree/master/packages/devtool-transformer)
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import transformers from '@glitz/transformers';
 const glitz = new GlitzClient({ transformer: transformers() });
 ```
@@ -372,7 +372,7 @@ const glitz = new GlitzClient({ transformer: transformers() });
 The [`@glitz/prefixer-transformer`](https://github.com/frenic/glitz/tree/master/packages/prefixer-transformer) is basically just a TypeScript wrapper for [`inline-style-prefixer/static`](https://github.com/rofrischmann/inline-style-prefixer).
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import prefixer from '@glitz/prefixer-transformer';
 const glitz = new GlitzClient({ transformer: prefixer });
 
@@ -396,7 +396,7 @@ const className = glitz.injectStyle({
 The [`@glitz/length-transformer`](https://github.com/frenic/glitz/tree/master/packages/length-transformer) converts numbers to lengths for certain properties.
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import numberToLength from '@glitz/length-transformer';
 const glitz = new GlitzClient({ transformer: numberToLength });
 
@@ -416,7 +416,7 @@ const className = glitz.injectStyle({
 The [`@glitz/devtool-transformer`](https://github.com/frenic/glitz/tree/master/packages/devtool-transformer) produces warnings and errors when something does wrong in development.
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import devTool from '@glitz/devtool-transformer';
 const glitz = new GlitzClient({ transformer: devTool });
 
@@ -485,7 +485,7 @@ Official transformers are:
 To use all the official transformers, use `@glitz/transformers`:
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import transformers from '@glitz/transformers';
 const glitz = new GlitzClient({ transformer: transformers() });
 ```

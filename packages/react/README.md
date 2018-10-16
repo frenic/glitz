@@ -49,7 +49,7 @@ $ npm install @glitz/react
 ```jsx
 import React from 'react';
 import { render } from 'react-dom';
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import transformers from '@glitz/transformers';
 import { GlitzProvider } from '@glitz/react';
 import App from './App';

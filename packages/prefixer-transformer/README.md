@@ -3,7 +3,7 @@
 A TypeScript and Glitz wrapper for [`inline-style-prefixer/static`](https://github.com/rofrischmann/inline-style-prefixer).
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import prefixer from '@glitz/prefixer-transformer';
 const glitz = new GlitzClient({ transformer: prefixer });
 
@@ -25,7 +25,7 @@ const className = glitz.injectStyle({
 This is basically the same thing as:
 
 ```ts
-import GlitzClient from '@glitz/core';
+import { GlitzClient } from '@glitz/core';
 import prefixAll from 'inline-style-prefixer/static';
 const glitz = new GlitzClient({ transformer: prefixAll });
 ```
