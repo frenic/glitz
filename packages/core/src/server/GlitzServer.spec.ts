@@ -70,9 +70,9 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
-        border: { xy: { width: 0 } },
+        border: { xy: { width: 0 }, x: { color: 'red' }, y: { color: 'green' } },
       }),
-    ).toBe('q r s t');
+    ).toBe('q r s t u v w x');
 
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });

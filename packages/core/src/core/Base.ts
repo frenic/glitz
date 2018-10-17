@@ -134,22 +134,32 @@ export default class Base<TStyle extends Style> {
 
         for (const extension in value) {
           const longhandValue = value[extension];
+
+          // Make sure to resolve plain object directly otherwise combinations
+          // of `xy` extension alias with `y` or `x` will conflict
+          const extensionDeclarations: any =
+            typeof longhandValue === 'object' && !Array.isArray(longhandValue) ? {} : longhandDeclarations;
+
           let alias = false;
 
           if (extension === 'x' || extension === 'xy') {
             alias = true;
-            longhandDeclarations[property + 'Left'] = longhandValue;
-            longhandDeclarations[property + 'Right'] = longhandValue;
+            extensionDeclarations[property + 'Left'] = longhandValue;
+            extensionDeclarations[property + 'Right'] = longhandValue;
           }
 
           if (extension === 'y' || extension === 'xy') {
             alias = true;
-            longhandDeclarations[property + 'Top'] = longhandValue;
-            longhandDeclarations[property + 'Bottom'] = longhandValue;
+            extensionDeclarations[property + 'Top'] = longhandValue;
+            extensionDeclarations[property + 'Bottom'] = longhandValue;
           }
 
           if (!alias) {
-            longhandDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+            extensionDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
+          }
+
+          if (extensionDeclarations !== longhandDeclarations) {
+            resolve(extensionDeclarations, theme, result, media, pseudo);
           }
         }
 

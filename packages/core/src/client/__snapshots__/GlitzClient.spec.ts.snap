@@ -168,13 +168,21 @@ exports[`client injects shorthand rule 17`] = `"@font-face {font-weight: bold; f
 
 exports[`client injects shorthand rule 18`] = `".p {font-family: a;}"`;
 
-exports[`client injects shorthand rule 19`] = `".q {border-left-width: 0;}"`;
+exports[`client injects shorthand rule 19`] = `".q {border-top-color: green;}"`;
 
-exports[`client injects shorthand rule 20`] = `".r {border-right-width: 0;}"`;
+exports[`client injects shorthand rule 20`] = `".r {border-bottom-color: green;}"`;
 
-exports[`client injects shorthand rule 21`] = `".s {border-top-width: 0;}"`;
+exports[`client injects shorthand rule 21`] = `".s {border-left-color: red;}"`;
 
-exports[`client injects shorthand rule 22`] = `".t {border-bottom-width: 0;}"`;
+exports[`client injects shorthand rule 22`] = `".t {border-right-color: red;}"`;
+
+exports[`client injects shorthand rule 23`] = `".u {border-left-width: 0;}"`;
+
+exports[`client injects shorthand rule 24`] = `".v {border-right-width: 0;}"`;
+
+exports[`client injects shorthand rule 25`] = `".w {border-top-width: 0;}"`;
+
+exports[`client injects shorthand rule 26`] = `".x {border-bottom-width: 0;}"`;
 
 exports[`client passes theme 1`] = `".a {color: red;}"`;
 

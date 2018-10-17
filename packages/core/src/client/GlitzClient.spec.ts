@@ -116,15 +116,19 @@ describe('client', () => {
 
     expect(
       client.injectStyle({
-        border: { xy: { width: 0 } },
+        border: { xy: { width: 0 }, x: { color: 'red' }, y: { color: 'green' } },
       }),
-    ).toBe('q r s t');
+    ).toBe('q r s t u v w x');
 
-    expect(sheet.cssRules).toHaveLength(22);
+    expect(sheet.cssRules).toHaveLength(26);
     expect(sheet.cssRules[18].cssText).toMatchSnapshot();
     expect(sheet.cssRules[19].cssText).toMatchSnapshot();
     expect(sheet.cssRules[20].cssText).toMatchSnapshot();
     expect(sheet.cssRules[21].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[22].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[23].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[24].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[25].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();
