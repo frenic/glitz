@@ -1,6 +1,6 @@
 {
   "name": "@glitz/prefixer-transformer",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "types": "./types/index.d.ts",
@@ -11,7 +11,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/type": "^2.0.0",
+    "@glitz/type": "^2.0.1",
     "inline-style-prefixer": "^5.0.0"
   },
   "scripts": {
