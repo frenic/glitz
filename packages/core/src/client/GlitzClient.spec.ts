@@ -663,6 +663,15 @@ describe('client', () => {
         '@font-face': {
           fontStyle: 'normal',
           fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('a');
+    expect(
+      client.injectStyle({
+        '@font-face': {
+          fontStyle: 'normal',
+          fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
         },
       }),

@@ -6,7 +6,7 @@ import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../uti
 
 const CLASS_RULE_REGEX = /\.([a-z0-9]+)(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9]+)\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
-const FONT_FACE_REGEX = /@font-face \{(.+);font-family:([^}]+)\}/g;
+const FONT_FACE_REGEX = /@font-face \{(.+?);font-family:([^}]+)\}/g;
 
 export default class InjectorClient extends Injector {
   constructor(
