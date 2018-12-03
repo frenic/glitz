@@ -25,6 +25,12 @@ export default class InjectorServer extends Injector {
 
     this.getStyle = () => {
       let css = '';
+      for (const block in fontFaceIndex) {
+        css += formatFontFaceRule(fontFaceIndex[block], block);
+      }
+      for (const blockList in keyframesIndex) {
+        css += formatKeyframesRule(keyframesIndex[blockList], blockList);
+      }
       for (const block in plainIndex) {
         css += formatClassRule(plainIndex[block], block);
       }
@@ -33,12 +39,6 @@ export default class InjectorServer extends Injector {
         for (const block in index) {
           css += formatClassRule(index[block], block, pseudo);
         }
-      }
-      for (const blockList in keyframesIndex) {
-        css += formatKeyframesRule(keyframesIndex[blockList], blockList);
-      }
-      for (const block in fontFaceIndex) {
-        css += formatFontFaceRule(fontFaceIndex[block], block);
       }
       return css;
     };
