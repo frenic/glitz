@@ -31,21 +31,22 @@ describe('react styled', () => {
     );
   });
   it('creates embedded styled component', () => {
-    const embeddedStyle = styled({ color: 'red' });
+    const embeddedStyleA = styled({ color: 'red' });
+    const embeddedStyleB = embeddedStyleA({ backgroundColor: 'green' });
 
-    const StyledComponentA = embeddedStyle(props => {
-      expect(props.compose()).toEqual([{ color: 'red' }]);
+    const StyledComponentA = embeddedStyleB(props => {
+      expect(props.compose()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
       return React.createElement(styled.Div, {
         css: props.compose(),
-        innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a'),
+        innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
       });
     });
-    const StyledComponentB = embeddedStyle(
+    const StyledComponentB = embeddedStyleB(
       props => {
-        expect(props.compose()).toEqual([{ color: 'red' }, { color: 'green' }]);
+        expect(props.compose()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }, { color: 'green' }]);
         return React.createElement(styled.Div, {
           css: props.compose(),
-          innerRef: (el: HTMLDivElement) => expect(el.className).toBe('b'),
+          innerRef: (el: HTMLDivElement) => expect(el.className).toBe('b c'),
         });
       },
       { color: 'green' },

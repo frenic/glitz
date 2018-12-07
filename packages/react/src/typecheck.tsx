@@ -70,12 +70,14 @@ const J = styled(
 const K = styled(J);
 <K x="" css={{}} innerRef={c => c} />;
 
-const j = styled({});
-const L = j(props => <styled.Div css={props.compose()} />);
+const j0 = styled({});
+const j1 = j0({});
+const L = j1(props => <styled.Div css={props.compose()} />);
 <L css={{}} />;
 
-const k = styled({});
-const M = k(
+const k0 = styled({});
+const k1 = k0({});
+const M = k1(
   class extends React.Component<StyledProps> {
     render() {
       return <styled.Div css={this.props.compose()} />;

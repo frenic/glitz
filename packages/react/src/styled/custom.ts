@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { Style, StyleArray } from '@glitz/type';
 import * as React from 'react';
 import { StyledElementLike } from './apply-class-name';
 import create from './create';
@@ -20,6 +20,7 @@ export interface StyledDecorator {
     component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
     style?: Style,
   ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
+  (style: Style): StyledDecorator;
 }
 
 export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
@@ -67,17 +68,21 @@ export function customStyled<TProps>(
   arg1: StyledElementLike<React.ComponentType<TProps>> | StyledComponent<TProps> | React.ComponentType<TProps> | Style,
   arg2?: Style,
 ): StyledComponent<TProps> | StyledDecorator {
-  return isStyle(arg1) ? decorator<TProps>(arg1) : create<TProps>(arg1, arg2 ? [arg2] : []);
+  return isStyle(arg1) ? decorator([arg1]) : create<TProps>(arg1, arg2 ? [arg2] : []);
 }
 
-function decorator<TProps>(preStyle: Style): StyledDecorator {
-  return (
-    innerComponent:
+function decorator(preStyle: StyleArray): StyledDecorator {
+  return (<TProps>(
+    arg1:
       | StyledElementLike<React.ComponentType<TProps>>
       | StyledComponent<TProps>
-      | React.ComponentType<TProps>,
-    style?: Style,
-  ) => create(innerComponent, style ? [preStyle, style] : [preStyle]);
+      | React.ComponentType<TProps>
+      | Style,
+    arg2?: Style,
+  ) =>
+    isStyle(arg1)
+      ? decorator(preStyle.concat(arg1))
+      : create<TProps>(arg1, arg2 ? preStyle.concat(arg2) : preStyle)) as StyledDecorator;
 }
 
 function isStyle(arg: any): arg is Style {
