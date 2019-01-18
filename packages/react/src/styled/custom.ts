@@ -56,7 +56,7 @@ export function customStyled<
 export function customStyled<TProps>(
   // tslint:disable-next-line unified-signatures
   component:
-    | StyledElementLike<React.ComponentType<TProps & StyledProps>>
+    | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>
     | StyledComponent<TProps>
     | React.ComponentType<TProps & StyledProps>,
   style?: Style,
