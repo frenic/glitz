@@ -51,18 +51,18 @@ export function customStyled<
   style?: Style,
 ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
 
+export function customStyled(style: Style): StyledDecorator;
+
 // This overload prevents errors on `component` when `style` is incorrect
 // and enables usage of generic parameter to provide prop type
-export function customStyled<TProps>(
+export function customStyled(
   // tslint:disable-next-line unified-signatures
   component:
-    | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>
-    | StyledComponent<TProps>
-    | React.ComponentType<TProps & StyledProps>,
+    | StyledElementLike<React.ComponentType<StyledElementProps>>
+    | StyledComponent<any>
+    | React.ComponentType<StyledProps>,
   style?: Style,
-): StyledComponent<TProps>;
-
-export function customStyled(style: Style): StyledDecorator;
+): StyledComponent<any>;
 
 export function customStyled<TProps>(
   arg1: StyledElementLike<React.ComponentType<TProps>> | StyledComponent<TProps> | React.ComponentType<TProps> | Style,
