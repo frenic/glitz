@@ -20,7 +20,10 @@ export function isElementType(type: any): type is StyledElement {
 }
 
 function createPredefined(tag: string) {
-  return (style: Style) => factory(createElementType(tag), [style]);
+  return (style: Style) => {
+    const { stack, stacktrace, message } = new Error('create stack trace') as any;
+    return factory(createElementType(tag), [style], { stack, stacktrace, message });
+  };
 }
 
 export function assignPredefined<TTarget>(target: TTarget) {

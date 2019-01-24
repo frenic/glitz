@@ -15,7 +15,11 @@ const MEDIA_IDENTIFIER = '@';
 const PSEUDO_IDENTIFIER = ':';
 
 export default class Base<TStyle extends Style> {
-  public injectStyle: (styles: StyleOrStyleArray<TStyle>, theme?: Theme) => string;
+  public injectStyle: (
+    styles: StyleOrStyleArray<TStyle>,
+    theme?: Theme,
+    debugInfo?: { stack: any; stacktrace: any; message: any },
+  ) => string;
   constructor(
     injector: (media?: string) => InjectorClient | InjectorServer,
     sourceMapper: SourceMapper,
@@ -265,7 +269,7 @@ export default class Base<TStyle extends Style> {
             return classNames;
           };
 
-    this.injectStyle = (styles, theme) => {
+    this.injectStyle = (styles, theme, debugInfo) => {
       const result: Index = {};
 
       if (Array.isArray(styles)) {
@@ -280,11 +284,13 @@ export default class Base<TStyle extends Style> {
 
       if (process.env.NODE_ENV !== 'production') {
         validateMixingShorthandLonghand(result, classNames);
+
+        if (debugInfo) {
+          return sourceMapper(1, debugInfo) + classNames;
+        }
       }
 
-      const { stack, stacktrace, message } = new Error('') as any;
-
-      return sourceMapper(1, { stack, stacktrace, message }) + classNames;
+      return classNames;
     };
   }
 }

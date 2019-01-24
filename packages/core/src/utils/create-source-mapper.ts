@@ -3,7 +3,7 @@ import { createHashCounter } from './hash';
 export type SourceMapper = (stackIndex: number, stackInfo: {}) => string;
 
 export function createSourceMapper(prefix: string): SourceMapper {
-  const blob = new Blob([`importScripts("https://unpkg.com/css-to-js-sourcemap-worker@2.0.2/worker.js")`], {
+  const blob = new Blob([`importScripts("https://unpkg.com/css-to-js-sourcemap-worker@2.0.4/worker.js")`], {
     type: 'application/javascript',
   });
 
@@ -11,7 +11,7 @@ export function createSourceMapper(prefix: string): SourceMapper {
 
   worker.postMessage({
     id: 'init_wasm',
-    url: 'https://unpkg.com/css-to-js-sourcemap-worker@2.0.2/mappings.wasm',
+    url: 'https://unpkg.com/css-to-js-sourcemap-worker@2.0.4/mappings.wasm',
   });
 
   worker.postMessage({
@@ -19,8 +19,8 @@ export function createSourceMapper(prefix: string): SourceMapper {
     interval: 120,
   });
 
-  // if (module.hot) {
-  //   module.hot.addStatusHandler(status => {
+  // if (module && (module as any).hot && (module as any).hot.addStatusHandler) {
+  //   (module as any).hot.addStatusHandler((status: string) => {
   //     if (status === 'dispose') {
   //       worker.postMessage({ id: 'invalidate' });
   //     }

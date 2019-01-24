@@ -12,6 +12,7 @@ type ComposeFunction = (additionals?: StyleOrStyleArray) => StyleOrStyleArray | 
 export default function createRenderer(
   type: StyledElement | StyledElementLike<React.ComponentType<any>> | React.ComponentType<any>,
   statics?: StyleArray,
+  debugInfo?: { stack: any; stacktrace: any; message: any },
 ) {
   let lastDynamics: StyleOrStyleArray | undefined;
   let lastComposer: ComposeFunction | undefined;
@@ -101,7 +102,7 @@ export default function createRenderer(
         }
       }
 
-      return (lastClassName = glitz.injectStyle(styles, theme));
+      return (lastClassName = glitz.injectStyle(styles, theme, debugInfo));
     });
   };
 

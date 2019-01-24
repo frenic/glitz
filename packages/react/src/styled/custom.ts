@@ -68,7 +68,8 @@ export function customStyled<TProps>(
   arg1: StyledElementLike<React.ComponentType<TProps>> | StyledComponent<TProps> | React.ComponentType<TProps> | Style,
   arg2?: Style,
 ): StyledComponent<TProps> | StyledDecorator {
-  return isStyle(arg1) ? decorator([arg1]) : create<TProps>(arg1, arg2 ? [arg2] : []);
+  const { stack, stacktrace, message } = new Error('create stack trace') as any;
+  return isStyle(arg1) ? decorator([arg1]) : create<TProps>(arg1, arg2 ? [arg2] : [], { stack, stacktrace, message });
 }
 
 function decorator(preStyle: StyleArray): StyledDecorator {
@@ -79,10 +80,12 @@ function decorator(preStyle: StyleArray): StyledDecorator {
       | React.ComponentType<TProps>
       | Style,
     arg2?: Style,
-  ) =>
-    isStyle(arg1)
+  ) => {
+    const { stack, stacktrace, message } = new Error('create stack trace') as any;
+    return isStyle(arg1)
       ? decorator(preStyle.concat(arg1))
-      : create<TProps>(arg1, arg2 ? preStyle.concat(arg2) : preStyle)) as StyledDecorator;
+      : create<TProps>(arg1, arg2 ? preStyle.concat(arg2) : preStyle, { stack, stacktrace, message });
+  }) as StyledDecorator;
 }
 
 function isStyle(arg: any): arg is Style {
