@@ -74,6 +74,12 @@ describe('server', () => {
       }),
     ).toBe('q r s t u v w x');
 
+    expect(
+      server.injectStyle({
+        border: { y: { x: { radius: 0 } } },
+      }),
+    ).toBe('y z a0 a1');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {

@@ -28,14 +28,13 @@ describe('client', () => {
   it('injects shorthand rule', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();
+    const sheet = style.sheet as CSSStyleSheet;
 
     expect(
       client.injectStyle({
         padding: { left: '10px', right: '10px', top: '10px', bottom: '10px' },
       }),
     ).toBe('a b c d');
-
-    const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(4);
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
@@ -129,6 +128,18 @@ describe('client', () => {
     expect(sheet.cssRules[23].cssText).toMatchSnapshot();
     expect(sheet.cssRules[24].cssText).toMatchSnapshot();
     expect(sheet.cssRules[25].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        border: { y: { x: { radius: 0 } } },
+      }),
+    ).toBe('y z a0 a1');
+
+    expect(sheet.cssRules).toHaveLength(30);
+    expect(sheet.cssRules[26].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[27].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[28].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[29].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();

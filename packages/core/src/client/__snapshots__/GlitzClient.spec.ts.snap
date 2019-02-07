@@ -184,6 +184,14 @@ exports[`client injects shorthand rule 25`] = `".w {border-top-width: 0;}"`;
 
 exports[`client injects shorthand rule 26`] = `".x {border-bottom-width: 0;}"`;
 
+exports[`client injects shorthand rule 27`] = `".y {border-top-left-radius: 0;}"`;
+
+exports[`client injects shorthand rule 28`] = `".z {border-top-right-radius: 0;}"`;
+
+exports[`client injects shorthand rule 29`] = `".a0 {border-bottom-left-radius: 0;}"`;
+
+exports[`client injects shorthand rule 30`] = `".a1 {border-bottom-right-radius: 0;}"`;
+
 exports[`client passes theme 1`] = `".a {color: red;}"`;
 
 exports[`client preserves order 1`] = `".a {padding-top: 20px;}"`;

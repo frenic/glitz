@@ -49,6 +49,11 @@ const css: Style = {
       variant: '',
     },
   },
+  border: {
+    y: { x: { radius: 10 }, left: { radius: 10 }, right: { radius: 10 } },
+    top: { x: { radius: 10 } },
+    bottom: { x: { radius: 10 } },
+  },
 };
 
 // Avoid unread variables type error

@@ -104,12 +104,6 @@ interface BorderProperty {
   y?: BorderTopProperty;
 }
 
-interface BorderBottomProperty {
-  color?: WithThemeFunction<UntransformedProperties['borderBottomColor']>;
-  style?: WithThemeFunction<UntransformedProperties['borderBottomStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['borderBottomWidth']>;
-}
-
 interface BorderImageProperty {
   outset?: WithThemeFunction<UntransformedProperties['borderImageOutset']>;
   repeat?: WithThemeFunction<UntransformedProperties['borderImageRepeat']>;
@@ -130,7 +124,19 @@ interface BorderRightProperty {
   width?: WithThemeFunction<UntransformedProperties['borderRightWidth']>;
 }
 
-interface BorderTopProperty {
+interface BorderYRadius {
+  right?: { radius?: WithThemeFunction<UntransformedProperties['borderTopRightRadius']> };
+  left?: { radius?: WithThemeFunction<UntransformedProperties['borderTopLeftRadius']> };
+  x?: { radius?: WithThemeFunction<UntransformedProperties['borderTopLeftRadius']> };
+}
+
+interface BorderBottomProperty extends BorderYRadius {
+  color?: WithThemeFunction<UntransformedProperties['borderBottomColor']>;
+  style?: WithThemeFunction<UntransformedProperties['borderBottomStyle']>;
+  width?: WithThemeFunction<UntransformedProperties['borderBottomWidth']>;
+}
+
+interface BorderTopProperty extends BorderYRadius {
   color?: WithThemeFunction<UntransformedProperties['borderTopColor']>;
   style?: WithThemeFunction<UntransformedProperties['borderTopStyle']>;
   width?: WithThemeFunction<UntransformedProperties['borderTopWidth']>;
