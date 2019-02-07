@@ -1,6 +1,6 @@
 {
   "name": "@glitz/core",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,7 +12,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/type": "^2.0.1"
+    "@glitz/type": "^2.0.2"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",

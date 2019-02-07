@@ -1,6 +1,6 @@
 {
   "name": "@glitz/react",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,8 +12,8 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/core": "^2.0.4",
-    "@glitz/type": "^2.0.1",
+    "@glitz/core": "^2.0.5",
+    "@glitz/type": "^2.0.2",
     "@types/react": "*"
   },
   "peerDependencies": {
