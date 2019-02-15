@@ -140,6 +140,16 @@ describe('client', () => {
     expect(sheet.cssRules[27].cssText).toMatchSnapshot();
     expect(sheet.cssRules[28].cssText).toMatchSnapshot();
     expect(sheet.cssRules[29].cssText).toMatchSnapshot();
+
+    expect(
+      client.injectStyle({
+        border: { x: { width: '10px' }, left: { width: '20px' } },
+      }),
+    ).toBe('a2 a3');
+
+    expect(sheet.cssRules).toHaveLength(32);
+    expect(sheet.cssRules[30].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[31].cssText).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {
     const style = createStyle();

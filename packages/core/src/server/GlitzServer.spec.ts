@@ -80,6 +80,12 @@ describe('server', () => {
       }),
     ).toBe('y z a0 a1');
 
+    expect(
+      server.injectStyle({
+        border: { x: { width: '10px' }, left: { width: '20px' } },
+      }),
+    ).toBe('a2 a3');
+
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects pseudo rule', () => {

@@ -129,41 +129,50 @@ export default class Base<TStyle extends Style> {
           continue;
         }
 
-        // Shorthand objects
-        const longhandDeclarations: any = {};
+        const extensions = Object.keys(value);
 
-        for (const extension in value) {
+        for (let j = extensions.length; j > 0; j--) {
+          const extension = extensions[j - 1];
           const longhandValue = value[extension];
-
-          // Make sure to resolve plain object directly otherwise combinations
-          // of `xy` extension alias with `y` or `x` will conflict
-          const extensionDeclarations: any =
-            typeof longhandValue === 'object' && !Array.isArray(longhandValue) ? {} : longhandDeclarations;
 
           let alias = false;
 
-          if (extension === 'x' || extension === 'xy') {
-            alias = true;
-            extensionDeclarations[property + 'Left'] = longhandValue;
-            extensionDeclarations[property + 'Right'] = longhandValue;
-          }
-
           if (extension === 'y' || extension === 'xy') {
             alias = true;
-            extensionDeclarations[property + 'Top'] = longhandValue;
-            extensionDeclarations[property + 'Bottom'] = longhandValue;
+
+            // Make sure to resolve plain object directly otherwise combinations
+            // of `xy` extension alias with `y` or `x` will conflict
+            resolve(
+              { [property + 'Top']: longhandValue, [property + 'Bottom']: longhandValue },
+              theme,
+              result,
+              media,
+              pseudo,
+            );
+          }
+
+          if (extension === 'x' || extension === 'xy') {
+            alias = true;
+
+            resolve(
+              { [property + 'Left']: longhandValue, [property + 'Right']: longhandValue },
+              theme,
+              result,
+              media,
+              pseudo,
+            );
           }
 
           if (!alias) {
-            extensionDeclarations[property + extension[0].toUpperCase() + extension.slice(1)] = longhandValue;
-          }
-
-          if (extensionDeclarations !== longhandDeclarations) {
-            resolve(extensionDeclarations, theme, result, media, pseudo);
+            resolve(
+              { [property + extension[0].toUpperCase() + extension.slice(1)]: longhandValue },
+              theme,
+              result,
+              media,
+              pseudo,
+            );
           }
         }
-
-        resolve(longhandDeclarations, theme, result, media, pseudo);
       }
 
       return result;
