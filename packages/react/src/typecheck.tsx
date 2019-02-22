@@ -70,14 +70,14 @@ const J = styled(
 const K = styled(J);
 <K x="" css={{}} innerRef={c => c} />;
 
-const j0 = styled({});
-const j1 = j0({});
-const L = j1(props => <styled.Div css={props.compose()} />);
+const l0 = styled({});
+const l1 = l0({});
+const L = l1(props => <styled.Div css={props.compose()} />);
 <L css={{}} />;
 
-const k0 = styled({});
-const k1 = k0({});
-const M = k1(
+const m0 = styled({});
+const m1 = m0({});
+const M = m1(
   class extends React.Component<StyledProps> {
     render() {
       return <styled.Div css={this.props.compose()} />;
@@ -127,6 +127,12 @@ function connect<TProps>(Component: React.ComponentType<TProps>): React.Stateles
 
 const R = connect(B);
 <R css={{}} />;
+
+const s = styled({});
+styled(props => <styled.Div css={props.compose(s)} />);
+styled(props => <styled.Div css={props.compose(s({}))} />);
+<styled.Div css={s} />;
+<styled.Div css={s({})} />;
 
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881

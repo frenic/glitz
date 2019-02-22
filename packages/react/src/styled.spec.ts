@@ -30,18 +30,18 @@ describe('react styled', () => {
       ),
     );
   });
-  it('creates embedded styled component', () => {
-    const embeddedStyleA = styled({ color: 'red' });
-    const embeddedStyleB = embeddedStyleA({ backgroundColor: 'green' });
+  it('creates decorated styled component', () => {
+    const styleDecoratorA = styled({ color: 'red' });
+    const styleDecoratorB = styleDecoratorA({ backgroundColor: 'green' });
 
-    const StyledComponentA = embeddedStyleB(props => {
+    const StyledComponentA = styleDecoratorB(props => {
       expect(props.compose()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
       return React.createElement(styled.Div, {
         css: props.compose(),
         innerRef: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
       });
     });
-    const StyledComponentB = embeddedStyleB(
+    const StyledComponentB = styleDecoratorB(
       props => {
         expect(props.compose()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }, { color: 'green' }]);
         return React.createElement(styled.Div, {
@@ -77,6 +77,87 @@ describe('react styled', () => {
         }),
       ),
     );
+  });
+  it('decorates style', () => {
+    const styleDecoratorA = styled({ color: 'red' });
+    const styleDecoratorB = styleDecoratorA({ backgroundColor: 'green' });
+
+    expect(styleDecoratorB()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+
+    const StyledComponentA = styled(props => {
+      return React.createElement(styled.Div, {
+        css: props.compose(styleDecoratorB),
+        innerRef: (el: HTMLDivElement) => {
+          expect(el.className).toBe('a b');
+          const declaration = getComputedStyle(el);
+          expect(declaration.getPropertyValue('color')).toBe('red');
+          expect(declaration.getPropertyValue('background-color')).toBe('green');
+        },
+      });
+    });
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponentA),
+      ),
+    );
+
+    const StyledComponentB = styled(props => {
+      return React.createElement(styled.Div, {
+        css: props.compose(styleDecoratorB({ color: 'blue' })),
+
+        innerRef: (el: HTMLDivElement) => {
+          expect(el.className).toBe('a b');
+          const declaration = getComputedStyle(el);
+          expect(declaration.getPropertyValue('background-color')).toBe('green');
+          expect(declaration.getPropertyValue('color')).toBe('blue');
+        },
+      });
+    });
+
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponentB),
+      ),
+    );
+
+    const treeA = mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(styled.Div, { css: styleDecoratorB }),
+      ),
+    );
+
+    const declarationA = getComputedStyle(treeA.getDOMNode());
+
+    expect(declarationA.getPropertyValue('color')).toBe('red');
+    expect(declarationA.getPropertyValue('background-color')).toBe('green');
+
+    const treeB = mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(styled.Div, { css: styleDecoratorB({ color: 'blue' }) }),
+      ),
+    );
+
+    const declarationB = getComputedStyle(treeB.getDOMNode());
+
+    expect(declarationB.getPropertyValue('background-color')).toBe('green');
+    expect(declarationB.getPropertyValue('color')).toBe('blue');
   });
   it('creates `className` styled component', () => {
     const StyledComponent = styled(

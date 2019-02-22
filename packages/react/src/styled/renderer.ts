@@ -4,10 +4,10 @@ import * as React from 'react';
 import { GlitzContext, GlitzContextConsumer, ThemeContext, ThemeContextConsumer } from '../components/context';
 import { isElementLikeType, StyledElementLike } from '../styled/apply-class-name';
 import { isElementType, StyledElement } from '../styled/predefined';
-import { ExternalProps, isStyledComponent, StyledElementProps, StyledProps } from './Super';
+import { ExternalProps, isStyledComponent, StyledDecorator, StyledElementProps, StyledProps } from './Super';
 
-type ApplyFunction = (additionals?: StyleOrStyleArray) => string | undefined;
-type ComposeFunction = (additionals?: StyleOrStyleArray) => StyleOrStyleArray | undefined;
+type ApplyFunction = () => string | undefined;
+type ComposeFunction = (additionals?: StyleOrStyleArray | StyledDecorator) => StyleOrStyleArray | undefined;
 
 export default function createRenderer(
   type: StyledElement | StyledElementLike<React.ComponentType<any>> | React.ComponentType<any>,
@@ -27,6 +27,8 @@ export default function createRenderer(
     let lastAdditionals: StyleOrStyleArray | undefined;
 
     return (lastComposer = additionals => {
+      additionals = typeof additionals === 'function' ? additionals() : additionals;
+
       const isPure = lastAdditionals === additionals;
 
       if (isPure && lastStyles) {
@@ -62,8 +64,8 @@ export default function createRenderer(
     let lastStyles: StyleOrStyleArray | undefined;
     let lastClassName: string | null;
 
-    return (lastApplier = additionals => {
-      const styles: StyleOrStyleArray | undefined = compose(additionals);
+    return (lastApplier = () => {
+      const styles: StyleOrStyleArray | undefined = compose();
 
       const isPure = styles === lastStyles;
       lastStyles = styles;
@@ -135,7 +137,7 @@ export default function createRenderer(
           }
         }
 
-        const compose = createComposer(currentProps.css);
+        const compose = createComposer(typeof currentProps.css === 'function' ? currentProps.css() : currentProps.css);
         return createElement(currentProps, createApplier(glitz, theme, compose), compose);
       });
     });

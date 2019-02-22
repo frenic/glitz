@@ -1,12 +1,32 @@
-import { StyleArray, StyleOrStyleArray } from '@glitz/type';
+import { Style, StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
+import { StyledElementLike } from './apply-class-name';
+
+export interface StyledDecorator {
+  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps extends StyledElementProps>(
+    component: StyledElementLike<React.StatelessComponent<TProps>>,
+    style?: Style,
+  ): StyledComponent<TProps>;
+  <TProps extends StyledElementProps, TInstance extends React.Component<TProps, React.ComponentState>>(
+    component: StyledElementLike<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>>,
+    style?: Style,
+  ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
+  <TProps extends StyledProps>(component: React.StatelessComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
+    component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
+    style?: Style,
+  ): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
+  (style: Style): StyledDecorator;
+  (): StyleArray;
+}
 
 export type CSSProp = {
-  css?: StyleOrStyleArray;
+  css?: StyleOrStyleArray | StyledDecorator;
 };
 
 export type StyledProps = {
-  compose: (style?: StyleOrStyleArray) => StyleOrStyleArray;
+  compose: (style?: StyleOrStyleArray | StyledDecorator) => StyleOrStyleArray;
 };
 
 export type StyledElementProps = {
