@@ -40,8 +40,7 @@ if (cjsSingle || cjsDouble) {
 
     const entryPath = resolvePath(`${template}.js`);
     write(
-      {
-        code: `'use strict';
+      `'use strict';
 
 if (process.env.NODE_ENV === 'production') {
   module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(productionCjsTemplate))}');
@@ -49,7 +48,6 @@ if (process.env.NODE_ENV === 'production') {
   module.exports = require('./${path.relative(path.dirname(entryPath), resolvePath(developmentCjsTemplate))}');
 }
 `,
-      },
       entryPath,
     );
   }
@@ -114,16 +112,18 @@ async function build(input, output, type, production) {
     ],
   });
 
-  const generate = bundle.generate({
+  const { output: chunks } = await bundle.generate({
     name: 'glitz',
     format: type === MJS_TYPE || type === ESNEXT_TYPE ? 'es' : 'cjs',
     globals: { react: 'React' },
   });
 
-  write(await generate, output);
+  for (const { code } of chunks) {
+    write(code, output);
+  }
 }
 
-function write({ code }, filename) {
+function write(code, filename) {
   try {
     const gzip = gzipSize.sync(code);
 

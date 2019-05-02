@@ -11,9 +11,9 @@ const server: GlitzServer = new GlitzServer();
 <GlitzProvider glitz={server} />;
 
 const A = styled.button({});
-<A type="" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
+<A type="submit" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
 
-<styled.Button type="" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
+<styled.Button type="submit" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
 
 const B = styled(props => <styled.Div css={props.compose({})} />);
 <B css={{}} />;
