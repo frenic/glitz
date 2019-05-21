@@ -1,22 +1,22 @@
 import { Style } from '@glitz/type';
 import { factory } from './create';
-import { isType, STYLED_TYPE_PROPERTY, StyledType, Type } from './internals';
+import { isType, SECRET_TYPE, StyledType, Type } from './internals';
 import { StyledElementComponents, StyledElementFunctions } from './types';
 
 export interface StyledElement extends StyledType {
-  [STYLED_TYPE_PROPERTY]: Type.Element;
+  [SECRET_TYPE]: Type.Element;
   value: string;
 }
 
 function createElementType(tag: string): StyledElement {
   return {
-    [STYLED_TYPE_PROPERTY]: Type.Element,
+    [SECRET_TYPE]: Type.Element,
     value: tag,
   };
 }
 
 export function isElementType(type: any): type is StyledElement {
-  return isType(type) && type[STYLED_TYPE_PROPERTY] === Type.Element;
+  return isType(type) && type[SECRET_TYPE] === Type.Element;
 }
 
 function createPredefined(tag: string) {

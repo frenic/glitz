@@ -1,8 +1,13 @@
+import { GlitzClient, GlitzServer } from '@glitz/core';
 import * as React from 'react';
-import { GlitzContext, GlitzContextProvider } from './context';
+import { GlitzContext } from './context';
 
-export default class GlitzProvider extends React.Component<GlitzContext> {
-  public render() {
-    return React.createElement(GlitzContextProvider, { value: this.props }, this.props.children);
-  }
-}
+export type PropType = {
+  glitz: GlitzClient | GlitzServer;
+};
+
+const Export: React.FunctionComponent<PropType> = function GlitzProvider(props) {
+  return React.createElement(GlitzContext.Provider, { value: props.glitz }, props.children);
+};
+
+export default Export;

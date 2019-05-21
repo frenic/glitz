@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { isType, STYLED_TYPE_PROPERTY, StyledType, Type } from './internals';
-import { StyledElementProps } from './Super';
+import { WithRefProp } from './create';
+import { isType, SECRET_TYPE, StyledType, Type } from './internals';
+import { StyledElementProps } from './types';
 
 export interface StyledElementLike<TComponent> extends StyledType {
-  [STYLED_TYPE_PROPERTY]: Type.ElementLike;
+  [SECRET_TYPE]: Type.ElementLike;
   value: TComponent;
 }
 
@@ -19,13 +20,13 @@ export function applyClassName<TProps extends StyledElementProps>(
   component: React.ComponentType<TProps>,
 ): StyledElementLike<React.ComponentType<TProps>> {
   return {
-    [STYLED_TYPE_PROPERTY]: Type.ElementLike,
+    [SECRET_TYPE]: Type.ElementLike,
     value: component,
   };
 }
 
-export function isElementLikeType<TProps extends StyledElementProps>(
+export function isElementLikeType<TProps extends StyledElementProps, TInstance>(
   type: any,
-): type is StyledElementLike<React.ComponentType<TProps>> {
-  return isType(type) && type[STYLED_TYPE_PROPERTY] === Type.ElementLike;
+): type is StyledElementLike<React.ComponentType<WithRefProp<TProps, TInstance>>> {
+  return isType(type) && type[SECRET_TYPE] === Type.ElementLike;
 }

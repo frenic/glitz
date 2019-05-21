@@ -1,4 +1,5 @@
-export const STYLED_TYPE_PROPERTY = '$$GLITZ_STYLED_TYPE';
+export const SECRET_COMPOSE = '$$GLITZ1';
+export const SECRET_TYPE = '$$GLITZ2';
 
 export enum Type {
   Element,
@@ -6,9 +7,9 @@ export enum Type {
 }
 
 export interface StyledType {
-  [STYLED_TYPE_PROPERTY]: Type;
+  [SECRET_TYPE]: Type;
 }
 
 export function isType(type: any): type is StyledType {
-  return STYLED_TYPE_PROPERTY in type;
+  return SECRET_TYPE in type;
 }

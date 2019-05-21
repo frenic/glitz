@@ -11,9 +11,9 @@ const server: GlitzServer = new GlitzServer();
 <GlitzProvider glitz={server} />;
 
 const A = styled.button({});
-<A type="submit" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
+<A type="submit" onClick={e => e.currentTarget.type} css={{}} ref={el => el} />;
 
-<styled.Button type="submit" onClick={e => e.currentTarget.type} css={{}} innerRef={el => el} />;
+<styled.Button type="submit" onClick={e => e.currentTarget.type} css={{}} ref={el => el} />;
 
 const B = styled(props => <styled.Div css={props.compose({})} />);
 <B css={{}} />;
@@ -37,7 +37,7 @@ const G = styled(
     }
   },
 );
-<G css={{}} innerRef={c => c} />;
+<G css={{}} ref={c => c} />;
 
 const H = styled(
   class extends React.Component<StyledProps> {
@@ -46,7 +46,7 @@ const H = styled(
     }
   },
 );
-<H css={{}} innerRef={c => c} />;
+<H css={{}} ref={c => c} />;
 
 const I = styled(
   class extends React.Component<StyledProps> {
@@ -56,7 +56,7 @@ const I = styled(
   },
   {},
 );
-<I css={{}} innerRef={c => c} />;
+<I css={{}} ref={c => c} />;
 
 const J = styled(
   class extends React.Component<{ x: string } & StyledProps> {
@@ -65,10 +65,10 @@ const J = styled(
     }
   },
 );
-<J x="" css={{}} innerRef={c => c} />;
+<J x="" css={{}} ref={c => c} />;
 
 const K = styled(J);
-<K x="" css={{}} innerRef={c => c} />;
+<K x="" css={{}} ref={c => c} />;
 
 const l0 = styled({});
 const l1 = l0({});
@@ -84,7 +84,7 @@ const M = m1(
     }
   },
 );
-<M css={{}} innerRef={c => c} />;
+<M css={{}} ref={c => c} />;
 
 function factory() {
   return styled(
@@ -108,7 +108,7 @@ const P = styled(
     },
   ),
 );
-<P className="" css={{}} innerRef={c => c} />;
+<P className="" css={{}} ref={c => c} />;
 
 const Q = styled(
   applyClassName(
@@ -119,7 +119,7 @@ const Q = styled(
     },
   ),
 );
-<Q x="" className="" css={{}} innerRef={c => c} />;
+<Q x="" className="" css={{}} ref={c => c} />;
 
 function connect<TProps>(Component: React.ComponentType<TProps>): React.StatelessComponent<TProps> {
   return props => <Component {...props} />;
@@ -142,7 +142,7 @@ styled(props => <styled.Div css={props.compose(s({}))} />);
 //     return <div className={this.props.apply()} />
 //   }
 // };
-// <L css={{}} innerRef={c => c} />;
+// <L css={{}} ref={c => c} />;
 
 // @styled
 // class M extends React.Component<StyledProps> {
@@ -150,7 +150,7 @@ styled(props => <styled.Div css={props.compose(s({}))} />);
 //     return <div className={this.props.apply()} />
 //   }
 // };
-// <M css={{}} innerRef={c => c} />;
+// <M css={{}} ref={c => c} />;
 
 // Avoid unread variables type error
 factory;

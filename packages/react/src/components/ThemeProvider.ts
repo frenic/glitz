@@ -1,8 +1,13 @@
+import { Theme } from '@glitz/type';
 import * as React from 'react';
-import { ThemeContext, ThemeContextProvider } from './context';
+import { ThemeContext } from './context';
 
-export default class GlitzProvider extends React.Component<ThemeContext> {
-  public render() {
-    return React.createElement(ThemeContextProvider, { value: this.props }, this.props.children);
-  }
-}
+type PropType = {
+  theme: Theme;
+};
+
+const Export: React.FunctionComponent<PropType> = function ThemeProvider(props) {
+  return React.createElement(ThemeContext.Provider, { value: props.theme }, props.children);
+};
+
+export default Export;

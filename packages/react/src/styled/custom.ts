@@ -1,10 +1,15 @@
-import { Style, StyleArray } from '@glitz/type';
+import { Style } from '@glitz/type';
 import * as React from 'react';
 import { StyledElementLike } from './apply-class-name';
-import create from './create';
+import create, { isStyledComponent } from './create';
+import decorator, { StyledDecorator } from './decorator';
 import { isType } from './internals';
-import { StyledComponent, StyledDecorator, StyledElementProps, StyledProps, WithInnerRefProp } from './Super';
+import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
 
+export function customStyled<TProps, TInstance>(
+  component: StyledComponentWithRef<TProps, TInstance>,
+  style?: Style,
+): StyledComponentWithRef<TProps, TInstance>;
 export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
 
 export function customStyled<TProps extends StyledElementProps>(
@@ -18,7 +23,7 @@ export function customStyled<
 >(
   component: StyledElementLike<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>>,
   style?: Style,
-): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
+): StyledComponentWithRef<TProps, TInstance>;
 
 export function customStyled<TProps extends StyledProps>(
   component: React.StatelessComponent<TProps>,
@@ -31,7 +36,7 @@ export function customStyled<
 >(
   component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
   style?: Style,
-): StyledComponent<WithInnerRefProp<TProps, TInstance>>;
+): StyledComponentWithRef<TProps, TInstance>;
 
 export function customStyled(style: Style): StyledDecorator;
 
@@ -41,6 +46,7 @@ export function customStyled(
   // tslint:disable-next-line unified-signatures
   component:
     | StyledElementLike<React.ComponentType<StyledElementProps>>
+    | StyledComponentWithRef<any, any>
     | StyledComponent<any>
     | React.ComponentType<StyledProps>,
   style?: Style,
@@ -53,25 +59,6 @@ export function customStyled<TProps>(
   return isStyle(arg1) ? decorator([arg1]) : create<TProps>(arg1, arg2 ? [arg2] : []);
 }
 
-function decorator(preStyle: StyleArray): StyledDecorator {
-  return (<TProps>(
-    arg1?:
-      | StyledElementLike<React.ComponentType<TProps>>
-      | StyledComponent<TProps>
-      | React.ComponentType<TProps>
-      | Style,
-    arg2?: Style,
-  ) => {
-    if (arg1) {
-      return isStyle(arg1)
-        ? decorator(preStyle.concat(arg1))
-        : create<TProps>(arg1, arg2 ? preStyle.concat(arg2) : preStyle);
-    }
-
-    return preStyle;
-  }) as StyledDecorator;
-}
-
-function isStyle(arg: any): arg is Style {
-  return typeof arg === 'object' && !isType(arg);
+export function isStyle(arg: any): arg is Style {
+  return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg);
 }
