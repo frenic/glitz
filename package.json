@@ -29,7 +29,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "prerelease": "lerna publish --npm-tag=next",
+    "prerelease": "lerna publish --dist-tag=next",
     "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
