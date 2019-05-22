@@ -134,6 +134,15 @@ styled(props => <styled.Div css={props.compose(s({}))} />);
 <styled.Div css={s} />;
 <styled.Div css={s({})} />;
 
+const T = styled(
+  class extends React.Component<StyledProps> {
+    render() {
+      return <styled.Div css={this.props.compose()}>{this.props.children}</styled.Div>;
+    }
+  },
+);
+<T css={{}}>Text</T>;
+
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881
 // @styled({})

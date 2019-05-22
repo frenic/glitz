@@ -9,9 +9,11 @@ import useStyle, { styleToArray } from './use-style';
 
 export type WithRefProp<TProps, TInstance> = React.PropsWithoutRef<TProps> & React.RefAttributes<TInstance>;
 
-export type ExternalProps<TProps> = Pick<TProps, Exclude<keyof TProps, keyof StyledProps>> & {
-  css?: StyleOrStyleArray | StyledDecorator;
-};
+export type ExternalProps<TProps> = React.PropsWithChildren<
+  Pick<TProps, Exclude<keyof TProps, keyof StyledProps>> & {
+    css?: StyleOrStyleArray | StyledDecorator;
+  }
+>;
 
 export default function create<TProps>(
   type:
