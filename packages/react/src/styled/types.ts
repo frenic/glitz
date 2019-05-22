@@ -1,8 +1,8 @@
 import { Style, StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
+import { SECRET_COMPOSE } from './constants';
 import { ExternalProps, WithRefProp } from './create';
 import { StyledDecorator } from './decorator';
-import { SECRET_COMPOSE } from './internals';
 
 export type StyledProps = {
   compose: (style?: StyleOrStyleArray | StyledDecorator) => StyleOrStyleArray;

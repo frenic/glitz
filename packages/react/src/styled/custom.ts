@@ -3,7 +3,7 @@ import * as React from 'react';
 import { StyledElementLike } from './apply-class-name';
 import create from './create';
 import decorator, { StyledDecorator } from './decorator';
-import { isType } from './internals';
+import { isType } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
 
 export function customStyled<TProps, TInstance>(

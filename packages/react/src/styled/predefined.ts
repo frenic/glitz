@@ -1,7 +1,20 @@
 import { Style } from '@glitz/type';
+import { SECRET_TYPE } from './constants';
 import { factory } from './create';
-import { isType, SECRET_TYPE, StyledType, Type } from './internals';
 import { StyledElementComponents, StyledElementFunctions } from './types';
+
+export enum Type {
+  Element,
+  ElementLike,
+}
+
+export interface StyledType {
+  [SECRET_TYPE]: Type;
+}
+
+export function isType(type: any): type is StyledType {
+  return SECRET_TYPE in type;
+}
 
 export interface StyledElement extends StyledType {
   [SECRET_TYPE]: Type.Element;

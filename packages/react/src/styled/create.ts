@@ -1,11 +1,11 @@
 import { StyleArray, StyleOrStyleArray } from '@glitz/type';
 import * as React from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
+import { SECRET_COMPOSE } from './constants';
 import { StyledDecorator } from './decorator';
-import { SECRET_COMPOSE } from './internals';
 import { isElementType, StyledElement } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledProps } from './types';
-import useStyle, { styleToArray } from './use-style';
+import useGlitz, { styleToArray } from './use-glitz';
 
 export type WithRefProp<TProps, TInstance> = React.PropsWithoutRef<TProps> & React.RefAttributes<TInstance>;
 
@@ -45,7 +45,7 @@ export function factory<TProps, TInstance>(
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(
     React.forwardRef<TInstance, ExternalProps<TProps>>((props, ref) => {
       const { css: dynamics, ...restProps } = props;
-      const [apply, compose] = useStyle(styleToArray(statics, dynamics));
+      const [apply, compose] = useGlitz(styleToArray(statics, dynamics));
 
       if (isElementType(type) || isElementLikeType<TProps, TInstance>(type)) {
         return React.createElement<any>(type.value, {

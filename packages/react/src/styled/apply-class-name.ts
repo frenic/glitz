@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { SECRET_TYPE } from './constants';
 import { WithRefProp } from './create';
-import { isType, SECRET_TYPE, StyledType, Type } from './internals';
+import { isType, StyledType, Type } from './predefined';
 import { StyledElementProps } from './types';
 
 export interface StyledElementLike<TComponent> extends StyledType {

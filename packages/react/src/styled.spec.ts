@@ -8,6 +8,7 @@ import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, ThemeProvider } from './';
 import { WithRefProp } from './styled/create';
 import { StyledElementProps, StyledProps } from './styled/types';
+import useGlitz from './styled/use-glitz';
 import useStyle from './styled/use-style';
 
 describe('react styled', () => {
@@ -16,9 +17,9 @@ describe('react styled', () => {
     console.warn = warn;
   });
 
-  it('returns class names using hook', () => {
+  it('returns class names using style hook', () => {
     function Component() {
-      const [apply] = useStyle({ color: 'red' });
+      const [apply] = useGlitz({ color: 'red' });
       expect(apply()).toBe('a');
       return null;
     }
@@ -32,11 +33,27 @@ describe('react styled', () => {
       ),
     );
   });
-  it('returns composes using hook', () => {
+  it('returns composes using style hook', () => {
     function Component() {
-      const [, composeA] = useStyle({ color: 'red', backgroundColor: 'blue' });
-      const [, composeB] = useStyle(composeA({ color: 'green' }));
+      const [, composeA] = useGlitz({ color: 'red', backgroundColor: 'blue' });
+      const [, composeB] = useGlitz(composeA({ color: 'green' }));
       expect(composeB()).toEqual([{ color: 'green' }, { color: 'red', backgroundColor: 'blue' }]);
+      return null;
+    }
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(Component),
+      ),
+    );
+  });
+  it('returns class names using class name hook', () => {
+    function Component() {
+      const classNames = useStyle({ color: 'red' });
+      expect(classNames).toBe('a');
       return null;
     }
     mount(
