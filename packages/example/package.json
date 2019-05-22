@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "glitz-example",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
@@ -9,7 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "@glitz/core": "^2.1.0",
-    "@glitz/react": "^3.0.0-alpha.0",
+    "@glitz/react": "^3.0.0-alpha.1",
     "@glitz/transformers": "^2.0.7",
     "@types/react": "*",
     "@types/react-dom": "*",
