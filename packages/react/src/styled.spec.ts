@@ -49,6 +49,27 @@ describe('react styled', () => {
       ),
     );
   });
+  it('renders memo styled component', () => {
+    const StyledComponent = styled(
+      React.memo((props: StyledProps) => {
+        expect(props.compose()).toEqual([{ color: 'red' }]);
+        return React.createElement(styled.Div, {
+          css: props.compose(),
+          ref: (el: HTMLDivElement) => expect(el.className).toBe('a'),
+        });
+      }),
+      { color: 'red' },
+    );
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponent),
+      ),
+    );
+  });
   it('creates custom styled component', () => {
     const StyledComponent = styled(
       props => {
