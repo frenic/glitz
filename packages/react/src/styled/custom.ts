@@ -1,7 +1,8 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
+import { isForwardRef, isMemo } from 'react-is';
 import { StyledElementLike } from './apply-class-name';
-import create from './create';
+import create, { isStyledComponent } from './create';
 import decorator, { StyledDecorator } from './decorator';
 import { isType } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
@@ -59,28 +60,6 @@ export function customStyled<TProps>(
   return isStyle(arg1) ? decorator([arg1]) : create<TProps>(arg1, arg2 ? [arg2] : []);
 }
 
-const REACT_TYPEOF_PROPERTY = '$$typeof';
-
-if (process.env.NODE_ENV !== 'production') {
-  const error = 'Your using an unsupported version of React. Please use React@^16.8.0.';
-
-  if (typeof React.useState !== 'function') {
-    throw new Error(error);
-  }
-
-  const checks = [React.memo(() => null), React.forwardRef(() => null)];
-  for (const check of checks) {
-    if (!(REACT_TYPEOF_PROPERTY in check)) {
-      throw new Error(error);
-    }
-  }
-}
-
 export function isStyle(arg: any): arg is Style {
-  return (
-    typeof arg === 'object' &&
-    !isType(arg) &&
-    // Make sure it isn't a `React.memo` or `React.forwardRef` component
-    !(REACT_TYPEOF_PROPERTY in arg)
-  );
+  return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg) && !isMemo(arg) && !isForwardRef(arg);
 }

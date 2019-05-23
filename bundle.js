@@ -87,6 +87,7 @@ async function build(input, output, type, production) {
       '@glitz/react',
       '@glitz/transformers',
       'react',
+      'react-is',
       'inline-style-prefixer',
     ],
     plugins: [
