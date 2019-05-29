@@ -296,12 +296,12 @@ describe('client', () => {
         color: 'red',
         background: { color: 'green' },
         borderLeftColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
         '@media (min-width: 768px)': {
           color: 'red',
           background: { color: 'green' },
-          borderColor: 'blue',
-          ':hover': { color: 'red', background: { color: 'green' }, borderColor: 'blue' },
+          borderLeftColor: 'blue',
+          ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
         },
       }),
     ).toBe('a b c d');
@@ -753,13 +753,12 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>({
       transformer: properties => {
         const prefixed: Properties = {};
-        let property: keyof Properties;
-        for (property in properties) {
-          const value = properties[property];
+        for (const property in properties) {
+          const value = (properties as any)[property];
           if (property === 'appearance' && value === 'none') {
             prefixed.MozAppearance = value;
           }
-          prefixed[property] = properties[property] as Properties[typeof property];
+          (prefixed as any)[property] = (properties as any)[property];
         }
         return prefixed;
       },

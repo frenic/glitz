@@ -71,7 +71,7 @@ export default class Injector {
       let property: keyof FontFace | typeof FONT_FAMILY;
       for (property in original) {
         if (property !== FONT_FAMILY) {
-          declarations[property] = original[property];
+          (declarations as any)[property] = original[property];
         }
       }
 

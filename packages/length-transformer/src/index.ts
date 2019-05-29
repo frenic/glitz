@@ -64,7 +64,7 @@ export function createNumberToLengthTransformer(options: Options = {}) {
         }
       }
 
-      transformed[property] = value as Glitz.Properties[typeof property];
+      (transformed as any)[property] = value as Glitz.Properties[typeof property];
     }
     return transformed;
   };

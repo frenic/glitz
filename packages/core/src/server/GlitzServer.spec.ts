@@ -404,7 +404,7 @@ describe('server', () => {
           if (property === 'appearance' && value === 'none') {
             prefixed.MozAppearance = value;
           }
-          prefixed[property] = properties[property] as Properties[typeof property];
+          (prefixed as any)[property] = properties[property] as Properties[typeof property];
         }
         return prefixed;
       },
