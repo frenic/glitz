@@ -18,13 +18,13 @@ const A = styled.button({});
 const B = styled(props => <styled.Div css={props.compose({})} />);
 <B css={{}} />;
 
-const C = styled(props => <B css={props.compose()} />);
+const C = styled(props => <B css={props.compose({})} />);
 <C css={{}} />;
 
-const D = styled(props => <styled.Div css={props.compose()} />, {});
+const D = styled(props => <styled.Div css={props.compose({})} />, {});
 <D css={{}} />;
 
-const E = styled((props: { x: string } & StyledProps) => <styled.Div css={props.compose()} />);
+const E = styled((props: { x: string } & StyledProps) => <styled.Div css={props.compose({})} />);
 <E x="" css={{}} />;
 
 const F = styled(E);
@@ -33,7 +33,7 @@ const F = styled(E);
 const G = styled(
   class extends React.Component<StyledProps> {
     render() {
-      return <styled.Div css={this.props.compose()} />;
+      return <styled.Div css={this.props.compose({})} />;
     }
   },
 );
@@ -51,7 +51,7 @@ const H = styled(
 const I = styled(
   class extends React.Component<StyledProps> {
     render() {
-      return <styled.Div css={this.props.compose()} />;
+      return <styled.Div css={this.props.compose({})} />;
     }
   },
   {},
@@ -61,7 +61,7 @@ const I = styled(
 const J = styled(
   class extends React.Component<{ x: string } & StyledProps> {
     render() {
-      return <styled.Div css={this.props.compose()} />;
+      return <styled.Div css={this.props.compose({})} />;
     }
   },
 );
@@ -72,7 +72,7 @@ const K = styled(J);
 
 const l0 = styled({});
 const l1 = l0({});
-const L = l1(props => <styled.Div css={props.compose()} />);
+const L = l1(props => <styled.Div css={props.compose({})} />);
 <L css={{}} />;
 
 const m0 = styled({});
@@ -80,7 +80,7 @@ const m1 = m0({});
 const M = m1(
   class extends React.Component<StyledProps> {
     render() {
-      return <styled.Div css={this.props.compose()} />;
+      return <styled.Div css={this.props.compose({})} />;
     }
   },
 );
@@ -89,7 +89,7 @@ const M = m1(
 function factory() {
   return styled(
     class extends React.Component<StyledProps> {
-      x = styled(({ compose }: StyledProps) => <styled.Div css={compose(this.props.compose())} />);
+      x = styled(({ compose }: StyledProps) => <styled.Div css={compose(this.props.compose({}))} />);
     },
   );
 }
@@ -121,7 +121,7 @@ const Q = styled(
 );
 <Q x="" className="" css={{}} ref={c => c} />;
 
-function connect<TProps>(Component: React.ComponentType<TProps>): React.StatelessComponent<TProps> {
+function connect<TProps>(Component: React.ComponentType<TProps>): React.FunctionComponent<TProps> {
   return props => <Component {...props} />;
 }
 
@@ -137,7 +137,7 @@ styled(props => <styled.Div css={props.compose(s({}))} />);
 const T = styled(
   class extends React.Component<StyledProps> {
     render() {
-      return <styled.Div css={this.props.compose()}>{this.props.children}</styled.Div>;
+      return <styled.Div css={this.props.compose({})}>{this.props.children}</styled.Div>;
     }
   },
 );

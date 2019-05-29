@@ -10,8 +10,8 @@ export interface StyledElementLike<TComponent> extends StyledType {
 }
 
 export function applyClassName<TProps extends StyledElementProps = StyledElementProps>(
-  component: React.StatelessComponent<TProps>,
-): StyledElementLike<React.StatelessComponent<TProps>>;
+  component: React.FunctionComponent<TProps>,
+): StyledElementLike<React.FunctionComponent<TProps>>;
 
 export function applyClassName<TProps extends StyledElementProps, TComponent extends React.ComponentClass<TProps>>(
   component: React.ClassType<TProps, React.Component<TProps, React.ComponentState>, TComponent>,

@@ -11,14 +11,14 @@ export interface StyledDecorator {
   >;
   <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps extends StyledElementProps>(
-    component: StyledElementLike<React.StatelessComponent<TProps>>,
+    component: StyledElementLike<React.FunctionComponent<TProps>>,
     style?: Style,
   ): StyledComponent<TProps>;
   <TProps extends StyledElementProps, TInstance extends React.Component<TProps, React.ComponentState>>(
     component: StyledElementLike<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>>,
     style?: Style,
   ): StyledComponentWithRef<TProps, TInstance>;
-  <TProps extends StyledProps>(component: React.StatelessComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps extends StyledProps>(component: React.FunctionComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
     component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
     style?: Style,

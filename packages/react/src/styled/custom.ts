@@ -11,10 +11,11 @@ export function customStyled<TProps, TInstance>(
   component: StyledComponentWithRef<TProps, TInstance>,
   style?: Style,
 ): StyledComponentWithRef<TProps, TInstance>;
+
 export function customStyled<TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
 
 export function customStyled<TProps extends StyledElementProps>(
-  component: StyledElementLike<React.StatelessComponent<TProps>>,
+  component: StyledElementLike<React.FunctionComponent<TProps>>,
   style?: Style,
 ): StyledComponent<TProps>;
 
@@ -27,7 +28,7 @@ export function customStyled<
 ): StyledComponentWithRef<TProps, TInstance>;
 
 export function customStyled<TProps extends StyledProps>(
-  component: React.StatelessComponent<TProps>,
+  component: React.FunctionComponent<TProps>,
   style?: Style,
 ): StyledComponent<TProps>;
 
