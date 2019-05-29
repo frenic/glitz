@@ -1,6 +1,6 @@
 {
   "name": "@glitz/length-transformer",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",

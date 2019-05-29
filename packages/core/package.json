@@ -1,6 +1,6 @@
 {
   "name": "@glitz/core",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
