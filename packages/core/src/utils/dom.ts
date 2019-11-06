@@ -3,8 +3,10 @@ export function injectSheetRule(styleElement: HTMLStyleElement, rule: string) {
   const index = sheet.cssRules.length;
   try {
     sheet.insertRule(rule, index);
-  } finally {
-    // Ignore failing rules
+  } catch (e) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`Failed to inject CSS: ${rule}`);
+    }
   }
 }
 
