@@ -4,6 +4,7 @@ import { Style } from './';
 
 const css: Style = {
   gridColumnStart: '',
+  gridColumn: { start: '' },
   grid: {
     column: {
       start: '',

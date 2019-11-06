@@ -53,6 +53,10 @@ export interface ExtendedProperties {
   flex?: FlexProperty;
   font?: FontProperty;
   grid?: GridProperty;
+  gridAuto?: GridAutoProperty;
+  gridColumn?: GridColumnProperty;
+  gridRow?: GridRowProperty;
+  gridTemplate?: GridTemplateProperty;
   maskBorder?: MaskBorderProperty;
   mask?: MaskProperty;
   margin?: MarginProperty;
@@ -166,26 +170,34 @@ interface FontProperty {
 }
 
 interface GridProperty {
-  auto?: {
-    columns?: WithThemeFunction<UntransformedProperties['gridAutoColumns']>;
-    flow?: WithThemeFunction<UntransformedProperties['gridAutoFlow']>;
-    rows?: WithThemeFunction<UntransformedProperties['gridAutoRows']>;
-  };
-  column?: {
-    end?: WithThemeFunction<UntransformedProperties['gridColumnEnd']>;
-    gap?: WithThemeFunction<UntransformedProperties['gridColumnGap']>;
-    start?: WithThemeFunction<UntransformedProperties['gridColumnStart']>;
-  };
-  row?: {
-    end?: WithThemeFunction<UntransformedProperties['gridRowEnd']>;
-    gap?: WithThemeFunction<UntransformedProperties['gridRowGap']>;
-    start?: WithThemeFunction<UntransformedProperties['gridRowStart']>;
-  };
-  template?: {
-    areas?: WithThemeFunction<UntransformedProperties['gridTemplateAreas']>;
-    columns?: WithThemeFunction<UntransformedProperties['gridTemplateColumns']>;
-    rows?: WithThemeFunction<UntransformedProperties['gridTemplateRows']>;
-  };
+  auto?: GridAutoProperty;
+  column?: GridColumnProperty;
+  row?: GridRowProperty;
+  template?: GridTemplateProperty;
+}
+
+interface GridAutoProperty {
+  columns?: WithThemeFunction<UntransformedProperties['gridAutoColumns']>;
+  flow?: WithThemeFunction<UntransformedProperties['gridAutoFlow']>;
+  rows?: WithThemeFunction<UntransformedProperties['gridAutoRows']>;
+}
+
+interface GridColumnProperty {
+  end?: WithThemeFunction<UntransformedProperties['gridColumnEnd']>;
+  gap?: WithThemeFunction<UntransformedProperties['gridColumnGap']>;
+  start?: WithThemeFunction<UntransformedProperties['gridColumnStart']>;
+}
+
+interface GridRowProperty {
+  end?: WithThemeFunction<UntransformedProperties['gridRowEnd']>;
+  gap?: WithThemeFunction<UntransformedProperties['gridRowGap']>;
+  start?: WithThemeFunction<UntransformedProperties['gridRowStart']>;
+}
+
+interface GridTemplateProperty {
+  areas?: WithThemeFunction<UntransformedProperties['gridTemplateAreas']>;
+  columns?: WithThemeFunction<UntransformedProperties['gridTemplateColumns']>;
+  rows?: WithThemeFunction<UntransformedProperties['gridTemplateRows']>;
 }
 
 interface MaskBorderProperty {
