@@ -1,6 +1,6 @@
 {
   "name": "@glitz/react",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,8 +12,8 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/core": "^2.1.1",
-    "@glitz/type": "^2.0.2",
+    "@glitz/core": "^2.1.2",
+    "@glitz/type": "^2.0.3",
     "@types/react": "*",
     "@types/react-is": "*",
     "react-is": "^16.11.0"
