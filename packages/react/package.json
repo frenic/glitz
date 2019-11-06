@@ -16,14 +16,10 @@
     "@glitz/type": "^2.0.2",
     "@types/react": "*",
     "@types/react-is": "*",
-    "react-is": "^16.8.6"
+    "react-is": "^16.11.0"
   },
   "peerDependencies": {
-    "react": "^16.8"
-  },
-  "devDependencies": {
-    "@types/memoize-one": "^3.1.1",
-    "memoize-one": "^3.1.1"
+    "react": "^16.11"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",

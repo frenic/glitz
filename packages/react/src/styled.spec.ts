@@ -3,7 +3,6 @@
 import { GlitzClient } from '@glitz/core';
 import { Style } from '@glitz/type';
 import { mount } from 'enzyme';
-import momoize from 'memoize-one';
 import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, ThemeProvider } from './';
 import { WithRefProp } from './styled/create';
@@ -370,30 +369,27 @@ describe('react styled', () => {
         },
       },
     );
-    const css = {};
+    const css1 = {};
     mount(
       React.createElement(
         GlitzProvider,
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponentPure, { css }),
+        React.createElement(StyledComponentPure, { css: css1 }),
       ),
     );
     expect(count).toBe(1);
     expect(renders).toBe(2);
     count = 0;
     renders = 0;
-    const StyledComponentMomoize = styled(
-      class extends React.Component<StyledProps> {
-        private css = momoize((color: string) => ({ color }));
-        public componentDidMount() {
-          this.forceUpdate();
-        }
-        public render() {
-          renders++;
-          return React.createElement(styled.Div, { css: this.props.compose(this.css('green')) });
-        }
+    const StyledComponentMemo = styled(
+      props => {
+        const [, setState] = React.useState(0);
+        renders++;
+        const css2 = React.useMemo(() => ({ color: 'green' }), []);
+        React.useEffect(() => setState(1), []);
+        return React.createElement(styled.Div, { css: props.compose(css2) });
       },
       {
         get backgroundColor() {
@@ -408,7 +404,7 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponentMomoize),
+        React.createElement(StyledComponentMemo),
       ),
     );
     expect(count).toBe(1);
