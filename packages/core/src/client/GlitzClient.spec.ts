@@ -10,7 +10,7 @@ interface TestStyle extends Style {
 }
 
 beforeEach(() => {
-  (document.head as HTMLHeadElement).innerHTML = '';
+  document.head.innerHTML = '';
 });
 
 describe('client', () => {
@@ -204,25 +204,25 @@ describe('client', () => {
     expect(client.injectStyle({ '@media (min-width: 1000px)': { color: 'red' } })).toBe('a');
     expect(client.injectStyle({ '@media (min-width: 100px)': { color: 'red' } })).toBe('b');
 
-    expect((document.head as HTMLHeadElement).childNodes).toHaveLength(2);
-    expect(((document.head as HTMLHeadElement).childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
-    expect(((document.head as HTMLHeadElement).childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
+    expect(document.head.childNodes).toHaveLength(2);
+    expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
 
     expect(client.injectStyle({ '@media (min-width: 200px)': { color: 'red' } })).toBe('c');
 
-    expect((document.head as HTMLHeadElement).childNodes).toHaveLength(3);
-    expect(((document.head as HTMLHeadElement).childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
-    expect(((document.head as HTMLHeadElement).childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 200px)');
-    expect(((document.head as HTMLHeadElement).childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
+    expect(document.head.childNodes).toHaveLength(3);
+    expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('(min-width: 100px)');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 200px)');
+    expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
 
     expect(client.injectStyle({ '@media (min-width: 1000px)': { color: 'red' } })).toBe('a');
     expect(client.injectStyle({ color: 'red' })).toBe('d');
 
-    expect((document.head as HTMLHeadElement).childNodes).toHaveLength(4);
-    expect(((document.head as HTMLHeadElement).childNodes[0] as HTMLStyleElement).media).toBe('');
-    expect(((document.head as HTMLHeadElement).childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 100px)');
-    expect(((document.head as HTMLHeadElement).childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 200px)');
-    expect(((document.head as HTMLHeadElement).childNodes[3] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
+    expect(document.head.childNodes).toHaveLength(4);
+    expect((document.head.childNodes[0] as HTMLStyleElement).media).toBe('');
+    expect((document.head.childNodes[1] as HTMLStyleElement).media).toBe('(min-width: 100px)');
+    expect((document.head.childNodes[2] as HTMLStyleElement).media).toBe('(min-width: 200px)');
+    expect((document.head.childNodes[3] as HTMLStyleElement).media).toBe('(min-width: 1000px)');
   });
   it('cache declarations', () => {
     let count = 0;
@@ -807,7 +807,7 @@ describe('client', () => {
 function createStyle(media?: string | null, css?: string) {
   const element = document.createElement('style');
   element.dataset.glitz = undefined;
-  (document.head as HTMLHeadElement).appendChild(element);
+  document.head.appendChild(element);
 
   if (media) {
     element.media = media;

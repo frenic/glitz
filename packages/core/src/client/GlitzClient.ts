@@ -54,9 +54,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
     super(injector, options.transformer, options.atomic);
 
-    const preRenderStyles = (document.head as HTMLHeadElement).querySelectorAll(`[data-${identifier}]`) as NodeListOf<
-      HTMLStyleElement
-    >;
+    const preRenderStyles = document.head.querySelectorAll<HTMLStyleElement>(`[data-${identifier}]`);
 
     if (preRenderStyles) {
       for (const element of preRenderStyles) {

@@ -6,8 +6,7 @@ export type Options = {
 
 export let createDevToolTransformer: (
   options?: Options,
-) => (declarations: UntransformedProperties) => Properties = () => (declarations: UntransformedProperties) =>
-  declarations as Properties;
+) => (declarations: UntransformedProperties) => Properties = () => declarations => declarations as Properties;
 
 if (process.env.NODE_ENV !== 'production') {
   if (typeof document !== 'undefined') {
@@ -81,8 +80,8 @@ if (process.env.NODE_ENV !== 'production') {
                 }
               }
             }
-          } else {
-            if (!validateDeclaration(hyphenatedProperty, value as string | number)) {
+          } else if (value) {
+            if (!validateDeclaration(hyphenatedProperty, value)) {
               const declaration = { [property]: value };
 
               if (properties.length > 1) {
