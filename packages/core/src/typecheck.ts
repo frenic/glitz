@@ -4,10 +4,7 @@ import { Properties, UntransformedProperties } from '@glitz/type';
 import { GlitzClient, GlitzServer, Options, compose, pseudo, media } from './index';
 
 const transformer: (input: UntransformedProperties) => Properties = input => ({ display: input.display });
-const transformers = compose(
-  transformer,
-  transformer,
-);
+const transformers = compose(transformer, transformer);
 
 const options: Options = {
   transformer,

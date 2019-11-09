@@ -23,11 +23,7 @@ import numberToLength from '@glitz/length-transformer';
 import devTool from '@glitz/devtool-transformer';
 import prefixer from '@glitz/prefixer-transformer';
 const glitz = new GlitzClient({
-  transformer: compose(
-    prefixer,
-    devTool,
-    numberToLength,
-  ),
+  transformer: compose(prefixer, devTool, numberToLength),
 });
 
 const className = glitz.injectStyle({

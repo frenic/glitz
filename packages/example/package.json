@@ -13,12 +13,12 @@
     "@glitz/transformers": "^2.0.9",
     "@types/react": "*",
     "@types/react-dom": "*",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2"
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.9.7",
-    "parcel-plugin-typescript": "^1.0.0"
+    "parcel-bundler": "^1.12.4",
+    "@flaviut/parcel-plugin-typescript": "^1.0.1"
   },
   "scripts": {
     "start": "parcel index.html --open"
