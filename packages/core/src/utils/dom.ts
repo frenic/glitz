@@ -1,5 +1,4 @@
-export function injectSheetRule(styleElement: HTMLStyleElement, rule: string) {
-  const sheet = styleElement.sheet as CSSStyleSheet;
+export function injectSheetRule(sheet: CSSStyleSheet, rule: string) {
   const index = sheet.cssRules.length;
   try {
     sheet.insertRule(rule, index);
@@ -25,4 +24,12 @@ export function createStyleElement(media: string | undefined, identifier: string
 export function insertStyleElement(element: HTMLStyleElement, insertBefore: HTMLStyleElement | null) {
   (document.head as HTMLHeadElement).insertBefore(element, insertBefore);
   return element;
+}
+
+export function isCSSStyleSheet(sheet: CSSStyleSheet | StyleSheet | null): sheet is CSSStyleSheet {
+  if (!sheet) {
+    return false;
+  }
+
+  return 'cssRules' in sheet;
 }

@@ -1,7 +1,7 @@
 // tslint:disable no-conditional-assignment
 
 import Injector from '../core/Injector';
-import { injectSheetRule } from '../utils/dom';
+import { injectSheetRule, isCSSStyleSheet } from '../utils/dom';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
 
 const CLASS_RULE_REGEX = /\.([a-z0-9]+)(:[^{]+)?\{([^}]+)\}/g;
@@ -39,19 +39,25 @@ export default class InjectorClient extends Injector {
       }
     }
 
+    const sheet = styleElement.sheet;
+
+    if (!isCSSStyleSheet(sheet)) {
+      throw new Error('HTMLStyleElement was not inserted properly into DOM');
+    }
+
     const injectNewClassRule = (className: string, block: string, pseudo?: string) => {
       const rule = formatClassRule(className, block, pseudo);
-      injectSheetRule(styleElement, rule);
+      injectSheetRule(sheet, rule);
     };
 
     const injectNewKeyframesRule = (name: string, blockList: string) => {
       const rule = formatKeyframesRule(name, blockList);
-      injectSheetRule(styleElement, rule);
+      injectSheetRule(sheet, rule);
     };
 
     const injectNewFontFaceRule = (name: string, block: string) => {
       const rule = formatFontFaceRule(name, block);
-      injectSheetRule(styleElement, rule);
+      injectSheetRule(sheet, rule);
     };
 
     super(

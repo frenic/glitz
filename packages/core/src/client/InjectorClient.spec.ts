@@ -156,6 +156,22 @@ describe('client', () => {
 
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
   });
+  it("won't fail if style element is removed from DOM", () => {
+    const style = createStyle();
+    const injector = createInjector(style);
+
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+
+    document.head.removeChild(style);
+
+    expect(injector.injectClassName({ color: 'green' })).toBe('b');
+  });
+  it("will fail if style element wasn't inserted to DOM", () => {
+    const style = createStyle();
+    document.head.removeChild(style);
+
+    expect(() => createInjector(style)).toThrowError();
+  });
 });
 
 function createStyle(css?: string) {
