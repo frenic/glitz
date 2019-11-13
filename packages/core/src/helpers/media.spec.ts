@@ -1,13 +1,6 @@
 import media, { query } from './media';
 
 describe('media selector', () => {
-  it('logs warning when empty', () => {
-    const logger = (console.warn = jest.fn());
-
-    media({}, {});
-
-    expect(logger).toHaveBeenCalledTimes(1);
-  });
   it('parses queries to list', () => {
     expect(query({ minWidth: '768px' })).toBe('(min-width: 768px)');
     expect(query({ minHeight: '768px' })).toBe('(min-height: 768px)');

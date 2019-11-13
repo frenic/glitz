@@ -10,12 +10,6 @@ export default function media(list: Query | string, style: Style): Style {
 }
 
 export function query(list: Query): string {
-  if (process.env.NODE_ENV !== 'production') {
-    if (Object.keys(list).length === 0) {
-      console.warn('The media query is empty and will therefore be ignored. Prefer not having empty media queries');
-    }
-  }
-
   let result = '';
   let feature: keyof Query;
   for (feature in list) {

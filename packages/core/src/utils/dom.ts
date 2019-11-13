@@ -1,10 +1,16 @@
+import { prettifyRule } from './format';
+
 export function injectSheetRule(sheet: CSSStyleSheet, rule: string) {
   const index = sheet.cssRules.length;
+
   try {
     sheet.insertRule(rule, index);
-  } catch (e) {
+  } catch {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn(`Failed to inject CSS: ${rule}`);
+      console.warn(
+        `Failed to insert this CSS rule possibly because the selector isn't supported by the browser:\n\n`,
+        prettifyRule(rule),
+      );
     }
   }
 }

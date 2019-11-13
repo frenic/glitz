@@ -23,20 +23,6 @@ export function parseDeclarationBlock(declarations: Declarations) {
 }
 
 export function parseDeclaration(property: string, value?: string | number) {
-  if (process.env.NODE_ENV !== 'production') {
-    if (!(typeof value === 'string' || typeof value === 'number')) {
-      console.error('The style value %O of property `%s` has to be a string, number', value, property);
-    }
-    if (value === '') {
-      console.warn('Style property `%s` as empty string may cause some unexpected behavior', property);
-    }
-    if (typeof value === 'number' && Number.isNaN(value)) {
-      console.warn('Style property `%s` as NaN may cause some unexpected behavior', property);
-    }
-    if (typeof value === 'number' && !Number.isFinite(value)) {
-      console.warn('Style property `%s` as an infinite number may cause some unexpected behavior', property);
-    }
-  }
   return `${hyphenateProperty(property)}:${value}`;
 }
 

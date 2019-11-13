@@ -1,5 +1,5 @@
 import { Declarations, FontFace, Properties, PropertiesList } from '@glitz/type';
-import { formatRule } from '../utils/format';
+import { formatRule, prettifyRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
 export const ANIMATION_NAME = 'animationName';
@@ -63,7 +63,10 @@ export default class Injector {
     this.injectFontFace = original => {
       if (process.env.NODE_ENV !== 'production') {
         if (FONT_FAMILY in original) {
-          console.warn('The CSS property `%s` in font face will be ignored in %O', FONT_FAMILY, original);
+          console.warn(
+            `The CSS property \`${FONT_FAMILY}\` in font face will be ignored in:\n\n`,
+            prettifyRule(parseDeclarationBlock(original as Declarations)),
+          );
         }
       }
 

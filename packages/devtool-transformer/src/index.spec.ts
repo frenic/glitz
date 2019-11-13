@@ -3,25 +3,57 @@ import devToolTransformer, { createDevToolTransformer } from './index';
 
 describe('style validation', () => {
   it('invalidates', () => {
-    const logger = (console.warn = jest.fn());
+    const logger1 = (console.warn = jest.fn());
 
     devToolTransformer({
       colour: 'red',
     } as Properties);
 
-    expect(logger).toHaveBeenCalledTimes(1);
+    expect(logger1).toHaveBeenCalledWith(
+      `The browser ignored the CSS in:
+
+{
+  %c"colour"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      'red',
+    );
+
+    const logger2 = (console.warn = jest.fn());
 
     devToolTransformer({
       color: 'bläck',
     });
 
-    expect(logger).toHaveBeenCalledTimes(2);
+    expect(logger2).toHaveBeenCalledWith(
+      `The browser ignored the CSS in:
+
+{
+  %c"color"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      'bläck',
+    );
+
+    const logger3 = (console.warn = jest.fn());
+    const value = [0, '--maxcontent'];
 
     devToolTransformer({
-      backgroundColour: 'red',
+      width: value,
     } as Properties);
 
-    expect(logger).toHaveBeenCalledTimes(3);
+    expect(logger3).toHaveBeenCalledWith(
+      `The browser ignored the CSS fallback value \`--maxcontent\` in:
+
+{
+  %c"width"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      value,
+    );
   });
   it('validates', () => {
     const logger = (console.warn = jest.fn());

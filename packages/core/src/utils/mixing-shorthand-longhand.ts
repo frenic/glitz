@@ -1,6 +1,8 @@
 import { hyphenateProperty } from '../utils/parse';
+import { issueFormatter } from './debugging';
+import { reverse } from './reverse';
 
-export let validateMixingShorthandLonghand: (object: { [property: string]: any }, classNames: string) => void = () => {
+export let validateMixingShorthandLonghand: (object: { [property: string]: any }) => void = () => {
   // noop
 };
 
@@ -99,10 +101,10 @@ if (process.env.NODE_ENV !== 'production') {
     transition: ['transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay'],
   };
 
-  validateMixingShorthandLonghand = (object, classNames) => {
+  validateMixingShorthandLonghand = object => {
     const hyphenatedProperties = Object.keys(object).reduce<{ [property: string]: string }>((properties, property) => {
       if (typeof object[property] === 'object' && !Array.isArray(object[property])) {
-        validateMixingShorthandLonghand(object[property], classNames);
+        validateMixingShorthandLonghand(object[property]);
       }
       properties[hyphenateProperty(property)] = property;
       return properties;
@@ -113,12 +115,15 @@ if (process.env.NODE_ENV !== 'production') {
         for (const longhand of shorthands[property]) {
           if (longhand in hyphenatedProperties) {
             console.warn(
-              'Injected style resulting in class name `%s` had a longhand property `%s` mixed with its corresponding shorthand property `%s` in %O which may likely cause some unexpected behavior. Replace `%s` with longhand properties to solve the issue.',
-              classNames,
-              hyphenatedProperties[longhand],
-              hyphenatedProperties[property],
-              object,
-              hyphenatedProperties[property],
+              ...issueFormatter(
+                `Inserted style had a longhand property \`${hyphenatedProperties[longhand]}\` mixed with its corresponding shorthand property \`${hyphenatedProperties[property]}\` may likely cause some unexpected behavior in:`,
+                object,
+                {
+                  [hyphenatedProperties[property]]: object[property],
+                  [hyphenatedProperties[longhand]]: object[longhand],
+                },
+                ({}, value) => (typeof value === 'object' && !Array.isArray(value) ? reverse(value) : value),
+              ),
             );
           }
         }

@@ -773,6 +773,119 @@ describe('client', () => {
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
     expect(sheet.cssRules[2].cssText).toMatchSnapshot();
   });
+  it('errors with invalid value type', () => {
+    const client = new GlitzClient<TestStyle>();
+    const logger = (console.error = jest.fn());
+    const value = Symbol();
+
+    try {
+      client.injectStyle({ ['color' as any]: value });
+    } catch {
+      /* noop */
+    }
+
+    expect(logger).toHaveBeenCalledWith(
+      `Value from property \`color\` has to be a string, number, plain object or array in:
+
+{
+  %c"color"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      value,
+    );
+  });
+  it('errors with empty value', () => {
+    const client = new GlitzClient<TestStyle>();
+    const error = (console.error = jest.fn());
+    const warn = (console.warn = jest.fn());
+
+    try {
+      client.injectStyle({ ['color' as any]: '' });
+    } catch {
+      /* noop */
+    }
+
+    expect(error).toHaveBeenCalledWith(
+      `Value from property \`color\` is an empty string and may cause some unexpected behavior in:
+
+{
+  %c"color"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      '',
+    );
+
+    expect(warn).toHaveBeenCalledWith(
+      `Failed to insert this CSS rule possibly because the selector isn't supported by the browser:
+
+`,
+      `.a {
+  color: ;
+}`,
+    );
+  });
+  it('errors with NaN value', () => {
+    const client = new GlitzClient<TestStyle>();
+    const logger = (console.error = jest.fn());
+
+    try {
+      client.injectStyle({ ['color' as any]: NaN });
+    } catch {
+      /* noop */
+    }
+
+    expect(logger).toHaveBeenCalledWith(
+      `Value from property \`color\` is a NaN and may cause some unexpected behavior in:
+
+{
+  %c"color"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      NaN,
+    );
+  });
+  it('errors with Infinity value', () => {
+    const client = new GlitzClient<TestStyle>();
+    const logger = (console.error = jest.fn());
+
+    try {
+      client.injectStyle({ ['color' as any]: Infinity });
+    } catch {
+      /* noop */
+    }
+
+    expect(logger).toHaveBeenCalledWith(
+      `Value from property \`color\` is an infinite number and may cause some unexpected behavior in:
+
+{
+  %c"color"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      Infinity,
+    );
+  });
+  it('warns with empty object value', () => {
+    const client = new GlitzClient<TestStyle>();
+    const logger = (console.warn = jest.fn());
+    const value = {};
+
+    client.injectStyle({ ['color' as any]: value });
+
+    expect(logger).toHaveBeenCalledWith(
+      `Value from property \`color\` is an empty object and can be removed in:
+
+{
+  %c"color"%c: %o
+}`,
+      expect.any(String),
+      expect.any(String),
+      value,
+    );
+  });
   it('warns with mixed longhand and shorthand', () => {
     const client = new GlitzClient<TestStyle>();
     const logger = (console.warn = jest.fn());

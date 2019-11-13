@@ -39,6 +39,37 @@ if (process.env.NODE_ENV !== 'production') {
       return isValid;
     }
 
+    type AnyObject = { [property: string]: any };
+
+    // Copied from core/utils/debugging.ts
+    const issueValue = '%o';
+    function issueFormatter(message: string, object: AnyObject, highlight: AnyObject = {}) {
+      const issueArgs = [];
+      const issueObject: any = {};
+
+      for (const key in object) {
+        const isIssue = key in highlight;
+
+        issueObject[isIssue ? `%c${key}%c` : key] = isIssue ? issueValue : object[key];
+
+        if (isIssue) {
+          issueArgs.push(
+            'font-weight: bold; text-decoration: underline',
+            'font-weight: normal; text-decoration: none',
+            object[key],
+          );
+        }
+      }
+
+      let block = JSON.stringify(issueObject, null, 2);
+
+      for (const key in highlight) {
+        block = block.replace(`  "%c${key}%c": "${issueValue}"`, `  %c"${key}"%c: ${issueValue}`);
+      }
+
+      return [`${message}\n\n${block}`, ...issueArgs];
+    }
+
     createDevToolTransformer = (options = {}) => {
       const ignores = defaultIgnores.concat(options.ignoreProperties || []);
 
@@ -62,37 +93,20 @@ if (process.env.NODE_ENV !== 'production') {
           if (Array.isArray(value)) {
             for (const entry of value) {
               if (!validateDeclaration(hyphenatedProperty, entry as string | number)) {
-                const declaration = { [property]: entry };
-
-                if (properties.length > 1) {
-                  console.warn(
-                    'An invalid CSS fallback declaration %o with values %O in %O was ignored by the browser',
-                    declaration,
-                    value,
-                    declarations,
-                  );
-                } else {
-                  console.warn(
-                    'An invalid CSS fallback declaration %o in %O was ignored by the browser',
-                    declaration,
-                    declarations,
-                  );
-                }
+                console.warn(
+                  ...issueFormatter(`The browser ignored the CSS fallback value \`${entry}\` in:`, declarations, {
+                    [property]: value,
+                  }),
+                );
               }
             }
           } else if (value) {
             if (!validateDeclaration(hyphenatedProperty, value)) {
-              const declaration = { [property]: value };
-
-              if (properties.length > 1) {
-                console.warn(
-                  'An invalid CSS declaration %o in %O was ignored by the browser',
-                  declaration,
-                  declarations,
-                );
-              } else {
-                console.warn('An invalid CSS declaration %o was ignored by the browser', declaration);
-              }
+              console.warn(
+                ...issueFormatter(`The browser ignored the CSS in:`, declarations, {
+                  [property]: value,
+                }),
+              );
             }
           }
         }

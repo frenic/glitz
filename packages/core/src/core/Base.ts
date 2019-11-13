@@ -2,7 +2,9 @@ import { FontFace, PropertiesList, Style, StyleOrStyleArray, Theme } from '@glit
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
+import { issueFormatter } from '../utils/debugging';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
+import { reverse } from '../utils/reverse';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
 type Declarations<TValue = string | number | Array<string | number>> = { [property: string]: TValue };
@@ -37,18 +39,71 @@ export default class Base<TStyle extends Style> {
         }
 
         if (process.env.NODE_ENV !== 'production') {
+          const issueTransformer = (object: any) => {
+            if (pseudo) {
+              object = { [pseudo]: object };
+            }
+
+            if (media) {
+              object = { [media]: object };
+            }
+
+            return object;
+          };
+
           if (['undefined', 'string', 'number', 'object'].indexOf(typeof value) === -1) {
             console.error(
-              'The style value %O of property `%s` has to be a string, number, plain object or array',
-              value,
-              property,
+              ...issueFormatter(
+                `Value from property \`${property}\` has to be a string, number, plain object or array in:`,
+                style,
+                { [property]: value },
+                null,
+                issueTransformer,
+              ),
             );
-          } else if ((typeof value === 'object' && Object.keys(value).length === 0) || String(value).trim() === '') {
+          }
+          if (value === '') {
+            console.error(
+              ...issueFormatter(
+                `Value from property \`${property}\` is an empty string and may cause some unexpected behavior in:`,
+                style,
+                { [property]: value },
+                null,
+                issueTransformer,
+              ),
+            );
+          }
+          if (typeof value === 'number' && Number.isNaN(value)) {
+            console.error(
+              ...issueFormatter(
+                `Value from property \`${property}\` is a NaN and may cause some unexpected behavior in:`,
+                style,
+                { [property]: value },
+                null,
+                issueTransformer,
+              ),
+            );
+          }
+          if (typeof value === 'number' && !Number.isFinite(value)) {
+            console.error(
+              ...issueFormatter(
+                `Value from property \`${property}\` is an infinite number and may cause some unexpected behavior in:`,
+                style,
+                { [property]: value },
+                null,
+                issueTransformer,
+              ),
+            );
+          }
+          if (typeof value === 'object' && Object.keys(value).length === 0) {
             console.warn(
-              'The style property `%s` in %O was an empty %s and should be removed because it can cause unexpected behavior',
-              property,
-              style,
-              Array.isArray(value) ? 'array' : typeof value,
+              ...issueFormatter(
+                `Value from property \`${property}\` is an empty object and can be removed in:`,
+                style,
+                { [property]: value },
+                null,
+                issueTransformer,
+              ),
             );
           }
         }
@@ -286,7 +341,7 @@ export default class Base<TStyle extends Style> {
       const classNames = inject(result);
 
       if (process.env.NODE_ENV !== 'production') {
-        validateMixingShorthandLonghand(result, classNames);
+        validateMixingShorthandLonghand(result);
       }
 
       return classNames.slice(1);
@@ -310,13 +365,4 @@ function getIndex<TValue>(
   } else {
     return index as Declarations<TValue>;
   }
-}
-
-function reverse(object: any) {
-  const reversed: any = {};
-  const properties = Object.keys(object);
-  for (let i = properties.length; i > 0; i--) {
-    reversed[properties[i - 1]] = object[properties[i - 1]];
-  }
-  return reversed;
 }

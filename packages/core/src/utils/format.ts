@@ -13,3 +13,11 @@ export function formatKeyframesRule(name: string, blockList: string) {
 export function formatFontFaceRule(name: string, block: string) {
   return `@font-face {${block};font-family:${name}}`;
 }
+
+const PRETTY_REGEX = /[{:;}]|(?:(["']).*?\1)/g;
+
+export function prettifyRule(rule: string) {
+  return rule.replace(PRETTY_REGEX, match =>
+    match === '{' ? ' {\n  ' : match === ':' ? ': ' : match === ';' ? ';\n  ' : match === '}' ? ';\n}' : match,
+  );
+}
