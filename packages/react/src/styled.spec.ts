@@ -157,15 +157,17 @@ describe('react styled', () => {
   it('decorates style', () => {
     const styleDecoratorA = styled({ color: 'red' });
     const styleDecoratorB = styleDecoratorA({ backgroundColor: 'green' });
-    expect(styleDecoratorB()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+    const styleDecoratorC = styleDecoratorB(styled({ borderLeftColor: 'blue' }));
+    expect(styleDecoratorC()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }, { borderLeftColor: 'blue' }]);
     const StyledComponentA = styled(props => {
       return React.createElement(styled.Div, {
-        css: props.compose(styleDecoratorB),
+        css: props.compose(styleDecoratorC),
         ref: (el: HTMLDivElement) => {
-          expect(el.className).toBe('a b');
+          expect(el.className).toBe('a b c');
           const declaration = getComputedStyle(el);
           expect(declaration.getPropertyValue('color')).toBe('red');
           expect(declaration.getPropertyValue('background-color')).toBe('green');
+          expect(declaration.getPropertyValue('border-left-color')).toBe('blue');
         },
       });
     });
