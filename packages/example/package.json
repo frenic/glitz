@@ -1,24 +1,24 @@
 {
   "private": true,
   "name": "glitz-example",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "license": "MIT",
   "dependencies": {
-    "@glitz/core": "^2.1.2",
-    "@glitz/react": "^3.0.0",
-    "@glitz/transformers": "^2.0.9",
+    "@glitz/core": "^2.1.3",
+    "@glitz/react": "^3.1.0",
+    "@glitz/transformers": "^2.0.10",
     "@types/react": "*",
     "@types/react-dom": "*",
     "react": "^16.11.0",
     "react-dom": "^16.11.0"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.4",
-    "@flaviut/parcel-plugin-typescript": "^1.0.1"
+    "@flaviut/parcel-plugin-typescript": "^1.0.1",
+    "parcel-bundler": "^1.12.4"
   },
   "scripts": {
     "start": "parcel index.html --open"

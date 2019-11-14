@@ -1,6 +1,6 @@
 {
   "name": "@glitz/devtool-transformer",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
