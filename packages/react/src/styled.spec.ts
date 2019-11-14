@@ -65,7 +65,7 @@ describe('react styled', () => {
       ),
     );
   });
-  it('renders memo styled component', () => {
+  it('renders styled component with memo', () => {
     const StyledComponent = styled(
       React.memo((props: StyledProps) => {
         expect(props.compose()).toEqual([{ color: 'red' }]);
@@ -83,6 +83,27 @@ describe('react styled', () => {
           glitz: new GlitzClient(),
         },
         React.createElement(StyledComponent),
+      ),
+    );
+  });
+  it('renders styled component with forwardRef', () => {
+    const StyledComponent = styled(
+      React.forwardRef((props: StyledProps, ref: React.Ref<HTMLDivElement>) => {
+        expect(props.compose()).toEqual([{ color: 'red' }]);
+        return React.createElement(styled.Div, {
+          css: props.compose(),
+          ref,
+        });
+      }),
+      { color: 'red' },
+    );
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponent, { ref: (el: HTMLDivElement) => expect(el.className).toBe('a') }),
       ),
     );
   });

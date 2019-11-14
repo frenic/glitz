@@ -1,6 +1,6 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
-import { isForwardRef, isMemo } from 'react-is';
+import { isValidElementType } from 'react-is';
 import { StyledElementLike } from './apply-class-name';
 import create, { isStyledComponent } from './create';
 import decorator, { StyledDecorator } from './decorator';
@@ -27,6 +27,11 @@ export function customStyled<
   style?: Style,
 ): StyledComponentWithRef<TProps, TInstance>;
 
+export function customStyled<TProps extends StyledProps, TInstance>(
+  component: React.ForwardRefExoticComponent<TProps & React.RefAttributes<TInstance>>,
+  style?: Style,
+): StyledComponentWithRef<TProps, TInstance>;
+
 export function customStyled<TProps extends StyledProps>(
   component: React.FunctionComponent<TProps>,
   style?: Style,
@@ -48,6 +53,7 @@ export function customStyled(
   // tslint:disable-next-line unified-signatures
   component:
     | StyledElementLike<React.ComponentType<StyledElementProps>>
+    | React.ForwardRefExoticComponent<StyledProps>
     | StyledComponentWithRef<any, any>
     | StyledComponent<any>
     | React.ComponentType<StyledProps>,
@@ -62,5 +68,5 @@ export function customStyled<TProps>(
 }
 
 export function isStyle(arg: any): arg is Style {
-  return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg) && !isMemo(arg) && !isForwardRef(arg);
+  return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg) && !isValidElementType(arg);
 }

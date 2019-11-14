@@ -11,9 +11,9 @@ const server: GlitzServer = new GlitzServer();
 <GlitzProvider glitz={server} />;
 
 const A = styled.button({});
-<A type="submit" onClick={e => e.currentTarget.type} css={{}} ref={el => el} />;
+<A type="submit" onClick={e => e.currentTarget.type} css={{}} ref={React.createRef<HTMLButtonElement>()} />;
 
-<styled.Button type="submit" onClick={e => e.currentTarget.type} css={{}} ref={el => el} />;
+<styled.Button type="submit" onClick={e => e.currentTarget.type} css={{}} ref={React.createRef<HTMLButtonElement>()} />;
 
 const B = styled(props => <styled.Div css={props.compose({})} />);
 <B css={{}} />;
@@ -30,45 +30,40 @@ const E = styled((props: { x: string } & StyledProps) => <styled.Div css={props.
 const F = styled(E);
 <F x="" css={{}} />;
 
-const G = styled(
-  class extends React.Component<StyledProps> {
-    render() {
-      return <styled.Div css={this.props.compose({})} />;
-    }
-  },
-);
-<G css={{}} ref={c => c} />;
+class G0 extends React.Component<StyledProps> {
+  render() {
+    return <styled.Div css={this.props.compose({})} />;
+  }
+}
+const G1 = styled(G0);
+<G1 css={{}} ref={React.createRef<G0>()} />;
 
-const H = styled(
-  class extends React.Component<StyledProps> {
-    render() {
-      return <G css={this.props.compose({})} />;
-    }
-  },
-);
-<H css={{}} ref={c => c} />;
+class H0 extends React.Component<StyledProps> {
+  render() {
+    return <G1 css={this.props.compose({})} />;
+  }
+}
+const H1 = styled(H0);
+<H1 css={{}} ref={React.createRef<H0>()} />;
 
-const I = styled(
-  class extends React.Component<StyledProps> {
-    render() {
-      return <styled.Div css={this.props.compose({})} />;
-    }
-  },
-  {},
-);
-<I css={{}} ref={c => c} />;
+class I0 extends React.Component<StyledProps> {
+  render() {
+    return <styled.Div css={this.props.compose({})} />;
+  }
+}
+const I1 = styled(I0, {});
+<I1 css={{}} ref={React.createRef<I0>()} />;
 
-const J = styled(
-  class extends React.Component<{ x: string } & StyledProps> {
-    render() {
-      return <styled.Div css={this.props.compose({})} />;
-    }
-  },
-);
-<J x="" css={{}} ref={c => c} />;
+class J0 extends React.Component<{ x: string } & StyledProps> {
+  render() {
+    return <styled.Div css={this.props.compose({})} />;
+  }
+}
+const J1 = styled(J0);
+<J1 x="" css={{}} ref={React.createRef<J0>()} />;
 
-const K = styled(J);
-<K x="" css={{}} ref={c => c} />;
+const K = styled(J1);
+<K x="" css={{}} ref={React.createRef<J0>()} />;
 
 const l0 = styled({});
 const l1 = styled({});
@@ -79,14 +74,13 @@ const L = l2(props => <styled.Div css={props.compose({})} />);
 const m0 = styled({});
 const m1 = styled({});
 const m2 = m0(m1({}));
-const M = m2(
-  class extends React.Component<StyledProps> {
-    render() {
-      return <styled.Div css={this.props.compose({})} />;
-    }
-  },
-);
-<M css={{}} ref={c => c} />;
+class M0 extends React.Component<StyledProps> {
+  render() {
+    return <styled.Div css={this.props.compose({})} />;
+  }
+}
+const M1 = m2(M0);
+<M1 css={{}} ref={React.createRef<M0>()} />;
 
 function factory() {
   return styled(
@@ -101,27 +95,21 @@ const N = styled(applyClassName(props => <div className={props.className} />));
 const O = styled(applyClassName((props: { x: string } & StyledElementProps) => <div className={props.className} />));
 <O x="" className="" css={{}} />;
 
-const P = styled(
-  applyClassName(
-    class extends React.Component<StyledElementProps> {
-      render() {
-        return <div className={this.props.className} />;
-      }
-    },
-  ),
-);
-<P className="" css={{}} ref={c => c} />;
+class P0 extends React.Component<StyledElementProps> {
+  render() {
+    return <div className={this.props.className} />;
+  }
+}
+const P1 = styled(applyClassName(P0));
+<P1 className="" css={{}} ref={React.createRef<P0>()} />;
 
-const Q = styled(
-  applyClassName(
-    class extends React.Component<{ x: string } & StyledElementProps> {
-      render() {
-        return <div className={this.props.className} />;
-      }
-    },
-  ),
-);
-<Q x="" className="" css={{}} ref={c => c} />;
+class Q0 extends React.Component<{ x: string } & StyledElementProps> {
+  render() {
+    return <div className={this.props.className} />;
+  }
+}
+const Q1 = styled(applyClassName(Q0));
+<Q1 x="" className="" css={{}} ref={React.createRef<Q0>()} />;
 
 function connect<TProps>(Component: React.ComponentType<TProps>): React.FunctionComponent<TProps> {
   return props => <Component {...props} />;
@@ -144,6 +132,13 @@ const T = styled(
   },
 );
 <T css={{}}>Text</T>;
+
+const U = styled(
+  React.forwardRef((props: StyledProps, ref: React.Ref<HTMLButtonElement>) => (
+    <styled.Button css={props.compose()} ref={ref} />
+  )),
+);
+<U css={{}} ref={React.createRef<HTMLButtonElement>()} />;
 
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881
