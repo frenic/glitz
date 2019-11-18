@@ -4,7 +4,7 @@ import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_COMPOSE } from './constants';
 import { StyledDecorator } from './decorator';
 import { isElementType, StyledElement } from './predefined';
-import { StyledComponent, StyledComponentWithRef, StyledProps } from './types';
+import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
 import useGlitz, { styleToArray } from './use-glitz';
 
 export type WithRefProp<TProps, TInstance> = React.PropsWithoutRef<TProps> & React.RefAttributes<TInstance>;
@@ -18,9 +18,10 @@ export type ExternalProps<TProps> = React.PropsWithChildren<
 export default function create<TProps>(
   type:
     | StyledElement
-    | StyledElementLike<React.ComponentType<TProps>>
+    | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>
     | StyledComponent<TProps>
-    | React.ComponentType<TProps>,
+    | StyledComponentWithRef<TProps, any>
+    | React.ComponentType<TProps & StyledProps>,
   statics: StyleArray,
 ): StyledComponent<TProps>;
 
