@@ -1,6 +1,6 @@
 {
   "name": "@glitz/transformers",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -15,7 +15,7 @@
     "@glitz/core": "^2.1.3",
     "@glitz/devtool-transformer": "^2.0.4",
     "@glitz/length-transformer": "^2.0.5",
-    "@glitz/prefixer-transformer": "^2.0.4",
+    "@glitz/prefixer-transformer": "^2.0.5",
     "@glitz/type": "^2.0.3"
   },
   "scripts": {
