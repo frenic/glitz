@@ -13,8 +13,8 @@
     "@glitz/transformers": "^2.0.10",
     "@types/react": "*",
     "@types/react-dom": "*",
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0"
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
   },
   "devDependencies": {
     "@flaviut/parcel-plugin-typescript": "^1.0.1",
