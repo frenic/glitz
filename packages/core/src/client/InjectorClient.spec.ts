@@ -49,11 +49,12 @@ describe('client', () => {
 
     expect(
       injector.injectFontFace({
+        fontFamily: 'x',
         fontStyle: 'normal',
         fontWeight: 400,
         src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
       }),
-    ).toBe('a');
+    ).toBe('x');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -125,19 +126,20 @@ describe('client', () => {
   });
   it('hydrates font face rule', () => {
     const style = createStyle(
-      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}" +
-        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:b}",
+      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}" +
+        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}",
     );
     const injector = createInjector(style);
 
     // Skipping .a
     expect(
       injector.injectFontFace({
+        fontFamily: 'y',
         fontStyle: 'normal',
         fontWeight: 400,
         src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
       }),
-    ).toBe('b');
+    ).toBe('y');
   });
   it('hydrates fallback rule', () => {
     const style = createStyle('.a{color:red;color:green}.b{color:black;color:white}');
@@ -186,5 +188,5 @@ function createStyle(css?: string) {
 }
 
 function createInjector(style: HTMLStyleElement) {
-  return new InjectorClient(style, createHashCounter(), createHashCounter(), createHashCounter());
+  return new InjectorClient(style, createHashCounter(), createHashCounter());
 }

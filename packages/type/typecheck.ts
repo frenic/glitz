@@ -39,16 +39,12 @@ const css: Style = {
     },
   },
   '@font-face': {
+    fontFamily: '',
     fontVariant: [''],
-    font: {
-      variant: '',
-    },
   },
   fontFamily: {
+    fontFamily: '',
     fontVariant: [''],
-    font: {
-      variant: '',
-    },
   },
   border: {
     y: { x: { radius: 10 }, left: { radius: 10 }, right: { radius: 10 } },

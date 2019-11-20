@@ -148,22 +148,24 @@ export default class Base<TStyle extends Style> {
 
               if (property === FONT_FAMILY) {
                 // Resolve `fontFace` object
-                const families = ([] as any[]).concat(value);
+                const fonts = ([] as any[]).concat(value);
+                const names = [];
 
-                let names = '';
-                for (const family of families) {
-                  if (names) {
-                    names += ',';
-                  }
-                  if (typeof family === 'object') {
-                    const fontFace = reverse(resolve(family, theme));
-                    names += injector().injectFontFace((transformer ? transformer(fontFace) : fontFace) as FontFace);
+                for (const font of fonts) {
+                  if (typeof font === 'object') {
+                    const fontFace = reverse(resolve(font, theme));
+                    const name = injector().injectFontFace(
+                      (transformer ? transformer(fontFace) : fontFace) as FontFace,
+                    );
+                    if (names.indexOf(name) === -1) {
+                      names.push(name);
+                    }
                   } else {
-                    names += family;
+                    names.push(font);
                   }
                 }
 
-                value = names;
+                value = names.join(',');
               }
             }
 

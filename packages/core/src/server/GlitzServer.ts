@@ -10,7 +10,6 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
     const prefix = options.prefix;
     const classHasher = createHashCounter(prefix);
     const keyframesHasher = createHashCounter(prefix);
-    const fontFaceHasher = createHashCounter(prefix);
 
     let plain: InjectorServer;
     const mediaIndex: {
@@ -19,8 +18,8 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
 
     const injector = (media?: string) =>
       media
-        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classHasher, keyframesHasher, fontFaceHasher))
-        : (plain = plain || new InjectorServer(classHasher, keyframesHasher, fontFaceHasher));
+        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classHasher, keyframesHasher))
+        : (plain = plain || new InjectorServer(classHasher, keyframesHasher));
 
     super(injector, options.transformer, options.atomic);
 

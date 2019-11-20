@@ -10,7 +10,6 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
     const prefix = options.prefix;
     const classHasher = createHashCounter(prefix);
     const keyframesHasher = createHashCounter(prefix);
-    const fontFaceHasher = createHashCounter(prefix);
 
     const mediaOrderOption = options.mediaOrder;
     const mediaSheets: { [media: string]: HTMLStyleElement } = {};
@@ -40,7 +39,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
         insertStyleElement(element, insertBefore);
 
-        return (mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher));
+        return (mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher));
       } else {
         if (plain) {
           return plain;
@@ -48,7 +47,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
         const element = insertStyleElement(createStyleElement(media, identifier), initialMediaSheet);
 
-        return (plain = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher));
+        return (plain = new InjectorClient(element, classHasher, keyframesHasher));
       }
     };
 
@@ -67,9 +66,9 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
             initialMediaSheet = element;
           }
           mediaSheets[media] = element;
-          mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher);
+          mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher);
         } else {
-          plain = new InjectorClient(element, classHasher, keyframesHasher, fontFaceHasher);
+          plain = new InjectorClient(element, classHasher, keyframesHasher);
         }
       }
 

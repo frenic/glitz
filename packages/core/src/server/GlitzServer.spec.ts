@@ -64,7 +64,7 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
-        fontFamily: { font: { weight: 'bold' } },
+        fontFamily: { fontFamily: 'x' },
       }),
     ).toBe('p');
 
@@ -175,6 +175,7 @@ describe('server', () => {
     expect(
       server.injectStyle({
         '@font-face': {
+          fontFamily: 'x',
           fontStyle: 'normal',
           fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
@@ -185,6 +186,7 @@ describe('server', () => {
     expect(
       server.injectStyle({
         fontFamily: {
+          fontFamily: 'y',
           fontStyle: 'normal',
           fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -196,6 +198,7 @@ describe('server', () => {
       server.injectStyle({
         font: {
           family: {
+            fontFamily: 'y',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -208,6 +211,7 @@ describe('server', () => {
       server.injectStyle({
         fontFamily: [
           {
+            fontFamily: 'x',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -222,6 +226,7 @@ describe('server', () => {
         font: {
           family: [
             {
+              fontFamily: 'x',
               fontStyle: 'normal',
               fontWeight: 400,
               src:
@@ -294,11 +299,13 @@ describe('server', () => {
       server.injectStyle([
         {
           '@font-face': {
+            fontFamily: 'x',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
           },
         },
         {
           '@font-face': {
+            fontFamily: 'y',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
           },
         },
@@ -308,11 +315,13 @@ describe('server', () => {
       server.injectStyle([
         {
           '@font-face': {
+            fontFamily: 'y',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
           },
         },
         {
           '@font-face': {
+            fontFamily: 'z',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
           },
         },

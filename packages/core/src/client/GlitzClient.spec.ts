@@ -105,7 +105,7 @@ describe('client', () => {
 
     expect(
       client.injectStyle({
-        fontFamily: { font: { weight: 'bold' } },
+        fontFamily: { fontFamily: 'x' },
       }),
     ).toBe('p');
 
@@ -346,6 +346,7 @@ describe('client', () => {
     expect(
       client.injectStyle({
         '@font-face': {
+          fontFamily: 'x',
           fontStyle: 'normal',
           fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
@@ -362,6 +363,7 @@ describe('client', () => {
     expect(
       client.injectStyle({
         fontFamily: {
+          fontFamily: 'y',
           fontStyle: 'normal',
           fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -373,6 +375,7 @@ describe('client', () => {
       client.injectStyle({
         font: {
           family: {
+            fontFamily: 'y',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -389,6 +392,7 @@ describe('client', () => {
       client.injectStyle({
         fontFamily: [
           {
+            fontFamily: 'z',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -403,6 +407,7 @@ describe('client', () => {
         font: {
           family: [
             {
+              fontFamily: 'z',
               fontStyle: 'normal',
               fontWeight: 400,
               src:
@@ -414,8 +419,8 @@ describe('client', () => {
       }),
     ).toBe('c');
 
-    expect(sheet.cssRules).toHaveLength(5);
-    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(6);
+    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
 
     expect(
       client.injectStyle({
@@ -423,8 +428,8 @@ describe('client', () => {
       }),
     ).toBe('d');
 
-    expect(sheet.cssRules).toHaveLength(6);
-    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+    expect(sheet.cssRules).toHaveLength(7);
+    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
   });
   it('injects different combinations', () => {
     const style1 = createStyle();
@@ -515,11 +520,13 @@ describe('client', () => {
       client.injectStyle([
         {
           '@font-face': {
+            fontFamily: 'x',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
           },
         },
         {
           '@font-face': {
+            fontFamily: 'x',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
           },
         },
@@ -529,11 +536,13 @@ describe('client', () => {
       client.injectStyle([
         {
           '@font-face': {
+            fontFamily: 'z',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
           },
         },
         {
           '@font-face': {
+            fontFamily: 'z',
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
           },
         },
@@ -673,15 +682,16 @@ describe('client', () => {
   it('hydrates font face rule', () => {
     createStyle(
       null,
-      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:a}" +
-        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:b}" +
-        '.a{font-family:a}.b{font-family:b}.c{font-family:b,sans-serif}',
+      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}" +
+        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}" +
+        '.a{font-family:x}.b{font-family:y}.c{font-family:z,sans-serif}',
     );
     const client = new GlitzClient<TestStyle>();
 
     expect(
       client.injectStyle({
         '@font-face': {
+          fontFamily: 'x',
           fontStyle: 'normal',
           fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
@@ -690,26 +700,45 @@ describe('client', () => {
     ).toBe('a');
     expect(
       client.injectStyle({
-        '@font-face': {
-          fontStyle: 'normal',
-          fontWeight: 400,
-          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-        },
-      }),
-    ).toBe('b');
-    expect(
-      client.injectStyle({
-        fontFamily: {
-          fontStyle: 'normal',
-          fontWeight: 400,
-          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-        },
+        '@font-face': [
+          {
+            fontFamily: 'y',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+          {
+            fontFamily: 'y',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        ],
       }),
     ).toBe('b');
     expect(
       client.injectStyle({
         fontFamily: [
           {
+            fontFamily: 'y',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+          {
+            fontFamily: 'y',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        ],
+      }),
+    ).toBe('b');
+    expect(
+      client.injectStyle({
+        fontFamily: [
+          {
+            fontFamily: 'z',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",

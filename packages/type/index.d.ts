@@ -30,8 +30,8 @@ export interface FeaturedProperties
       Exclude<keyof UntransformedProperties, keyof ExtendedProperties | ExcludedShorthands>
     >,
     ExtendedProperties {
-  '@keyframes'?: FeaturedPropertiesList;
-  '@font-face'?: FeaturedFontFace;
+  '@keyframes'?: AnimationNameProperty;
+  '@font-face'?: FontFamilyProperty;
 }
 
 export interface ExtendedProperties {
@@ -281,24 +281,12 @@ export type AnimationNameProperty = WithThemeFunction<
   FeaturedPropertiesList | UntransformedProperties['animationName']
 >;
 
-export interface FontFace extends Pick<CSS.FontFaceFallback, Exclude<keyof CSS.FontFaceFallback, 'fontFamily'>> {}
-
-export interface FeaturedFontFace extends FontFace {
-  font?: {
-    display?: WithThemeFunction<FontFace['fontDisplay']>;
-    featureSettings?: WithThemeFunction<FontFace['fontFeatureSettings']>;
-    stretch?: WithThemeFunction<FontFace['fontStretch']>;
-    style?: WithThemeFunction<FontFace['fontStyle']>;
-    variant?: WithThemeFunction<FontFace['fontVariant']>;
-    variationSettings?: WithThemeFunction<FontFace['fontVariationSettings']>;
-    weight?: WithThemeFunction<FontFace['fontWeight']>;
-  };
-}
+export type FontFace = Omit<CSS.FontFaceFallback, 'fontFamily'> & { fontFamily: CSS.FontFace['fontFamily'] };
 
 export type FontFamilyProperty = WithThemeFunction<
-  | FeaturedFontFace
+  | FontFace
   | CSS.StandardLonghandProperties['fontFamily']
-  | Array<FeaturedFontFace | CSS.StandardLonghandProperties['fontFamily']>
+  | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>
 >;
 
-export type Declarations = { [index: string]: string | number | Array<string | number> };
+export type Declarations = { [index: string]: string | number | Array<string | number> | undefined };

@@ -42,15 +42,15 @@ exports[`client injects different combinations 2`] = `".b {color: green;}"`;
 
 exports[`client injects different combinations 3`] = `".c {color: blue;}"`;
 
-exports[`client injects font face rule 1`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: a;}"`;
+exports[`client injects font face rule 1`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: x;}"`;
 
-exports[`client injects font face rule 2`] = `".a {font-family: a;}"`;
+exports[`client injects font face rule 2`] = `".a {font-family: x;}"`;
 
-exports[`client injects font face rule 3`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: b;}"`;
+exports[`client injects font face rule 3`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: y;}"`;
 
-exports[`client injects font face rule 4`] = `".b {font-family: b;}"`;
+exports[`client injects font face rule 4`] = `".b {font-family: y;}"`;
 
-exports[`client injects font face rule 5`] = `".c {font-family: b,sans-serif;}"`;
+exports[`client injects font face rule 5`] = `".c {font-family: z,sans-serif;}"`;
 
 exports[`client injects font face rule 6`] = `".d {font-family: sans-serif;}"`;
 
@@ -116,13 +116,13 @@ exports[`client injects rule deeply 7`] = `
 
 exports[`client injects rule deeply 8`] = `".f {animation-name: b;}"`;
 
-exports[`client injects rule deeply 9`] = `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: a;}"`;
+exports[`client injects rule deeply 9`] = `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: x;}"`;
 
-exports[`client injects rule deeply 10`] = `".g {font-family: a;}"`;
+exports[`client injects rule deeply 10`] = `".g {font-family: x;}"`;
 
-exports[`client injects rule deeply 11`] = `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: b;}"`;
+exports[`client injects rule deeply 11`] = `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: z;}"`;
 
-exports[`client injects rule deeply 12`] = `".h {font-family: b;}"`;
+exports[`client injects rule deeply 12`] = `".h {font-family: z;}"`;
 
 exports[`client injects rule deeply 13`] = `".i {color: red;}"`;
 
@@ -164,9 +164,9 @@ exports[`client injects shorthand rule 15`] = `
 
 exports[`client injects shorthand rule 16`] = `".o {animation-name: a;}"`;
 
-exports[`client injects shorthand rule 17`] = `"@font-face {font-weight: bold; font-family: a;}"`;
+exports[`client injects shorthand rule 17`] = `"@font-face {font-family: x;}"`;
 
-exports[`client injects shorthand rule 18`] = `".p {font-family: a;}"`;
+exports[`client injects shorthand rule 18`] = `".p {font-family: x;}"`;
 
 exports[`client injects shorthand rule 19`] = `".q {border-left-width: 0;}"`;
 

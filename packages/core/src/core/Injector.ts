@@ -16,10 +16,9 @@ export default class Injector {
     fontFaceIndex: { [block: string]: string },
     incrementClassHash: () => string,
     incrementKeyframesHash: () => string,
-    incrementFontFaceHash: () => string,
     injectNewClassRule?: (className: string, block: string, pseudo?: string) => void,
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
-    injectNewFontFaceRule?: (name: string, block: string) => void,
+    injectNewFontFaceRule?: (block: string) => void,
   ) {
     this.injectClassName = (declarations, pseudo) => {
       const block = parseDeclarationBlock(declarations as Declarations);
@@ -62,36 +61,38 @@ export default class Injector {
 
     this.injectFontFace = original => {
       if (process.env.NODE_ENV !== 'production') {
-        if (FONT_FAMILY in original) {
-          console.warn(
-            `The CSS property \`${FONT_FAMILY}\` in font face will be ignored in:\n\n`,
+        if (!(FONT_FAMILY in original)) {
+          console.error(
+            `The CSS property \`${FONT_FAMILY}\` in font face must be defined:\n\n`,
             prettifyRule(parseDeclarationBlock(original as Declarations)),
           );
         }
       }
 
-      const declarations: FontFace = {};
+      const declarations: Declarations = {};
       let property: keyof FontFace | typeof FONT_FAMILY;
       for (property in original) {
         if (property !== FONT_FAMILY) {
-          (declarations as any)[property] = original[property];
+          declarations[property] = original[property];
         }
       }
 
-      const block = parseDeclarationBlock(declarations as Declarations);
+      const family = original[FONT_FAMILY]!;
+      declarations[FONT_FAMILY] = family;
+
+      const block = parseDeclarationBlock(declarations);
 
       if (fontFaceIndex[block]) {
         return fontFaceIndex[block];
       }
 
-      const name = incrementFontFaceHash();
-      fontFaceIndex[block] = name;
+      fontFaceIndex[block] = family;
 
       if (injectNewFontFaceRule) {
-        injectNewFontFaceRule(name, block);
+        injectNewFontFaceRule(block);
       }
 
-      return name;
+      return family;
     };
   }
 }

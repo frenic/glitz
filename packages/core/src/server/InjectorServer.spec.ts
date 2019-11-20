@@ -21,11 +21,12 @@ describe('server', () => {
 
     expect(
       injector.injectFontFace({
+        fontFamily: 'x',
         fontStyle: 'normal',
         fontWeight: 400,
         src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
       }),
-    ).toBe('a');
+    ).toBe('x');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects keyframes rule', () => {
@@ -71,5 +72,5 @@ describe('server', () => {
 });
 
 function createInjector() {
-  return new InjectorServer(createHashCounter(), createHashCounter(), createHashCounter());
+  return new InjectorServer(createHashCounter(), createHashCounter());
 }

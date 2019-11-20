@@ -6,15 +6,10 @@ import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../uti
 
 const CLASS_RULE_REGEX = /\.([a-z0-9]+)(:[^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9]+)\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
-const FONT_FACE_REGEX = /@font-face \{(.+?);font-family:([^}]+)\}/g;
+const FONT_FACE_REGEX = /@font-face \{(.+?;font-family:([^}]+))\}/g;
 
 export default class InjectorClient extends Injector {
-  constructor(
-    styleElement: HTMLStyleElement,
-    incrementClassHash: () => string,
-    incrementKeyframesHash: () => string,
-    incrementFontFaceHash: () => string,
-  ) {
+  constructor(styleElement: HTMLStyleElement, incrementClassHash: () => string, incrementKeyframesHash: () => string) {
     const plainIndex: { [block: string]: string } = {};
     const pseudoIndex: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesIndex: { [blockList: string]: string } = {};
@@ -34,7 +29,6 @@ export default class InjectorClient extends Injector {
         keyframesIndex[rule[2]] = rule[1];
       }
       while ((rule = FONT_FACE_REGEX.exec(css))) {
-        incrementFontFaceHash();
         fontFaceIndex[rule[1]] = rule[2];
       }
     }
@@ -55,8 +49,8 @@ export default class InjectorClient extends Injector {
       injectSheetRule(sheet, rule);
     };
 
-    const injectNewFontFaceRule = (name: string, block: string) => {
-      const rule = formatFontFaceRule(name, block);
+    const injectNewFontFaceRule = (block: string) => {
+      const rule = formatFontFaceRule(block);
       injectSheetRule(sheet, rule);
     };
 
@@ -67,7 +61,6 @@ export default class InjectorClient extends Injector {
       fontFaceIndex,
       incrementClassHash,
       incrementKeyframesHash,
-      incrementFontFaceHash,
       injectNewClassRule,
       injectNewKeyframesRule,
       injectNewFontFaceRule,

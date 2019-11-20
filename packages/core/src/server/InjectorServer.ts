@@ -3,30 +3,18 @@ import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../uti
 
 export default class InjectorServer extends Injector {
   public getStyle: () => void;
-  constructor(
-    incrementClassHash: () => string,
-    incrementKeyframesHash: () => string,
-    incrementFontFaceHash: () => string,
-  ) {
+  constructor(incrementClassHash: () => string, incrementKeyframesHash: () => string) {
     const plainIndex: { [block: string]: string } = {};
     const pseudoIndex: { [pseudo: string]: { [block: string]: string } } = {};
     const keyframesIndex: { [block: string]: string } = {};
     const fontFaceIndex: { [block: string]: string } = {};
 
-    super(
-      plainIndex,
-      pseudoIndex,
-      keyframesIndex,
-      fontFaceIndex,
-      incrementClassHash,
-      incrementKeyframesHash,
-      incrementFontFaceHash,
-    );
+    super(plainIndex, pseudoIndex, keyframesIndex, fontFaceIndex, incrementClassHash, incrementKeyframesHash);
 
     this.getStyle = () => {
       let css = '';
       for (const block in fontFaceIndex) {
-        css += formatFontFaceRule(fontFaceIndex[block], block);
+        css += formatFontFaceRule(block);
       }
       for (const blockList in keyframesIndex) {
         css += formatKeyframesRule(keyframesIndex[blockList], blockList);
