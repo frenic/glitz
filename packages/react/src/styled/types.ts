@@ -12,8 +12,7 @@ export type StyledElementProps = {
   className?: string;
 };
 
-export interface StyledComponent<TProps>
-  extends React.ForwardRefExoticComponent<React.PropsWithoutRef<ExternalProps<TProps>>> {
+export interface StyledComponent<TProps> extends React.ForwardRefExoticComponent<ExternalProps<TProps>> {
   [SECRET_COMPOSE](style?: StyleArray): StyledComponent<TProps>;
 }
 

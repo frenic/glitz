@@ -9,11 +9,10 @@ import useGlitz, { styleToArray } from './use-glitz';
 
 export type WithRefProp<TProps, TInstance> = React.PropsWithoutRef<TProps> & React.RefAttributes<TInstance>;
 
-export type ExternalProps<TProps> = React.PropsWithChildren<
-  Pick<TProps, Exclude<keyof TProps, keyof StyledProps>> & {
-    css?: StyleOrStyleArray | StyledDecorator;
-  }
->;
+// Conditionally omit `StyledProps` enables support for union props
+export type ExternalProps<TProps> = (TProps extends StyledProps ? Omit<TProps, keyof StyledProps> : TProps) & {
+  css?: StyleOrStyleArray | StyledDecorator;
+};
 
 export default function create<TProps>(
   type:

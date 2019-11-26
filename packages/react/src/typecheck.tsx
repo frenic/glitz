@@ -140,6 +140,20 @@ const U = styled(
 );
 <U css={{}} ref={React.createRef<HTMLButtonElement>()} />;
 
+const V = styled((props: ({ a: boolean; b?: never } | { a?: never; b: boolean }) & StyledProps) => {
+  if ('a' in props && props.a === true) {
+    return null;
+  }
+  if ('b' in props && props.b === true) {
+    return null;
+  }
+
+  return null;
+});
+
+<V a />;
+<V b />;
+
 // Using `styled` as a decorator is not possible at the moment
 // due to: https://github.com/Microsoft/TypeScript/issues/4881
 // @styled({})
