@@ -29,7 +29,7 @@ export interface StyledCustom {
   <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
     component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
     style?: Style,
-  ): StyledComponentWithRef<React.PropsWithChildren<TProps>, TInstance>;
+  ): StyledComponentWithRef<TProps, TInstance>;
   (style: Style): StyledDecorator;
 
   // This overload prevents errors on `component` when `style` is incorrect
