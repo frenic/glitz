@@ -1,6 +1,6 @@
-import { Declarations } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/type';
 
-export function parseDeclarationBlock(declarations: Declarations) {
+export function parseDeclarationBlock(declarations: ResolvedDeclarations) {
   let block = '';
   let property: string;
   for (property in declarations) {

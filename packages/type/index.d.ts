@@ -1,45 +1,65 @@
 import * as CSS from 'csstype';
+export { PropertyValue } from 'csstype';
 
-export interface Style extends FeaturedProperties, PseudoMap {}
-
-export interface Properties extends CSS.PropertiesFallback<string | 0> {}
-
-// To provide proper type errors for `Style` we create an interface of `Style[]`
-// and makes sure it's first in order
-export interface StyleArray<TStyle = Style> extends Array<TStyle> {}
-export type StyleOrStyleArray<TStyle = Style> = StyleArray<TStyle> | TStyle;
+export type Style = Pseudos &
+  Omit<Merge<FeaturedProperties, ExtendedProperties>, ExcludedShorthands> & {
+    '@keyframes'?: KeyframesProperty;
+    '@font-face'?: FontFaceProperty;
+  };
 
 export interface Theme {}
 
-export interface UntransformedProperties
-  extends Pick<Properties, Exclude<keyof Properties, keyof TransformerProperties>>,
-    TransformerProperties {}
+export interface TransformerProperties {}
 
-// Override properties using module augmentation
-interface TransformerProperties {}
+export type ResolvedProperties = Merge<CSS.PropertiesFallback, TransformerProperties>;
 
-type WithThemeFunction<TValue> = TValue | ((theme: Theme) => TValue);
+export type FeaturedProperties = {
+  [property in keyof ResolvedProperties]:
+    | ResolvedProperties[property]
+    | ((theme: Theme | undefined) => ResolvedProperties[property]);
+};
 
-type WithThemeFunctionMap<TProperties> = { [key in keyof TProperties]: WithThemeFunction<TProperties[key]> };
+export type ResolvedValue = string | number | Array<string | number>;
 
-type ExcludedShorthands = 'borderColor' | 'borderStyle' | 'borderWidth';
-
-export interface FeaturedProperties
-  extends Pick<
-      WithThemeFunctionMap<UntransformedProperties>,
-      Exclude<keyof UntransformedProperties, keyof ExtendedProperties | ExcludedShorthands>
-    >,
-    ExtendedProperties {
-  '@keyframes'?: AnimationNameProperty;
-  '@font-face'?: FontFamilyProperty;
+export interface ResolvedDeclarations {
+  [key: string]: ResolvedValue;
 }
+
+export interface ResolvedDeclarationList {
+  [identifier: string]: ResolvedDeclarations;
+}
+
+export type CommonValue = string | number | undefined | Array<string | number | undefined>;
+
+export type CommonStyle = {
+  [key: string]: CommonStyle | CommonValue | ((theme: Theme | undefined) => CommonValue);
+};
+
+export interface CommonDeclarations {
+  [key: string]: CommonValue;
+}
+
+export interface Keyframes {
+  [identifier: string]: Style;
+}
+
+export type KeyframesProperty = FeaturedProperties['animationName'] | Keyframes;
+
+export type FontFace = Omit<CSS.AtRule.FontFaceFallback, 'fontFamily'> & {
+  fontFamily: CSS.AtRule.FontFace['fontFamily'];
+};
+
+export type FontFaceProperty =
+  | FontFace
+  | FeaturedProperties['fontFamily']
+  | Array<FontFace | FeaturedProperties['fontFamily']>;
 
 export interface ExtendedProperties {
   // Keyframes
-  animationName?: AnimationNameProperty;
+  animationName?: KeyframesProperty;
 
   // Font face
-  fontFamily?: FontFamilyProperty;
+  fontFamily?: FontFaceProperty;
 
   // Shorthand objects
   animation?: AnimationProperty;
@@ -66,39 +86,41 @@ export interface ExtendedProperties {
   transition?: TransitionProperty;
 }
 
+type Merge<TSource, TTarget> = Omit<TSource, keyof TTarget> & TTarget;
+
 interface AnimationProperty {
-  delay?: WithThemeFunction<UntransformedProperties['animationDelay']>;
-  direction?: WithThemeFunction<UntransformedProperties['animationDirection']>;
-  duration?: WithThemeFunction<UntransformedProperties['animationDuration']>;
-  fillMode?: WithThemeFunction<UntransformedProperties['animationFillMode']>;
-  iterationCount?: WithThemeFunction<UntransformedProperties['animationIterationCount']>;
-  name?: AnimationNameProperty;
-  playState?: WithThemeFunction<UntransformedProperties['animationPlayState']>;
-  timingFunction?: WithThemeFunction<UntransformedProperties['animationTimingFunction']>;
+  delay?: FeaturedProperties['animationDelay'];
+  direction?: FeaturedProperties['animationDirection'];
+  duration?: FeaturedProperties['animationDuration'];
+  fillMode?: FeaturedProperties['animationFillMode'];
+  iterationCount?: FeaturedProperties['animationIterationCount'];
+  name?: KeyframesProperty;
+  playState?: FeaturedProperties['animationPlayState'];
+  timingFunction?: FeaturedProperties['animationTimingFunction'];
 }
 
 interface BackgroundProperty {
-  attachment?: WithThemeFunction<UntransformedProperties['backgroundAttachment']>;
-  blendMode?: WithThemeFunction<UntransformedProperties['backgroundBlendMode']>;
-  clip?: WithThemeFunction<UntransformedProperties['backgroundClip']>;
-  color?: WithThemeFunction<UntransformedProperties['backgroundColor']>;
-  image?: WithThemeFunction<UntransformedProperties['backgroundImage']>;
-  origin?: WithThemeFunction<UntransformedProperties['backgroundOrigin']>;
-  position?: WithThemeFunction<UntransformedProperties['backgroundPosition']>;
-  positionX?: WithThemeFunction<UntransformedProperties['backgroundPositionX']>;
-  positionY?: WithThemeFunction<UntransformedProperties['backgroundPositionY']>;
-  repeat?: WithThemeFunction<UntransformedProperties['backgroundRepeat']>;
-  size?: WithThemeFunction<UntransformedProperties['backgroundSize']>;
+  attachment?: FeaturedProperties['backgroundAttachment'];
+  blendMode?: FeaturedProperties['backgroundBlendMode'];
+  clip?: FeaturedProperties['backgroundClip'];
+  color?: FeaturedProperties['backgroundColor'];
+  image?: FeaturedProperties['backgroundImage'];
+  origin?: FeaturedProperties['backgroundOrigin'];
+  position?: FeaturedProperties['backgroundPosition'];
+  positionX?: FeaturedProperties['backgroundPositionX'];
+  positionY?: FeaturedProperties['backgroundPositionY'];
+  repeat?: FeaturedProperties['backgroundRepeat'];
+  size?: FeaturedProperties['backgroundSize'];
 }
 
 interface BorderProperty {
-  collapse?: WithThemeFunction<UntransformedProperties['borderCollapse']>;
-  blockEnd?: WithThemeFunction<UntransformedProperties['borderBlockEnd']>;
-  blockStart?: WithThemeFunction<UntransformedProperties['borderBlockStart']>;
-  inlineEnd?: WithThemeFunction<UntransformedProperties['borderInlineEnd']>;
-  inlineStart?: WithThemeFunction<UntransformedProperties['borderInlineStart']>;
-  radius?: WithThemeFunction<UntransformedProperties['borderRadius']>;
-  spacing?: WithThemeFunction<UntransformedProperties['borderSpacing']>;
+  collapse?: FeaturedProperties['borderCollapse'];
+  blockEnd?: FeaturedProperties['borderBlockEnd'];
+  blockStart?: FeaturedProperties['borderBlockStart'];
+  inlineEnd?: FeaturedProperties['borderInlineEnd'];
+  inlineStart?: FeaturedProperties['borderInlineStart'];
+  radius?: FeaturedProperties['borderRadius'];
+  spacing?: FeaturedProperties['borderSpacing'];
   top?: BorderTopProperty;
   right?: BorderRightProperty;
   bottom?: BorderBottomProperty;
@@ -109,64 +131,64 @@ interface BorderProperty {
 }
 
 interface BorderImageProperty {
-  outset?: WithThemeFunction<UntransformedProperties['borderImageOutset']>;
-  repeat?: WithThemeFunction<UntransformedProperties['borderImageRepeat']>;
-  slice?: WithThemeFunction<UntransformedProperties['borderImageSlice']>;
-  source?: WithThemeFunction<UntransformedProperties['borderImageSource']>;
-  width?: WithThemeFunction<UntransformedProperties['borderImageWidth']>;
+  outset?: FeaturedProperties['borderImageOutset'];
+  repeat?: FeaturedProperties['borderImageRepeat'];
+  slice?: FeaturedProperties['borderImageSlice'];
+  source?: FeaturedProperties['borderImageSource'];
+  width?: FeaturedProperties['borderImageWidth'];
 }
 
 interface BorderLeftProperty {
-  color?: WithThemeFunction<UntransformedProperties['borderLeftColor']>;
-  style?: WithThemeFunction<UntransformedProperties['borderLeftStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['borderLeftWidth']>;
+  color?: FeaturedProperties['borderLeftColor'];
+  style?: FeaturedProperties['borderLeftStyle'];
+  width?: FeaturedProperties['borderLeftWidth'];
 }
 
 interface BorderRightProperty {
-  color?: WithThemeFunction<UntransformedProperties['borderRightColor']>;
-  style?: WithThemeFunction<UntransformedProperties['borderRightStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['borderRightWidth']>;
+  color?: FeaturedProperties['borderRightColor'];
+  style?: FeaturedProperties['borderRightStyle'];
+  width?: FeaturedProperties['borderRightWidth'];
 }
 
 interface BorderYRadius {
-  right?: { radius?: WithThemeFunction<UntransformedProperties['borderTopRightRadius']> };
-  left?: { radius?: WithThemeFunction<UntransformedProperties['borderTopLeftRadius']> };
-  x?: { radius?: WithThemeFunction<UntransformedProperties['borderTopLeftRadius']> };
+  right?: { radius?: FeaturedProperties['borderTopRightRadius'] };
+  left?: { radius?: FeaturedProperties['borderTopLeftRadius'] };
+  x?: { radius?: FeaturedProperties['borderTopLeftRadius'] };
 }
 
 interface BorderBottomProperty extends BorderYRadius {
-  color?: WithThemeFunction<UntransformedProperties['borderBottomColor']>;
-  style?: WithThemeFunction<UntransformedProperties['borderBottomStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['borderBottomWidth']>;
+  color?: FeaturedProperties['borderBottomColor'];
+  style?: FeaturedProperties['borderBottomStyle'];
+  width?: FeaturedProperties['borderBottomWidth'];
 }
 
 interface BorderTopProperty extends BorderYRadius {
-  color?: WithThemeFunction<UntransformedProperties['borderTopColor']>;
-  style?: WithThemeFunction<UntransformedProperties['borderTopStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['borderTopWidth']>;
+  color?: FeaturedProperties['borderTopColor'];
+  style?: FeaturedProperties['borderTopStyle'];
+  width?: FeaturedProperties['borderTopWidth'];
 }
 
 interface FlexProperty {
-  basis?: WithThemeFunction<UntransformedProperties['flexBasis']>;
-  direction?: WithThemeFunction<UntransformedProperties['flexDirection']>;
-  grow?: WithThemeFunction<UntransformedProperties['flexGrow']>;
-  shrink?: WithThemeFunction<UntransformedProperties['flexShrink']>;
-  wrap?: WithThemeFunction<UntransformedProperties['flexWrap']>;
+  basis?: FeaturedProperties['flexBasis'];
+  direction?: FeaturedProperties['flexDirection'];
+  grow?: FeaturedProperties['flexGrow'];
+  shrink?: FeaturedProperties['flexShrink'];
+  wrap?: FeaturedProperties['flexWrap'];
 }
 
 interface FontProperty {
-  family?: FontFamilyProperty;
-  featureSettings?: WithThemeFunction<UntransformedProperties['fontFeatureSettings']>;
-  kerning?: WithThemeFunction<UntransformedProperties['fontKerning']>;
-  languageOverride?: WithThemeFunction<UntransformedProperties['fontLanguageOverride']>;
-  variationSettings?: WithThemeFunction<UntransformedProperties['fontVariationSettings']>;
-  size?: WithThemeFunction<UntransformedProperties['fontSize']>;
-  sizeAdjust?: WithThemeFunction<UntransformedProperties['fontSizeAdjust']>;
-  stretch?: WithThemeFunction<UntransformedProperties['fontStretch']>;
-  style?: WithThemeFunction<UntransformedProperties['fontStyle']>;
-  synthesis?: WithThemeFunction<UntransformedProperties['fontSynthesis']>;
-  variant?: WithThemeFunction<UntransformedProperties['fontVariant']>;
-  weight?: WithThemeFunction<UntransformedProperties['fontWeight']>;
+  family?: FontFaceProperty;
+  featureSettings?: FeaturedProperties['fontFeatureSettings'];
+  kerning?: FeaturedProperties['fontKerning'];
+  languageOverride?: FeaturedProperties['fontLanguageOverride'];
+  variationSettings?: FeaturedProperties['fontVariationSettings'];
+  size?: FeaturedProperties['fontSize'];
+  sizeAdjust?: FeaturedProperties['fontSizeAdjust'];
+  stretch?: FeaturedProperties['fontStretch'];
+  style?: FeaturedProperties['fontStyle'];
+  synthesis?: FeaturedProperties['fontSynthesis'];
+  variant?: FeaturedProperties['fontVariant'];
+  weight?: FeaturedProperties['fontWeight'];
 }
 
 interface GridProperty {
@@ -177,116 +199,96 @@ interface GridProperty {
 }
 
 interface GridAutoProperty {
-  columns?: WithThemeFunction<UntransformedProperties['gridAutoColumns']>;
-  flow?: WithThemeFunction<UntransformedProperties['gridAutoFlow']>;
-  rows?: WithThemeFunction<UntransformedProperties['gridAutoRows']>;
+  columns?: FeaturedProperties['gridAutoColumns'];
+  flow?: FeaturedProperties['gridAutoFlow'];
+  rows?: FeaturedProperties['gridAutoRows'];
 }
 
 interface GridColumnProperty {
-  end?: WithThemeFunction<UntransformedProperties['gridColumnEnd']>;
-  gap?: WithThemeFunction<UntransformedProperties['gridColumnGap']>;
-  start?: WithThemeFunction<UntransformedProperties['gridColumnStart']>;
+  end?: FeaturedProperties['gridColumnEnd'];
+  gap?: FeaturedProperties['gridColumnGap'];
+  start?: FeaturedProperties['gridColumnStart'];
 }
 
 interface GridRowProperty {
-  end?: WithThemeFunction<UntransformedProperties['gridRowEnd']>;
-  gap?: WithThemeFunction<UntransformedProperties['gridRowGap']>;
-  start?: WithThemeFunction<UntransformedProperties['gridRowStart']>;
+  end?: FeaturedProperties['gridRowEnd'];
+  gap?: FeaturedProperties['gridRowGap'];
+  start?: FeaturedProperties['gridRowStart'];
 }
 
 interface GridTemplateProperty {
-  areas?: WithThemeFunction<UntransformedProperties['gridTemplateAreas']>;
-  columns?: WithThemeFunction<UntransformedProperties['gridTemplateColumns']>;
-  rows?: WithThemeFunction<UntransformedProperties['gridTemplateRows']>;
+  areas?: FeaturedProperties['gridTemplateAreas'];
+  columns?: FeaturedProperties['gridTemplateColumns'];
+  rows?: FeaturedProperties['gridTemplateRows'];
 }
 
 interface MaskBorderProperty {
-  mode?: WithThemeFunction<UntransformedProperties['maskBorderMode']>;
-  outset?: WithThemeFunction<UntransformedProperties['maskBorderOutset']>;
-  repeat?: WithThemeFunction<UntransformedProperties['maskBorderRepeat']>;
-  slice?: WithThemeFunction<UntransformedProperties['maskBorderSlice']>;
-  source?: WithThemeFunction<UntransformedProperties['maskBorderSource']>;
-  width?: WithThemeFunction<UntransformedProperties['maskBorderWidth']>;
+  mode?: FeaturedProperties['maskBorderMode'];
+  outset?: FeaturedProperties['maskBorderOutset'];
+  repeat?: FeaturedProperties['maskBorderRepeat'];
+  slice?: FeaturedProperties['maskBorderSlice'];
+  source?: FeaturedProperties['maskBorderSource'];
+  width?: FeaturedProperties['maskBorderWidth'];
 }
 
 interface MaskProperty {
-  clip?: WithThemeFunction<UntransformedProperties['maskClip']>;
-  composite?: WithThemeFunction<UntransformedProperties['maskComposite']>;
-  image?: WithThemeFunction<UntransformedProperties['maskImage']>;
-  mode?: WithThemeFunction<UntransformedProperties['maskMode']>;
-  origin?: WithThemeFunction<UntransformedProperties['maskOrigin']>;
-  position?: WithThemeFunction<UntransformedProperties['maskPosition']>;
-  repeat?: WithThemeFunction<UntransformedProperties['maskRepeat']>;
-  size?: WithThemeFunction<UntransformedProperties['maskSize']>;
-  type?: WithThemeFunction<UntransformedProperties['maskType']>;
+  clip?: FeaturedProperties['maskClip'];
+  composite?: FeaturedProperties['maskComposite'];
+  image?: FeaturedProperties['maskImage'];
+  mode?: FeaturedProperties['maskMode'];
+  origin?: FeaturedProperties['maskOrigin'];
+  position?: FeaturedProperties['maskPosition'];
+  repeat?: FeaturedProperties['maskRepeat'];
+  size?: FeaturedProperties['maskSize'];
+  type?: FeaturedProperties['maskType'];
 }
 
 interface MarginProperty {
-  xy?: WithThemeFunction<UntransformedProperties['marginLeft']>;
-  x?: WithThemeFunction<UntransformedProperties['marginLeft']>;
-  y?: WithThemeFunction<UntransformedProperties['marginTop']>;
-  top?: WithThemeFunction<UntransformedProperties['marginTop']>;
-  right?: WithThemeFunction<UntransformedProperties['marginRight']>;
-  bottom?: WithThemeFunction<UntransformedProperties['marginBottom']>;
-  left?: WithThemeFunction<UntransformedProperties['marginLeft']>;
+  xy?: FeaturedProperties['marginLeft'];
+  x?: FeaturedProperties['marginLeft'];
+  y?: FeaturedProperties['marginTop'];
+  top?: FeaturedProperties['marginTop'];
+  right?: FeaturedProperties['marginRight'];
+  bottom?: FeaturedProperties['marginBottom'];
+  left?: FeaturedProperties['marginLeft'];
 }
 
 interface OffsetProperty {
-  anchor?: WithThemeFunction<UntransformedProperties['offsetAnchor']>;
-  blockEnd?: WithThemeFunction<UntransformedProperties['offsetBlockEnd']>;
-  blockStart?: WithThemeFunction<UntransformedProperties['offsetBlockStart']>;
-  inlineEnd?: WithThemeFunction<UntransformedProperties['offsetInlineEnd']>;
-  inlineStart?: WithThemeFunction<UntransformedProperties['offsetInlineStart']>;
-  distance?: WithThemeFunction<UntransformedProperties['offsetDistance']>;
-  path?: WithThemeFunction<UntransformedProperties['offsetPath']>;
-  position?: WithThemeFunction<UntransformedProperties['offsetPosition']>;
-  rotate?: WithThemeFunction<UntransformedProperties['offsetRotate']>;
+  anchor?: FeaturedProperties['offsetAnchor'];
+  blockEnd?: FeaturedProperties['offsetBlockEnd'];
+  blockStart?: FeaturedProperties['offsetBlockStart'];
+  inlineEnd?: FeaturedProperties['offsetInlineEnd'];
+  inlineStart?: FeaturedProperties['offsetInlineStart'];
+  distance?: FeaturedProperties['offsetDistance'];
+  path?: FeaturedProperties['offsetPath'];
+  position?: FeaturedProperties['offsetPosition'];
+  rotate?: FeaturedProperties['offsetRotate'];
 }
 
 interface OutlineProperty {
-  color?: WithThemeFunction<UntransformedProperties['outlineColor']>;
-  offset?: WithThemeFunction<UntransformedProperties['outlineOffset']>;
-  style?: WithThemeFunction<UntransformedProperties['outlineStyle']>;
-  width?: WithThemeFunction<UntransformedProperties['outlineWidth']>;
+  color?: FeaturedProperties['outlineColor'];
+  offset?: FeaturedProperties['outlineOffset'];
+  style?: FeaturedProperties['outlineStyle'];
+  width?: FeaturedProperties['outlineWidth'];
 }
 
 interface PaddingProperty {
-  xy?: WithThemeFunction<UntransformedProperties['paddingLeft']>;
-  x?: WithThemeFunction<UntransformedProperties['paddingLeft']>;
-  y?: WithThemeFunction<UntransformedProperties['paddingTop']>;
-  top?: WithThemeFunction<UntransformedProperties['paddingTop']>;
-  right?: WithThemeFunction<UntransformedProperties['paddingRight']>;
-  bottom?: WithThemeFunction<UntransformedProperties['paddingBottom']>;
-  left?: WithThemeFunction<UntransformedProperties['paddingLeft']>;
+  xy?: FeaturedProperties['paddingLeft'];
+  x?: FeaturedProperties['paddingLeft'];
+  y?: FeaturedProperties['paddingTop'];
+  top?: FeaturedProperties['paddingTop'];
+  right?: FeaturedProperties['paddingRight'];
+  bottom?: FeaturedProperties['paddingBottom'];
+  left?: FeaturedProperties['paddingLeft'];
 }
 
 interface TransitionProperty {
-  delay?: WithThemeFunction<UntransformedProperties['transitionDelay']>;
-  duration?: WithThemeFunction<UntransformedProperties['transitionDuration']>;
-  property?: WithThemeFunction<UntransformedProperties['transitionProperty']>;
-  timingFunction?: WithThemeFunction<UntransformedProperties['transitionTimingFunction']>;
+  delay?: FeaturedProperties['transitionDelay'];
+  duration?: FeaturedProperties['transitionDuration'];
+  property?: FeaturedProperties['transitionProperty'];
+  timingFunction?: FeaturedProperties['transitionTimingFunction'];
 }
 
-export type PseudoMap = { [P in CSS.SimplePseudos]?: FeaturedProperties & PseudoMap };
+type ExcludedShorthands = 'borderColor' | 'borderStyle' | 'borderWidth';
 
-export interface PropertiesList {
-  [identifier: string]: Properties;
-}
-
-export interface FeaturedPropertiesList {
-  [identifier: string]: Style;
-}
-
-export type AnimationNameProperty = WithThemeFunction<
-  FeaturedPropertiesList | UntransformedProperties['animationName']
->;
-
-export type FontFace = Omit<CSS.FontFaceFallback, 'fontFamily'> & { fontFamily: CSS.FontFace['fontFamily'] };
-
-export type FontFamilyProperty = WithThemeFunction<
-  | FontFace
-  | CSS.StandardLonghandProperties['fontFamily']
-  | Array<FontFace | CSS.StandardLonghandProperties['fontFamily']>
->;
-
-export type Declarations = { [index: string]: string | number | Array<string | number> | undefined };
+type Pseudos = { [P in CSS.SimplePseudos]?: Style };

@@ -1,8 +1,8 @@
-import { StyleOrStyleArray } from '@glitz/type';
+import { Style } from '@glitz/type';
 import { StyledDecorator } from './decorator';
 import useGlitz from './use-glitz';
 
-export default function useStyle(styles?: StyleOrStyleArray | StyledDecorator) {
+export default function useStyle(styles?: Style | Style[] | StyledDecorator) {
   const [apply] = useGlitz(styles);
   return apply();
 }

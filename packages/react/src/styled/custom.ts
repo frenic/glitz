@@ -30,7 +30,6 @@ export interface StyledCustom {
     component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
     style?: Style,
   ): StyledComponentWithRef<TProps, TInstance>;
-  (style: Style): StyledDecorator;
 
   // This overload prevents errors on `component` when `style` is incorrect
   // and enables usage of generic parameter to provide prop type
@@ -43,6 +42,8 @@ export interface StyledCustom {
       | React.ComponentType<StyledProps>,
     style?: Style,
   ): StyledComponent<any>;
+
+  (style: Style): StyledDecorator;
 }
 
 function custom<TProps>(

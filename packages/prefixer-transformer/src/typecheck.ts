@@ -1,10 +1,10 @@
 // tslint:disable
 
-import { Properties, UntransformedProperties } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/type';
 import prefixer from './';
 
-const a: UntransformedProperties = {};
-const b: Properties = prefixer(a);
+const a: ResolvedDeclarations = {};
+const b: ResolvedDeclarations = prefixer(a);
 
 // Avoid unread variables type error
 b;

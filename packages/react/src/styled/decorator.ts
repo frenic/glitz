@@ -1,4 +1,4 @@
-import { Style, StyleArray } from '@glitz/type';
+import { Style } from '@glitz/type';
 import { StyledElementLike } from './apply-class-name';
 import { SECRET_DECORATOR } from './constants';
 import create from './create';
@@ -8,10 +8,10 @@ import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProp
 export interface StyledDecorator extends StyledCustom {
   [SECRET_DECORATOR]: true;
   (decorator: StyledDecorator): StyledDecorator;
-  (): StyleArray;
+  (): Style[];
 }
 
-export default function decorator(preStyle: StyleArray): StyledDecorator {
+export default function decorator(preStyle: Style[]): StyledDecorator {
   const fn = (<TProps>(
     arg1?:
       | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>

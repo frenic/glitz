@@ -1,10 +1,10 @@
 // tslint:disable
 
-import { Properties } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/type';
 import transformers from './';
 
-const a: Properties = {};
-const b: Properties = transformers({
+const a: ResolvedDeclarations = {};
+const b: ResolvedDeclarations = transformers({
   devToolOptions: { ignoreProperties: '' },
   numberToLengthOptions: { defaultUnit: 'rem' },
 })(a);

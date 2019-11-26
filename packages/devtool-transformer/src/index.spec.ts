@@ -1,4 +1,3 @@
-import { Properties } from '@glitz/type';
 import devToolTransformer, { createDevToolTransformer } from './index';
 
 describe('style validation', () => {
@@ -7,7 +6,7 @@ describe('style validation', () => {
 
     devToolTransformer({
       colour: 'red',
-    } as Properties);
+    });
 
     expect(logger1).toHaveBeenCalledWith(
       `The browser ignored the CSS in:
@@ -42,7 +41,7 @@ describe('style validation', () => {
 
     devToolTransformer({
       width: value,
-    } as Properties);
+    });
 
     expect(logger3).toHaveBeenCalledWith(
       `The browser ignored the CSS fallback value \`--maxcontent\` in:
@@ -87,20 +86,20 @@ describe('style validation', () => {
 
     createDevToolTransformer({ ignoreProperties: 'colour' })({
       colour: 'red',
-    } as Properties);
+    });
 
     expect(logger).toHaveBeenCalledTimes(0);
 
     createDevToolTransformer({ ignoreProperties: /^background/ })({
       backgroundColour: 'red',
-    } as Properties);
+    });
 
     expect(logger).toHaveBeenCalledTimes(0);
 
     createDevToolTransformer({ ignoreProperties: ['colour', /^background/] })({
       colour: 'red',
       backgroundColour: 'red',
-    } as Properties);
+    });
 
     expect(logger).toHaveBeenCalledTimes(0);
   });

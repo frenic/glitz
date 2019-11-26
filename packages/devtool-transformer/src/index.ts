@@ -1,4 +1,4 @@
-import { Properties, UntransformedProperties } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/type';
 
 export type Options = {
   ignoreProperties?: string | RegExp | Array<string | RegExp>;
@@ -6,7 +6,7 @@ export type Options = {
 
 export let createDevToolTransformer: (
   options?: Options,
-) => (declarations: UntransformedProperties) => Properties = () => declarations => declarations as Properties;
+) => (declarations: ResolvedDeclarations) => ResolvedDeclarations = () => declarations => declarations;
 
 if (process.env.NODE_ENV !== 'production') {
   if (typeof document !== 'undefined') {
@@ -74,7 +74,7 @@ if (process.env.NODE_ENV !== 'production') {
       const ignores = defaultIgnores.concat(options.ignoreProperties || []);
 
       return declarations => {
-        const properties = Object.keys(declarations) as Array<keyof UntransformedProperties>;
+        const properties = Object.keys(declarations);
 
         for (const property of properties) {
           const hyphenatedProperty = hyphenateProperty(property);
@@ -111,7 +111,7 @@ if (process.env.NODE_ENV !== 'production') {
           }
         }
 
-        return declarations as Properties;
+        return declarations;
       };
     };
   }

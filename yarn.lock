@@ -3414,10 +3414,15 @@ cssstyle@^1.0.0, cssstyle@^1.1.1:
   dependencies:
     cssom "0.3.x"
 
-csstype@^2.2.0, csstype@^2.6.7:
+csstype@^2.2.0:
   version "2.6.7"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.7.tgz#20b0024c20b6718f4eda3853a1f5a1cce7f5e4a5"
   integrity sha512-9Mcn9sFbGBAdmimWb2gLVDtFJzeKtDGIr76TUqmjZrw9LFXBMSU70lcs+C0/7fyCd6iBDqmksUcCOUIkisPHsQ==
+
+csstype@^3.0.0-alpha.2:
+  version "3.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.0-alpha.2.tgz#454148665cf8ed9667de92360e7dda63c682896a"
+  integrity sha512-SO+m7t1itAZxQ6srqRUNoS+EnDqTgU6+zfL8qCHGjn8KIWoKpt9alWF9UNswPnx+log75YffzvtKOP/jbP3Cxg==
 
 currently-unhandled@^0.4.1:
   version "0.4.1"

@@ -1,4 +1,4 @@
-import { StyleArray, StyleOrStyleArray } from '@glitz/type';
+import { Style } from '@glitz/type';
 import * as React from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_COMPOSE } from './constants';
@@ -12,7 +12,7 @@ export type WithRefProp<TProps, TInstance> = React.PropsWithoutRef<TProps> & Rea
 // Conditionally omit `StyledProps` enables support for union props
 export type ExternalProps<TProps> = (TProps extends StyledProps ? Omit<TProps, keyof StyledProps> : TProps) &
   React.PropsWithChildren<{
-    css?: StyleOrStyleArray | StyledDecorator;
+    css?: Style | Style[] | StyledDecorator;
   }>;
 
 export default function create<TProps>(
@@ -22,7 +22,7 @@ export default function create<TProps>(
     | StyledComponent<TProps>
     | StyledComponentWithRef<TProps, any>
     | React.ComponentType<TProps & StyledProps>,
-  statics: StyleArray,
+  statics: Style[],
 ): StyledComponent<TProps>;
 
 export default function create<TProps, TInstance>(
@@ -31,7 +31,7 @@ export default function create<TProps, TInstance>(
     | StyledElementLike<React.ComponentType<WithRefProp<TProps, TInstance>>>
     | StyledComponentWithRef<TProps, TInstance>
     | React.ComponentType<WithRefProp<TProps, TInstance>>,
-  statics: StyleArray,
+  statics: Style[],
 ): StyledComponentWithRef<TProps, TInstance> {
   return isStyledComponent<TProps, TInstance>(type) ? type[SECRET_COMPOSE](statics) : factory(type, statics);
 }
@@ -41,7 +41,7 @@ export function factory<TProps, TInstance>(
     | StyledElement
     | StyledElementLike<React.ComponentType<WithRefProp<TProps, TInstance>>>
     | React.ComponentType<WithRefProp<TProps, TInstance>>,
-  statics: StyleArray,
+  statics: Style[],
 ): StyledComponentWithRef<TProps, TInstance> {
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(
     React.forwardRef<TInstance, ExternalProps<TProps>>((props, ref) => {
@@ -63,7 +63,7 @@ export function factory<TProps, TInstance>(
       return React.createElement<any>(type, { ...restProps, compose, ref });
     }),
     {
-      [SECRET_COMPOSE](additionals?: StyleArray) {
+      [SECRET_COMPOSE](additionals?: Style[]) {
         return factory(type, additionals ? statics.concat(additionals) : statics);
       },
     },

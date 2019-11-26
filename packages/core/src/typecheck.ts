@@ -1,9 +1,9 @@
 // tslint:disable
 
-import { Properties, UntransformedProperties } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/type';
 import { GlitzClient, GlitzServer, Options, compose, pseudo, media } from './index';
 
-const transformer: (input: UntransformedProperties) => Properties = input => ({ display: input.display });
+const transformer: (input: ResolvedDeclarations) => ResolvedDeclarations = input => ({ display: input.display });
 const transformers = compose(transformer, transformer);
 
 const options: Options = {

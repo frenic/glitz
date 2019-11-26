@@ -1,11 +1,11 @@
-import { Style, StyleArray, StyleOrStyleArray } from '@glitz/type';
+import { Style } from '@glitz/type';
 import * as React from 'react';
 import { SECRET_COMPOSE } from './constants';
 import { ExternalProps, WithRefProp } from './create';
 import { StyledDecorator } from './decorator';
 
 export type StyledProps = {
-  compose: (style?: StyleOrStyleArray | StyledDecorator) => StyleOrStyleArray;
+  compose: (style?: Style | Style[] | StyledDecorator) => Style | Style[];
 };
 
 export type StyledElementProps = {
@@ -13,12 +13,12 @@ export type StyledElementProps = {
 };
 
 export interface StyledComponent<TProps> extends React.ForwardRefExoticComponent<ExternalProps<TProps>> {
-  [SECRET_COMPOSE](style?: StyleArray): StyledComponent<TProps>;
+  [SECRET_COMPOSE](style?: Style[]): StyledComponent<TProps>;
 }
 
 export interface StyledComponentWithRef<TProps, TInstance>
   extends React.ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
-  [SECRET_COMPOSE](style?: StyleArray): StyledComponentWithRef<TProps, TInstance>;
+  [SECRET_COMPOSE](style?: Style[]): StyledComponentWithRef<TProps, TInstance>;
 }
 
 export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponentWithRef<TProps, TInstance>;

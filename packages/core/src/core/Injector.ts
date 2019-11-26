@@ -1,4 +1,4 @@
-import { Declarations, FontFace, Properties, PropertiesList } from '@glitz/type';
+import { ResolvedDeclarationList, ResolvedDeclarations } from '@glitz/type';
 import { formatRule, prettifyRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 
@@ -6,9 +6,9 @@ export const ANIMATION_NAME = 'animationName';
 export const FONT_FAMILY = 'fontFamily';
 
 export default class Injector {
-  public injectClassName: (declarations: Properties, pseudo?: string) => string;
-  public injectKeyframes: (declarationList: PropertiesList) => string;
-  public injectFontFace: (declarations: FontFace) => string;
+  public injectClassName: (declarations: ResolvedDeclarations, pseudo?: string) => string;
+  public injectKeyframes: (declarationList: ResolvedDeclarationList) => string;
+  public injectFontFace: (declarations: ResolvedDeclarations) => string;
   constructor(
     plainIndex: { [block: string]: string },
     pseudoIndex: { [pseudo: string]: { [block: string]: string } },
@@ -21,7 +21,7 @@ export default class Injector {
     injectNewFontFaceRule?: (block: string) => void,
   ) {
     this.injectClassName = (declarations, pseudo) => {
-      const block = parseDeclarationBlock(declarations as Declarations);
+      const block = parseDeclarationBlock(declarations);
       const index = pseudo ? (pseudoIndex[pseudo] = pseudoIndex[pseudo] || {}) : plainIndex;
 
       if (index[block]) {
@@ -41,7 +41,7 @@ export default class Injector {
     this.injectKeyframes = declarationList => {
       let blockList = '';
       for (const identifier in declarationList) {
-        const keyframeBlock = parseDeclarationBlock(declarationList[identifier] as Declarations);
+        const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
         blockList += formatRule(identifier, keyframeBlock);
       }
 
@@ -64,20 +64,19 @@ export default class Injector {
         if (!(FONT_FAMILY in original)) {
           console.error(
             `The CSS property \`${FONT_FAMILY}\` in font face must be defined:\n\n`,
-            prettifyRule(parseDeclarationBlock(original as Declarations)),
+            prettifyRule(parseDeclarationBlock(original)),
           );
         }
       }
 
-      const declarations: Declarations = {};
-      let property: keyof FontFace | typeof FONT_FAMILY;
-      for (property in original) {
+      const declarations: ResolvedDeclarations = {};
+      for (const property in original) {
         if (property !== FONT_FAMILY) {
           declarations[property] = original[property];
         }
       }
 
-      const family = original[FONT_FAMILY]!;
+      const family = original[FONT_FAMILY] as string;
       declarations[FONT_FAMILY] = family;
 
       const block = parseDeclarationBlock(declarations);

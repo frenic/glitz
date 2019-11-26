@@ -1,4 +1,4 @@
-import { Properties, Style } from '@glitz/type';
+import { ResolvedDeclarations, ResolvedValue, Style } from '@glitz/type';
 import GlitzServer from './GlitzServer';
 
 interface TestStyle extends Style {
@@ -406,14 +406,13 @@ describe('server', () => {
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
       transformer: properties => {
-        const prefixed: Properties = {};
-        let property: keyof Properties;
-        for (property in properties) {
-          const value = properties[property];
+        const prefixed: ResolvedDeclarations = {};
+        for (const property in properties) {
+          const value: ResolvedValue = properties[property];
           if (property === 'appearance' && value === 'none') {
             prefixed.MozAppearance = value;
           }
-          (prefixed as any)[property] = properties[property] as Properties[typeof property];
+          prefixed[property] = properties[property];
         }
         return prefixed;
       },

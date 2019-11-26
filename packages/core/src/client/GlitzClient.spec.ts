@@ -1,4 +1,4 @@
-import { Properties, Style, UntransformedProperties } from '@glitz/type';
+import { FeaturedProperties, ResolvedDeclarations, Style } from '@glitz/type';
 import GlitzClient from './GlitzClient';
 
 interface TestStyle extends Style {
@@ -229,7 +229,7 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>({
       transformer: declaration => {
         count++;
-        return declaration as Properties;
+        return declaration;
       },
     });
 
@@ -763,9 +763,9 @@ describe('client', () => {
     ).toBe('a b c');
   });
   it('hydrates transformed properties', () => {
-    function transformer(style: UntransformedProperties) {
+    function transformer(style: FeaturedProperties) {
       return {
-        ...(Object.keys(style) as Array<keyof UntransformedProperties>).reduce(
+        ...(Object.keys(style) as Array<keyof FeaturedProperties>).reduce(
           (result, key) => ({ ...result, [`-moz-${key}`]: `${style[key]}px`, [key]: `${style[key]}px` }),
           {},
         ),
@@ -781,13 +781,13 @@ describe('client', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>({
       transformer: properties => {
-        const prefixed: Properties = {};
+        const prefixed: ResolvedDeclarations = {};
         for (const property in properties) {
-          const value = (properties as any)[property];
+          const value = properties[property];
           if (property === 'appearance' && value === 'none') {
             prefixed.MozAppearance = value;
           }
-          (prefixed as any)[property] = (properties as any)[property];
+          prefixed[property] = properties[property];
         }
         return prefixed;
       },

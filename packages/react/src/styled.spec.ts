@@ -576,12 +576,10 @@ describe('react styled', () => {
       };
       private ref = React.createRef<HTMLDivElement>();
       public componentDidMount() {
-        // @ts-ignore
         expect(this.ref.current.className).toBe('some-class a');
         this.setState({ className: 'another-class' });
       }
       public componentDidUpdate() {
-        // @ts-ignore
         expect(this.ref.current.className).toBe('another-class a');
       }
       public render() {
@@ -620,11 +618,9 @@ describe('react styled', () => {
       class extends React.Component<StyledProps> {
         private ref = React.createRef<HTMLDivElement>();
         public componentDidMount() {
-          // @ts-ignore
           expect(this.ref.current.className).toBe('a');
         }
         public componentDidUpdate() {
-          // @ts-ignore
           expect(this.ref.current.className).toBe('b');
         }
         public render() {

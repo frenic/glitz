@@ -1,9 +1,9 @@
-import { StyleArray, StyleOrStyleArray } from '@glitz/type';
+import { Style } from '@glitz/type';
 import { useCallback, useContext, useRef } from 'react';
 import { GlitzContext, ThemeContext } from '../components/context';
 import { StyledDecorator } from './decorator';
 
-export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorator) {
+export default function useGlitz(inputStyles?: Style | Style[] | StyledDecorator) {
   const glitz = useContext(GlitzContext);
 
   if (!glitz) {
@@ -18,7 +18,7 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
   const totalCacheInvalidationsRef = useRef(0);
   const lastGlitzRef = useRef(glitz);
   const lastThemeRef = useRef(theme);
-  const lastFinalStylesRef = useRef<StyleArray>([]);
+  const lastFinalStylesRef = useRef<Style[]>([]);
   const lastClassNamesRef = useRef<string>();
 
   const apply = useCallback(() => {
@@ -69,18 +69,18 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
   }, [inputStyles, glitz, theme]);
 
   const compose = useCallback(
-    (defaults?: StyleOrStyleArray | StyledDecorator): StyleArray => styleToArray(defaults, inputStyles),
+    (defaults?: Style | Style[] | StyledDecorator): Style[] => styleToArray(defaults, inputStyles),
     [inputStyles],
   );
 
   return [apply, compose] as const;
 }
 
-export function styleToArray(...styles: Array<StyleOrStyleArray | StyledDecorator | undefined>): StyleArray {
-  return ([] as StyleArray).concat(...styles.map(style => (typeof style === 'function' ? style() : style || [])));
+export function styleToArray(...styles: Array<Style | Style[] | StyledDecorator | undefined>): Style[] {
+  return ([] as Style[]).concat(...styles.map(style => (typeof style === 'function' ? style() : style || [])));
 }
 
-function shallowEquals(a: StyleArray, b: StyleArray) {
+function shallowEquals(a: Style[], b: Style[]) {
   if (a.length !== b.length) {
     return false;
   }

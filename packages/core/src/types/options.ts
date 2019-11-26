@@ -1,8 +1,8 @@
-import { Properties, UntransformedProperties} from '@glitz/type';
+import { ResolvedDeclarations} from '@glitz/type';
 
 export const DEFAULT_HYDRATION_IDENTIFIER = 'glitz';
 
-export type Transformer = (declarations: UntransformedProperties) => Properties;
+export type Transformer = (declarations: ResolvedDeclarations) => ResolvedDeclarations;
 
 export type Options = {
   identifier?: string,
