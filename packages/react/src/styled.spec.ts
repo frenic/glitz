@@ -65,6 +65,23 @@ describe('react styled', () => {
       ),
     );
   });
+  it("renders styled component with no class names when there's no style", () => {
+    const StyledComponent = styled(props => {
+      return React.createElement(styled.Div, {
+        css: props.compose(),
+        ref: (el: HTMLDivElement) => expect(el.getAttribute('class')).toBeNull(),
+      });
+    });
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(StyledComponent),
+      ),
+    );
+  });
   it('renders styled component with memo', () => {
     const StyledComponent = styled(
       React.memo((props: StyledProps) => {

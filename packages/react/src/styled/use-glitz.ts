@@ -1,5 +1,4 @@
-import { GlitzClient, GlitzServer } from '@glitz/core';
-import { StyleArray, StyleOrStyleArray, Theme } from '@glitz/type';
+import { StyleArray, StyleOrStyleArray } from '@glitz/type';
 import { useCallback, useContext, useRef } from 'react';
 import { GlitzContext, ThemeContext } from '../components/context';
 import { StyledDecorator } from './decorator';
@@ -15,15 +14,15 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
 
   const theme = useContext(ThemeContext);
 
-  const hasWarnedCacheInvalidationsRef = useRef<boolean>(false);
-  const totalCacheInvalidationsRef = useRef<number>(0);
-  const lastGlitzRef = useRef<GlitzClient | GlitzServer>(glitz);
-  const lastThemeRef = useRef<Theme | undefined>(theme);
+  const hasWarnedCacheInvalidationsRef = useRef(false);
+  const totalCacheInvalidationsRef = useRef(0);
+  const lastGlitzRef = useRef(glitz);
+  const lastThemeRef = useRef(theme);
   const lastFinalStylesRef = useRef<StyleArray>([]);
-  const lastClassNamesRef = useRef<string | null>(null);
+  const lastClassNamesRef = useRef<string>();
 
   const apply = useCallback(() => {
-    const finalStyles: StyleArray = styleToArray(inputStyles);
+    const finalStyles = styleToArray(inputStyles);
 
     if (!finalStyles) {
       return;
@@ -35,7 +34,7 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
       shallowEquals(lastFinalStylesRef.current, finalStyles) &&
       typeof lastClassNamesRef.current === 'string'
     ) {
-      return lastClassNamesRef.current;
+      return lastClassNamesRef.current || void 0;
     }
 
     if (process.env.NODE_ENV !== 'production') {
@@ -66,7 +65,7 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
     lastThemeRef.current = theme;
     lastFinalStylesRef.current = finalStyles;
 
-    return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme));
+    return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
   }, [inputStyles, glitz, theme]);
 
   const compose = useCallback(

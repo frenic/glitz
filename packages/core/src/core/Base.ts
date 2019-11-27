@@ -35,7 +35,7 @@ export default class Base<TStyle extends Style> {
 
         // Treat null as undefined
         if (value === null) {
-          value = undefined;
+          value = void 0;
         }
 
         if (process.env.NODE_ENV !== 'production') {
@@ -253,7 +253,7 @@ export default class Base<TStyle extends Style> {
             for (let i = keys.length - 1; i >= 0; i--) {
               const key = keys[i];
 
-              if (style[key] === undefined) {
+              if (style[key] === void 0) {
                 continue;
               }
 
@@ -291,7 +291,7 @@ export default class Base<TStyle extends Style> {
               const property = properties[i];
               const value = result[property];
 
-              if (value === undefined) {
+              if (value === void 0) {
                 continue;
               }
 
