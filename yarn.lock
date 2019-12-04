@@ -3419,10 +3419,10 @@ csstype@^2.2.0:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.7.tgz#20b0024c20b6718f4eda3853a1f5a1cce7f5e4a5"
   integrity sha512-9Mcn9sFbGBAdmimWb2gLVDtFJzeKtDGIr76TUqmjZrw9LFXBMSU70lcs+C0/7fyCd6iBDqmksUcCOUIkisPHsQ==
 
-csstype@^3.0.0-alpha.2:
-  version "3.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.0-alpha.2.tgz#454148665cf8ed9667de92360e7dda63c682896a"
-  integrity sha512-SO+m7t1itAZxQ6srqRUNoS+EnDqTgU6+zfL8qCHGjn8KIWoKpt9alWF9UNswPnx+log75YffzvtKOP/jbP3Cxg==
+csstype@^3.0.0-beta.1:
+  version "3.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.0-beta.1.tgz#7f184f2e70b135d1b102239698d9426b7689e819"
+  integrity sha512-Kydox1cFJz3Jm4sAf4gbnEvpmR8m0sGfN0T8KEdbaVVkn32lhTwsXLbJlUTlzX9AHmzYnRa1vplzWV9hN1PCBQ==
 
 currently-unhandled@^0.4.1:
   version "0.4.1"
@@ -9498,10 +9498,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^3.7.2:
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.2.tgz#27e489b95fa5909445e9fef5ee48d81697ad18fb"
-  integrity sha512-ml7V7JfiN2Xwvcer+XAf2csGO1bPBdRbFCkYBczNZggrBZ9c7G3riSUeJmqEU5uOtXNPMhE3n+R4FA/3YOAWOQ==
+typescript@~3.7.3:
+  version "3.7.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.3.tgz#b36840668a16458a7025b9eabfad11b66ab85c69"
+  integrity sha512-Mcr/Qk7hXqFBXMN7p7Lusj1ktCBydylfQM/FZCk5glCNQJrCUKPkMHdo9R0MTFWsC/4kPFvDS0fDPvukfCkFsw==
 
 uglify-js@^3.1.4, uglify-js@^3.4.9:
   version "3.6.9"
