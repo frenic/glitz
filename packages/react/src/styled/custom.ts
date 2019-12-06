@@ -8,11 +8,11 @@ import { isType } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
 
 export interface StyledCustom {
+  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Style): StyledComponentWithRef<
     TProps,
     TInstance
   >;
-  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps extends StyledElementProps>(
     component: StyledElementLike<React.FunctionComponent<TProps>>,
     style?: Style,
@@ -34,12 +34,7 @@ export interface StyledCustom {
   // This overload prevents errors on `component` when `style` is incorrect
   // and enables usage of generic parameter to provide prop type
   (
-    component:
-      | StyledElementLike<React.ComponentType<StyledElementProps>>
-      | React.ForwardRefExoticComponent<StyledProps>
-      | StyledComponentWithRef<any, any>
-      | StyledComponent<any>
-      | React.ComponentType<StyledProps>,
+    component: StyledElementLike<React.ComponentType<StyledElementProps>> | React.ComponentType<StyledProps>,
     style?: Style,
   ): StyledComponent<any>;
 

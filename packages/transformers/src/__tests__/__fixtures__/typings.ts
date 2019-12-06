@@ -1,7 +1,7 @@
-// tslint:disable
+// tslint:disable no-unused-expression
 
 import { ResolvedDeclarations } from '@glitz/type';
-import transformers from './';
+import transformers from '../..';
 
 const a: ResolvedDeclarations = {};
 const b: ResolvedDeclarations = transformers({

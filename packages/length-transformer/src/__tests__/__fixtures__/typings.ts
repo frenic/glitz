@@ -1,7 +1,7 @@
-// tslint:disable
+// tslint:disable no-unused-expression
 
-import { GlitzClient } from '@glitz/core';
-import numberToLength, { createNumberToLengthTransformer } from './';
+import numberToLength, { createNumberToLengthTransformer } from '../..';
+import { GlitzClient } from '../../../../core/src';
 
 const a = numberToLength({
   // Length

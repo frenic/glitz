@@ -8,6 +8,6 @@ module.exports = {
   transform: {
     '^.+\\.ts$': '<rootDir>/jest.preprocessor.js',
   },
-  testMatch: ['**/src/**/*.spec.ts'],
+  testMatch: ['**/src/**/*.spec.(ts|tsx)', '**/__tests__/*.(ts|tsx)'],
   setupFilesAfterEnv: ['<rootDir>jest.setup.ts'],
 };

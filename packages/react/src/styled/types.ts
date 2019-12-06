@@ -4,8 +4,13 @@ import { SECRET_COMPOSE } from './constants';
 import { ExternalProps, WithRefProp } from './create';
 import { StyledDecorator } from './decorator';
 
+// To provide proper type errors for `Style` we create an interface of `Style[]`
+// and makes sure it's first in order
+// export interface StyleArray extends Array<Style> {}
+// export type StyleOrStyleArray = StyleArray | Style;
+
 export type StyledProps = {
-  compose: (style?: Style | Style[] | StyledDecorator) => Style | Style[];
+  compose: (style?: StyledDecorator | Style[] | Style) => Style | Style[];
 };
 
 export type StyledElementProps = {

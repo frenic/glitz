@@ -8,5 +8,5 @@
     },
     "noEmit": true
   },
-  "exclude": ["**/cjs/", "**/esnext/", "**/mjs/", "**/types/"]
+  "exclude": ["**/cjs/", "**/esnext/", "**/mjs/", "**/types/", "**/__fixtures__"]
 }

@@ -12,7 +12,7 @@ export type WithRefProp<TProps, TInstance> = React.PropsWithoutRef<TProps> & Rea
 // Conditionally omit `StyledProps` enables support for union props
 export type ExternalProps<TProps> = (TProps extends StyledProps ? Omit<TProps, keyof StyledProps> : TProps) &
   React.PropsWithChildren<{
-    css?: Style | Style[] | StyledDecorator;
+    css?: StyledDecorator | Style[] | Style;
   }>;
 
 export default function create<TProps>(

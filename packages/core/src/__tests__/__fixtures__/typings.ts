@@ -1,28 +1,33 @@
-// tslint:disable
+// tslint:disable no-unused-expression
 
 import { ResolvedDeclarations } from '@glitz/type';
-import { GlitzClient, GlitzServer, Options, compose, pseudo, media } from './index';
+import { compose, GlitzClient, GlitzServer, media, Options, pseudo } from '../..';
 
-const transformer: (input: ResolvedDeclarations) => ResolvedDeclarations = input => ({ display: input.display });
+const transformer: (input: ResolvedDeclarations) => ResolvedDeclarations = input => ({
+  anyProperty: input.anyProperty,
+  width: 0,
+  color: ['', 0],
+});
+
 const transformers = compose(transformer, transformer);
 
 const options: Options = {
   transformer,
 };
 
-new GlitzServer(options);
-
 const server = new GlitzServer(options);
+
 const a: string = server.injectStyle({});
+
 const b: string = server.getStyleMarkup();
 
-new GlitzClient(options);
-
 const client = new GlitzClient(options);
+
 const c: string = client.injectStyle({});
 
 const d: string = client.injectStyle({
   ...pseudo('', {}),
+  ...media('', {}),
   ...media({}, {}),
 });
 
