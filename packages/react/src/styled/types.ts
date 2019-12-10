@@ -29,6 +29,7 @@ export interface StyledComponentWithRef<TProps, TInstance>
 export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponentWithRef<TProps, TInstance>;
 
 export interface StyledElementComponents {
+  // HTML
   A: StyledComponentWithRef<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
   Abbr: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Address: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
@@ -51,7 +52,7 @@ export interface StyledElementComponents {
   Code: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Col: StyledComponentWithRef<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
   Colgroup: StyledComponentWithRef<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-  Data: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+  Data: StyledComponentWithRef<React.DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
   Datalist: StyledComponentWithRef<React.HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
   Dd: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Del: StyledComponentWithRef<React.DelHTMLAttributes<HTMLElement>, HTMLElement>;
@@ -74,7 +75,7 @@ export interface StyledElementComponents {
   H4: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
   H5: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
   H6: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  Head: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLHeadElement>;
+  Head: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
   Header: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Hgroup: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Hr: StyledComponentWithRef<React.HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
@@ -98,6 +99,7 @@ export interface StyledElementComponents {
   Meta: StyledComponentWithRef<React.MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
   Meter: StyledComponentWithRef<React.MeterHTMLAttributes<HTMLElement>, HTMLElement>;
   Nav: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+  Noindex: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Noscript: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Object: StyledComponentWithRef<React.ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
   Ol: StyledComponentWithRef<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
@@ -127,6 +129,7 @@ export interface StyledElementComponents {
   Summary: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Sup: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Table: StyledComponentWithRef<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
+  Template: StyledComponentWithRef<React.HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
   Tbody: StyledComponentWithRef<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
   Td: StyledComponentWithRef<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
   Textarea: StyledComponentWithRef<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
@@ -143,64 +146,83 @@ export interface StyledElementComponents {
   Video: StyledComponentWithRef<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
   Wbr: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   Webview: StyledComponentWithRef<React.WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
-  Animate: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Circle: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  ClipPath: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Defs: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Desc: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Ellipse: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeBlend: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeColorMatrix: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeComponentTransfer: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeComposite: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeConvolveMatrix: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeDiffuseLighting: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeDisplacementMap: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeDistantLight: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeDropShadow: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeFlood: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeFuncA: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeFuncB: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeFuncG: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeFuncR: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeGaussianBlur: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeImage: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeMerge: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeMergeNode: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeMorphology: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeOffset: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FePointLight: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeSpecularLighting: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeSpotLight: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeTile: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  FeTurbulence: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Filter: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  ForeignObject: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  G: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Image: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Line: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  LinearGradient: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Marker: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Mask: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Metadata: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Path: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Pattern: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Polygon: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Polyline: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  RadialGradient: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Rect: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Stop: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Svg: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Switch: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Symbol: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Text: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  TextPath: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Tspan: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Use: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  View: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
+
+  // SVG
+  Svg: StyledComponentWithRef<React.SVGAttributes<SVGSVGElement>, SVGSVGElement>;
+
+  Animate: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
+  AnimateMotion: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
+  AnimateTransform: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
+  Circle: StyledComponentWithRef<React.SVGAttributes<SVGCircleElement>, SVGCircleElement>;
+  ClipPath: StyledComponentWithRef<React.SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
+  Defs: StyledComponentWithRef<React.SVGAttributes<SVGDefsElement>, SVGDefsElement>;
+  Desc: StyledComponentWithRef<React.SVGAttributes<SVGDescElement>, SVGDescElement>;
+  Ellipse: StyledComponentWithRef<React.SVGAttributes<SVGEllipseElement>, SVGEllipseElement>;
+  FeBlend: StyledComponentWithRef<React.SVGAttributes<SVGFEBlendElement>, SVGFEBlendElement>;
+  FeColorMatrix: StyledComponentWithRef<React.SVGAttributes<SVGFEColorMatrixElement>, SVGFEColorMatrixElement>;
+  FeComponentTransfer: StyledComponentWithRef<
+    React.SVGAttributes<SVGFEComponentTransferElement>,
+    SVGFEComponentTransferElement
+  >;
+  FeComposite: StyledComponentWithRef<React.SVGAttributes<SVGFECompositeElement>, SVGFECompositeElement>;
+  FeConvolveMatrix: StyledComponentWithRef<React.SVGAttributes<SVGFEConvolveMatrixElement>, SVGFEConvolveMatrixElement>;
+  FeDiffuseLighting: StyledComponentWithRef<
+    React.SVGAttributes<SVGFEDiffuseLightingElement>,
+    SVGFEDiffuseLightingElement
+  >;
+  FeDisplacementMap: StyledComponentWithRef<
+    React.SVGAttributes<SVGFEDisplacementMapElement>,
+    SVGFEDisplacementMapElement
+  >;
+  FeDistantLight: StyledComponentWithRef<React.SVGAttributes<SVGFEDistantLightElement>, SVGFEDistantLightElement>;
+  FeDropShadow: StyledComponentWithRef<React.SVGAttributes<SVGFEDropShadowElement>, SVGFEDropShadowElement>;
+  FeFlood: StyledComponentWithRef<React.SVGAttributes<SVGFEFloodElement>, SVGFEFloodElement>;
+  FeFuncA: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncAElement>, SVGFEFuncAElement>;
+  FeFuncB: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncBElement>, SVGFEFuncBElement>;
+  FeFuncG: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncGElement>, SVGFEFuncGElement>;
+  FeFuncR: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncRElement>, SVGFEFuncRElement>;
+  FeGaussianBlur: StyledComponentWithRef<React.SVGAttributes<SVGFEGaussianBlurElement>, SVGFEGaussianBlurElement>;
+  FeImage: StyledComponentWithRef<React.SVGAttributes<SVGFEImageElement>, SVGFEImageElement>;
+  FeMerge: StyledComponentWithRef<React.SVGAttributes<SVGFEMergeElement>, SVGFEMergeElement>;
+  FeMergeNode: StyledComponentWithRef<React.SVGAttributes<SVGFEMergeNodeElement>, SVGFEMergeNodeElement>;
+  FeMorphology: StyledComponentWithRef<React.SVGAttributes<SVGFEMorphologyElement>, SVGFEMorphologyElement>;
+  FeOffset: StyledComponentWithRef<React.SVGAttributes<SVGFEOffsetElement>, SVGFEOffsetElement>;
+  FePointLight: StyledComponentWithRef<React.SVGAttributes<SVGFEPointLightElement>, SVGFEPointLightElement>;
+  FeSpecularLighting: StyledComponentWithRef<
+    React.SVGAttributes<SVGFESpecularLightingElement>,
+    SVGFESpecularLightingElement
+  >;
+  FeSpotLight: StyledComponentWithRef<React.SVGAttributes<SVGFESpotLightElement>, SVGFESpotLightElement>;
+  FeTile: StyledComponentWithRef<React.SVGAttributes<SVGFETileElement>, SVGFETileElement>;
+  FeTurbulence: StyledComponentWithRef<React.SVGAttributes<SVGFETurbulenceElement>, SVGFETurbulenceElement>;
+  Filter: StyledComponentWithRef<React.SVGAttributes<SVGFilterElement>, SVGFilterElement>;
+  ForeignObject: StyledComponentWithRef<React.SVGAttributes<SVGForeignObjectElement>, SVGForeignObjectElement>;
+  G: StyledComponentWithRef<React.SVGAttributes<SVGGElement>, SVGGElement>;
+  Image: StyledComponentWithRef<React.SVGAttributes<SVGImageElement>, SVGImageElement>;
+  Line: StyledComponentWithRef<React.SVGAttributes<SVGLineElement>, SVGLineElement>;
+  LinearGradient: StyledComponentWithRef<React.SVGAttributes<SVGLinearGradientElement>, SVGLinearGradientElement>;
+  Marker: StyledComponentWithRef<React.SVGAttributes<SVGMarkerElement>, SVGMarkerElement>;
+  Mask: StyledComponentWithRef<React.SVGAttributes<SVGMaskElement>, SVGMaskElement>;
+  Metadata: StyledComponentWithRef<React.SVGAttributes<SVGMetadataElement>, SVGMetadataElement>;
+  Mpath: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
+  Path: StyledComponentWithRef<React.SVGAttributes<SVGPathElement>, SVGPathElement>;
+  Pattern: StyledComponentWithRef<React.SVGAttributes<SVGPatternElement>, SVGPatternElement>;
+  Polygon: StyledComponentWithRef<React.SVGAttributes<SVGPolygonElement>, SVGPolygonElement>;
+  Polyline: StyledComponentWithRef<React.SVGAttributes<SVGPolylineElement>, SVGPolylineElement>;
+  RadialGradient: StyledComponentWithRef<React.SVGAttributes<SVGRadialGradientElement>, SVGRadialGradientElement>;
+  Rect: StyledComponentWithRef<React.SVGAttributes<SVGRectElement>, SVGRectElement>;
+  Stop: StyledComponentWithRef<React.SVGAttributes<SVGStopElement>, SVGStopElement>;
+  Switch: StyledComponentWithRef<React.SVGAttributes<SVGSwitchElement>, SVGSwitchElement>;
+  Symbol: StyledComponentWithRef<React.SVGAttributes<SVGSymbolElement>, SVGSymbolElement>;
+  Text: StyledComponentWithRef<React.SVGAttributes<SVGTextElement>, SVGTextElement>;
+  TextPath: StyledComponentWithRef<React.SVGAttributes<SVGTextPathElement>, SVGTextPathElement>;
+  Tspan: StyledComponentWithRef<React.SVGAttributes<SVGTSpanElement>, SVGTSpanElement>;
+  Use: StyledComponentWithRef<React.SVGAttributes<SVGUseElement>, SVGUseElement>;
+  View: StyledComponentWithRef<React.SVGAttributes<SVGViewElement>, SVGViewElement>;
 }
 
 export interface StyledElementFunctions {
+  // HTML
   a: StyledFunction<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
   abbr: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   address: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
@@ -223,7 +245,7 @@ export interface StyledElementFunctions {
   code: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   col: StyledFunction<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
   colgroup: StyledFunction<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-  data: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+  data: StyledFunction<React.DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
   datalist: StyledFunction<React.HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
   dd: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   del: StyledFunction<React.DelHTMLAttributes<HTMLElement>, HTMLElement>;
@@ -246,7 +268,7 @@ export interface StyledElementFunctions {
   h4: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
   h5: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
   h6: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  head: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLHeadElement>;
+  head: StyledFunction<React.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
   header: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   hgroup: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   hr: StyledFunction<React.HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
@@ -270,6 +292,7 @@ export interface StyledElementFunctions {
   meta: StyledFunction<React.MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
   meter: StyledFunction<React.MeterHTMLAttributes<HTMLElement>, HTMLElement>;
   nav: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+  noindex: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   noscript: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   object: StyledFunction<React.ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
   ol: StyledFunction<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
@@ -299,6 +322,7 @@ export interface StyledElementFunctions {
   summary: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   sup: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   table: StyledFunction<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
+  template: StyledFunction<React.HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
   tbody: StyledFunction<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
   td: StyledFunction<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
   textarea: StyledFunction<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
@@ -315,59 +339,68 @@ export interface StyledElementFunctions {
   video: StyledFunction<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
   wbr: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   webview: StyledFunction<React.WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
-  animate: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  circle: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  clipPath: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  defs: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  desc: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  ellipse: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feBlend: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feColorMatrix: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feComponentTransfer: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feComposite: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feConvolveMatrix: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feDiffuseLighting: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feDisplacementMap: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feDistantLight: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feDropShadow: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feFlood: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feFuncA: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feFuncB: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feFuncG: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feFuncR: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feGaussianBlur: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feImage: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feMerge: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feMergeNode: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feMorphology: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feOffset: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  fePointLight: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feSpecularLighting: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feSpotLight: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feTile: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  feTurbulence: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  filter: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  foreignObject: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  g: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  image: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  line: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  linearGradient: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  marker: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  mask: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  metadata: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  path: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  pattern: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  polygon: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  polyline: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  radialGradient: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  rect: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  stop: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  svg: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  switch: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  symbol: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  text: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  textPath: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  tspan: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  use: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  view: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
+
+  // SVG
+  svg: StyledFunction<React.SVGAttributes<SVGSVGElement>, SVGSVGElement>;
+
+  animate: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
+  animateMotion: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
+  animateTransform: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
+  circle: StyledFunction<React.SVGAttributes<SVGCircleElement>, SVGCircleElement>;
+  clipPath: StyledFunction<React.SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
+  defs: StyledFunction<React.SVGAttributes<SVGDefsElement>, SVGDefsElement>;
+  desc: StyledFunction<React.SVGAttributes<SVGDescElement>, SVGDescElement>;
+  ellipse: StyledFunction<React.SVGAttributes<SVGEllipseElement>, SVGEllipseElement>;
+  feBlend: StyledFunction<React.SVGAttributes<SVGFEBlendElement>, SVGFEBlendElement>;
+  feColorMatrix: StyledFunction<React.SVGAttributes<SVGFEColorMatrixElement>, SVGFEColorMatrixElement>;
+  feComponentTransfer: StyledFunction<
+    React.SVGAttributes<SVGFEComponentTransferElement>,
+    SVGFEComponentTransferElement
+  >;
+  feComposite: StyledFunction<React.SVGAttributes<SVGFECompositeElement>, SVGFECompositeElement>;
+  feConvolveMatrix: StyledFunction<React.SVGAttributes<SVGFEConvolveMatrixElement>, SVGFEConvolveMatrixElement>;
+  feDiffuseLighting: StyledFunction<React.SVGAttributes<SVGFEDiffuseLightingElement>, SVGFEDiffuseLightingElement>;
+  feDisplacementMap: StyledFunction<React.SVGAttributes<SVGFEDisplacementMapElement>, SVGFEDisplacementMapElement>;
+  feDistantLight: StyledFunction<React.SVGAttributes<SVGFEDistantLightElement>, SVGFEDistantLightElement>;
+  feDropShadow: StyledFunction<React.SVGAttributes<SVGFEDropShadowElement>, SVGFEDropShadowElement>;
+  feFlood: StyledFunction<React.SVGAttributes<SVGFEFloodElement>, SVGFEFloodElement>;
+  feFuncA: StyledFunction<React.SVGAttributes<SVGFEFuncAElement>, SVGFEFuncAElement>;
+  feFuncB: StyledFunction<React.SVGAttributes<SVGFEFuncBElement>, SVGFEFuncBElement>;
+  feFuncG: StyledFunction<React.SVGAttributes<SVGFEFuncGElement>, SVGFEFuncGElement>;
+  feFuncR: StyledFunction<React.SVGAttributes<SVGFEFuncRElement>, SVGFEFuncRElement>;
+  feGaussianBlur: StyledFunction<React.SVGAttributes<SVGFEGaussianBlurElement>, SVGFEGaussianBlurElement>;
+  feImage: StyledFunction<React.SVGAttributes<SVGFEImageElement>, SVGFEImageElement>;
+  feMerge: StyledFunction<React.SVGAttributes<SVGFEMergeElement>, SVGFEMergeElement>;
+  feMergeNode: StyledFunction<React.SVGAttributes<SVGFEMergeNodeElement>, SVGFEMergeNodeElement>;
+  feMorphology: StyledFunction<React.SVGAttributes<SVGFEMorphologyElement>, SVGFEMorphologyElement>;
+  feOffset: StyledFunction<React.SVGAttributes<SVGFEOffsetElement>, SVGFEOffsetElement>;
+  fePointLight: StyledFunction<React.SVGAttributes<SVGFEPointLightElement>, SVGFEPointLightElement>;
+  feSpecularLighting: StyledFunction<React.SVGAttributes<SVGFESpecularLightingElement>, SVGFESpecularLightingElement>;
+  feSpotLight: StyledFunction<React.SVGAttributes<SVGFESpotLightElement>, SVGFESpotLightElement>;
+  feTile: StyledFunction<React.SVGAttributes<SVGFETileElement>, SVGFETileElement>;
+  feTurbulence: StyledFunction<React.SVGAttributes<SVGFETurbulenceElement>, SVGFETurbulenceElement>;
+  filter: StyledFunction<React.SVGAttributes<SVGFilterElement>, SVGFilterElement>;
+  foreignObject: StyledFunction<React.SVGAttributes<SVGForeignObjectElement>, SVGForeignObjectElement>;
+  g: StyledFunction<React.SVGAttributes<SVGGElement>, SVGGElement>;
+  image: StyledFunction<React.SVGAttributes<SVGImageElement>, SVGImageElement>;
+  line: StyledFunction<React.SVGAttributes<SVGLineElement>, SVGLineElement>;
+  linearGradient: StyledFunction<React.SVGAttributes<SVGLinearGradientElement>, SVGLinearGradientElement>;
+  marker: StyledFunction<React.SVGAttributes<SVGMarkerElement>, SVGMarkerElement>;
+  mask: StyledFunction<React.SVGAttributes<SVGMaskElement>, SVGMaskElement>;
+  metadata: StyledFunction<React.SVGAttributes<SVGMetadataElement>, SVGMetadataElement>;
+  mpath: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
+  path: StyledFunction<React.SVGAttributes<SVGPathElement>, SVGPathElement>;
+  pattern: StyledFunction<React.SVGAttributes<SVGPatternElement>, SVGPatternElement>;
+  polygon: StyledFunction<React.SVGAttributes<SVGPolygonElement>, SVGPolygonElement>;
+  polyline: StyledFunction<React.SVGAttributes<SVGPolylineElement>, SVGPolylineElement>;
+  radialGradient: StyledFunction<React.SVGAttributes<SVGRadialGradientElement>, SVGRadialGradientElement>;
+  rect: StyledFunction<React.SVGAttributes<SVGRectElement>, SVGRectElement>;
+  stop: StyledFunction<React.SVGAttributes<SVGStopElement>, SVGStopElement>;
+  switch: StyledFunction<React.SVGAttributes<SVGSwitchElement>, SVGSwitchElement>;
+  symbol: StyledFunction<React.SVGAttributes<SVGSymbolElement>, SVGSymbolElement>;
+  text: StyledFunction<React.SVGAttributes<SVGTextElement>, SVGTextElement>;
+  textPath: StyledFunction<React.SVGAttributes<SVGTextPathElement>, SVGTextPathElement>;
+  tspan: StyledFunction<React.SVGAttributes<SVGTSpanElement>, SVGTSpanElement>;
+  use: StyledFunction<React.SVGAttributes<SVGUseElement>, SVGUseElement>;
+  view: StyledFunction<React.SVGAttributes<SVGViewElement>, SVGViewElement>;
 }
