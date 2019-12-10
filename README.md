@@ -168,19 +168,20 @@ The `fontFamily` property injects the `@font-face` rule and will be replaced by 
 const className = glitz.injectStyle({
   fontFamily: {
     // or font: { family: { ...
+    fontFamily: '"Custom Font"',
     fontStyle: 'normal',
-    fontWeight: 400,
-    src: "url(https://domain.tld/path/to/font.woff2) format('woff2')",
+    fontWeight: 'normal',
+    src: "url(https://domain.tld/path/to/font-regular.woff2) format('woff2')",
   },
   // Will be injected as:
   // .a {
-  //   font-family: a;
+  //   font-family: "Custom Font";
   // }
   // @font-face {
+  //   font-family: "Custom Font";
   //   font-style: normal;
   //   font-weight: 400;
   //   src: url(https://domain.tld/path/to/font.woff2) format('woff2');
-  //   font-family: a;
   // }
 });
 ```
@@ -193,9 +194,16 @@ You're also able to use fallback values in combination with font faces.
 const className = glitz.injectStyle({
   fontFamily: [
     {
+      fontFamily: '"Custom Font"',
       fontStyle: 'normal',
-      fontWeight: 400,
-      src: "url(https://domain.tld/path/to/font.woff2) format('woff2')",
+      fontWeight: 'normal,
+      src: "url(https://domain.tld/path/to/font-regular.woff2) format('woff2')",
+    },
+    {
+      fontFamily: '"Custom Font"',
+      fontStyle: 'normal',
+      fontWeight: 'bold',
+      src: "url(https://domain.tld/path/to/font-bold.woff2) format('woff2')",
     },
     'sans-serif',
   ],

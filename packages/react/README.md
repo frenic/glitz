@@ -221,7 +221,7 @@ Returns a component:
   /* Optional, compose with so called dynamic styles */
   css={[style]}
   /* Optional, forwards a function to the inner element as `ref` */
-  innerRef={[ref]}
+  ref={[ref]}
 />
 ```
 
@@ -253,7 +253,7 @@ Returns a component:
   /* Optional, compose with e.g. dynamic styles */
   css={[style]}
   /* Optional, forwards a function to the inner element as `ref` */
-  innerRef={[ref]}
+  ref={[ref]}
 />
 ```
 
@@ -283,7 +283,7 @@ Returns a component:
   /* Optional, compose with e.g. dynamic styles */
   css={[style]}
   /* Optional, forwards a function to the inner element as `ref` */
-  innerRef={[ref]}
+  ref={[ref]}
 />
 ```
 
