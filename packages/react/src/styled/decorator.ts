@@ -11,7 +11,7 @@ export interface StyledDecorator extends StyledCustom {
   (): Style[];
 }
 
-export default function decorator(preStyle: Style[]): StyledDecorator {
+export default function decorator(style: Style[]): StyledDecorator {
   const fn = (<TProps>(
     arg1?:
       | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>
@@ -24,17 +24,17 @@ export default function decorator(preStyle: Style[]): StyledDecorator {
   ) => {
     if (arg1) {
       if (isStyle(arg1)) {
-        return decorator(preStyle.concat(arg1));
+        return decorator(style.concat(arg1));
       }
 
       if (isDecorator(arg1)) {
-        return decorator(preStyle.concat(arg1()));
+        return decorator(style.concat(arg1()));
       }
 
-      return create<TProps>(arg1, arg2 ? preStyle.concat(arg2) : preStyle);
+      return create<TProps>(arg1, arg2 ? style.concat(arg2) : style);
     }
 
-    return preStyle;
+    return style;
   }) as StyledDecorator;
 
   fn[SECRET_DECORATOR] = true;

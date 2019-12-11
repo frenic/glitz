@@ -6,8 +6,6 @@ type PropType = {
   theme: Theme;
 };
 
-const Export: React.FunctionComponent<PropType> = function ThemeProvider(props) {
+export function ThemeProvider(props: React.PropsWithChildren<PropType>) {
   return React.createElement(ThemeContext.Provider, { value: props.theme }, props.children);
-};
-
-export default Export;
+}

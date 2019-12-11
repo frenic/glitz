@@ -6,8 +6,6 @@ export type PropType = {
   glitz: GlitzClient | GlitzServer;
 };
 
-const Export: React.FunctionComponent<PropType> = function GlitzProvider(props) {
+export function GlitzProvider(props: React.PropsWithChildren<PropType>) {
   return React.createElement(GlitzContext.Provider, { value: props.glitz }, props.children);
-};
-
-export default Export;
+}

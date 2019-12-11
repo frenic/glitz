@@ -2,8 +2,8 @@ import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { ThemeContext } from './context';
-import GlitzProvider from './GlitzProvider';
-import ThemeProvider from './ThemeProvider';
+import { GlitzProvider } from './GlitzProvider';
+import { ThemeProvider } from './ThemeProvider';
 
 describe('react provider', () => {
   it('provides instance', () => {

@@ -1,5 +1,6 @@
 import { Style } from '@glitz/type';
 import * as React from 'react';
+import { StyleContext } from '../components/context';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_COMPOSE } from './constants';
 import { StyledDecorator } from './decorator';
@@ -43,31 +44,47 @@ export function factory<TProps, TInstance>(
     | React.ComponentType<WithRefProp<TProps, TInstance>>,
   statics: Style[],
 ): StyledComponentWithRef<TProps, TInstance> {
-  const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(
-    React.forwardRef<TInstance, ExternalProps<TProps>>((props, ref) => {
-      const { css: dynamics, ...restProps } = props;
-      const [apply, compose] = useGlitz(styleToArray(statics, dynamics));
+  const Component = isElementType(type)
+    ? React.forwardRef((props: ExternalProps<TProps>, ref: React.Ref<TInstance>) => {
+        const { css: dynamics, ...restProps } = props;
+        const pre = React.useContext(StyleContext)?.[type.value];
+        const [apply] = useGlitz(styleToArray(pre, statics, dynamics));
 
-      if (isElementType(type) || isElementLikeType<TProps, TInstance>(type)) {
         return React.createElement<any>(type.value, {
           ...restProps,
           className: combineClassNames((props as any).className, apply()),
           ref,
         });
-      }
+      })
+    : isElementLikeType<TProps, TInstance>(type)
+    ? React.forwardRef((props: ExternalProps<TProps>, ref: React.Ref<TInstance>) => {
+        const { css: dynamics, ...restProps } = props;
+        const [apply] = useGlitz(styleToArray(statics, dynamics));
 
-      if (isStyledComponent(type)) {
+        return React.createElement<any>(type.value, {
+          ...restProps,
+          className: combineClassNames((props as any).className, apply()),
+          ref,
+        });
+      })
+    : isStyledComponent(type)
+    ? React.forwardRef((props: ExternalProps<TProps>, ref: React.Ref<TInstance>) => {
+        const { css: dynamics, ...restProps } = props;
+        const [, compose] = useGlitz(styleToArray(statics, dynamics));
         return React.createElement<any>(type, { ...restProps, css: compose(), ref });
-      }
+      })
+    : React.forwardRef((props: ExternalProps<TProps>, ref: React.Ref<TInstance>) => {
+        const { css: dynamics, ...restProps } = props;
+        const [, compose] = useGlitz(styleToArray(statics, dynamics));
 
-      return React.createElement<any>(type, { ...restProps, compose, ref });
-    }),
-    {
-      [SECRET_COMPOSE](additionals?: Style[]) {
-        return factory(type, additionals ? statics.concat(additionals) : statics);
-      },
+        return React.createElement<any>(type, { ...restProps, compose, ref });
+      });
+
+  const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
+    [SECRET_COMPOSE](additionals?: Style[]) {
+      return factory(type, additionals ? statics.concat(additionals) : statics);
     },
-  );
+  });
 
   if (process.env.NODE_ENV !== 'production') {
     const inner = isElementType(type) || isElementLikeType<TProps, TInstance>(type) ? type.value : type;

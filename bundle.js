@@ -96,7 +96,7 @@ async function build(input, output, type, production) {
         typescript: require('typescript'),
         ...require('./tsconfig.base.json').compilerOptions,
         ...require('./tsconfig.json').compilerOptions,
-        target: type === ESNEXT_TYPE ? 'esnext' : 'es5',
+        target: type === ESNEXT_TYPE ? 'es2020' : 'es5',
         module: 'es6',
         declaration: false,
       }),

@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`typings 1`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 211:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & Pick<{ a: boolean; b?: undefined; } & StyledProps, \\"a\\" | \\"b\\"> & { css?: Style | StyledDecorator | Style[] | undefined; } & { ...; }) | (IntrinsicAttributes & ... 2 more ... & { ...; })'.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 211:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & Pick<{ a: boolean; b?: undefined; } & StyledProps, \\"a\\" | \\"b\\"> & { css?: Style | Style[] | StyledDecorator | undefined; } & { ...; }) | (IntrinsicAttributes & ... 2 more ... & { ...; })'.
   Type '{ a: true; b: true; }' is not assignable to type 'Pick<{ a?: undefined; b: boolean; } & StyledProps, \\"a\\" | \\"b\\">'.
     Types of property 'a' are incompatible.
       Type 'true' is not assignable to type 'undefined'."
 `;
 
 exports[`typings 2`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 213:30 - Type '{ color: string; unknownProperty: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
-  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | Style[]'."
+"packages/react/src/__tests__/__fixtures__/typings.tsx 213:30 - Type '{ color: string; unknownProperty: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
+  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[] | StyledDecorator'."
 `;
 
 exports[`typings 3`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 215:12 - Type '{ color: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 215:12 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
   Type '{ color: number; }' is not assignable to type 'undefined'."
 `;
 
@@ -38,12 +38,12 @@ exports[`typings 7`] = `
 `;
 
 exports[`typings 8`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 225:60 - Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style | StyledDecorator | Style[] | undefined'.
-  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | Style[]'."
+"packages/react/src/__tests__/__fixtures__/typings.tsx 225:60 - Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style | Style[] | StyledDecorator | undefined'.
+  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[] | StyledDecorator'."
 `;
 
 exports[`typings 9`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 227:47 - Argument of type '{ color: number; }' is not assignable to parameter of type 'Style | StyledDecorator | Style[] | undefined'.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 227:47 - Argument of type '{ color: number; }' is not assignable to parameter of type 'Style | Style[] | StyledDecorator | undefined'.
   Type '{ color: number; }' is not assignable to type 'undefined'."
 `;
 

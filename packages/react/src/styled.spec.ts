@@ -5,6 +5,7 @@ import { Style } from '@glitz/type';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, ThemeProvider } from './';
+import { StyleProvider } from './components/StyleProvider';
 import { WithRefProp } from './styled/create';
 import { StyledElementProps, StyledProps } from './styled/types';
 import useGlitz from './styled/use-glitz';
@@ -647,6 +648,23 @@ describe('react styled', () => {
       ),
     );
     expect(renders).toBe(2);
+  });
+  it('styles with provided style', () => {
+    mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(
+          StyleProvider,
+          { include: { div: { color: 'red' } }, div: { color: 'green', backgroundColor: 'blue' } },
+          React.createElement(styled.Div, {
+            ref: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
+          }),
+        ),
+      ),
+    );
   });
   it('styles with HOC in between', () => {
     function hoc<TProps, TInstance>(
