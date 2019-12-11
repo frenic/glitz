@@ -4,7 +4,7 @@ const gzipSize = require('gzip-size');
 const { rollup } = require('rollup');
 const replace = require('rollup-plugin-replace');
 const typescript = require('rollup-plugin-typescript');
-const { uglify } = require('rollup-plugin-uglify');
+const { terser } = require('rollup-plugin-terser');
 const resolver = require('rollup-plugin-node-resolve');
 
 const CJS_SINGLE_TYPE = Symbol();
@@ -94,9 +94,7 @@ async function build(input, output, type, production) {
       resolver(),
       typescript({
         typescript: require('typescript'),
-        // @ts-ignore
         ...require('./tsconfig.base.json').compilerOptions,
-        // @ts-ignore
         ...require('./tsconfig.json').compilerOptions,
         target: type === ESNEXT_TYPE ? 'esnext' : 'es5',
         module: 'es6',
@@ -109,7 +107,7 @@ async function build(input, output, type, production) {
             }),
           ]
         : []),
-      ...(production ? [uglify({ toplevel: true })] : []),
+      ...(production ? [terser({ toplevel: true })] : []),
     ],
   });
 

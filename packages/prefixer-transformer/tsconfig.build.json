@@ -5,5 +5,5 @@
     "outDir": "./types",
     "emitDeclarationOnly": true
   },
-  "exclude": ["**/*.spec.ts", "**/typecheck.ts", "**/typecheck.tsx"]
+  "exclude": ["**/*.spec.ts", "**/__tests__"]
 }
