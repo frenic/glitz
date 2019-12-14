@@ -4,14 +4,14 @@ import Injector from '../core/Injector';
 import { injectSheetRule, isCSSStyleSheet } from '../utils/dom';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
 
-const CLASS_RULE_REGEX = /\.([a-z0-9]+)(:[^{]+)?\{([^}]+)\}/g;
+const CLASS_RULE_REGEX = /\.([a-z0-9]+)([:\[][^{]+)?\{([^}]+)\}/g;
 const KEYFRAMES_REGEX = /@keyframes ([a-z0-9]+)\{((?:[a-z0-9%]+\{[^}]+\})+)\}/g;
 const FONT_FACE_REGEX = /@font-face \{(.+?;font-family:([^}]+))\}/g;
 
 export default class InjectorClient extends Injector {
   constructor(styleElement: HTMLStyleElement, incrementClassHash: () => string, incrementKeyframesHash: () => string) {
     const plainIndex: { [block: string]: string } = {};
-    const pseudoIndex: { [pseudo: string]: { [block: string]: string } } = {};
+    const selectorIndex: { [selector: string]: { [block: string]: string } } = {};
     const keyframesIndex: { [blockList: string]: string } = {};
     const fontFaceIndex: { [block: string]: string } = {};
 
@@ -21,7 +21,7 @@ export default class InjectorClient extends Injector {
       let rule: RegExpExecArray | null;
       while ((rule = CLASS_RULE_REGEX.exec(css))) {
         incrementClassHash();
-        const index = rule[2] ? (pseudoIndex[rule[2]] = pseudoIndex[rule[2]] || {}) : plainIndex;
+        const index = rule[2] ? (selectorIndex[rule[2]] = selectorIndex[rule[2]] || {}) : plainIndex;
         index[rule[3]] = rule[1];
       }
       while ((rule = KEYFRAMES_REGEX.exec(css))) {
@@ -39,8 +39,8 @@ export default class InjectorClient extends Injector {
       throw new Error('HTMLStyleElement was not inserted properly into DOM');
     }
 
-    const injectNewClassRule = (className: string, block: string, pseudo?: string) => {
-      const rule = formatClassRule(className, block, pseudo);
+    const injectNewClassRule = (className: string, block: string, selector?: string) => {
+      const rule = formatClassRule(className, block, selector);
       injectSheetRule(sheet, rule);
     };
 
@@ -56,7 +56,7 @@ export default class InjectorClient extends Injector {
 
     super(
       plainIndex,
-      pseudoIndex,
+      selectorIndex,
       keyframesIndex,
       fontFaceIndex,
       incrementClassHash,

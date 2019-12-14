@@ -2,6 +2,10 @@
 
 exports[`client increments plain hash 1`] = `".c {color: blue;}"`;
 
+exports[`client injects attribute selector 1`] = `".a[disabled] {color: red;}"`;
+
+exports[`client injects attribute selector 2`] = `".b[disabled] {color: green; background-color: black;}"`;
+
 exports[`client injects font face rule 1`] = `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: x;}"`;
 
 exports[`client injects keyframes rule 1`] = `
@@ -15,6 +19,6 @@ exports[`client injects plain rule 1`] = `".a {color: red;}"`;
 
 exports[`client injects plain rule 2`] = `".b {color: green; background-color: black;}"`;
 
-exports[`client injects pseudo rule 1`] = `".a:hover {color: red;}"`;
+exports[`client injects pseudo selector 1`] = `".a:hover {color: red;}"`;
 
-exports[`client injects pseudo rule 2`] = `".b:hover {color: green; background-color: black;}"`;
+exports[`client injects pseudo selector 2`] = `".b:hover {color: green; background-color: black;}"`;

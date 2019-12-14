@@ -88,17 +88,30 @@ describe('server', () => {
 
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
-  it('injects pseudo rule', () => {
+  it('injects pseudo selector', () => {
     const server = new GlitzServer<TestStyle>();
 
     expect(server.injectStyle({ color: 'red' })).toBe('a');
     expect(server.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
-  it('injects nested pseudo rule', () => {
+  it('injects nested pseudo selector', () => {
     const server = new GlitzServer<TestStyle>();
 
     expect(server.injectStyle({ ':first-child': { ':hover': { color: 'red' } } })).toBe('a');
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
+  it('injects attribute selector', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.injectStyle({ '[disabled]': { color: 'red' } })).toBe('b');
+    expect(server.getStyleMarkup()).toMatchSnapshot();
+  });
+  it('injects nested attribute selector', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(server.injectStyle({ '[readonly]': { '[disabled]': { color: 'red' } } })).toBe('a');
     expect(server.getStyleMarkup()).toMatchSnapshot();
   });
   it('injects media rule', () => {

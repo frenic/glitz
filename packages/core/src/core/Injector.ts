@@ -6,23 +6,23 @@ export const ANIMATION_NAME = 'animationName';
 export const FONT_FAMILY = 'fontFamily';
 
 export default class Injector {
-  public injectClassName: (declarations: ResolvedDeclarations, pseudo?: string) => string;
+  public injectClassName: (declarations: ResolvedDeclarations, selector?: string) => string;
   public injectKeyframes: (declarationList: ResolvedDeclarationList) => string;
   public injectFontFace: (declarations: ResolvedDeclarations) => string;
   constructor(
     plainIndex: { [block: string]: string },
-    pseudoIndex: { [pseudo: string]: { [block: string]: string } },
+    selectorIndex: { [selector: string]: { [block: string]: string } },
     keyframesIndex: { [blockList: string]: string },
     fontFaceIndex: { [block: string]: string },
     incrementClassHash: () => string,
     incrementKeyframesHash: () => string,
-    injectNewClassRule?: (className: string, block: string, pseudo?: string) => void,
+    injectNewClassRule?: (className: string, block: string, selector?: string) => void,
     injectNewKeyframesRule?: (name: string, blockList: string) => void,
     injectNewFontFaceRule?: (block: string) => void,
   ) {
-    this.injectClassName = (declarations, pseudo) => {
+    this.injectClassName = (declarations, selector) => {
       const block = parseDeclarationBlock(declarations);
-      const index = pseudo ? (pseudoIndex[pseudo] = pseudoIndex[pseudo] || {}) : plainIndex;
+      const index = selector ? (selectorIndex[selector] = selectorIndex[selector] || {}) : plainIndex;
 
       if (index[block]) {
         return index[block];
@@ -32,7 +32,7 @@ export default class Injector {
       index[block] = className;
 
       if (injectNewClassRule) {
-        injectNewClassRule(className, block, pseudo);
+        injectNewClassRule(className, block, selector);
       }
 
       return className;

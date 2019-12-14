@@ -1,7 +1,7 @@
 // tslint:disable no-unused-expression
 
 import { ResolvedDeclarations } from '@glitz/type';
-import { compose, GlitzClient, GlitzServer, media, Options, pseudo } from '../..';
+import { compose, GlitzClient, GlitzServer, media, Options, selector } from '../..';
 
 const transformer: (input: ResolvedDeclarations) => ResolvedDeclarations = input => ({
   anyProperty: input.anyProperty,
@@ -26,7 +26,7 @@ const client = new GlitzClient(options);
 const c: string = client.injectStyle({});
 
 const d: string = client.injectStyle({
-  ...pseudo('', {}),
+  ...selector('', {}),
   ...media('', {}),
   ...media({}, {}),
 });

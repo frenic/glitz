@@ -151,7 +151,7 @@ describe('client', () => {
     expect(sheet.cssRules[30].cssText).toMatchSnapshot();
     expect(sheet.cssRules[31].cssText).toMatchSnapshot();
   });
-  it('injects pseudo rule', () => {
+  it('injects pseudo selector', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();
 
@@ -163,11 +163,45 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(2);
     expect(sheet.cssRules[1].cssText).toMatchSnapshot();
   });
-  it('injects nested pseudo rule', () => {
+  it('injects nested pseudo selector', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ ':first-child': { ':hover': { color: 'red' } } })).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
+  it('injects attribute selector', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>();
+
+    expect(client.injectStyle({ color: 'red' })).toBe('a');
+    expect(client.injectStyle({ '[disabled]': { color: 'red' } })).toBe('b');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(2);
+    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+  });
+  it('injects nested attribute selector', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>();
+
+    expect(client.injectStyle({ '[readonly]': { '[disabled]': { color: 'red' } } })).toBe('a');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+  });
+  it('injects mixed selectors', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>();
+
+    expect(client.injectStyle({ '[disabled]': { ':hover': { color: 'red' } } })).toBe('a');
 
     const sheet = style.sheet as CSSStyleSheet;
 

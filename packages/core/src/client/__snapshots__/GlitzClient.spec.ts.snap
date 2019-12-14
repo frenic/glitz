@@ -36,6 +36,8 @@ exports[`client injects atomic rules 11`] = `".k:hover {background-color: green;
 
 exports[`client injects atomic rules 12`] = `".l:hover {border-left-color: blue;}"`;
 
+exports[`client injects attribute selector 1`] = `".b[disabled] {color: red;}"`;
+
 exports[`client injects different combinations 1`] = `".a {color: red;}"`;
 
 exports[`client injects different combinations 2`] = `".b {color: green;}"`;
@@ -76,7 +78,11 @@ exports[`client injects keyframes rule 5`] = `".c {animation-name: some-thing;}"
 
 exports[`client injects media rule 1`] = `".c {color: red;}"`;
 
-exports[`client injects nested pseudo rule 1`] = `".a:first-child:hover {color: red;}"`;
+exports[`client injects mixed selectors 1`] = `".a[disabled]:hover {color: red;}"`;
+
+exports[`client injects nested attribute selector 1`] = `".a[readonly][disabled] {color: red;}"`;
+
+exports[`client injects nested pseudo selector 1`] = `".a:first-child:hover {color: red;}"`;
 
 exports[`client injects non-atomic rules 1`] = `".a {color: red; background-color: green; border-left-color: blue;}"`;
 
@@ -88,7 +94,7 @@ exports[`client injects non-atomic rules 4`] = `".d:hover {color: red; backgroun
 
 exports[`client injects plain rule 1`] = `".a {color: red;}"`;
 
-exports[`client injects pseudo rule 1`] = `".b:hover {color: red;}"`;
+exports[`client injects pseudo selector 1`] = `".b:hover {color: red;}"`;
 
 exports[`client injects rule deeply 1`] = `".a {color: red;}"`;
 

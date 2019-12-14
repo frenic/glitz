@@ -1,7 +1,7 @@
 import * as CSS from 'csstype';
 export { PropertyValue } from 'csstype';
 
-export type Style = Pseudos &
+export type Style = Selectors &
   Omit<Merge<FeaturedProperties, ExtendedProperties>, ExcludedShorthands> & {
     '@keyframes'?: KeyframesProperty;
     '@font-face'?: FontFaceProperty;
@@ -291,4 +291,4 @@ interface TransitionProperty {
 
 type ExcludedShorthands = 'borderColor' | 'borderStyle' | 'borderWidth';
 
-type Pseudos = { [P in CSS.SimplePseudos]?: Style };
+type Selectors = { [P in CSS.SimplePseudos | CSS.HtmlAttributes | CSS.SvgAttributes]?: Style };

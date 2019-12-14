@@ -9,11 +9,18 @@ describe('server', () => {
     expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' })).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
-  it('injects pseudo rule', () => {
+  it('injects pseudo selector', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
+    expect(injector.getStyle()).toMatchSnapshot();
+  });
+  it('injects attribute selector', () => {
+    const injector = createInjector();
+
+    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
+    expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' }, '[disabled]')).toBe('b');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('injects font face rule', () => {
@@ -48,11 +55,18 @@ describe('server', () => {
     expect(injector.injectClassName({ color: 'red' })).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
-  it('reuses pseudo rule', () => {
+  it('reuses pseudo selector', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.getStyle()).toMatchSnapshot();
+  });
+  it('reuses attribute selector', () => {
+    const injector = createInjector();
+
+    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
+    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
     expect(injector.getStyle()).toMatchSnapshot();
   });
   it('reuses keyframes rule', () => {

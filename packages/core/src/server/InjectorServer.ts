@@ -5,11 +5,11 @@ export default class InjectorServer extends Injector {
   public getStyle: () => void;
   constructor(incrementClassHash: () => string, incrementKeyframesHash: () => string) {
     const plainIndex: { [block: string]: string } = {};
-    const pseudoIndex: { [pseudo: string]: { [block: string]: string } } = {};
+    const selectorIndex: { [selector: string]: { [block: string]: string } } = {};
     const keyframesIndex: { [block: string]: string } = {};
     const fontFaceIndex: { [block: string]: string } = {};
 
-    super(plainIndex, pseudoIndex, keyframesIndex, fontFaceIndex, incrementClassHash, incrementKeyframesHash);
+    super(plainIndex, selectorIndex, keyframesIndex, fontFaceIndex, incrementClassHash, incrementKeyframesHash);
 
     this.getStyle = () => {
       let css = '';
@@ -22,10 +22,10 @@ export default class InjectorServer extends Injector {
       for (const block in plainIndex) {
         css += formatClassRule(plainIndex[block], block);
       }
-      for (const pseudo in pseudoIndex) {
-        const index = pseudoIndex[pseudo];
+      for (const selector in selectorIndex) {
+        const index = selectorIndex[selector];
         for (const block in index) {
-          css += formatClassRule(index[block], block, pseudo);
+          css += formatClassRule(index[block], block, selector);
         }
       }
       return css;

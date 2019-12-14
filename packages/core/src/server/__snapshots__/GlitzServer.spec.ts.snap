@@ -6,6 +6,8 @@ exports[`server deletes properties 1`] = `"<style data-glitz>.a{color:red}</styl
 
 exports[`server injects atomic rules 1`] = `"<style data-glitz>.a{color:red}.b{background-color:green}.c{border-left-color:blue}.d:hover{color:red}.e:hover{background-color:green}.f:hover{border-left-color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.g{color:red}.h{background-color:green}.i{border-left-color:blue}</style>"`;
 
+exports[`server injects attribute selector 1`] = `"<style data-glitz>.a{color:red}.b[disabled]{color:red}</style>"`;
+
 exports[`server injects different combinations 1`] = `"<style data-glitz>.a{color:red}</style><style data-glitz media=\\"(min-width: 768px)\\">.b{color:green}</style><style data-glitz media=\\"(min-width: 992px)\\">.c{color:blue}</style>"`;
 
 exports[`server injects font face rule 1`] = `"<style data-glitz>@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:x}.a{font-family:x}.b{font-family:y}.c{font-family:x,sans-serif}.d{font-family:sans-serif}</style>"`;
@@ -16,13 +18,15 @@ exports[`server injects media markup in certain order 1`] = `"<style data-glitz>
 
 exports[`server injects media rule 1`] = `"<style data-glitz>.a{color:red}.b:hover{color:red}</style><style data-glitz media=\\"(min-width: 768px)\\">.c{color:red}.d:hover{color:red}</style>"`;
 
-exports[`server injects nested pseudo rule 1`] = `"<style data-glitz>.a:first-child:hover{color:red}</style>"`;
+exports[`server injects nested attribute selector 1`] = `"<style data-glitz>.a[readonly][disabled]{color:red}</style>"`;
+
+exports[`server injects nested pseudo selector 1`] = `"<style data-glitz>.a:first-child:hover{color:red}</style>"`;
 
 exports[`server injects non-atomic rules 1`] = `"<style data-glitz>.a{color:red;background-color:green;border-left-color:blue}.b:hover{color:red;background-color:green;border-left-color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.c{color:red;background-color:green;border-left-color:blue}</style>"`;
 
 exports[`server injects plain rule 1`] = `"<style data-glitz>.a{color:red}</style>"`;
 
-exports[`server injects pseudo rule 1`] = `"<style data-glitz>.a{color:red}.b:hover{color:red}</style>"`;
+exports[`server injects pseudo selector 1`] = `"<style data-glitz>.a{color:red}.b:hover{color:red}</style>"`;
 
 exports[`server injects rule deeply 1`] = `"<style data-glitz>@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}@font-face {src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:z}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:y}.h{font-family:z}.c:hover{color:red}.d:first-child:hover{color:red}</style><style data-glitz media=\\"(min-width: 768px)\\">.i{color:red}.j:hover{color:red}</style>"`;
 

@@ -21,8 +21,9 @@ type ResolvedStyle = { [key: string]: ResolvedValue | ResolvedDeclarations };
 type Cache = { [key: string]: string | Cache };
 
 const NON_ATOMIC_KEY = '$';
-const MEDIA_IDENTIFIER = '@';
-const PSEUDO_IDENTIFIER = ':';
+const MEDIA_IDENTIFIER = '@'.charCodeAt(0);
+const PSEUDO_IDENTIFIER = ':'.charCodeAt(0);
+const ATTRIBUTE_IDENTIFIER = '['.charCodeAt(0);
 
 export default class Base<TStyle extends Style> {
   public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
@@ -36,7 +37,7 @@ export default class Base<TStyle extends Style> {
       theme: Theme | undefined,
       resolved: ResolvedStyle = {},
       media?: string,
-      pseudo?: string,
+      selector?: string,
     ) => {
       const properties = Object.keys(style);
 
@@ -55,8 +56,8 @@ export default class Base<TStyle extends Style> {
 
         if (process.env.NODE_ENV !== 'production') {
           const issueTransformer = (object: any) => {
-            if (pseudo) {
-              object = { [pseudo]: object };
+            if (selector) {
+              object = { [selector]: object };
             }
 
             if (media) {
@@ -134,11 +135,10 @@ export default class Base<TStyle extends Style> {
         if (
           property === ANIMATION_NAME ||
           property === FONT_FAMILY ||
-          // String, number or undefined
           typeof value !== 'object' ||
           Array.isArray(value)
         ) {
-          const declarations = getIndex(resolved, media, pseudo);
+          const declarations = getIndex(resolved, media, selector);
 
           if (!(property in declarations)) {
             if (typeof value === 'object') {
@@ -151,9 +151,9 @@ export default class Base<TStyle extends Style> {
                   const keyframe = keyframes[j];
                   if (typeof keyframe === 'object') {
                     const list: ResolvedDeclarationList = {};
-                    for (const identifier in keyframe) {
-                      const block = reverse(resolve(keyframe[identifier], theme));
-                      list[identifier] = transformer ? transformer(block) : block;
+                    for (const key in keyframe) {
+                      const block = reverse(resolve(keyframe[key], theme));
+                      list[key] = transformer ? transformer(block) : block;
                     }
 
                     names[j] = injector().injectKeyframes(list);
@@ -191,14 +191,22 @@ export default class Base<TStyle extends Style> {
           continue;
         }
 
-        // Media or pseudo
-        if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
+        const identifier = property.charCodeAt(0);
+
+        // Media or pseudo/attribute selector
+        if (
+          identifier === MEDIA_IDENTIFIER ||
+          identifier === PSEUDO_IDENTIFIER ||
+          identifier === ATTRIBUTE_IDENTIFIER
+        ) {
           resolve(
             value,
             theme,
             resolved,
-            property[0] === MEDIA_IDENTIFIER ? property : media,
-            property[0] === PSEUDO_IDENTIFIER ? (pseudo || '') + property : pseudo,
+            identifier === MEDIA_IDENTIFIER ? property : media,
+            identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER
+              ? (selector || '') + property
+              : selector,
           );
           continue;
         }
@@ -221,7 +229,7 @@ export default class Base<TStyle extends Style> {
               theme,
               resolved,
               media,
-              pseudo,
+              selector,
             );
           }
 
@@ -233,7 +241,7 @@ export default class Base<TStyle extends Style> {
               theme,
               resolved,
               media,
-              pseudo,
+              selector,
             );
           }
 
@@ -243,7 +251,7 @@ export default class Base<TStyle extends Style> {
               theme,
               resolved,
               media,
-              pseudo,
+              selector,
             );
           }
         }
@@ -255,15 +263,15 @@ export default class Base<TStyle extends Style> {
     const injectClassName = (
       declarations: ResolvedDeclarations,
       media: string | undefined,
-      pseudo: string | undefined,
-    ) => injector(media).injectClassName(transformer ? transformer(declarations) : declarations, pseudo);
+      selector: string | undefined,
+    ) => injector(media).injectClassName(transformer ? transformer(declarations) : declarations, selector);
 
     const cache: Cache = {};
 
     const inject =
       atomic === false
         ? // Non-atomic style
-          (resolved: ResolvedStyle, media?: string, pseudo?: string) => {
+          (resolved: ResolvedStyle, media?: string, selector?: string) => {
             let classNames = '';
             const keys = Object.keys(resolved);
             const blocks: { [property: string]: ResolvedDeclarations } = {};
@@ -275,9 +283,13 @@ export default class Base<TStyle extends Style> {
                 continue;
               }
 
+              const identifier = key.charCodeAt(0);
+
               const object =
-                key[0] === MEDIA_IDENTIFIER || key[0] === PSEUDO_IDENTIFIER
-                  ? // Media or pseudo
+                identifier === MEDIA_IDENTIFIER ||
+                identifier === PSEUDO_IDENTIFIER ||
+                identifier === ATTRIBUTE_IDENTIFIER
+                  ? // Media or pseudo/attribute selector
                     blocks
                   : // Group declarations
                     (blocks[NON_ATOMIC_KEY] = blocks[NON_ATOMIC_KEY] || {});
@@ -287,12 +299,13 @@ export default class Base<TStyle extends Style> {
 
             for (const rule in blocks) {
               if (rule === NON_ATOMIC_KEY) {
-                classNames += ' ' + injectClassName(blocks[rule], media, pseudo);
+                classNames += ' ' + injectClassName(blocks[rule], media, selector);
               } else {
+                const identifier = rule.charCodeAt(0);
                 classNames += inject(
                   blocks[rule],
-                  rule[0] === MEDIA_IDENTIFIER ? rule.slice(7) : media,
-                  rule[0] === PSEUDO_IDENTIFIER ? rule : pseudo,
+                  identifier === MEDIA_IDENTIFIER ? rule.slice(7) : media,
+                  identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER ? rule : selector,
                 );
               }
             }
@@ -300,10 +313,10 @@ export default class Base<TStyle extends Style> {
             return classNames;
           }
         : // Atomic style
-          (resolved: ResolvedStyle, media?: string, pseudo?: string) => {
+          (resolved: ResolvedStyle, media?: string, selector?: string) => {
             let classNames = '';
             const properties = Object.keys(resolved);
-            const index = getIndex(cache, media, pseudo);
+            const index = getIndex(cache, media, selector);
 
             for (let i = properties.length - 1; i >= 0; i--) {
               const property = properties[i];
@@ -313,12 +326,18 @@ export default class Base<TStyle extends Style> {
                 continue;
               }
 
-              // Media or pseudo
-              if (property[0] === MEDIA_IDENTIFIER || property[0] === PSEUDO_IDENTIFIER) {
+              const identifier = property.charCodeAt(0);
+
+              // Media or pseudo/attribute selector
+              if (
+                identifier === MEDIA_IDENTIFIER ||
+                identifier === PSEUDO_IDENTIFIER ||
+                identifier === ATTRIBUTE_IDENTIFIER
+              ) {
                 classNames += inject(
                   value as ResolvedDeclarations,
-                  property[0] === MEDIA_IDENTIFIER ? property.slice(7) : media,
-                  property[0] === PSEUDO_IDENTIFIER ? property : pseudo,
+                  identifier === MEDIA_IDENTIFIER ? property.slice(7) : media,
+                  identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER ? property : selector,
                 );
                 continue;
               }
@@ -333,14 +352,14 @@ export default class Base<TStyle extends Style> {
                   continue;
                 }
 
-                const className = injectClassName(declaration, media, pseudo);
+                const className = injectClassName(declaration, media, selector);
                 classNames += ' ' + (cachedValues[value] = className);
 
                 continue;
               }
 
               // Array
-              classNames += ' ' + injectClassName(declaration, media, pseudo);
+              classNames += ' ' + injectClassName(declaration, media, selector);
             }
 
             return classNames;
@@ -368,15 +387,19 @@ export default class Base<TStyle extends Style> {
   }
 }
 
-function getIndex<TIndex extends any>(indexes: TIndex, media: string | undefined, pseudo: string | undefined): TIndex {
+function getIndex<TIndex extends any>(
+  indexes: TIndex,
+  media: string | undefined,
+  selector: string | undefined,
+): TIndex {
   let index = indexes;
 
   if (media) {
     index = index[media] = index[media] || ({} as TIndex);
   }
 
-  if (pseudo) {
-    return (index[pseudo] = index[pseudo] || ({} as TIndex));
+  if (selector) {
+    return (index[selector] = index[selector] || ({} as TIndex));
   } else {
     return index;
   }
