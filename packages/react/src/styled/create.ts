@@ -47,8 +47,8 @@ export function factory<TProps, TInstance>(
   const Component = isElementType(type)
     ? React.forwardRef((props: ExternalProps<TProps>, ref: React.Ref<TInstance>) => {
         const { css: dynamics, ...restProps } = props;
-        const pre = React.useContext(StyleContext)?.[type.value];
-        const [apply] = useGlitz(styleToArray(pre, statics, dynamics));
+        const { universal, [type.value]: pre } = React.useContext(StyleContext) ?? {};
+        const [apply] = useGlitz(styleToArray(universal, pre, statics, dynamics));
 
         return React.createElement<any>(type.value, {
           ...restProps,

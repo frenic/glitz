@@ -3,7 +3,9 @@ import * as React from 'react';
 import { StyledElementFunctions } from '../styled/types';
 import { ElementPreStyle, StyleContext } from './context';
 
-export type PreStyleProps = { [tag in keyof StyledElementFunctions]?: Style };
+type PreStyleKeys = keyof StyledElementFunctions | 'universal';
+
+export type PreStyleProps = { [tag in PreStyleKeys]?: Style };
 
 type StyleProviderProps = PreStyleProps & { include?: PreStyleProps };
 
@@ -12,7 +14,7 @@ export function StyleProvider({ children, include, ...restProps }: React.PropsWi
 
   for (const map of [include, restProps]) {
     if (map) {
-      let tag: keyof StyledElementFunctions;
+      let tag: PreStyleKeys;
       for (tag in map) {
         pre[tag] = tag in pre ? [...pre[tag], map[tag]!] : [map[tag]!];
       }
