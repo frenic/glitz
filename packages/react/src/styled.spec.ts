@@ -65,14 +65,14 @@ describe('react styled', () => {
       ),
     );
   });
-  it('renders styled component with memo', () => {
+  it('renders styled component with memo', async () => {
+    let updates = 0;
+    let renders = 0;
     const StyledComponent = styled(
       React.memo((props: StyledProps) => {
+        renders++;
         expect(props.compose()).toEqual([{ color: 'red' }]);
-        return React.createElement(styled.Div, {
-          css: props.compose(),
-          ref: (el: HTMLDivElement) => expect(el.className).toBe('a'),
-        });
+        return null;
       }),
       { color: 'red' },
     );
@@ -82,9 +82,22 @@ describe('react styled', () => {
         {
           glitz: new GlitzClient(),
         },
-        React.createElement(StyledComponent),
+        React.createElement(
+          class extends React.Component {
+            public componentDidMount() {
+              expect(renders).toBe(1);
+              this.forceUpdate();
+            }
+            public render() {
+              updates++;
+              return React.createElement(StyledComponent);
+            }
+          },
+        ),
       ),
     );
+    expect(updates).toBe(2);
+    expect(renders).toBe(1);
   });
   it('renders styled component with forwardRef', () => {
     const StyledComponent = styled(

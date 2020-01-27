@@ -22,9 +22,9 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
   const lastFinalStylesRef = useRef<StyleArray>([]);
   const lastClassNamesRef = useRef<string | null>(null);
 
-  const apply = useCallback(() => {
-    const finalStyles: StyleArray = styleToArray(inputStyles);
+  const finalStyles = styleToArray(inputStyles);
 
+  const apply = useCallback(() => {
     if (!finalStyles) {
       return;
     }
@@ -67,11 +67,11 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
     lastFinalStylesRef.current = finalStyles;
 
     return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme));
-  }, [inputStyles, glitz, theme]);
+  }, [...finalStyles, glitz, theme]);
 
   const compose = useCallback(
-    (defaults?: StyleOrStyleArray | StyledDecorator): StyleArray => styleToArray(defaults, inputStyles),
-    [inputStyles],
+    (defaults?: StyleOrStyleArray | StyledDecorator): StyleArray => styleToArray(defaults, finalStyles),
+    finalStyles,
   );
 
   return [apply, compose] as const;
