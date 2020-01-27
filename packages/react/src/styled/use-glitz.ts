@@ -1,6 +1,5 @@
-import { GlitzClient, GlitzServer } from '@glitz/core';
-import { StyleArray, StyleOrStyleArray, Theme } from '@glitz/type';
-import { useCallback, useContext, useRef } from 'react';
+import { Style, StyleArray, StyleOrStyleArray } from '@glitz/type';
+import { useContext, useRef } from 'react';
 import { GlitzContext, ThemeContext } from '../components/context';
 import { StyledDecorator } from './decorator';
 
@@ -15,70 +14,91 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
 
   const theme = useContext(ThemeContext);
 
-  const hasWarnedCacheInvalidationsRef = useRef<boolean>(false);
-  const totalCacheInvalidationsRef = useRef<number>(0);
-  const lastGlitzRef = useRef<GlitzClient | GlitzServer>(glitz);
-  const lastThemeRef = useRef<Theme | undefined>(theme);
-  const lastFinalStylesRef = useRef<StyleArray>([]);
-  const lastClassNamesRef = useRef<string | null>(null);
-
   const finalStyles = styleToArray(inputStyles);
+  const hasWarnedCacheInvalidationsRef = useRef(false);
+  const totalCacheInvalidationsRef = useRef(0);
+  const lastGlitzRef = useRef(glitz);
+  const lastThemeRef = useRef(theme);
+  const lastFinalStylesRef = useRef<Style[]>(finalStyles);
+  const lastClassNamesRef = useRef<string>();
 
-  const apply = useCallback(() => {
-    if (!finalStyles) {
-      return;
-    }
+  const applyRef = useRef<() => string | undefined>();
 
-    if (
-      lastGlitzRef.current === glitz &&
-      lastThemeRef.current === theme &&
-      shallowEquals(lastFinalStylesRef.current, finalStyles) &&
-      typeof lastClassNamesRef.current === 'string'
-    ) {
-      return lastClassNamesRef.current;
-    }
+  const isValidGlitz = lastGlitzRef.current === glitz;
+  const isValidTheme = lastThemeRef.current === theme;
+  const isValidStyle = shallowEquals(lastFinalStylesRef.current, finalStyles);
 
-    if (process.env.NODE_ENV !== 'production') {
-      if (typeof requestAnimationFrame === 'function' && !hasWarnedCacheInvalidationsRef.current) {
-        totalCacheInvalidationsRef.current++;
-        const currentCacheInvalidations = totalCacheInvalidationsRef.current;
-
-        // Jump two frames to reset counter if there hasn't been any more renders with cache invalidation
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (totalCacheInvalidationsRef.current === currentCacheInvalidations) {
-              if (currentCacheInvalidations > 3) {
-                console.warn(
-                  "Multiple re-renders of a styled component with invalidated cache was detected. Either make sure it doesn't re-render or make sure the cache is intact. More info: https://git.io/fxYyd",
-                );
-
-                hasWarnedCacheInvalidationsRef.current = true;
-              }
-
-              totalCacheInvalidationsRef.current = 0;
-            }
-          });
-        });
+  if (!applyRef.current || !isValidGlitz || !isValidTheme || !isValidStyle) {
+    applyRef.current = () => {
+      if (!finalStyles) {
+        return;
       }
-    }
 
-    lastGlitzRef.current = glitz;
-    lastThemeRef.current = theme;
-    lastFinalStylesRef.current = finalStyles;
+      if (isValidGlitz && isValidTheme && isValidStyle && typeof lastClassNamesRef.current === 'string') {
+        return lastClassNamesRef.current || void 0;
+      }
 
-    return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme));
-  }, [...finalStyles, glitz, theme]);
+      if (process.env.NODE_ENV !== 'production') {
+        if (typeof requestAnimationFrame === 'function' && !hasWarnedCacheInvalidationsRef.current) {
+          totalCacheInvalidationsRef.current++;
+          const currentCacheInvalidations = totalCacheInvalidationsRef.current;
 
-  const compose = useCallback(
-    (defaults?: StyleOrStyleArray | StyledDecorator): StyleArray => styleToArray(defaults, finalStyles),
-    finalStyles,
-  );
+          // Jump two frames to reset counter if there hasn't been any more renders with cache invalidation
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (totalCacheInvalidationsRef.current === currentCacheInvalidations) {
+                if (currentCacheInvalidations > 3) {
+                  console.warn(
+                    "Multiple re-renders of a styled component with invalidated cache was detected. Either make sure it doesn't re-render or make sure the cache is intact. More info: https://git.io/fxYyd",
+                  );
 
-  return [apply, compose] as const;
+                  hasWarnedCacheInvalidationsRef.current = true;
+                }
+
+                totalCacheInvalidationsRef.current = 0;
+              }
+            });
+          });
+        }
+      }
+
+      lastGlitzRef.current = glitz;
+      lastThemeRef.current = theme;
+      lastFinalStylesRef.current = finalStyles;
+
+      return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
+    };
+  }
+
+  const composeRef = useRef<(defaults?: Style | Style[] | StyledDecorator) => Style[]>();
+
+  if (!composeRef.current || !isValidStyle) {
+    composeRef.current = (defaults?: Style | Style[] | StyledDecorator): Style[] => styleToArray(defaults, finalStyles);
+  }
+
+  return [applyRef.current, composeRef.current] as const;
 }
 
-export function styleToArray(...styles: Array<StyleOrStyleArray | StyledDecorator | undefined>): StyleArray {
-  return ([] as StyleArray).concat(...styles.map(style => (typeof style === 'function' ? style() : style || [])));
+export function styleToArray(...dirtyStyles: Array<Style | Style[] | StyledDecorator | undefined>): Style[] {
+  const styles: Style[] = [];
+
+  for (let style of dirtyStyles) {
+    if (!style) {
+      continue;
+    }
+    if (typeof style === 'function') {
+      style = style();
+    }
+    if (Array.isArray(style)) {
+      for (const entry of style) {
+        styles.push(entry);
+      }
+    } else {
+      styles.push(style);
+    }
+  }
+
+  return styles;
 }
 
 function shallowEquals(a: StyleArray, b: StyleArray) {
