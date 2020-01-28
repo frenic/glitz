@@ -13,6 +13,7 @@ Along with other built-in features like:
 - Atomic CSS (and non-Atomic CSS)
 - Shorthand expansion
 - Pseudo selectors/elements
+- Attribute selectors
 - Fallback values
 - `@media` support
 - `@keyframes` support
@@ -28,7 +29,8 @@ Along with other built-in features like:
 - [Getting started](#getting-started)
 - [Features](#features)
   - [Atomic](#atomic)
-  - [Pseudos](#pseudos)
+  - [Pseudo selectors/elements](#pseudo-selectorselements)
+  - [Attribute selectors](#attribute-selectors)
   - [Fallback values](#fallback-values)
   - [Keyframes](#keyframes)
   - [Font faces](#font-faces)
@@ -97,7 +99,7 @@ So the next time you use `display: 'flex'` it will reuse `a` instead of injectin
 
 _However, the side-effect of this is that you cannot guarantee the order of the CSS. That why it's recommended to always use longhand properties. More info about using [shorthand properties](#shorthand-properties) here. You're able to [disable this feature](#optionsatomic) but it's not recommended._
 
-### Pseudos
+### Pseudo selectors/elements
 
 You define your pseudo selector or element as the property name, followed with the style you wish to have for that pseudo.
 
@@ -109,6 +111,18 @@ const className = glitz.injectStyle({
     ':after': {
       content: '"Don\'t forget double quotes when doing this"',
     },
+  },
+});
+```
+
+### Attribute selectors
+
+You define your attribute selector as the property name, followed with the style you wish to have for that element.
+
+```ts
+const className = glitz.injectStyle({
+  '[disabled]': {
+    display: 'none',
   },
 });
 ```

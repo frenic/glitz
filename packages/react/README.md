@@ -11,7 +11,7 @@ const Box = styled.div({
   fontSize: '18px',
 });
 
-export default function Message(props) {
+function Message(props) {
   return (
     <Box css={{ color: props.important ? 'maroon' : 'teal' }}>
       Hi and <styled.Span css={{ fontWeight: 'bold' }}>welcome!</styled.Span>
@@ -26,14 +26,17 @@ export default function Message(props) {
 - [Caching](#caching)
 - [Deep style composition](#deep-style-composition)
 - [TypeScript](#typescript)
+- [Theming](#theming)
+- [Global styling](#global-styling)
 - [Server rendering](#server-rendering)
 - [API](#api)
   - [`<GlitzProvider />`](#glitzprovider)
   - [`styled.tagname`](#styledtagname)
-  - [`<styled.[Tagname] />`](#styledtagname)
+  - [`<styled.[Tagname] />`](#styledtagname-1)
   - [`styled(innerComponent: ComponentType, staticStyle?: Style)`](#styledinnercomponent-componenttype-staticstyle-style)
   - [`styled(embeddedStyle: Style)`](#styledembeddedstyle-style)
   - [`<ThemeProvider />`](#themeprovider)
+  - [`<StyleProvider />`](#styleprovider)
   - [`applyClassName(component: ComponentType)`](#applyclassnamecomponent-componenttype)
 
 ## Getting started
@@ -50,8 +53,8 @@ $ npm install @glitz/react
 import React from 'react';
 import { render } from 'react-dom';
 import { GlitzClient } from '@glitz/core';
-import transformers from '@glitz/transformers';
 import { GlitzProvider } from '@glitz/react';
+import transformers from '@glitz/transformers';
 import App from './App';
 
 const glitz = new GlitzClient({ transformer: transformers() });
@@ -93,7 +96,7 @@ Here's an example of the different results:
 ```tsx
 import { styled } from '@glitz/react';
 
-export const Link = styled.a({
+const Link = styled.a({
   color: 'grey',
   ':hover': {
     color: 'black',
@@ -101,7 +104,7 @@ export const Link = styled.a({
   },
 });
 
-export const InvertedLink = styled(Link, {
+const InvertedLink = styled(Link, {
   ':hover': {
     color: 'white',
   },
@@ -128,15 +131,13 @@ type Props = {
   title: string;
 };
 
-class Message extends React.Component<Props & StyledProps> {
-  render() {
-    return (
-      <styled.Div css={this.props.compose()}>
-        <h1>{this.props.title}</h1>
-        {this.props.children}
-      </styled.Div>
-    );
-  }
+function Message (props: Props & StyledProps) {
+  return (
+    <styled.Div css={this.props.compose()}>
+      <h1>{this.props.title}</h1>
+      {this.props.children}
+    </styled.Div>
+  );
 }
 
 export default styled(Message, {
@@ -151,10 +152,8 @@ const HelloWorld = styled(Message, {
   backgroundColor: 'green',
 });
 
-export default class Feature extends React.Component {
-  render() {
-    return <HelloWorld title="Hello world">Welcome</HelloWorld>;
-  }
+function HelloWorld {
+  return <HelloWorld title="Hello world">Welcome</HelloWorld>;
 }
 ```
 
@@ -168,6 +167,50 @@ declare module '@glitz/type' {
     linkColor: string;
     backgroundColor: string;
   }
+}
+```
+
+## Theming
+
+Provide a theme object that will accessed from style property values.
+
+```tsx
+import { styled, ThemeProvider } from '@glitz/react';
+
+function Text(props) {
+  return <styled.Span css={{ color: theme => theme.textColor }}>{props.children}</styled.Span>;
+}
+
+function Example() {
+  return (
+    <ThemeProvider theme={{ textColor: 'green' }}>
+      <Text>Some green text</Text>
+      <ThemeProvider theme={{ textColor: 'blue' }}>
+        <Text>Some blue text</Text>
+      </ThemeProvider>
+    </ThemeProvider>
+  );
+}
+```
+
+## Global styling
+
+Provide default style to predefined style elements. _It isn't global styles for real because it's still scoped to Glitz style elements only!_
+
+```tsx
+import { styled, StyleProvider } from '@glitz/react';
+
+function Example() {
+  return (
+    <StyleProvider
+      universal={{ color: 'green' }}
+      span={{ fontWeight: 'bold' }}
+      a={{ textDecoration: 'none', ':hover': { textDecoration: 'underline' } }}
+    >
+      <styled.Span>Some bold and green text</styled.Span>
+      <styled.A>Underlined when hovered</styled.A>
+    </StyleProvider>
+  );
 }
 ```
 
@@ -232,13 +275,13 @@ Dynamic style are in the other hand inside using the `css` prop _(see next examp
 ```jsx
 import { styled } from '@glitz/react';
 
-export default function Message(props) {
-  return <Box>Hi and welcome!</Box>;
-}
-
 const Box = styled.div({
   fontSize: '18px',
 });
+
+function Example(props) {
+  return <Box>Hi and welcome!</Box>;
+}
 ```
 
 ### `<styled.[Tagname] />`
@@ -262,13 +305,15 @@ You can also use capitalized tag name (initial letter upper cased) which exposes
 ```jsx
 import { styled } from '@glitz/react';
 
-export default function Message(props) {
+function Example(props) {
   return (
     <styled.Div
       css={{
-        fontSize: props.xlarge: '24px' : '18px',
+        fontSize: props.xlarge ? '24px' : '18px',
       }}
-    >Hi and welcome!</styled.Div>
+    >
+      Hi and welcome!
+    </styled.Div>
   );
 }
 ```
@@ -299,24 +344,22 @@ Compose style from one styled component to another styled component. This method
 import { styled } from '@glitz/react';
 import Message from './Message';
 
-class Welcome extends React.Component {
-  render() {
-    return (
-      <styled.Div
-        css={this.props.compose({
-          textDecoration: 'underline',
-        })}
-        // `compose()` will in this case return both:
-        // - `{ textDecoration: 'underline' }`
-        // - `{ fontWeight: 'bold' }`
-      >
-        Hi and welcome!
-      </styled.Div>
-    );
-  }
+function Welcome() {
+  return (
+    <styled.Div
+      css={this.props.compose({
+        textDecoration: 'underline',
+      })}
+      // `compose()` will in this case return both:
+      // - `{ textDecoration: 'underline' }`
+      // - `{ fontWeight: 'bold' }`
+    >
+      Hi and welcome!
+    </styled.Div>
+  );
 }
 
-export default styled(Welcome, {
+const Example = styled(Welcome, {
   fontWeight: 'bold',
 });
 ```
@@ -330,10 +373,8 @@ It's also possible to pass style as a single argument to `styled`. In that case,
 ```jsx
 import { styled } from '@glitz/react';
 
-class List extends React.Component {
-  render() {
-    return <styled.Ul css={props.compose()}>{props.items.map((item = <li key={item.key}>{item.text}</li>))}</styled.Ul>;
-  }
+function List(props) {
+  return <styled.Ul css={props.compose()}>{props.items.map((item = <li key={item.key}>{item.text}</li>))}</styled.Ul>;
 }
 
 const listStyled = styled({
@@ -342,12 +383,12 @@ const listStyled = styled({
 });
 
 /* Will be styled as a list with squares, `18px` and `bold` */
-export const ImportantList = listStyled(List, {
+const ImportantList = listStyled(List, {
   fontWeight: 'bold',
 });
 
 /* Will be styled as a list with squares and `24px` */
-export const LargeList = listStyled(List, {
+const LargeList = listStyled(List, {
   fontSize: '24px',
 });
 ```
@@ -382,7 +423,7 @@ const Link = styled.a({
   color: theme => theme.linkColor,
 });
 
-export default function() {
+function Example() {
   return (
     <ThemeProvider theme={theme1}>
       <Link>Link is maroon</Link>
@@ -390,6 +431,34 @@ export default function() {
         <Link>Link is teal</Link>
       </ThemeProvider>
     </ThemeProvider>
+  );
+}
+```
+
+### `<StyleProvider />`
+
+Provides default styling to Glitz style elements.
+
+```jsx
+<StyleProvider
+  [tagname]={Object}
+>
+```
+
+```jsx
+import React from 'react';
+import { styled, StyleProvider } from '@glitz/react';
+
+function Example() {
+  return (
+    <StyleProvider
+      universal={{ color: 'green' }}
+      span={{ fontWeight: 'bold' }}
+      a={{ textDecoration: 'none', ':hover': { textDecoration: 'underline' } }}
+    >
+      <styled.Span>Some bold and green text</styled.Span>
+      <styled.A>Underlined when hovered</styled.A>
+    </StyleProvider>
   );
 }
 ```
