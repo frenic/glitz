@@ -1,6 +1,6 @@
 {
   "name": "@glitz/reboot",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,10 +12,10 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/type": "^3.0.0-alpha.0"
+    "@glitz/type": "^3.0.0-alpha.1"
   },
   "devDependencies": {
-    "@glitz/react": "^4.0.0-alpha.3",
+    "@glitz/react": "^4.0.0-alpha.4",
     "@types/react": "*",
     "react": "^16.12"
   },
