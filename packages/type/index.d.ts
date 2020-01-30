@@ -16,7 +16,7 @@ export type ResolvedProperties = Merge<CSS.PropertiesFallback, TransformerProper
 export type FeaturedProperties = {
   [property in keyof ResolvedProperties]:
     | ResolvedProperties[property]
-    | ((theme: Theme | undefined) => ResolvedProperties[property]);
+    | ((theme: Theme) => ResolvedProperties[property]);
 };
 
 export type ResolvedValue = string | number | Array<string | number>;
@@ -32,7 +32,7 @@ export interface ResolvedDeclarationList {
 export type CommonValue = string | number | undefined | Array<string | number | undefined>;
 
 export type CommonStyle = {
-  [key: string]: CommonStyle | CommonValue | ((theme: Theme | undefined) => CommonValue);
+  [key: string]: CommonStyle | CommonValue | ((theme: Theme) => CommonValue);
 };
 
 export interface CommonDeclarations {

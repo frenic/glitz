@@ -34,7 +34,7 @@ export default class Base<TStyle extends Style> {
   ) {
     const resolve = (
       style: CommonStyle,
-      theme: Theme | undefined,
+      theme: Theme,
       resolved: ResolvedStyle = {},
       media?: string,
       selector?: string,
@@ -365,7 +365,7 @@ export default class Base<TStyle extends Style> {
             return classNames;
           };
 
-    this.injectStyle = (styles, theme) => {
+    this.injectStyle = (styles, theme = {}) => {
       const resolvedStyle: ResolvedStyle = {};
 
       if (Array.isArray(styles)) {
