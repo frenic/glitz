@@ -332,7 +332,7 @@ const className = glitz.injectStyle({
 Unknown properties will fail to be able to notify you when there's a typo. This means that function-like pseudos (e.g. `:not(:first-child)`) and media query selectors will be considered unknown properties. For those, there's two helper functions ([`pseudo`](#pseudo) and [`media`](#media)) that will make the selectors valid.
 
 ```ts
-import { media, pseudo } from '@glitz/core';
+import { media, selector } from '@glitz/core';
 
 const className = glitz.injectStyle({
   ...media(
@@ -341,7 +341,7 @@ const className = glitz.injectStyle({
       display: 'block',
     },
   ),
-  ...pseudo(':not(:first-child)', {
+  ...selector(':not(:first-child)', {
     textDecoration: 'underline',
   }),
 });
@@ -488,7 +488,7 @@ Default: `"glitz"`
 
 The dataset name that will be used to identify Glitz style elements.
 
-#### `options.transformer`
+#### `options.transformer()`
 
 ```ts
 transformer(style: Properties): Properties
@@ -512,7 +512,7 @@ import transformers from '@glitz/transformers';
 const glitz = new GlitzClient({ transformer: transformers() });
 ```
 
-#### `options.mediaOrder`
+#### `options.mediaOrder()`
 
 ```ts
 mediaOrder(a: string, b: string): number
@@ -566,15 +566,15 @@ Prefix all class names.
 
 ### Helpers
 
-#### `pseudo`
+#### `selector()`
 
 ```ts
-pseudo(selector: string, style?: Style): Style
+selector(selector: string, style?: Style): Style
 ```
 
 Validates the pseudo rule. See [example](#unknown-properties).
 
-#### `media`
+#### `media()`
 
 ```ts
 media(query: Query | string, style?: Style): Style
@@ -582,7 +582,7 @@ media(query: Query | string, style?: Style): Style
 
 Parse and validate [`Query`](https://github.com/frenic/glitz/blob/master/packages/core/src/types/query.ts) or string into a valid media **rule**. See [example](#unknown-properties).
 
-#### `query`
+#### `query()`
 
 ```ts
 query(query: Query): string
