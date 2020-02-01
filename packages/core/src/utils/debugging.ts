@@ -1,3 +1,9 @@
+export const defaultDisplayWarning = console.warn;
+export const defaultDisplayError = console.error;
+
+export type DisplayWarning = typeof defaultDisplayWarning;
+export type DisplayError = typeof defaultDisplayError;
+
 type AnyObject = { [property: string]: any };
 export let issueFormatter: (
   message: string,

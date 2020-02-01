@@ -1,8 +1,11 @@
 import { hyphenateProperty } from '../utils/parse';
-import { issueFormatter } from './debugging';
+import { DisplayWarning, issueFormatter } from './debugging';
 import { reverse } from './reverse';
 
-export let validateMixingShorthandLonghand: (object: { [property: string]: any }) => void = () => {
+export let validateMixingShorthandLonghand: (
+  object: { [property: string]: any },
+  warn: DisplayWarning,
+) => void = () => {
   // noop
 };
 
@@ -101,10 +104,10 @@ if (process.env.NODE_ENV !== 'production') {
     transition: ['transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay'],
   };
 
-  validateMixingShorthandLonghand = object => {
+  validateMixingShorthandLonghand = (object, warn) => {
     const hyphenatedProperties = Object.keys(object).reduce<{ [property: string]: string }>((properties, property) => {
       if (typeof object[property] === 'object' && !Array.isArray(object[property])) {
-        validateMixingShorthandLonghand(object[property]);
+        validateMixingShorthandLonghand(object[property], warn);
       }
       properties[hyphenateProperty(property)] = property;
       return properties;
@@ -114,7 +117,7 @@ if (process.env.NODE_ENV !== 'production') {
       if (property in shorthands) {
         for (const longhand of shorthands[property]) {
           if (longhand in hyphenatedProperties) {
-            console.warn(
+            warn(
               ...issueFormatter(
                 `Inserted style had a longhand property \`${hyphenatedProperties[longhand]}\` mixed with its corresponding shorthand property \`${hyphenatedProperties[property]}\` may likely cause some unexpected behavior in:`,
                 object,

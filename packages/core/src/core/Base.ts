@@ -11,7 +11,13 @@ import {
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
-import { issueFormatter } from '../utils/debugging';
+import {
+  defaultDisplayError,
+  defaultDisplayWarning,
+  DisplayError,
+  DisplayWarning,
+  issueFormatter,
+} from '../utils/debugging';
 import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
 import { reverse } from '../utils/reverse';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
@@ -26,7 +32,7 @@ const PSEUDO_IDENTIFIER = ':'.charCodeAt(0);
 const ATTRIBUTE_IDENTIFIER = '['.charCodeAt(0);
 
 export default class Base<TStyle extends Style> {
-  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
+  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme, warn?: DisplayWarning, error?: DisplayError) => string;
   constructor(
     injector: (media?: string) => InjectorClient | InjectorServer,
     transformer: Transformer | undefined,
@@ -35,6 +41,8 @@ export default class Base<TStyle extends Style> {
     const resolve = (
       style: CommonStyle,
       theme: Theme,
+      warn: DisplayWarning,
+      error: DisplayError,
       resolved: ResolvedStyle = {},
       media?: string,
       selector?: string,
@@ -68,7 +76,7 @@ export default class Base<TStyle extends Style> {
           };
 
           if (['undefined', 'string', 'number', 'object'].indexOf(typeof value) === -1) {
-            console.error(
+            error(
               ...issueFormatter(
                 `Value from property \`${property}\` has to be a string, number, plain object or array in:`,
                 style,
@@ -79,7 +87,7 @@ export default class Base<TStyle extends Style> {
             );
           }
           if (value === '') {
-            console.error(
+            error(
               ...issueFormatter(
                 `Value from property \`${property}\` is an empty string and may cause some unexpected behavior in:`,
                 style,
@@ -90,7 +98,7 @@ export default class Base<TStyle extends Style> {
             );
           }
           if (typeof value === 'number' && Number.isNaN(value)) {
-            console.error(
+            error(
               ...issueFormatter(
                 `Value from property \`${property}\` is a NaN and may cause some unexpected behavior in:`,
                 style,
@@ -101,7 +109,7 @@ export default class Base<TStyle extends Style> {
             );
           }
           if (typeof value === 'number' && !Number.isFinite(value)) {
-            console.error(
+            error(
               ...issueFormatter(
                 `Value from property \`${property}\` is an infinite number and may cause some unexpected behavior in:`,
                 style,
@@ -112,7 +120,7 @@ export default class Base<TStyle extends Style> {
             );
           }
           if (typeof value === 'object' && Object.keys(value).length === 0) {
-            console.warn(
+            warn(
               ...issueFormatter(
                 `Value from property \`${property}\` is an empty object and can be removed in:`,
                 style,
@@ -152,7 +160,7 @@ export default class Base<TStyle extends Style> {
                   if (typeof keyframe === 'object') {
                     const list: ResolvedDeclarationList = {};
                     for (const key in keyframe) {
-                      const block = reverse(resolve(keyframe[key], theme));
+                      const block = reverse(resolve(keyframe[key], theme, warn, error));
                       list[key] = transformer ? transformer(block) : block;
                     }
 
@@ -172,7 +180,7 @@ export default class Base<TStyle extends Style> {
 
                 for (const font of fonts) {
                   if (typeof font === 'object') {
-                    const fontFace = reverse(resolve(font, theme));
+                    const fontFace = reverse(resolve(font, theme, warn, error));
                     const name = injector().injectFontFace(transformer ? transformer(fontFace) : fontFace);
                     if (names.indexOf(name) === -1) {
                       names.push(name);
@@ -202,6 +210,8 @@ export default class Base<TStyle extends Style> {
           resolve(
             value,
             theme,
+            warn,
+            error,
             resolved,
             identifier === MEDIA_IDENTIFIER ? property : media,
             identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER
@@ -227,6 +237,8 @@ export default class Base<TStyle extends Style> {
             resolve(
               { [property + 'Top']: longhandValue, [property + 'Bottom']: longhandValue },
               theme,
+              warn,
+              error,
               resolved,
               media,
               selector,
@@ -239,6 +251,8 @@ export default class Base<TStyle extends Style> {
             resolve(
               { [property + 'Left']: longhandValue, [property + 'Right']: longhandValue },
               theme,
+              warn,
+              error,
               resolved,
               media,
               selector,
@@ -249,6 +263,8 @@ export default class Base<TStyle extends Style> {
             resolve(
               { [property + extension[0].toUpperCase() + extension.slice(1)]: longhandValue },
               theme,
+              warn,
+              error,
               resolved,
               media,
               selector,
@@ -365,21 +381,21 @@ export default class Base<TStyle extends Style> {
             return classNames;
           };
 
-    this.injectStyle = (styles, theme = {}) => {
+    this.injectStyle = (styles, theme = {}, warn = defaultDisplayWarning, error = defaultDisplayError) => {
       const resolvedStyle: ResolvedStyle = {};
 
       if (Array.isArray(styles)) {
         for (let i = styles.length - 1; i >= 0; i--) {
-          resolve(styles[i], theme, resolvedStyle);
+          resolve(styles[i], theme, warn, error, resolvedStyle);
         }
       } else {
-        resolve(styles, theme, resolvedStyle);
+        resolve(styles, theme, warn, error, resolvedStyle);
       }
 
       const classNames = inject(resolvedStyle);
 
       if (process.env.NODE_ENV !== 'production') {
-        validateMixingShorthandLonghand(resolvedStyle);
+        validateMixingShorthandLonghand(resolvedStyle, warn);
       }
 
       return classNames.slice(1);

@@ -838,16 +838,16 @@ describe('client', () => {
   });
   it('errors with invalid value type', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.error = jest.fn());
+    const error = jest.fn();
     const value = Symbol();
 
     try {
-      client.injectStyle({ ['color' as any]: value });
+      client.injectStyle({ ['color' as any]: value }, undefined, undefined, error);
     } catch {
       /* noop */
     }
 
-    expect(logger).toHaveBeenCalledWith(
+    expect(error).toHaveBeenCalledWith(
       `Value from property \`color\` has to be a string, number, plain object or array in:
 
 {
@@ -860,11 +860,11 @@ describe('client', () => {
   });
   it('errors with empty value', () => {
     const client = new GlitzClient<TestStyle>();
-    const error = (console.error = jest.fn());
-    const warn = (console.warn = jest.fn());
+    const error = jest.fn();
+    const warn = jest.fn();
 
     try {
-      client.injectStyle({ ['color' as any]: '' });
+      client.injectStyle({ ['color' as any]: '' }, undefined, warn, error);
     } catch {
       /* noop */
     }
@@ -891,15 +891,15 @@ describe('client', () => {
   });
   it('errors with NaN value', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.error = jest.fn());
+    const error = jest.fn();
 
     try {
-      client.injectStyle({ ['color' as any]: NaN });
+      client.injectStyle({ ['color' as any]: NaN }, undefined, undefined, error);
     } catch {
       /* noop */
     }
 
-    expect(logger).toHaveBeenCalledWith(
+    expect(error).toHaveBeenCalledWith(
       `Value from property \`color\` is a NaN and may cause some unexpected behavior in:
 
 {
@@ -912,15 +912,15 @@ describe('client', () => {
   });
   it('errors with Infinity value', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.error = jest.fn());
+    const error = jest.fn();
 
     try {
-      client.injectStyle({ ['color' as any]: Infinity });
+      client.injectStyle({ ['color' as any]: Infinity }, undefined, undefined, error);
     } catch {
       /* noop */
     }
 
-    expect(logger).toHaveBeenCalledWith(
+    expect(error).toHaveBeenCalledWith(
       `Value from property \`color\` is an infinite number and may cause some unexpected behavior in:
 
 {
@@ -933,12 +933,12 @@ describe('client', () => {
   });
   it('warns with empty object value', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.warn = jest.fn());
+    const warn = jest.fn();
     const value = {};
 
-    client.injectStyle({ ['color' as any]: value });
+    client.injectStyle({ ['color' as any]: value }, undefined, warn);
 
-    expect(logger).toHaveBeenCalledWith(
+    expect(warn).toHaveBeenCalledWith(
       `Value from property \`color\` is an empty object and can be removed in:
 
 {
@@ -951,22 +951,22 @@ describe('client', () => {
   });
   it('warns with mixed longhand and shorthand', () => {
     const client = new GlitzClient<TestStyle>();
-    const logger = (console.warn = jest.fn());
+    const warn = jest.fn();
 
-    client.injectStyle({ border: { left: { width: 0 } }, borderLeftWidth: 0 });
-    expect(logger).toHaveBeenCalledTimes(0);
+    client.injectStyle({ border: { left: { width: 0 } }, borderLeftWidth: 0 }, undefined, warn);
+    expect(warn).toHaveBeenCalledTimes(0);
 
-    client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(0);
+    client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle, undefined, warn);
+    expect(warn).toHaveBeenCalledTimes(0);
 
-    client.injectStyle({ border: 0, borderWidth: 0 } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(1);
+    client.injectStyle({ border: 0, borderWidth: 0 } as TestStyle, undefined, warn);
+    expect(warn).toHaveBeenCalledTimes(1);
 
-    client.injectStyle([{ border: 0 }, { borderWidth: 0 }] as TestStyle[]);
-    expect(logger).toHaveBeenCalledTimes(2);
+    client.injectStyle([{ border: 0 }, { borderWidth: 0 }] as TestStyle[], undefined, warn);
+    expect(warn).toHaveBeenCalledTimes(2);
 
-    client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(3);
+    client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle, undefined, warn);
+    expect(warn).toHaveBeenCalledTimes(3);
   });
   it('passes theme', () => {
     const style = createStyle();

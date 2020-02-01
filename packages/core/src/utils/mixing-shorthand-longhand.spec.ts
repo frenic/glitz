@@ -2,15 +2,18 @@ import { validateMixingShorthandLonghand } from './mixing-shorthand-longhand';
 
 describe('mixing shorthand longhand', () => {
   it('will log error', () => {
-    const logger1 = (console.warn = jest.fn());
+    const warn = jest.fn();
 
-    validateMixingShorthandLonghand({
-      // It should be reversed
-      borderBottomColor: 1,
-      border: 1,
-    });
+    validateMixingShorthandLonghand(
+      {
+        // It should be reversed
+        borderBottomColor: 1,
+        border: 1,
+      },
+      warn,
+    );
 
-    expect(logger1).toHaveBeenCalledWith(
+    expect(warn).toHaveBeenCalledWith(
       `Inserted style had a longhand property \`borderBottomColor\` mixed with its corresponding shorthand property \`border\` may likely cause some unexpected behavior in:
 
 {
@@ -25,15 +28,18 @@ describe('mixing shorthand longhand', () => {
       1,
     );
 
-    const logger2 = (console.warn = jest.fn());
+    const warn2 = jest.fn();
 
-    validateMixingShorthandLonghand({
-      // It should be reversed
-      borderBottomColor: 1,
-      borderBottom: 1,
-    });
+    validateMixingShorthandLonghand(
+      {
+        // It should be reversed
+        borderBottomColor: 1,
+        borderBottom: 1,
+      },
+      warn2,
+    );
 
-    expect(logger2).toHaveBeenCalledWith(
+    expect(warn2).toHaveBeenCalledWith(
       `Inserted style had a longhand property \`borderBottomColor\` mixed with its corresponding shorthand property \`borderBottom\` may likely cause some unexpected behavior in:
 
 {
@@ -48,25 +54,31 @@ describe('mixing shorthand longhand', () => {
       1,
     );
 
-    const logger3 = (console.warn = jest.fn());
+    const warn3 = jest.fn();
 
-    validateMixingShorthandLonghand({
-      borderBottomColor: 1,
-      borderBottom: 1,
-      borderTopColor: 1,
-      borderTop: 1,
-    });
+    validateMixingShorthandLonghand(
+      {
+        borderBottomColor: 1,
+        borderBottom: 1,
+        borderTopColor: 1,
+        borderTop: 1,
+      },
+      warn3,
+    );
 
-    expect(logger3).toHaveBeenCalledTimes(2);
+    expect(warn3).toHaveBeenCalledTimes(2);
   });
   it("won't log error", () => {
-    const logger = (console.warn = jest.fn());
+    const warn = jest.fn();
 
-    validateMixingShorthandLonghand({
-      border: 1,
-      marginBottom: 1,
-    });
+    validateMixingShorthandLonghand(
+      {
+        border: 1,
+        marginBottom: 1,
+      },
+      warn,
+    );
 
-    expect(logger).toHaveBeenCalledTimes(0);
+    expect(warn).toHaveBeenCalledTimes(0);
   });
 });
