@@ -16,7 +16,7 @@
     "@glitz/type": "^3.0.0-alpha.2",
     "@types/react": "*",
     "@types/react-is": "*",
-    "react-is": "^16.12.0"
+    "react-is": "^16.13.1"
   },
   "peerDependencies": {
     "react": "^16.8"

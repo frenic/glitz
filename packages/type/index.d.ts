@@ -261,7 +261,6 @@ interface OffsetProperty {
   inlineStart?: FeaturedProperties['offsetInlineStart'];
   distance?: FeaturedProperties['offsetDistance'];
   path?: FeaturedProperties['offsetPath'];
-  position?: FeaturedProperties['offsetPosition'];
   rotate?: FeaturedProperties['offsetRotate'];
 }
 

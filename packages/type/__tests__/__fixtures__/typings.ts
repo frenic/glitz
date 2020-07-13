@@ -53,12 +53,10 @@ const css: Style = {
   },
 };
 
-const commonStyle: CommonStyle = {} as Style;
 const commonValue: CommonValue = '' as CommonDeclarations[keyof CommonDeclarations];
 const resolvedValue: ResolvedValue = '' as ResolvedDeclarations[keyof ResolvedDeclarations];
 
 // Avoid unread variables type error
 css;
-commonStyle;
 commonValue;
 resolvedValue;

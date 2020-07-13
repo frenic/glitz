@@ -152,7 +152,7 @@ export default class Base<TStyle extends Style> {
                   if (typeof keyframe === 'object') {
                     const list: ResolvedDeclarationList = {};
                     for (const key in keyframe) {
-                      const block = reverse(resolve(keyframe[key], theme));
+                      const block = reverse(resolve(keyframe[key] as CommonStyle, theme));
                       list[key] = transformer ? transformer(block) : block;
                     }
 
@@ -165,9 +165,7 @@ export default class Base<TStyle extends Style> {
 
               if (property === FONT_FAMILY) {
                 // Resolve `fontFace` object
-                const fonts = ([] as Array<string | FontFace>).concat(
-                  value as string | FontFace | Array<string | FontFace>,
-                );
+                const fonts = ([] as (string | FontFace)[]).concat(value as string | FontFace | (string | FontFace)[]);
                 const names = [];
 
                 for (const font of fonts) {
@@ -370,10 +368,10 @@ export default class Base<TStyle extends Style> {
 
       if (Array.isArray(styles)) {
         for (let i = styles.length - 1; i >= 0; i--) {
-          resolve(styles[i], theme, resolvedStyle);
+          resolve(styles[i] as CommonStyle, theme, resolvedStyle);
         }
       } else {
-        resolve(styles, theme, resolvedStyle);
+        resolve(styles as CommonStyle, theme, resolvedStyle);
       }
 
       const classNames = inject(resolvedStyle);
@@ -387,19 +385,19 @@ export default class Base<TStyle extends Style> {
   }
 }
 
-function getIndex<TIndex extends any>(
+function getIndex<TIndex extends { [key: string]: any }>(
   indexes: TIndex,
   media: string | undefined,
   selector: string | undefined,
 ): TIndex {
-  let index = indexes;
+  let index: TIndex = indexes;
 
   if (media) {
-    index = index[media] = index[media] || ({} as TIndex);
+    index = (index[media] as TIndex) = index[media] || ({} as TIndex);
   }
 
   if (selector) {
-    return (index[selector] = index[selector] || ({} as TIndex));
+    return ((index[selector] as TIndex) = index[selector] || ({} as TIndex));
   } else {
     return index;
   }

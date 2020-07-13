@@ -1,7 +1,7 @@
 import { ResolvedDeclarations } from '@glitz/type';
 
 export type Options = {
-  ignoreProperties?: string | RegExp | Array<string | RegExp>;
+  ignoreProperties?: string | RegExp | (string | RegExp)[];
 };
 
 export let createDevToolTransformer: (
@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== 'production') {
     const propertyCache: { [property: string]: string } = {};
 
     // Default ignore some font face properties that doesn't exist on elements
-    const defaultIgnores: Array<string | RegExp> = ['font-display', 'src', 'unicode-range'];
+    const defaultIgnores: (string | RegExp)[] = ['font-display', 'src', 'unicode-range'];
 
     function hyphenateProperty(property: string) {
       return property in propertyCache

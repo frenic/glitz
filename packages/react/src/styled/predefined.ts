@@ -44,7 +44,7 @@ export function assignPredefined<TTarget>(target: TTarget) {
   return target as TTarget & StyledElementFunctions & StyledElementComponents;
 }
 
-const predefinedElements: Array<keyof StyledElementFunctions> = [
+const predefinedElements: (keyof StyledElementFunctions)[] = [
   'a',
   'abbr',
   'address',

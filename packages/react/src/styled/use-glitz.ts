@@ -79,7 +79,7 @@ export default function useGlitz(inputStyles?: Style | Style[] | StyledDecorator
   return [applyRef.current, composeRef.current] as const;
 }
 
-export function styleToArray(...dirtyStyles: Array<Style | Style[] | StyledDecorator | undefined>): Style[] {
+export function styleToArray(...dirtyStyles: (Style | Style[] | StyledDecorator | undefined)[]): Style[] {
   const styles: Style[] = [];
 
   for (let style of dirtyStyles) {

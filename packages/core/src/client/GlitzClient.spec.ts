@@ -799,7 +799,7 @@ describe('client', () => {
   it('hydrates transformed properties', () => {
     function transformer(style: FeaturedProperties) {
       return {
-        ...(Object.keys(style) as Array<keyof FeaturedProperties>).reduce(
+        ...(Object.keys(style) as (keyof FeaturedProperties)[]).reduce(
           (result, key) => ({ ...result, [`-moz-${key}`]: `${style[key]}px`, [key]: `${style[key]}px` }),
           {},
         ),
