@@ -830,4 +830,24 @@ describe('react styled', () => {
     expect(logger).toHaveBeenCalledTimes(1);
     expect(renders).toBe(4);
   });
+  it('inherits default props when composing', () => {
+    const StyledComponent = styled(styled.Button);
+    StyledComponent.defaultProps = { type: 'button' };
+
+    const ComposedComponent = styled(StyledComponent);
+
+    const tree = mount(
+      React.createElement(
+        GlitzProvider,
+        {
+          glitz: new GlitzClient(),
+        },
+        React.createElement(ComposedComponent),
+      ),
+    );
+
+    const element = tree.getDOMNode() as HTMLButtonElement;
+
+    expect(element.type).toBe('button');
+  });
 });
