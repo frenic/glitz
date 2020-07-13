@@ -82,17 +82,21 @@ export function factory<TProps, TInstance>(
 
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
     [SECRET_COMPOSE](additionals?: Style[]) {
-      const NewComponent = factory(type, additionals ? statics.concat(additionals) : statics);
+      const NewStyled = factory(type, additionals ? statics.concat(additionals) : statics);
 
       if (Component.defaultProps) {
-        NewComponent.defaultProps = {};
+        NewStyled.defaultProps = {};
 
         for (const name in Component.defaultProps) {
-          (NewComponent.defaultProps as any)[name] = (Component.defaultProps as any)[name];
+          (NewStyled.defaultProps as any)[name] = (Component.defaultProps as any)[name];
         }
       }
 
-      return NewComponent;
+      if (process.env.NODE_ENV !== 'production') {
+        NewStyled.displayName = Component.displayName;
+      }
+
+      return NewStyled;
     },
   });
 

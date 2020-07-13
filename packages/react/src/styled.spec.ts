@@ -835,19 +835,15 @@ describe('react styled', () => {
     StyledComponent.defaultProps = { type: 'button' };
 
     const ComposedComponent = styled(StyledComponent);
+    expect(ComposedComponent.defaultProps).toEqual({ type: 'button' });
+  });
+  it('inherits display name when composing', () => {
+    const StyledComponent = styled(styled.Button);
+    expect(StyledComponent.displayName).toBe('Styled(button)');
 
-    const tree = mount(
-      React.createElement(
-        GlitzProvider,
-        {
-          glitz: new GlitzClient(),
-        },
-        React.createElement(ComposedComponent),
-      ),
-    );
+    StyledComponent.displayName = 'Test';
 
-    const element = tree.getDOMNode() as HTMLButtonElement;
-
-    expect(element.type).toBe('button');
+    const ComposedComponent = styled(StyledComponent);
+    expect(ComposedComponent.displayName).toBe('Test');
   });
 });
