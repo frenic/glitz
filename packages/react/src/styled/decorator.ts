@@ -1,9 +1,10 @@
+import { ComponentType } from 'react';
 import { Style } from '@glitz/type';
 import { StyledElementLike } from './apply-class-name';
 import { SECRET_DECORATOR } from './constants';
 import create from './create';
 import { isStyle, StyledCustom } from './custom';
-import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
+import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
 export interface StyledDecorator extends StyledCustom {
   [SECRET_DECORATOR]: true;
@@ -14,10 +15,10 @@ export interface StyledDecorator extends StyledCustom {
 export default function decorator(style: Style[]): StyledDecorator {
   const fn = (<TProps>(
     arg1?:
-      | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>
+      | StyledElementLike<ComponentType<TProps & StyledElementProps>>
       | StyledComponentWithRef<TProps, any>
       | StyledComponent<TProps>
-      | React.ComponentType<TProps & StyledProps>
+      | ComponentType<TProps>
       | StyledDecorator
       | Style,
     arg2?: Style,
@@ -43,11 +44,7 @@ export default function decorator(style: Style[]): StyledDecorator {
 }
 
 function isDecorator(
-  value:
-    | StyledElementLike<React.ComponentType<any>>
-    | StyledComponent<any>
-    | React.ComponentType<any>
-    | StyledDecorator,
+  value: StyledElementLike<ComponentType<any>> | StyledComponent<any> | ComponentType<any> | StyledDecorator,
 ): value is StyledDecorator {
   return SECRET_DECORATOR in value;
 }

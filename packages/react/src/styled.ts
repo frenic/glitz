@@ -1,7 +1,7 @@
 import { styledCustom } from './styled/custom';
 import { assignPredefined } from './styled/predefined';
 
-export { default as useStyle } from './styled/use-style';
+export { default as useStyle } from './styled/use-glitz';
 export * from './styled/apply-class-name';
 export * from './styled/types';
 

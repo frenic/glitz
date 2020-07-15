@@ -1,7 +1,7 @@
 // tslint:disable no-unused-expression max-classes-per-file
 
 import * as React from 'react';
-import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledProps } from '../..';
+import { applyClassName, GlitzProvider, styled, StyledElementProps } from '../..';
 import { GlitzClient, GlitzServer } from '../../../../core/src';
 
 const client = new GlitzClient();
@@ -32,28 +32,24 @@ const StyledButton = styled.button({});
   ref={React.createRef<HTMLButtonElement>()}
 />;
 
-const StyledFunctionComponentWithoutStyle = styled(props => <styled.Div css={props.compose({})} />);
+const StyledFunctionComponentWithoutStyle = styled(() => <styled.Div css={{}} />);
 <StyledFunctionComponentWithoutStyle css={{}} />;
 
-const StyledStyledFunctionComponentWithoutStyle = styled(props => (
-  <StyledFunctionComponentWithoutStyle css={props.compose({})} />
-));
+const StyledStyledFunctionComponentWithoutStyle = styled(() => <StyledFunctionComponentWithoutStyle css={{}} />);
 <StyledStyledFunctionComponentWithoutStyle css={{}} />;
 
-const StyledFunctionComponentWithStyle = styled(props => <styled.Div css={props.compose({})} />, {});
+const StyledFunctionComponentWithStyle = styled(() => <styled.Div css={{}} />, {});
 <StyledFunctionComponentWithStyle css={{}} />;
 
-const StyledFunctionComponentWithProps = styled((props: { x: string } & StyledProps) => (
-  <styled.Div css={props.compose({})} />
-));
+const StyledFunctionComponentWithProps = styled(({}: { x: string }) => <styled.Div css={{}} />);
 <StyledFunctionComponentWithProps x="" css={{}} />;
 
 const StyledStyledFunctionComponentWithProps = styled(StyledFunctionComponentWithProps);
 <StyledStyledFunctionComponentWithProps x="" css={{}} />;
 
-class ClassComponentWithoutProps extends React.Component<StyledProps> {
+class ClassComponentWithoutProps extends React.Component {
   public render() {
-    return <styled.Div css={this.props.compose({})} />;
+    return <styled.Div css={{}} />;
   }
 }
 const StyledClassComponentWithoutProps = styled(ClassComponentWithoutProps);
@@ -65,9 +61,9 @@ const StyledClassComponentWithoutProps = styled(ClassComponentWithoutProps);
   }}
 />;
 
-class ClassComponentStyledClassComponent extends React.Component<StyledProps> {
+class ClassComponentStyledClassComponent extends React.Component {
   public render() {
-    return <StyledClassComponentWithoutProps css={this.props.compose({})} />;
+    return <StyledClassComponentWithoutProps css={{}} />;
   }
 }
 const StyledClassComponentStyledClassComponent = styled(ClassComponentStyledClassComponent);
@@ -88,9 +84,9 @@ const StyledClassComponentWithoutPropsWithStyle = styled(ClassComponentWithoutPr
   }}
 />;
 
-class ClassComponentWithProps extends React.Component<{ x: string } & StyledProps> {
+class ClassComponentWithProps extends React.Component<{ x: string }> {
   public render() {
-    return <styled.Div css={this.props.compose({})} />;
+    return <styled.Div css={{}} />;
   }
 }
 const StyledClassComponentWithProps = styled(ClassComponentWithProps);
@@ -116,7 +112,7 @@ const StyledStyledClassComponentWithProps = styled(StyledClassComponentWithProps
 const styledDecoratorA = styled({});
 const styledDecoratorB = styled({});
 const styledDecoratorAB = styledDecoratorA(styledDecoratorB({}));
-const StyledFunctionComponentWithDecorator = styledDecoratorAB(props => <styled.Div css={props.compose({})} />);
+const StyledFunctionComponentWithDecorator = styledDecoratorAB(() => <styled.Div css={{}} />);
 <StyledFunctionComponentWithDecorator css={{}} />;
 
 const StyledClassComponentWithDecorator = styledDecoratorAB(ClassComponentWithoutProps);
@@ -176,15 +172,13 @@ function connect<TProps>(Component: React.ComponentType<TProps>): React.Function
 const R = connect(StyledFunctionComponentWithoutStyle);
 <R css={{}} />;
 
-styled(props => <styled.Div css={props.compose(styledDecoratorA)} />);
-styled(props => <styled.Div css={props.compose(styledDecoratorA({}))} />);
+styled(() => <styled.Div css={styledDecoratorA} />);
+styled(() => <styled.Div css={styledDecoratorA({})} />);
 <styled.Div css={styledDecoratorA} />;
 <styled.Div css={styledDecoratorA({})} />;
 
 const StyledForwardRefComponent = styled(
-  React.forwardRef((props: StyledProps, ref: React.Ref<HTMLButtonElement>) => (
-    <styled.Button css={props.compose()} ref={ref} />
-  )),
+  React.forwardRef(({}, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
 );
 <StyledForwardRefComponent
   css={{}}
@@ -194,18 +188,16 @@ const StyledForwardRefComponent = styled(
   }}
 />;
 
-const StyledFunctionComponentWithUnionProps = styled(
-  (props: ({ a: boolean; b?: never } | { a?: never; b: boolean }) & StyledProps) => {
-    if ('a' in props && props.a === true) {
-      return null;
-    }
-    if ('b' in props && props.b === true) {
-      return null;
-    }
-
+const StyledFunctionComponentWithUnionProps = styled((props: { a: boolean; b?: never } | { a?: never; b: boolean }) => {
+  if ('a' in props && props.a === true) {
     return null;
-  },
-);
+  }
+  if ('b' in props && props.b === true) {
+    return null;
+  }
+
+  return null;
+});
 
 <StyledFunctionComponentWithUnionProps a />;
 <StyledFunctionComponentWithUnionProps b />;
@@ -223,13 +215,13 @@ styled({ color: '', unknownProperty: 0 });
 
 styled({ color: 0 });
 
-styled(props => <styled.Div css={props.compose({ color: '', unknownProperty: 0 })} />);
+styled(() => <styled.Div css={{ color: '', unknownProperty: 0 }} />);
 
-styled(props => <styled.Div css={props.compose({ color: 0 })} />);
+styled(() => <styled.Div css={{ color: 0 }} />);
 
-styled(props => <styled.Div css={props.compose()} />, { color: '', unknownProperty: 0 });
+styled(() => <styled.Div css={{}} />, { color: '', unknownProperty: 0 });
 
-styled(props => <styled.Div css={props.compose()} />, { color: 0 });
+styled(() => <styled.Div css={{}} />, { color: 0 });
 
 styled(() => new Promise(r => r()), { color: '', unknownProperty: 0 });
 

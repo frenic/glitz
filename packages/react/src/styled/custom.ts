@@ -1,52 +1,62 @@
 import { Style } from '@glitz/type';
-import * as React from 'react';
+import {
+  FunctionComponent,
+  Component,
+  ComponentState,
+  ComponentClass,
+  ClassType,
+  ForwardRefExoticComponent,
+  RefAttributes,
+  ComponentType,
+} from 'react';
 import { isValidElementType } from 'react-is';
 import { StyledElementLike } from './apply-class-name';
 import create, { isStyledComponent } from './create';
 import decorator, { StyledDecorator } from './decorator';
 import { isType } from './predefined';
-import { StyledComponent, StyledComponentWithRef, StyledElementProps, StyledProps } from './types';
+import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
 export interface StyledCustom {
+  (component: FunctionComponent, style?: Style): StyledComponent<{}>;
+  <TProps>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  // tslint:disable-next-line: unified-signatures
   <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Style): StyledComponentWithRef<
     TProps,
     TInstance
   >;
   <TProps extends StyledElementProps>(
-    component: StyledElementLike<React.FunctionComponent<TProps>>,
+    component: StyledElementLike<FunctionComponent<TProps>>,
     style?: Style,
   ): StyledComponent<TProps>;
-  <TProps extends StyledElementProps, TInstance extends React.Component<TProps, React.ComponentState>>(
-    component: StyledElementLike<React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>>,
+  <TProps extends StyledElementProps, TInstance extends Component<TProps, ComponentState>>(
+    component: StyledElementLike<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
     style?: Style,
   ): StyledComponentWithRef<TProps, TInstance>;
-  <TProps extends StyledProps, TInstance>(
-    component: React.ForwardRefExoticComponent<TProps & React.RefAttributes<TInstance>>,
+  <TProps, TInstance>(
+    component: ForwardRefExoticComponent<TProps & RefAttributes<TInstance>>,
     style?: Style,
   ): StyledComponentWithRef<TProps, TInstance>;
-  <TProps extends StyledProps>(component: React.FunctionComponent<TProps>, style?: Style): StyledComponent<TProps>;
-  <TProps extends StyledProps, TInstance extends React.Component<TProps, React.ComponentState>>(
-    component: React.ClassType<TProps, TInstance, React.ComponentClass<TProps>>,
+  <TProps, TInstance extends Component<TProps, ComponentState>>(
+    component: ClassType<TProps, TInstance, ComponentClass<TProps>>,
     style?: Style,
   ): StyledComponentWithRef<TProps, TInstance>;
 
   // This overload prevents errors on `component` when `style` is incorrect
   // and enables usage of generic parameter to provide prop type
-  (
-    component: StyledElementLike<React.ComponentType<StyledElementProps>> | React.ComponentType<StyledProps>,
-    style?: Style,
-  ): StyledComponent<any>;
+  (component: StyledElementLike<ComponentType<StyledElementProps>> | ComponentType, style?: Style): StyledComponent<
+    any
+  >;
 
   (style: Style): StyledDecorator;
 }
 
 function custom<TProps>(
   arg1:
-    | StyledElementLike<React.ComponentType<StyledElementProps>>
+    | StyledElementLike<ComponentType<StyledElementProps>>
     | StyledComponentWithRef<any, any>
     | StyledComponent<any>
-    | React.ComponentType<StyledProps>,
+    | ComponentType,
   arg2?: Style,
 ): StyledComponent<TProps>;
 
@@ -54,10 +64,10 @@ function custom<TProps>(arg1: Style): StyledDecorator;
 
 function custom<TProps>(
   arg1:
-    | StyledElementLike<React.ComponentType<TProps & StyledElementProps>>
+    | StyledElementLike<ComponentType<TProps & StyledElementProps>>
     | StyledComponentWithRef<TProps, any>
     | StyledComponent<TProps>
-    | React.ComponentType<TProps & StyledProps>
+    | ComponentType<TProps>
     | Style,
   arg2?: Style,
 ): StyledComponent<TProps> | StyledDecorator {

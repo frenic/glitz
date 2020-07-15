@@ -34,8 +34,7 @@ describe('react provider', () => {
       ),
     );
   });
-
-  it('renders input with reboot style', () => {
+  it('renders input with style', () => {
     const glitz = new GlitzServer();
 
     mount(

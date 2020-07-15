@@ -1,5 +1,5 @@
 import { Style } from '@glitz/type';
-import * as React from 'react';
+import { useContext, createElement, PropsWithChildren } from 'react';
 import { StyledElementFunctions } from '../styled/types';
 import { ElementPreStyle, StyleContext } from './context';
 
@@ -9,8 +9,8 @@ export type PreStyleProps = { [tag in PreStyleKeys]?: Style };
 
 type StyleProviderProps = PreStyleProps & { include?: PreStyleProps };
 
-export function StyleProvider({ children, include, ...restProps }: React.PropsWithChildren<StyleProviderProps>) {
-  const pre: ElementPreStyle = React.useContext(StyleContext) ?? {};
+export function StyleProvider({ children, include, ...restProps }: PropsWithChildren<StyleProviderProps>) {
+  const pre: ElementPreStyle = useContext(StyleContext) ?? {};
 
   for (const map of [include, restProps]) {
     if (map) {
@@ -21,5 +21,5 @@ export function StyleProvider({ children, include, ...restProps }: React.PropsWi
     }
   }
 
-  return React.createElement(StyleContext.Provider, { value: pre }, children);
+  return createElement(StyleContext.Provider, { value: pre }, children);
 }

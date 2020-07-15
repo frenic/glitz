@@ -1,9 +1,11 @@
 import { Style } from '@glitz/type';
-import { useContext, useRef } from 'react';
+import { useContext, useRef, useEffect } from 'react';
 import { GlitzContext, ThemeContext } from '../components/context';
 import { StyledDecorator } from './decorator';
 
-export default function useGlitz(inputStyles?: Style | Style[] | StyledDecorator) {
+export type DirtyStyle = Style | StyledDecorator | DirtyStyle[] | undefined;
+
+export default function useGlitz(...dirtyStyles: DirtyStyle[]) {
   const glitz = useContext(GlitzContext);
 
   if (!glitz) {
@@ -14,72 +16,67 @@ export default function useGlitz(inputStyles?: Style | Style[] | StyledDecorator
 
   const theme = useContext(ThemeContext);
 
-  const finalStyles = styleToArray(inputStyles);
-  const hasWarnedCacheInvalidationsRef = useRef(false);
-  const totalCacheInvalidationsRef = useRef(0);
+  const finalStyles = styleToArray(dirtyStyles);
   const lastGlitzRef = useRef(glitz);
   const lastThemeRef = useRef(theme);
   const lastFinalStylesRef = useRef<Style[]>(finalStyles);
   const lastClassNamesRef = useRef<string>();
+  const isValid =
+    lastGlitzRef.current === glitz &&
+    lastThemeRef.current === theme &&
+    shallowEquals(lastFinalStylesRef.current, finalStyles) &&
+    typeof lastClassNamesRef.current === 'string';
 
-  const applyRef = useRef<() => string | undefined>();
+  if (process.env.NODE_ENV !== 'production') {
+    const hasWarnedCacheInvalidationsRef = useRef(false);
+    const totalCacheInvalidationsRef = useRef(0);
 
-  const isValidGlitz = lastGlitzRef.current === glitz;
-  const isValidTheme = lastThemeRef.current === theme;
-  const isValidStyle = shallowEquals(lastFinalStylesRef.current, finalStyles);
+    useEffect(() => {
+      if (
+        finalStyles.length > 0 &&
+        !isValid &&
+        typeof requestAnimationFrame === 'function' &&
+        !hasWarnedCacheInvalidationsRef.current
+      ) {
+        totalCacheInvalidationsRef.current++;
+        const currentCacheInvalidations = totalCacheInvalidationsRef.current;
 
-  if (!applyRef.current || !isValidGlitz || !isValidTheme || !isValidStyle) {
-    applyRef.current = () => {
-      if (!finalStyles) {
-        return;
-      }
-
-      if (isValidGlitz && isValidTheme && isValidStyle && typeof lastClassNamesRef.current === 'string') {
-        return lastClassNamesRef.current || void 0;
-      }
-
-      if (process.env.NODE_ENV !== 'production') {
-        if (typeof requestAnimationFrame === 'function' && !hasWarnedCacheInvalidationsRef.current) {
-          totalCacheInvalidationsRef.current++;
-          const currentCacheInvalidations = totalCacheInvalidationsRef.current;
-
-          // Jump two frames to reset counter if there hasn't been any more renders with cache invalidation
+        // Jump two frames to reset counter if there hasn't been any more renders with cache invalidation
+        requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              if (totalCacheInvalidationsRef.current === currentCacheInvalidations) {
-                if (currentCacheInvalidations > 3) {
-                  console.warn(
-                    "Multiple re-renders of a styled component with invalidated cache was detected. Either make sure it doesn't re-render or make sure the cache is intact. More info: https://git.io/fxYyd",
-                  );
+            if (totalCacheInvalidationsRef.current === currentCacheInvalidations) {
+              if (currentCacheInvalidations > 5) {
+                console.warn(
+                  "Multiple re-renders of a styled component with invalidated cache was detected. Either make sure it doesn't re-render or make sure the cache is intact. More info: https://git.io/fxYyd",
+                );
 
-                  hasWarnedCacheInvalidationsRef.current = true;
-                }
-
-                totalCacheInvalidationsRef.current = 0;
+                hasWarnedCacheInvalidationsRef.current = true;
               }
-            });
+
+              totalCacheInvalidationsRef.current = 0;
+            }
           });
-        }
+        });
       }
-
-      lastGlitzRef.current = glitz;
-      lastThemeRef.current = theme;
-      lastFinalStylesRef.current = finalStyles;
-
-      return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
-    };
+    });
   }
 
-  const composeRef = useRef<(defaults?: Style | Style[] | StyledDecorator) => Style[]>();
-
-  if (!composeRef.current || !isValidStyle) {
-    composeRef.current = (defaults?: Style | Style[] | StyledDecorator): Style[] => styleToArray(defaults, finalStyles);
+  if (finalStyles.length === 0) {
+    return void 0;
   }
 
-  return [applyRef.current, composeRef.current] as const;
+  if (isValid) {
+    return lastClassNamesRef.current || void 0;
+  }
+
+  lastGlitzRef.current = glitz;
+  lastThemeRef.current = theme;
+  lastFinalStylesRef.current = finalStyles;
+
+  return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
 }
 
-export function styleToArray(...dirtyStyles: (Style | Style[] | StyledDecorator | undefined)[]): Style[] {
+function styleToArray(dirtyStyles: DirtyStyle[]): Style[] {
   const styles: Style[] = [];
 
   for (let style of dirtyStyles) {
@@ -90,8 +87,8 @@ export function styleToArray(...dirtyStyles: (Style | Style[] | StyledDecorator 
       style = style();
     }
     if (Array.isArray(style)) {
-      for (const entry of style) {
-        styles.push(entry);
+      if (style.length > 0) {
+        styles.push(...styleToArray(style));
       }
     } else {
       styles.push(style);

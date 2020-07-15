@@ -1,5 +1,58 @@
 import { Style } from '@glitz/type';
-import * as React from 'react';
+import {
+  AnchorHTMLAttributes,
+  AreaHTMLAttributes,
+  AudioHTMLAttributes,
+  BaseHTMLAttributes,
+  BlockquoteHTMLAttributes,
+  ButtonHTMLAttributes,
+  CanvasHTMLAttributes,
+  ColgroupHTMLAttributes,
+  ColHTMLAttributes,
+  DataHTMLAttributes,
+  DelHTMLAttributes,
+  DetailsHTMLAttributes,
+  DialogHTMLAttributes,
+  EmbedHTMLAttributes,
+  FieldsetHTMLAttributes,
+  FormHTMLAttributes,
+  ForwardRefExoticComponent,
+  HTMLAttributes,
+  HtmlHTMLAttributes,
+  IframeHTMLAttributes,
+  ImgHTMLAttributes,
+  InputHTMLAttributes,
+  InsHTMLAttributes,
+  KeygenHTMLAttributes,
+  LabelHTMLAttributes,
+  LiHTMLAttributes,
+  LinkHTMLAttributes,
+  MapHTMLAttributes,
+  MenuHTMLAttributes,
+  MetaHTMLAttributes,
+  MeterHTMLAttributes,
+  ObjectHTMLAttributes,
+  OlHTMLAttributes,
+  OptgroupHTMLAttributes,
+  OptionHTMLAttributes,
+  OutputHTMLAttributes,
+  ParamHTMLAttributes,
+  ProgressHTMLAttributes,
+  QuoteHTMLAttributes,
+  ScriptHTMLAttributes,
+  SelectHTMLAttributes,
+  SourceHTMLAttributes,
+  StyleHTMLAttributes,
+  SVGAttributes,
+  TableHTMLAttributes,
+  TdHTMLAttributes,
+  TextareaHTMLAttributes,
+  ThHTMLAttributes,
+  TimeHTMLAttributes,
+  TrackHTMLAttributes,
+  VideoHTMLAttributes,
+  WebViewHTMLAttributes,
+} from 'react';
 import { SECRET_COMPOSE } from './constants';
 import { ExternalProps, WithRefProp } from './create';
 import { StyledDecorator } from './decorator';
@@ -17,12 +70,12 @@ export type StyledElementProps = {
   className?: string;
 };
 
-export interface StyledComponent<TProps> extends React.ForwardRefExoticComponent<ExternalProps<TProps>> {
+export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
   [SECRET_COMPOSE](style?: Style[]): StyledComponent<TProps>;
 }
 
 export interface StyledComponentWithRef<TProps, TInstance>
-  extends React.ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
+  extends ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
   [SECRET_COMPOSE](style?: Style[]): StyledComponentWithRef<TProps, TInstance>;
 }
 
@@ -30,377 +83,365 @@ export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponen
 
 export interface StyledElementComponents {
   // HTML
-  A: StyledComponentWithRef<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
-  Abbr: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Address: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Area: StyledComponentWithRef<React.AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
-  Article: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Aside: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Audio: StyledComponentWithRef<React.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
-  B: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Base: StyledComponentWithRef<React.BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
-  Bdi: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Bdo: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Big: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Blockquote: StyledComponentWithRef<React.BlockquoteHTMLAttributes<HTMLElement>, HTMLElement>;
-  Body: StyledComponentWithRef<React.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
-  Br: StyledComponentWithRef<React.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
-  Button: StyledComponentWithRef<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
-  Canvas: StyledComponentWithRef<React.CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
-  Caption: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Cite: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Code: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Col: StyledComponentWithRef<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-  Colgroup: StyledComponentWithRef<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-  Data: StyledComponentWithRef<React.DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
-  Datalist: StyledComponentWithRef<React.HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
-  Dd: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Del: StyledComponentWithRef<React.DelHTMLAttributes<HTMLElement>, HTMLElement>;
-  Details: StyledComponentWithRef<React.DetailsHTMLAttributes<HTMLElement>, HTMLElement>;
-  Dfn: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Dialog: StyledComponentWithRef<React.DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
-  Div: StyledComponentWithRef<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
-  Dl: StyledComponentWithRef<React.HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
-  Dt: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Em: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Embed: StyledComponentWithRef<React.EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
-  Fieldset: StyledComponentWithRef<React.FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
-  Figcaption: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Figure: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Footer: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Form: StyledComponentWithRef<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
-  H1: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  H2: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  H3: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  H4: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  H5: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  H6: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  Head: StyledComponentWithRef<React.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
-  Header: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Hgroup: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Hr: StyledComponentWithRef<React.HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
-  Html: StyledComponentWithRef<React.HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
-  I: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Iframe: StyledComponentWithRef<React.IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
-  Img: StyledComponentWithRef<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
-  Input: StyledComponentWithRef<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-  Ins: StyledComponentWithRef<React.InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
-  Kbd: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Keygen: StyledComponentWithRef<React.KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
-  Label: StyledComponentWithRef<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
-  Legend: StyledComponentWithRef<React.HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
-  Li: StyledComponentWithRef<React.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
-  Link: StyledComponentWithRef<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
-  Main: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Map: StyledComponentWithRef<React.MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
-  Mark: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Menu: StyledComponentWithRef<React.MenuHTMLAttributes<HTMLElement>, HTMLElement>;
-  Menuitem: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Meta: StyledComponentWithRef<React.MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
-  Meter: StyledComponentWithRef<React.MeterHTMLAttributes<HTMLElement>, HTMLElement>;
-  Nav: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Noindex: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Noscript: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Object: StyledComponentWithRef<React.ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
-  Ol: StyledComponentWithRef<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
-  Optgroup: StyledComponentWithRef<React.OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
-  Option: StyledComponentWithRef<React.OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
-  Output: StyledComponentWithRef<React.OutputHTMLAttributes<HTMLElement>, HTMLElement>;
-  P: StyledComponentWithRef<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
-  Param: StyledComponentWithRef<React.ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
-  Picture: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Pre: StyledComponentWithRef<React.HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
-  Progress: StyledComponentWithRef<React.ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
-  Q: StyledComponentWithRef<React.QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
-  Rp: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Rt: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Ruby: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  S: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Samp: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Script: StyledComponentWithRef<React.ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
-  Section: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Select: StyledComponentWithRef<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
-  Small: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Source: StyledComponentWithRef<React.SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
-  Span: StyledComponentWithRef<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
-  Strong: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Style: StyledComponentWithRef<React.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
-  Sub: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Summary: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Sup: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Table: StyledComponentWithRef<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
-  Template: StyledComponentWithRef<React.HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
-  Tbody: StyledComponentWithRef<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-  Td: StyledComponentWithRef<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
-  Textarea: StyledComponentWithRef<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
-  Tfoot: StyledComponentWithRef<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-  Th: StyledComponentWithRef<React.ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
-  Thead: StyledComponentWithRef<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-  Time: StyledComponentWithRef<React.TimeHTMLAttributes<HTMLElement>, HTMLElement>;
-  Title: StyledComponentWithRef<React.HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
-  Tr: StyledComponentWithRef<React.HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
-  Track: StyledComponentWithRef<React.TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
-  U: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Ul: StyledComponentWithRef<React.HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
-  Var: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Video: StyledComponentWithRef<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
-  Wbr: StyledComponentWithRef<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  Webview: StyledComponentWithRef<React.WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
+  A: StyledComponentWithRef<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+  Abbr: StyledComponentWithRef<LiHTMLAttributes<HTMLElement>, HTMLElement>;
+  Address: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Area: StyledComponentWithRef<AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
+  Article: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Aside: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Audio: StyledComponentWithRef<AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
+  B: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Base: StyledComponentWithRef<BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
+  Bdi: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Bdo: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Big: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Blockquote: StyledComponentWithRef<BlockquoteHTMLAttributes<HTMLElement>, HTMLElement>;
+  Body: StyledComponentWithRef<HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
+  Br: StyledComponentWithRef<HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+  Button: StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+  Canvas: StyledComponentWithRef<CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
+  Caption: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Cite: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Code: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Col: StyledComponentWithRef<ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+  Colgroup: StyledComponentWithRef<ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+  Data: StyledComponentWithRef<DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
+  Datalist: StyledComponentWithRef<HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
+  Dd: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Del: StyledComponentWithRef<DelHTMLAttributes<HTMLElement>, HTMLElement>;
+  Details: StyledComponentWithRef<DetailsHTMLAttributes<HTMLElement>, HTMLElement>;
+  Dfn: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Dialog: StyledComponentWithRef<DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
+  Div: StyledComponentWithRef<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+  Dl: StyledComponentWithRef<HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
+  Dt: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Em: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Embed: StyledComponentWithRef<EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
+  Fieldset: StyledComponentWithRef<FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
+  Figcaption: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Figure: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Footer: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Form: StyledComponentWithRef<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
+  H1: StyledComponentWithRef<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  H2: StyledComponentWithRef<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  H3: StyledComponentWithRef<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  H4: StyledComponentWithRef<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  H5: StyledComponentWithRef<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  H6: StyledComponentWithRef<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  Head: StyledComponentWithRef<HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
+  Header: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Hgroup: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Hr: StyledComponentWithRef<HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
+  Html: StyledComponentWithRef<HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
+  I: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Iframe: StyledComponentWithRef<IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
+  Img: StyledComponentWithRef<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+  Input: StyledComponentWithRef<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
+  Ins: StyledComponentWithRef<InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
+  Kbd: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Keygen: StyledComponentWithRef<KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
+  Label: StyledComponentWithRef<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
+  Legend: StyledComponentWithRef<HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
+  Li: StyledComponentWithRef<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
+  Link: StyledComponentWithRef<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
+  Main: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Map: StyledComponentWithRef<MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
+  Mark: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Menu: StyledComponentWithRef<MenuHTMLAttributes<HTMLElement>, HTMLElement>;
+  Menuitem: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Meta: StyledComponentWithRef<MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
+  Meter: StyledComponentWithRef<MeterHTMLAttributes<HTMLElement>, HTMLElement>;
+  Nav: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Noindex: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Noscript: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Object: StyledComponentWithRef<ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
+  Ol: StyledComponentWithRef<OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
+  Optgroup: StyledComponentWithRef<OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
+  Option: StyledComponentWithRef<OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
+  Output: StyledComponentWithRef<OutputHTMLAttributes<HTMLElement>, HTMLElement>;
+  P: StyledComponentWithRef<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
+  Param: StyledComponentWithRef<ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
+  Picture: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Pre: StyledComponentWithRef<HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
+  Progress: StyledComponentWithRef<ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
+  Q: StyledComponentWithRef<QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+  Rp: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Rt: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Ruby: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  S: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Samp: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Script: StyledComponentWithRef<ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
+  Section: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Select: StyledComponentWithRef<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+  Small: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Source: StyledComponentWithRef<SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
+  Span: StyledComponentWithRef<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
+  Strong: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Style: StyledComponentWithRef<StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
+  Sub: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Summary: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Sup: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Table: StyledComponentWithRef<TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
+  Template: StyledComponentWithRef<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
+  Tbody: StyledComponentWithRef<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+  Td: StyledComponentWithRef<TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
+  Textarea: StyledComponentWithRef<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
+  Tfoot: StyledComponentWithRef<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+  Th: StyledComponentWithRef<ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
+  Thead: StyledComponentWithRef<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+  Time: StyledComponentWithRef<TimeHTMLAttributes<HTMLElement>, HTMLElement>;
+  Title: StyledComponentWithRef<HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
+  Tr: StyledComponentWithRef<HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
+  Track: StyledComponentWithRef<TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
+  U: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Ul: StyledComponentWithRef<HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
+  Var: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Video: StyledComponentWithRef<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
+  Wbr: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
+  Webview: StyledComponentWithRef<WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
 
   // SVG
-  Svg: StyledComponentWithRef<React.SVGAttributes<SVGSVGElement>, SVGSVGElement>;
+  Svg: StyledComponentWithRef<SVGAttributes<SVGSVGElement>, SVGSVGElement>;
 
-  Animate: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
-  AnimateMotion: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  AnimateTransform: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
-  Circle: StyledComponentWithRef<React.SVGAttributes<SVGCircleElement>, SVGCircleElement>;
-  ClipPath: StyledComponentWithRef<React.SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
-  Defs: StyledComponentWithRef<React.SVGAttributes<SVGDefsElement>, SVGDefsElement>;
-  Desc: StyledComponentWithRef<React.SVGAttributes<SVGDescElement>, SVGDescElement>;
-  Ellipse: StyledComponentWithRef<React.SVGAttributes<SVGEllipseElement>, SVGEllipseElement>;
-  FeBlend: StyledComponentWithRef<React.SVGAttributes<SVGFEBlendElement>, SVGFEBlendElement>;
-  FeColorMatrix: StyledComponentWithRef<React.SVGAttributes<SVGFEColorMatrixElement>, SVGFEColorMatrixElement>;
+  Animate: StyledComponentWithRef<SVGAttributes<SVGAnimateElement>, SVGElement>;
+  AnimateMotion: StyledComponentWithRef<SVGAttributes<SVGElement>, SVGElement>;
+  AnimateTransform: StyledComponentWithRef<SVGAttributes<SVGAnimateTransformElement>, SVGElement>;
+  Circle: StyledComponentWithRef<SVGAttributes<SVGCircleElement>, SVGCircleElement>;
+  ClipPath: StyledComponentWithRef<SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
+  Defs: StyledComponentWithRef<SVGAttributes<SVGDefsElement>, SVGDefsElement>;
+  Desc: StyledComponentWithRef<SVGAttributes<SVGDescElement>, SVGDescElement>;
+  Ellipse: StyledComponentWithRef<SVGAttributes<SVGEllipseElement>, SVGEllipseElement>;
+  FeBlend: StyledComponentWithRef<SVGAttributes<SVGFEBlendElement>, SVGFEBlendElement>;
+  FeColorMatrix: StyledComponentWithRef<SVGAttributes<SVGFEColorMatrixElement>, SVGFEColorMatrixElement>;
   FeComponentTransfer: StyledComponentWithRef<
-    React.SVGAttributes<SVGFEComponentTransferElement>,
+    SVGAttributes<SVGFEComponentTransferElement>,
     SVGFEComponentTransferElement
   >;
-  FeComposite: StyledComponentWithRef<React.SVGAttributes<SVGFECompositeElement>, SVGFECompositeElement>;
-  FeConvolveMatrix: StyledComponentWithRef<React.SVGAttributes<SVGFEConvolveMatrixElement>, SVGFEConvolveMatrixElement>;
-  FeDiffuseLighting: StyledComponentWithRef<
-    React.SVGAttributes<SVGFEDiffuseLightingElement>,
-    SVGFEDiffuseLightingElement
-  >;
-  FeDisplacementMap: StyledComponentWithRef<
-    React.SVGAttributes<SVGFEDisplacementMapElement>,
-    SVGFEDisplacementMapElement
-  >;
-  FeDistantLight: StyledComponentWithRef<React.SVGAttributes<SVGFEDistantLightElement>, SVGFEDistantLightElement>;
-  FeDropShadow: StyledComponentWithRef<React.SVGAttributes<SVGFEDropShadowElement>, SVGFEDropShadowElement>;
-  FeFlood: StyledComponentWithRef<React.SVGAttributes<SVGFEFloodElement>, SVGFEFloodElement>;
-  FeFuncA: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncAElement>, SVGFEFuncAElement>;
-  FeFuncB: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncBElement>, SVGFEFuncBElement>;
-  FeFuncG: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncGElement>, SVGFEFuncGElement>;
-  FeFuncR: StyledComponentWithRef<React.SVGAttributes<SVGFEFuncRElement>, SVGFEFuncRElement>;
-  FeGaussianBlur: StyledComponentWithRef<React.SVGAttributes<SVGFEGaussianBlurElement>, SVGFEGaussianBlurElement>;
-  FeImage: StyledComponentWithRef<React.SVGAttributes<SVGFEImageElement>, SVGFEImageElement>;
-  FeMerge: StyledComponentWithRef<React.SVGAttributes<SVGFEMergeElement>, SVGFEMergeElement>;
-  FeMergeNode: StyledComponentWithRef<React.SVGAttributes<SVGFEMergeNodeElement>, SVGFEMergeNodeElement>;
-  FeMorphology: StyledComponentWithRef<React.SVGAttributes<SVGFEMorphologyElement>, SVGFEMorphologyElement>;
-  FeOffset: StyledComponentWithRef<React.SVGAttributes<SVGFEOffsetElement>, SVGFEOffsetElement>;
-  FePointLight: StyledComponentWithRef<React.SVGAttributes<SVGFEPointLightElement>, SVGFEPointLightElement>;
-  FeSpecularLighting: StyledComponentWithRef<
-    React.SVGAttributes<SVGFESpecularLightingElement>,
-    SVGFESpecularLightingElement
-  >;
-  FeSpotLight: StyledComponentWithRef<React.SVGAttributes<SVGFESpotLightElement>, SVGFESpotLightElement>;
-  FeTile: StyledComponentWithRef<React.SVGAttributes<SVGFETileElement>, SVGFETileElement>;
-  FeTurbulence: StyledComponentWithRef<React.SVGAttributes<SVGFETurbulenceElement>, SVGFETurbulenceElement>;
-  Filter: StyledComponentWithRef<React.SVGAttributes<SVGFilterElement>, SVGFilterElement>;
-  ForeignObject: StyledComponentWithRef<React.SVGAttributes<SVGForeignObjectElement>, SVGForeignObjectElement>;
-  G: StyledComponentWithRef<React.SVGAttributes<SVGGElement>, SVGGElement>;
-  Image: StyledComponentWithRef<React.SVGAttributes<SVGImageElement>, SVGImageElement>;
-  Line: StyledComponentWithRef<React.SVGAttributes<SVGLineElement>, SVGLineElement>;
-  LinearGradient: StyledComponentWithRef<React.SVGAttributes<SVGLinearGradientElement>, SVGLinearGradientElement>;
-  Marker: StyledComponentWithRef<React.SVGAttributes<SVGMarkerElement>, SVGMarkerElement>;
-  Mask: StyledComponentWithRef<React.SVGAttributes<SVGMaskElement>, SVGMaskElement>;
-  Metadata: StyledComponentWithRef<React.SVGAttributes<SVGMetadataElement>, SVGMetadataElement>;
-  Mpath: StyledComponentWithRef<React.SVGAttributes<SVGElement>, SVGElement>;
-  Path: StyledComponentWithRef<React.SVGAttributes<SVGPathElement>, SVGPathElement>;
-  Pattern: StyledComponentWithRef<React.SVGAttributes<SVGPatternElement>, SVGPatternElement>;
-  Polygon: StyledComponentWithRef<React.SVGAttributes<SVGPolygonElement>, SVGPolygonElement>;
-  Polyline: StyledComponentWithRef<React.SVGAttributes<SVGPolylineElement>, SVGPolylineElement>;
-  RadialGradient: StyledComponentWithRef<React.SVGAttributes<SVGRadialGradientElement>, SVGRadialGradientElement>;
-  Rect: StyledComponentWithRef<React.SVGAttributes<SVGRectElement>, SVGRectElement>;
-  Stop: StyledComponentWithRef<React.SVGAttributes<SVGStopElement>, SVGStopElement>;
-  Switch: StyledComponentWithRef<React.SVGAttributes<SVGSwitchElement>, SVGSwitchElement>;
-  Symbol: StyledComponentWithRef<React.SVGAttributes<SVGSymbolElement>, SVGSymbolElement>;
-  Text: StyledComponentWithRef<React.SVGAttributes<SVGTextElement>, SVGTextElement>;
-  TextPath: StyledComponentWithRef<React.SVGAttributes<SVGTextPathElement>, SVGTextPathElement>;
-  Tspan: StyledComponentWithRef<React.SVGAttributes<SVGTSpanElement>, SVGTSpanElement>;
-  Use: StyledComponentWithRef<React.SVGAttributes<SVGUseElement>, SVGUseElement>;
-  View: StyledComponentWithRef<React.SVGAttributes<SVGViewElement>, SVGViewElement>;
+  FeComposite: StyledComponentWithRef<SVGAttributes<SVGFECompositeElement>, SVGFECompositeElement>;
+  FeConvolveMatrix: StyledComponentWithRef<SVGAttributes<SVGFEConvolveMatrixElement>, SVGFEConvolveMatrixElement>;
+  FeDiffuseLighting: StyledComponentWithRef<SVGAttributes<SVGFEDiffuseLightingElement>, SVGFEDiffuseLightingElement>;
+  FeDisplacementMap: StyledComponentWithRef<SVGAttributes<SVGFEDisplacementMapElement>, SVGFEDisplacementMapElement>;
+  FeDistantLight: StyledComponentWithRef<SVGAttributes<SVGFEDistantLightElement>, SVGFEDistantLightElement>;
+  FeDropShadow: StyledComponentWithRef<SVGAttributes<SVGFEDropShadowElement>, SVGFEDropShadowElement>;
+  FeFlood: StyledComponentWithRef<SVGAttributes<SVGFEFloodElement>, SVGFEFloodElement>;
+  FeFuncA: StyledComponentWithRef<SVGAttributes<SVGFEFuncAElement>, SVGFEFuncAElement>;
+  FeFuncB: StyledComponentWithRef<SVGAttributes<SVGFEFuncBElement>, SVGFEFuncBElement>;
+  FeFuncG: StyledComponentWithRef<SVGAttributes<SVGFEFuncGElement>, SVGFEFuncGElement>;
+  FeFuncR: StyledComponentWithRef<SVGAttributes<SVGFEFuncRElement>, SVGFEFuncRElement>;
+  FeGaussianBlur: StyledComponentWithRef<SVGAttributes<SVGFEGaussianBlurElement>, SVGFEGaussianBlurElement>;
+  FeImage: StyledComponentWithRef<SVGAttributes<SVGFEImageElement>, SVGFEImageElement>;
+  FeMerge: StyledComponentWithRef<SVGAttributes<SVGFEMergeElement>, SVGFEMergeElement>;
+  FeMergeNode: StyledComponentWithRef<SVGAttributes<SVGFEMergeNodeElement>, SVGFEMergeNodeElement>;
+  FeMorphology: StyledComponentWithRef<SVGAttributes<SVGFEMorphologyElement>, SVGFEMorphologyElement>;
+  FeOffset: StyledComponentWithRef<SVGAttributes<SVGFEOffsetElement>, SVGFEOffsetElement>;
+  FePointLight: StyledComponentWithRef<SVGAttributes<SVGFEPointLightElement>, SVGFEPointLightElement>;
+  FeSpecularLighting: StyledComponentWithRef<SVGAttributes<SVGFESpecularLightingElement>, SVGFESpecularLightingElement>;
+  FeSpotLight: StyledComponentWithRef<SVGAttributes<SVGFESpotLightElement>, SVGFESpotLightElement>;
+  FeTile: StyledComponentWithRef<SVGAttributes<SVGFETileElement>, SVGFETileElement>;
+  FeTurbulence: StyledComponentWithRef<SVGAttributes<SVGFETurbulenceElement>, SVGFETurbulenceElement>;
+  Filter: StyledComponentWithRef<SVGAttributes<SVGFilterElement>, SVGFilterElement>;
+  ForeignObject: StyledComponentWithRef<SVGAttributes<SVGForeignObjectElement>, SVGForeignObjectElement>;
+  G: StyledComponentWithRef<SVGAttributes<SVGGElement>, SVGGElement>;
+  Image: StyledComponentWithRef<SVGAttributes<SVGImageElement>, SVGImageElement>;
+  Line: StyledComponentWithRef<SVGAttributes<SVGLineElement>, SVGLineElement>;
+  LinearGradient: StyledComponentWithRef<SVGAttributes<SVGLinearGradientElement>, SVGLinearGradientElement>;
+  Marker: StyledComponentWithRef<SVGAttributes<SVGMarkerElement>, SVGMarkerElement>;
+  Mask: StyledComponentWithRef<SVGAttributes<SVGMaskElement>, SVGMaskElement>;
+  Metadata: StyledComponentWithRef<SVGAttributes<SVGMetadataElement>, SVGMetadataElement>;
+  Mpath: StyledComponentWithRef<SVGAttributes<SVGElement>, SVGElement>;
+  Path: StyledComponentWithRef<SVGAttributes<SVGPathElement>, SVGPathElement>;
+  Pattern: StyledComponentWithRef<SVGAttributes<SVGPatternElement>, SVGPatternElement>;
+  Polygon: StyledComponentWithRef<SVGAttributes<SVGPolygonElement>, SVGPolygonElement>;
+  Polyline: StyledComponentWithRef<SVGAttributes<SVGPolylineElement>, SVGPolylineElement>;
+  RadialGradient: StyledComponentWithRef<SVGAttributes<SVGRadialGradientElement>, SVGRadialGradientElement>;
+  Rect: StyledComponentWithRef<SVGAttributes<SVGRectElement>, SVGRectElement>;
+  Stop: StyledComponentWithRef<SVGAttributes<SVGStopElement>, SVGStopElement>;
+  Switch: StyledComponentWithRef<SVGAttributes<SVGSwitchElement>, SVGSwitchElement>;
+  Symbol: StyledComponentWithRef<SVGAttributes<SVGSymbolElement>, SVGSymbolElement>;
+  Text: StyledComponentWithRef<SVGAttributes<SVGTextElement>, SVGTextElement>;
+  TextPath: StyledComponentWithRef<SVGAttributes<SVGTextPathElement>, SVGTextPathElement>;
+  Tspan: StyledComponentWithRef<SVGAttributes<SVGTSpanElement>, SVGTSpanElement>;
+  Use: StyledComponentWithRef<SVGAttributes<SVGUseElement>, SVGUseElement>;
+  View: StyledComponentWithRef<SVGAttributes<SVGViewElement>, SVGViewElement>;
 }
 
 export interface StyledElementFunctions {
   // HTML
-  a: StyledFunction<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
-  abbr: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  address: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  area: StyledFunction<React.AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
-  article: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  aside: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  audio: StyledFunction<React.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
-  b: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  base: StyledFunction<React.BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
-  bdi: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  bdo: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  big: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  blockquote: StyledFunction<React.BlockquoteHTMLAttributes<HTMLElement>, HTMLElement>;
-  body: StyledFunction<React.HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
-  br: StyledFunction<React.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
-  button: StyledFunction<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
-  canvas: StyledFunction<React.CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
-  caption: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  cite: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  code: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  col: StyledFunction<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-  colgroup: StyledFunction<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-  data: StyledFunction<React.DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
-  datalist: StyledFunction<React.HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
-  dd: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  del: StyledFunction<React.DelHTMLAttributes<HTMLElement>, HTMLElement>;
-  details: StyledFunction<React.DetailsHTMLAttributes<HTMLElement>, HTMLElement>;
-  dfn: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  dialog: StyledFunction<React.DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
-  div: StyledFunction<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
-  dl: StyledFunction<React.HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
-  dt: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  em: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  embed: StyledFunction<React.EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
-  fieldset: StyledFunction<React.FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
-  figcaption: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  figure: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  footer: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  form: StyledFunction<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
-  h1: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  h2: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  h3: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  h4: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  h5: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  h6: StyledFunction<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-  head: StyledFunction<React.HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
-  header: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  hgroup: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  hr: StyledFunction<React.HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
-  html: StyledFunction<React.HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
-  i: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  iframe: StyledFunction<React.IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
-  img: StyledFunction<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
-  input: StyledFunction<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-  ins: StyledFunction<React.InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
-  kbd: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  keygen: StyledFunction<React.KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
-  label: StyledFunction<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
-  legend: StyledFunction<React.HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
-  li: StyledFunction<React.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
-  link: StyledFunction<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
-  main: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  map: StyledFunction<React.MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
-  mark: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  menu: StyledFunction<React.MenuHTMLAttributes<HTMLElement>, HTMLElement>;
-  menuitem: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  meta: StyledFunction<React.MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
-  meter: StyledFunction<React.MeterHTMLAttributes<HTMLElement>, HTMLElement>;
-  nav: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  noindex: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  noscript: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  object: StyledFunction<React.ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
-  ol: StyledFunction<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
-  optgroup: StyledFunction<React.OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
-  option: StyledFunction<React.OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
-  output: StyledFunction<React.OutputHTMLAttributes<HTMLElement>, HTMLElement>;
-  p: StyledFunction<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
-  param: StyledFunction<React.ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
-  picture: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  pre: StyledFunction<React.HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
-  progress: StyledFunction<React.ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
-  q: StyledFunction<React.QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
-  rp: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  rt: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  ruby: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  s: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  samp: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  script: StyledFunction<React.ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
-  section: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  select: StyledFunction<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
-  small: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  source: StyledFunction<React.SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
-  span: StyledFunction<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
-  strong: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  style: StyledFunction<React.StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
-  sub: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  summary: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  sup: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  table: StyledFunction<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
-  template: StyledFunction<React.HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
-  tbody: StyledFunction<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-  td: StyledFunction<React.TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
-  textarea: StyledFunction<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
-  tfoot: StyledFunction<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-  th: StyledFunction<React.ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
-  thead: StyledFunction<React.HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-  time: StyledFunction<React.TimeHTMLAttributes<HTMLElement>, HTMLElement>;
-  title: StyledFunction<React.HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
-  tr: StyledFunction<React.HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
-  track: StyledFunction<React.TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
-  u: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  ul: StyledFunction<React.HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
-  var: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  video: StyledFunction<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
-  wbr: StyledFunction<React.HTMLAttributes<HTMLElement>, HTMLElement>;
-  webview: StyledFunction<React.WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
+  a: StyledFunction<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+  abbr: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  address: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  area: StyledFunction<AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
+  article: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  aside: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  audio: StyledFunction<AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
+  b: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  base: StyledFunction<BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
+  bdi: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  bdo: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  big: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  blockquote: StyledFunction<BlockquoteHTMLAttributes<HTMLElement>, HTMLElement>;
+  body: StyledFunction<HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
+  br: StyledFunction<HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+  button: StyledFunction<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+  canvas: StyledFunction<CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
+  caption: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  cite: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  code: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  col: StyledFunction<ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+  colgroup: StyledFunction<ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+  data: StyledFunction<DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
+  datalist: StyledFunction<HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
+  dd: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  del: StyledFunction<DelHTMLAttributes<HTMLElement>, HTMLElement>;
+  details: StyledFunction<DetailsHTMLAttributes<HTMLElement>, HTMLElement>;
+  dfn: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  dialog: StyledFunction<DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
+  div: StyledFunction<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+  dl: StyledFunction<HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
+  dt: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  em: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  embed: StyledFunction<EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
+  fieldset: StyledFunction<FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
+  figcaption: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  figure: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  footer: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  form: StyledFunction<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
+  h1: StyledFunction<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  h2: StyledFunction<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  h3: StyledFunction<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  h4: StyledFunction<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  h5: StyledFunction<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  h6: StyledFunction<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+  head: StyledFunction<HTMLAttributes<HTMLHeadElement>, HTMLHeadElement>;
+  header: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  hgroup: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  hr: StyledFunction<HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
+  html: StyledFunction<HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
+  i: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  iframe: StyledFunction<IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
+  img: StyledFunction<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+  input: StyledFunction<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
+  ins: StyledFunction<InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
+  kbd: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  keygen: StyledFunction<KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
+  label: StyledFunction<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
+  legend: StyledFunction<HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
+  li: StyledFunction<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
+  link: StyledFunction<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
+  main: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  map: StyledFunction<MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
+  mark: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  menu: StyledFunction<MenuHTMLAttributes<HTMLElement>, HTMLElement>;
+  menuitem: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  meta: StyledFunction<MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
+  meter: StyledFunction<MeterHTMLAttributes<HTMLElement>, HTMLElement>;
+  nav: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  noindex: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  noscript: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  object: StyledFunction<ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
+  ol: StyledFunction<OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
+  optgroup: StyledFunction<OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
+  option: StyledFunction<OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
+  output: StyledFunction<OutputHTMLAttributes<HTMLElement>, HTMLElement>;
+  p: StyledFunction<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
+  param: StyledFunction<ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
+  picture: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  pre: StyledFunction<HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
+  progress: StyledFunction<ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
+  q: StyledFunction<QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+  rp: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  rt: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  ruby: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  s: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  samp: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  script: StyledFunction<ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
+  section: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  select: StyledFunction<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+  small: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  source: StyledFunction<SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
+  span: StyledFunction<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
+  strong: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  style: StyledFunction<StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
+  sub: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  summary: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  sup: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  table: StyledFunction<TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
+  template: StyledFunction<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
+  tbody: StyledFunction<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+  td: StyledFunction<TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
+  textarea: StyledFunction<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
+  tfoot: StyledFunction<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+  th: StyledFunction<ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
+  thead: StyledFunction<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+  time: StyledFunction<TimeHTMLAttributes<HTMLElement>, HTMLElement>;
+  title: StyledFunction<HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
+  tr: StyledFunction<HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
+  track: StyledFunction<TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
+  u: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  ul: StyledFunction<HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
+  var: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  video: StyledFunction<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
+  wbr: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
+  webview: StyledFunction<WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
 
   // SVG
-  svg: StyledFunction<React.SVGAttributes<SVGSVGElement>, SVGSVGElement>;
+  svg: StyledFunction<SVGAttributes<SVGSVGElement>, SVGSVGElement>;
 
-  animate: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
-  animateMotion: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  animateTransform: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>; // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
-  circle: StyledFunction<React.SVGAttributes<SVGCircleElement>, SVGCircleElement>;
-  clipPath: StyledFunction<React.SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
-  defs: StyledFunction<React.SVGAttributes<SVGDefsElement>, SVGDefsElement>;
-  desc: StyledFunction<React.SVGAttributes<SVGDescElement>, SVGDescElement>;
-  ellipse: StyledFunction<React.SVGAttributes<SVGEllipseElement>, SVGEllipseElement>;
-  feBlend: StyledFunction<React.SVGAttributes<SVGFEBlendElement>, SVGFEBlendElement>;
-  feColorMatrix: StyledFunction<React.SVGAttributes<SVGFEColorMatrixElement>, SVGFEColorMatrixElement>;
-  feComponentTransfer: StyledFunction<
-    React.SVGAttributes<SVGFEComponentTransferElement>,
-    SVGFEComponentTransferElement
-  >;
-  feComposite: StyledFunction<React.SVGAttributes<SVGFECompositeElement>, SVGFECompositeElement>;
-  feConvolveMatrix: StyledFunction<React.SVGAttributes<SVGFEConvolveMatrixElement>, SVGFEConvolveMatrixElement>;
-  feDiffuseLighting: StyledFunction<React.SVGAttributes<SVGFEDiffuseLightingElement>, SVGFEDiffuseLightingElement>;
-  feDisplacementMap: StyledFunction<React.SVGAttributes<SVGFEDisplacementMapElement>, SVGFEDisplacementMapElement>;
-  feDistantLight: StyledFunction<React.SVGAttributes<SVGFEDistantLightElement>, SVGFEDistantLightElement>;
-  feDropShadow: StyledFunction<React.SVGAttributes<SVGFEDropShadowElement>, SVGFEDropShadowElement>;
-  feFlood: StyledFunction<React.SVGAttributes<SVGFEFloodElement>, SVGFEFloodElement>;
-  feFuncA: StyledFunction<React.SVGAttributes<SVGFEFuncAElement>, SVGFEFuncAElement>;
-  feFuncB: StyledFunction<React.SVGAttributes<SVGFEFuncBElement>, SVGFEFuncBElement>;
-  feFuncG: StyledFunction<React.SVGAttributes<SVGFEFuncGElement>, SVGFEFuncGElement>;
-  feFuncR: StyledFunction<React.SVGAttributes<SVGFEFuncRElement>, SVGFEFuncRElement>;
-  feGaussianBlur: StyledFunction<React.SVGAttributes<SVGFEGaussianBlurElement>, SVGFEGaussianBlurElement>;
-  feImage: StyledFunction<React.SVGAttributes<SVGFEImageElement>, SVGFEImageElement>;
-  feMerge: StyledFunction<React.SVGAttributes<SVGFEMergeElement>, SVGFEMergeElement>;
-  feMergeNode: StyledFunction<React.SVGAttributes<SVGFEMergeNodeElement>, SVGFEMergeNodeElement>;
-  feMorphology: StyledFunction<React.SVGAttributes<SVGFEMorphologyElement>, SVGFEMorphologyElement>;
-  feOffset: StyledFunction<React.SVGAttributes<SVGFEOffsetElement>, SVGFEOffsetElement>;
-  fePointLight: StyledFunction<React.SVGAttributes<SVGFEPointLightElement>, SVGFEPointLightElement>;
-  feSpecularLighting: StyledFunction<React.SVGAttributes<SVGFESpecularLightingElement>, SVGFESpecularLightingElement>;
-  feSpotLight: StyledFunction<React.SVGAttributes<SVGFESpotLightElement>, SVGFESpotLightElement>;
-  feTile: StyledFunction<React.SVGAttributes<SVGFETileElement>, SVGFETileElement>;
-  feTurbulence: StyledFunction<React.SVGAttributes<SVGFETurbulenceElement>, SVGFETurbulenceElement>;
-  filter: StyledFunction<React.SVGAttributes<SVGFilterElement>, SVGFilterElement>;
-  foreignObject: StyledFunction<React.SVGAttributes<SVGForeignObjectElement>, SVGForeignObjectElement>;
-  g: StyledFunction<React.SVGAttributes<SVGGElement>, SVGGElement>;
-  image: StyledFunction<React.SVGAttributes<SVGImageElement>, SVGImageElement>;
-  line: StyledFunction<React.SVGAttributes<SVGLineElement>, SVGLineElement>;
-  linearGradient: StyledFunction<React.SVGAttributes<SVGLinearGradientElement>, SVGLinearGradientElement>;
-  marker: StyledFunction<React.SVGAttributes<SVGMarkerElement>, SVGMarkerElement>;
-  mask: StyledFunction<React.SVGAttributes<SVGMaskElement>, SVGMaskElement>;
-  metadata: StyledFunction<React.SVGAttributes<SVGMetadataElement>, SVGMetadataElement>;
-  mpath: StyledFunction<React.SVGAttributes<SVGElement>, SVGElement>;
-  path: StyledFunction<React.SVGAttributes<SVGPathElement>, SVGPathElement>;
-  pattern: StyledFunction<React.SVGAttributes<SVGPatternElement>, SVGPatternElement>;
-  polygon: StyledFunction<React.SVGAttributes<SVGPolygonElement>, SVGPolygonElement>;
-  polyline: StyledFunction<React.SVGAttributes<SVGPolylineElement>, SVGPolylineElement>;
-  radialGradient: StyledFunction<React.SVGAttributes<SVGRadialGradientElement>, SVGRadialGradientElement>;
-  rect: StyledFunction<React.SVGAttributes<SVGRectElement>, SVGRectElement>;
-  stop: StyledFunction<React.SVGAttributes<SVGStopElement>, SVGStopElement>;
-  switch: StyledFunction<React.SVGAttributes<SVGSwitchElement>, SVGSwitchElement>;
-  symbol: StyledFunction<React.SVGAttributes<SVGSymbolElement>, SVGSymbolElement>;
-  text: StyledFunction<React.SVGAttributes<SVGTextElement>, SVGTextElement>;
-  textPath: StyledFunction<React.SVGAttributes<SVGTextPathElement>, SVGTextPathElement>;
-  tspan: StyledFunction<React.SVGAttributes<SVGTSpanElement>, SVGTSpanElement>;
-  use: StyledFunction<React.SVGAttributes<SVGUseElement>, SVGUseElement>;
-  view: StyledFunction<React.SVGAttributes<SVGViewElement>, SVGViewElement>;
+  animate: StyledFunction<SVGAttributes<SVGAnimateElement>, SVGElement>;
+  animateMotion: StyledFunction<SVGAttributes<SVGElement>, SVGElement>;
+  animateTransform: StyledFunction<SVGAttributes<SVGAnimateTransformElement>, SVGElement>;
+  circle: StyledFunction<SVGAttributes<SVGCircleElement>, SVGCircleElement>;
+  clipPath: StyledFunction<SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
+  defs: StyledFunction<SVGAttributes<SVGDefsElement>, SVGDefsElement>;
+  desc: StyledFunction<SVGAttributes<SVGDescElement>, SVGDescElement>;
+  ellipse: StyledFunction<SVGAttributes<SVGEllipseElement>, SVGEllipseElement>;
+  feBlend: StyledFunction<SVGAttributes<SVGFEBlendElement>, SVGFEBlendElement>;
+  feColorMatrix: StyledFunction<SVGAttributes<SVGFEColorMatrixElement>, SVGFEColorMatrixElement>;
+  feComponentTransfer: StyledFunction<SVGAttributes<SVGFEComponentTransferElement>, SVGFEComponentTransferElement>;
+  feComposite: StyledFunction<SVGAttributes<SVGFECompositeElement>, SVGFECompositeElement>;
+  feConvolveMatrix: StyledFunction<SVGAttributes<SVGFEConvolveMatrixElement>, SVGFEConvolveMatrixElement>;
+  feDiffuseLighting: StyledFunction<SVGAttributes<SVGFEDiffuseLightingElement>, SVGFEDiffuseLightingElement>;
+  feDisplacementMap: StyledFunction<SVGAttributes<SVGFEDisplacementMapElement>, SVGFEDisplacementMapElement>;
+  feDistantLight: StyledFunction<SVGAttributes<SVGFEDistantLightElement>, SVGFEDistantLightElement>;
+  feDropShadow: StyledFunction<SVGAttributes<SVGFEDropShadowElement>, SVGFEDropShadowElement>;
+  feFlood: StyledFunction<SVGAttributes<SVGFEFloodElement>, SVGFEFloodElement>;
+  feFuncA: StyledFunction<SVGAttributes<SVGFEFuncAElement>, SVGFEFuncAElement>;
+  feFuncB: StyledFunction<SVGAttributes<SVGFEFuncBElement>, SVGFEFuncBElement>;
+  feFuncG: StyledFunction<SVGAttributes<SVGFEFuncGElement>, SVGFEFuncGElement>;
+  feFuncR: StyledFunction<SVGAttributes<SVGFEFuncRElement>, SVGFEFuncRElement>;
+  feGaussianBlur: StyledFunction<SVGAttributes<SVGFEGaussianBlurElement>, SVGFEGaussianBlurElement>;
+  feImage: StyledFunction<SVGAttributes<SVGFEImageElement>, SVGFEImageElement>;
+  feMerge: StyledFunction<SVGAttributes<SVGFEMergeElement>, SVGFEMergeElement>;
+  feMergeNode: StyledFunction<SVGAttributes<SVGFEMergeNodeElement>, SVGFEMergeNodeElement>;
+  feMorphology: StyledFunction<SVGAttributes<SVGFEMorphologyElement>, SVGFEMorphologyElement>;
+  feOffset: StyledFunction<SVGAttributes<SVGFEOffsetElement>, SVGFEOffsetElement>;
+  fePointLight: StyledFunction<SVGAttributes<SVGFEPointLightElement>, SVGFEPointLightElement>;
+  feSpecularLighting: StyledFunction<SVGAttributes<SVGFESpecularLightingElement>, SVGFESpecularLightingElement>;
+  feSpotLight: StyledFunction<SVGAttributes<SVGFESpotLightElement>, SVGFESpotLightElement>;
+  feTile: StyledFunction<SVGAttributes<SVGFETileElement>, SVGFETileElement>;
+  feTurbulence: StyledFunction<SVGAttributes<SVGFETurbulenceElement>, SVGFETurbulenceElement>;
+  filter: StyledFunction<SVGAttributes<SVGFilterElement>, SVGFilterElement>;
+  foreignObject: StyledFunction<SVGAttributes<SVGForeignObjectElement>, SVGForeignObjectElement>;
+  g: StyledFunction<SVGAttributes<SVGGElement>, SVGGElement>;
+  image: StyledFunction<SVGAttributes<SVGImageElement>, SVGImageElement>;
+  line: StyledFunction<SVGAttributes<SVGLineElement>, SVGLineElement>;
+  linearGradient: StyledFunction<SVGAttributes<SVGLinearGradientElement>, SVGLinearGradientElement>;
+  marker: StyledFunction<SVGAttributes<SVGMarkerElement>, SVGMarkerElement>;
+  mask: StyledFunction<SVGAttributes<SVGMaskElement>, SVGMaskElement>;
+  metadata: StyledFunction<SVGAttributes<SVGMetadataElement>, SVGMetadataElement>;
+  mpath: StyledFunction<SVGAttributes<SVGElement>, SVGElement>;
+  path: StyledFunction<SVGAttributes<SVGPathElement>, SVGPathElement>;
+  pattern: StyledFunction<SVGAttributes<SVGPatternElement>, SVGPatternElement>;
+  polygon: StyledFunction<SVGAttributes<SVGPolygonElement>, SVGPolygonElement>;
+  polyline: StyledFunction<SVGAttributes<SVGPolylineElement>, SVGPolylineElement>;
+  radialGradient: StyledFunction<SVGAttributes<SVGRadialGradientElement>, SVGRadialGradientElement>;
+  rect: StyledFunction<SVGAttributes<SVGRectElement>, SVGRectElement>;
+  stop: StyledFunction<SVGAttributes<SVGStopElement>, SVGStopElement>;
+  switch: StyledFunction<SVGAttributes<SVGSwitchElement>, SVGSwitchElement>;
+  symbol: StyledFunction<SVGAttributes<SVGSymbolElement>, SVGSymbolElement>;
+  text: StyledFunction<SVGAttributes<SVGTextElement>, SVGTextElement>;
+  textPath: StyledFunction<SVGAttributes<SVGTextPathElement>, SVGTextPathElement>;
+  tspan: StyledFunction<SVGAttributes<SVGTSpanElement>, SVGTSpanElement>;
+  use: StyledFunction<SVGAttributes<SVGUseElement>, SVGUseElement>;
+  view: StyledFunction<SVGAttributes<SVGViewElement>, SVGViewElement>;
 }
