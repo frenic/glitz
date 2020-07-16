@@ -576,6 +576,31 @@ describe('react styled', () => {
     const ComposedComponent = styled(StyledComponent);
     expect(ComposedComponent.displayName).toBe('Test');
   });
+  it('does not trigger update on child elements when style changes', () => {
+    let renders = 0;
+    const Child = styled(
+      React.memo(() => {
+        renders++;
+        return React.createElement(styled.Div);
+      }),
+    );
+
+    const StyledComponent = styled(() => React.createElement(styled.Div, null, React.createElement(Child)));
+
+    const css = { color: 'red' };
+
+    const tree = mountWithGlitz(React.createElement(StyledComponent, { css }));
+    expect(renders).toBe(1);
+
+    tree.setProps({ css });
+    expect(renders).toBe(1);
+
+    tree.setProps({ css: { color: 'red' } });
+    expect(renders).toBe(1);
+
+    tree.setProps({ css: { color: 'green' } });
+    expect(renders).toBe(1);
+  });
 });
 
 function mountWithGlitz(node: React.ReactElement) {
