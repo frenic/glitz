@@ -41,6 +41,7 @@ import {
   QuoteHTMLAttributes,
   ScriptHTMLAttributes,
   SelectHTMLAttributes,
+  SlotHTMLAttributes,
   SourceHTMLAttributes,
   StyleHTMLAttributes,
   SVGAttributes,
@@ -84,7 +85,7 @@ export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponen
 export interface StyledElementComponents {
   // HTML
   A: StyledComponentWithRef<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
-  Abbr: StyledComponentWithRef<LiHTMLAttributes<HTMLElement>, HTMLElement>;
+  Abbr: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
   Address: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
   Area: StyledComponentWithRef<AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
   Article: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
@@ -173,6 +174,7 @@ export interface StyledElementComponents {
   Script: StyledComponentWithRef<ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
   Section: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
   Select: StyledComponentWithRef<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+  Slot: StyledComponentWithRef<SlotHTMLAttributes<HTMLSlotElement>, HTMLSlotElement>;
   Small: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
   Source: StyledComponentWithRef<SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
   Span: StyledComponentWithRef<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
@@ -182,9 +184,9 @@ export interface StyledElementComponents {
   Summary: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
   Sup: StyledComponentWithRef<HTMLAttributes<HTMLElement>, HTMLElement>;
   Table: StyledComponentWithRef<TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
-  Template: StyledComponentWithRef<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
   Tbody: StyledComponentWithRef<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
   Td: StyledComponentWithRef<TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
+  Template: StyledComponentWithRef<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
   Textarea: StyledComponentWithRef<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
   Tfoot: StyledComponentWithRef<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
   Th: StyledComponentWithRef<ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
@@ -203,9 +205,9 @@ export interface StyledElementComponents {
   // SVG
   Svg: StyledComponentWithRef<SVGAttributes<SVGSVGElement>, SVGSVGElement>;
 
-  Animate: StyledComponentWithRef<SVGAttributes<SVGAnimateElement>, SVGElement>;
+  Animate: StyledComponentWithRef<SVGAttributes<SVGAnimateElement>, SVGAnimateElement>;
   AnimateMotion: StyledComponentWithRef<SVGAttributes<SVGElement>, SVGElement>;
-  AnimateTransform: StyledComponentWithRef<SVGAttributes<SVGAnimateTransformElement>, SVGElement>;
+  AnimateTransform: StyledComponentWithRef<SVGAttributes<SVGAnimateTransformElement>, SVGAnimateTransformElement>;
   Circle: StyledComponentWithRef<SVGAttributes<SVGCircleElement>, SVGCircleElement>;
   ClipPath: StyledComponentWithRef<SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
   Defs: StyledComponentWithRef<SVGAttributes<SVGDefsElement>, SVGDefsElement>;
@@ -357,6 +359,7 @@ export interface StyledElementFunctions {
   script: StyledFunction<ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
   section: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
   select: StyledFunction<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+  slot: StyledFunction<SlotHTMLAttributes<HTMLSlotElement>, HTMLSlotElement>;
   small: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
   source: StyledFunction<SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
   span: StyledFunction<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
@@ -366,9 +369,9 @@ export interface StyledElementFunctions {
   summary: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
   sup: StyledFunction<HTMLAttributes<HTMLElement>, HTMLElement>;
   table: StyledFunction<TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
-  template: StyledFunction<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
   tbody: StyledFunction<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
   td: StyledFunction<TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
+  template: StyledFunction<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
   textarea: StyledFunction<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
   tfoot: StyledFunction<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
   th: StyledFunction<ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
@@ -387,9 +390,9 @@ export interface StyledElementFunctions {
   // SVG
   svg: StyledFunction<SVGAttributes<SVGSVGElement>, SVGSVGElement>;
 
-  animate: StyledFunction<SVGAttributes<SVGAnimateElement>, SVGElement>;
+  animate: StyledFunction<SVGAttributes<SVGAnimateElement>, SVGAnimateElement>;
   animateMotion: StyledFunction<SVGAttributes<SVGElement>, SVGElement>;
-  animateTransform: StyledFunction<SVGAttributes<SVGAnimateTransformElement>, SVGElement>;
+  animateTransform: StyledFunction<SVGAttributes<SVGAnimateTransformElement>, SVGAnimateTransformElement>;
   circle: StyledFunction<SVGAttributes<SVGCircleElement>, SVGCircleElement>;
   clipPath: StyledFunction<SVGAttributes<SVGClipPathElement>, SVGClipPathElement>;
   defs: StyledFunction<SVGAttributes<SVGDefsElement>, SVGDefsElement>;

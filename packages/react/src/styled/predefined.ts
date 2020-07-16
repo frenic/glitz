@@ -132,6 +132,7 @@ const predefinedElements: (keyof StyledElementFunctions)[] = [
   'ruby',
   's',
   'samp',
+  'slot',
   'script',
   'section',
   'select',
