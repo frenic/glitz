@@ -229,4 +229,17 @@ styled(() => new Promise(r => r()), { color: 0 });
 
 <styled.button />;
 
-styled.Button({});
+const NotAStyledComponent = styled.Button({});
+<NotAStyledComponent />;
+
+const StyledComponentWithInheritedRef = styled(styled.button({}));
+<StyledComponentWithInheritedRef
+  css={{}}
+  ref={ref => {
+    const element: HTMLButtonElement | null = ref;
+    element;
+  }}
+/>;
+
+const StyledComponentFunctionWithoutRef = styled(({}: { ref?: React.Ref<HTMLButtonElement> }) => <styled.Button />);
+<StyledComponentFunctionWithoutRef css={{}} ref={React.createRef()} />;

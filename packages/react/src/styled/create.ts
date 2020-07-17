@@ -8,6 +8,7 @@ import {
   useContext,
   createElement,
   Ref,
+  PropsWithRef,
 } from 'react';
 import { StyleContext } from '../components/context';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
@@ -19,6 +20,7 @@ import useGlitz from './use-glitz';
 import { useAbsorb, useForward } from './compose';
 
 export type WithRefProp<TProps, TInstance> = PropsWithoutRef<TProps> & RefAttributes<TInstance>;
+export type WithoutRefProp<TProps> = TProps extends PropsWithRef<TProps> ? PropsWithoutRef<TProps> : TProps;
 
 // Conditionally omit `StyledProps` enables support for union props
 export type ExternalProps<TProps> = PropsWithChildren<

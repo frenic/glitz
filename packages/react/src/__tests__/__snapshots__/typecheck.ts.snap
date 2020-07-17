@@ -83,3 +83,10 @@ exports[`typings 14`] = `
   Its return type 'StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>' is not a valid JSX element.
     Type 'StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>' is missing the following properties from type 'Element': type, props, key"
 `;
+
+exports[`typings 15`] = `"packages/react/src/__tests__/__fixtures__/typings.tsx 232:1 - JSX element type 'NotAStyledComponent' does not have any construct or call signatures."`;
+
+exports[`typings 16`] = `
+"packages/react/src/__tests__/__fixtures__/typings.tsx 244:44 - Type '{ css: {}; ref: RefObject<unknown>; }' is not assignable to type 'IntrinsicAttributes & Pick<{ ref?: ((instance: HTMLButtonElement | null) => void) | RefObject<HTMLButtonElement> | null | undefined; }, never> & { ...; } & { ...; }'.
+  Property 'ref' does not exist on type 'IntrinsicAttributes & Pick<{ ref?: ((instance: HTMLButtonElement | null) => void) | RefObject<HTMLButtonElement> | null | undefined; }, never> & { ...; } & { ...; }'."
+`;

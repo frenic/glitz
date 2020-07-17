@@ -11,24 +11,23 @@ import {
 } from 'react';
 import { isValidElementType } from 'react-is';
 import { StyledElementLike } from './apply-class-name';
-import create, { isStyledComponent } from './create';
+import create, { isStyledComponent, WithoutRefProp } from './create';
 import decorator, { StyledDecorator } from './decorator';
 import { isType } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
 export interface StyledCustom {
   (component: FunctionComponent, style?: Style): StyledComponent<{}>;
-  <TProps>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<TProps>;
-  // tslint:disable-next-line: unified-signatures
-  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<WithoutRefProp<TProps>>;
   <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Style): StyledComponentWithRef<
     TProps,
     TInstance
   >;
+  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
   <TProps extends StyledElementProps>(
     component: StyledElementLike<FunctionComponent<TProps>>,
     style?: Style,
-  ): StyledComponent<TProps>;
+  ): StyledComponent<WithoutRefProp<TProps>>;
   <TProps extends StyledElementProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledElementLike<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
     style?: Style,

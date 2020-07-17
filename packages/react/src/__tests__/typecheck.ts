@@ -3,7 +3,7 @@ import { typescriptDiagnostics } from '../../../../test-utils';
 
 test('typings', () => {
   const errors = typescriptDiagnostics(resolve(__dirname, '__fixtures__/typings.tsx'));
-  expect(errors.length).toBe(14);
+  expect(errors.length).toBe(16);
   for (const error of errors) {
     expect(error).toMatchSnapshot();
   }
