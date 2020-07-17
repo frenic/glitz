@@ -1,7 +1,7 @@
 // tslint:disable no-unused-expression max-classes-per-file
 
 import * as React from 'react';
-import { applyClassName, GlitzProvider, styled, StyledElementProps } from '../..';
+import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledComponent } from '../..';
 import { GlitzClient, GlitzServer } from '../../../../core/src';
 
 const client = new GlitzClient();
@@ -243,3 +243,13 @@ const StyledComponentWithInheritedRef = styled(styled.button({}));
 
 const StyledComponentFunctionWithoutRef = styled(({}: { ref?: React.Ref<HTMLButtonElement> }) => <styled.Button />);
 <StyledComponentFunctionWithoutRef css={{}} ref={React.createRef()} />;
+
+export function createStyledComponent<TProps>(Component: StyledComponent<TProps>) {
+  // Just to ping whenever this is fixed
+  // Related (I think): https://github.com/microsoft/TypeScript/issues/28884
+  // @ts-expect-error
+  ({ x, ...restProps }: TProps & { x: string }) => <Component {...restProps} />;
+  // @ts-expect-error
+  styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...restProps} />);
+  styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...((restProps as unknown) as TProps)} />);
+}
