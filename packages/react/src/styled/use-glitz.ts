@@ -5,7 +5,7 @@ import { StyledDecorator } from './decorator';
 
 export type DirtyStyle = Style | StyledDecorator | DirtyStyle[] | undefined;
 
-export default function useGlitz(...dirtyStyles: DirtyStyle[]) {
+export default function useGlitz(dirtyStyle: DirtyStyle) {
   const glitz = useContext(GlitzContext);
 
   if (!glitz) {
@@ -16,7 +16,7 @@ export default function useGlitz(...dirtyStyles: DirtyStyle[]) {
 
   const theme = useContext(ThemeContext);
 
-  const finalStyles = styleToArray(dirtyStyles);
+  const finalStyles = flattenStyle([dirtyStyle]);
   const lastGlitzRef = useRef(glitz);
   const lastThemeRef = useRef(theme);
   const lastFinalStylesRef = useRef<Style[]>(finalStyles);
@@ -76,20 +76,17 @@ export default function useGlitz(...dirtyStyles: DirtyStyle[]) {
   return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
 }
 
-function styleToArray(dirtyStyles: DirtyStyle[]): Style[] {
+export function flattenStyle(dirtyStyles: DirtyStyle[]): Style[] {
   const styles: Style[] = [];
 
-  for (let style of dirtyStyles) {
+  for (const style of dirtyStyles) {
     if (!style) {
       continue;
     }
     if (typeof style === 'function') {
-      style = style();
-    }
-    if (Array.isArray(style)) {
-      if (style.length > 0) {
-        styles.push(...styleToArray(style));
-      }
+      styles.push(...style());
+    } else if (Array.isArray(style)) {
+      styles.push(...flattenStyle(style));
     } else {
       styles.push(style);
     }

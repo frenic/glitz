@@ -9,14 +9,12 @@ import {
   RefAttributes,
   ComponentType,
 } from 'react';
-import { isValidElementType } from 'react-is';
 import { StyledElementLike } from './apply-class-name';
-import create, { isStyledComponent, WithoutRefProp } from './create';
-import decorator, { StyledDecorator } from './decorator';
-import { isType } from './predefined';
+import createComponent, { WithoutRefProp } from './create';
+import createDecorator, { StyledDecorator, isStyle } from './decorator';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
-export interface StyledCustom {
+export interface Styled {
   (component: FunctionComponent, style?: Style): StyledComponent<{}>;
   <TProps>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<WithoutRefProp<TProps>>;
   <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Style): StyledComponentWithRef<
@@ -47,10 +45,10 @@ export interface StyledCustom {
     any
   >;
 
-  (style: Style): StyledDecorator;
+  (style?: Style): StyledDecorator;
 }
 
-function custom<TProps>(
+function creator<TProps>(
   arg1:
     | StyledElementLike<ComponentType<StyledElementProps>>
     | StyledComponentWithRef<any, any>
@@ -59,10 +57,10 @@ function custom<TProps>(
   arg2?: Style,
 ): StyledComponent<TProps>;
 
-function custom<TProps>(arg1: Style): StyledDecorator;
+function creator<TProps>(arg1?: Style): StyledDecorator;
 
-function custom<TProps>(
-  arg1:
+function creator<TProps>(
+  arg1?:
     | StyledElementLike<ComponentType<TProps & StyledElementProps>>
     | StyledComponentWithRef<TProps, any>
     | StyledComponent<TProps>
@@ -70,11 +68,7 @@ function custom<TProps>(
     | Style,
   arg2?: Style,
 ): StyledComponent<TProps> | StyledDecorator {
-  return isStyle(arg1) ? decorator([arg1]) : create<TProps>(arg1, arg2 ? [arg2] : []);
+  return typeof arg1 === 'undefined' || isStyle(arg1) ? createDecorator(arg1) : createComponent<TProps>(arg1, arg2);
 }
 
-export const styledCustom: StyledCustom = custom;
-
-export function isStyle(arg: any): arg is Style {
-  return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg) && !isValidElementType(arg);
-}
+export const createStyled: Styled = creator;

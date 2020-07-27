@@ -16,7 +16,7 @@ import { SECRET_COMPOSE } from './constants';
 import { StyledDecorator } from './decorator';
 import { isElementType, StyledElement } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
-import useGlitz from './use-glitz';
+import useGlitz, { DirtyStyle } from './use-glitz';
 import { useAbsorb, useForward } from './compose';
 
 export type WithRefProp<TProps, TInstance> = PropsWithoutRef<TProps> & RefAttributes<TInstance>;
@@ -29,23 +29,23 @@ export type ExternalProps<TProps> = PropsWithChildren<
   }
 >;
 
-export default function create<TProps>(
+export default function createComponent<TProps>(
   type:
     | StyledElement
     | StyledElementLike<ComponentType<TProps & StyledElementProps>>
     | StyledComponent<TProps>
     | StyledComponentWithRef<TProps, any>
     | ComponentType<TProps>,
-  statics: Style[],
+  statics: DirtyStyle,
 ): StyledComponent<TProps>;
 
-export default function create<TProps, TInstance>(
+export default function createComponent<TProps, TInstance>(
   type:
     | StyledElement
     | StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>>
     | StyledComponentWithRef<TProps, TInstance>
     | ComponentType<WithRefProp<TProps, TInstance>>,
-  statics: Style[],
+  statics: DirtyStyle,
 ): StyledComponentWithRef<TProps, TInstance> {
   return isStyledComponent<TProps, TInstance>(type) ? type[SECRET_COMPOSE](statics) : factory(type, statics);
 }
@@ -55,7 +55,7 @@ export function factory<TProps, TInstance>(
     | StyledElement
     | StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>>
     | ComponentType<WithRefProp<TProps, TInstance>>,
-  statics: Style[],
+  statics: DirtyStyle,
 ): StyledComponentWithRef<TProps, TInstance> {
   const Component = isElementType(type)
     ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
@@ -63,7 +63,7 @@ export function factory<TProps, TInstance>(
           const { universal, [type.value]: pre } = useContext(StyleContext) ?? {};
           const className = combineClassNames(
             (restProps as any).className,
-            useGlitz(universal, pre, statics, dynamic, dynamics),
+            useGlitz([universal, pre, statics, dynamic, dynamics]),
           );
 
           return createElement<any>(type.value, {
@@ -76,7 +76,7 @@ export function factory<TProps, TInstance>(
     : isElementLikeType<TProps, TInstance>(type)
     ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
         useAbsorb(dynamics => {
-          const className = combineClassNames((restProps as any).className, useGlitz(statics, dynamic, dynamics));
+          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, dynamics]));
 
           return createElement<any>(type.value, {
             ...restProps,
@@ -94,8 +94,8 @@ export function factory<TProps, TInstance>(
       );
 
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
-    [SECRET_COMPOSE](additionals?: Style[]) {
-      const NewStyled = factory(type, additionals ? statics.concat(additionals) : statics);
+    [SECRET_COMPOSE](additionals?: DirtyStyle) {
+      const NewStyled = factory(type, [statics, additionals]);
 
       if (Component.defaultProps) {
         NewStyled.defaultProps = {};

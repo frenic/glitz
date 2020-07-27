@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledComponent } from '../..';
 import { GlitzClient, GlitzServer } from '../../../../core/src';
+import { StyledDecorator } from '../../styled/decorator';
 
 const client = new GlitzClient();
 <GlitzProvider glitz={client} />;
@@ -253,3 +254,6 @@ export function createStyledComponent<TProps>(Component: StyledComponent<TProps>
   styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...restProps} />);
   styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...((restProps as unknown) as TProps)} />);
 }
+
+let decorator: StyledDecorator = styled();
+decorator = decorator({});

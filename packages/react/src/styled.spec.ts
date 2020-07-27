@@ -601,6 +601,13 @@ describe('react styled', () => {
     tree.setProps({ css: { color: 'green' } });
     expect(renders).toBe(1);
   });
+  it('creates an empty decorator', () => {
+    let decorator = styled();
+
+    decorator = decorator({ color: 'red' });
+    decorator = decorator({ backgroundColor: 'green' });
+    expect(decorator()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+  });
 });
 
 function mountWithGlitz(node: React.ReactElement) {

@@ -57,6 +57,7 @@ import {
 import { SECRET_COMPOSE } from './constants';
 import { ExternalProps, WithRefProp } from './create';
 import { StyledDecorator } from './decorator';
+import { DirtyStyle } from './use-glitz';
 
 // To provide proper type errors for `Style` we create an interface of `Style[]`
 // and makes sure it's first in order
@@ -72,12 +73,12 @@ export type StyledElementProps = {
 };
 
 export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
-  [SECRET_COMPOSE](style?: Style[]): StyledComponent<TProps>;
+  [SECRET_COMPOSE](style?: DirtyStyle): StyledComponent<TProps>;
 }
 
 export interface StyledComponentWithRef<TProps, TInstance>
   extends ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
-  [SECRET_COMPOSE](style?: Style[]): StyledComponentWithRef<TProps, TInstance>;
+  [SECRET_COMPOSE](style?: DirtyStyle): StyledComponentWithRef<TProps, TInstance>;
 }
 
 export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponentWithRef<TProps, TInstance>;
