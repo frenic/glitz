@@ -1,6 +1,6 @@
 // tslint:disable no-unused-expression
 
-import { Style, CommonStyle, CommonValue, CommonDeclarations, ResolvedValue, ResolvedDeclarations } from '../..';
+import { Style, CommonValue, CommonDeclarations, ResolvedValue, ResolvedDeclarations } from '../..';
 
 const css: Style = {
   gridColumnStart: '',
