@@ -56,17 +56,12 @@ import {
 } from 'react';
 import { SECRET_COMPOSE } from './constants';
 import { ExternalProps, WithRefProp } from './create';
-import { StyledDecorator } from './decorator';
 import { DirtyStyle } from './use-glitz';
 
 // To provide proper type errors for `Style` we create an interface of `Style[]`
 // and makes sure it's first in order
 // export interface StyleArray extends Array<Style> {}
 // export type StyleOrStyleArray = StyleArray | Style;
-
-export type StyledProps = {
-  compose: (style?: StyledDecorator | Style[] | Style) => Style | Style[];
-};
 
 export type StyledElementProps = {
   className?: string;

@@ -1,5 +1,5 @@
 import * as CSS from 'csstype';
-export { PropertyValue } from 'csstype';
+export { PropertyValue, PropertiesFallback as Properties } from 'csstype';
 
 export type Style = Selectors &
   Omit<Merge<FeaturedProperties, ExtendedProperties>, ExcludedShorthands> & {
