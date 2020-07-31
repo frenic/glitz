@@ -15,8 +15,7 @@ import createDecorator, { StyledDecorator, isStyle } from './decorator';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
 export interface Styled {
-  (component: FunctionComponent, style?: Style): StyledComponent<{}>;
-  <TProps>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<WithoutRefProp<TProps>>;
+  <TProps = {}>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<WithoutRefProp<TProps>>;
   <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Style): StyledComponentWithRef<
     TProps,
     TInstance

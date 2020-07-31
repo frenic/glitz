@@ -42,11 +42,17 @@ const StyledStyledFunctionComponentWithoutStyle = styled(() => <StyledFunctionCo
 const StyledFunctionComponentWithStyle = styled(() => <styled.Div css={{}} />, {});
 <StyledFunctionComponentWithStyle css={{}} />;
 
-const StyledFunctionComponentWithProps = styled(({}: { x: string }) => <styled.Div css={{}} />);
-<StyledFunctionComponentWithProps x="" css={{}} />;
+const StyledFunctionComponentWithRequiredProps = styled(({}: { x: string }) => <styled.Div css={{}} />, {});
+<StyledFunctionComponentWithRequiredProps x="" css={{}} />;
 
-const StyledStyledFunctionComponentWithProps = styled(StyledFunctionComponentWithProps);
-<StyledStyledFunctionComponentWithProps x="" css={{}} />;
+const StyledStyledFunctionComponentWithRequiredProps = styled(StyledFunctionComponentWithRequiredProps);
+<StyledStyledFunctionComponentWithRequiredProps x="" css={{}} />;
+
+const StyledFunctionComponentWithOptionalProps = styled(({}: { x?: string }) => <styled.Div css={{}} />, {});
+<StyledFunctionComponentWithOptionalProps x="" css={{}} />;
+
+const StyledStyledFunctionComponentWithOptionalProps = styled(StyledFunctionComponentWithOptionalProps);
+<StyledStyledFunctionComponentWithOptionalProps x="" css={{}} />;
 
 class ClassComponentWithoutProps extends React.Component {
   public render() {
@@ -85,27 +91,27 @@ const StyledClassComponentWithoutPropsWithStyle = styled(ClassComponentWithoutPr
   }}
 />;
 
-class ClassComponentWithProps extends React.Component<{ x: string }> {
+class ClassComponentWithRequiredProps extends React.Component<{ x: string }> {
   public render() {
     return <styled.Div css={{}} />;
   }
 }
-const StyledClassComponentWithProps = styled(ClassComponentWithProps);
-<StyledClassComponentWithProps
+const StyledClassComponentWithRequiredProps = styled(ClassComponentWithRequiredProps);
+<StyledClassComponentWithRequiredProps
   x=""
   css={{}}
   ref={ref => {
-    const instance: ClassComponentWithProps | null = ref;
+    const instance: ClassComponentWithRequiredProps | null = ref;
     instance;
   }}
 />;
 
-const StyledStyledClassComponentWithProps = styled(StyledClassComponentWithProps);
-<StyledStyledClassComponentWithProps
+const StyledStyledClassComponentWithRequiredProps = styled(StyledClassComponentWithRequiredProps);
+<StyledStyledClassComponentWithRequiredProps
   x=""
   css={{}}
   ref={ref => {
-    const instance: ClassComponentWithProps | null = ref;
+    const instance: ClassComponentWithRequiredProps | null = ref;
     instance;
   }}
 />;
@@ -130,10 +136,15 @@ const StyledElementLikeFunctionComponentWithoutProps = styled(
 );
 <StyledElementLikeFunctionComponentWithoutProps className="" css={{}} />;
 
-const StyledElementLikeFunctionComponentWithProps = styled(
+const StyledElementLikeFunctionComponentWithRequiredProps = styled(
   applyClassName((props: { x: string } & StyledElementProps) => <div className={props.className} />),
 );
-<StyledElementLikeFunctionComponentWithProps x="" className="" css={{}} />;
+<StyledElementLikeFunctionComponentWithRequiredProps x="" className="" css={{}} />;
+
+const StyledElementLikeFunctionComponentWithOptionalProps = styled(
+  applyClassName((props: { x?: string } & StyledElementProps) => <div className={props.className} />),
+);
+<StyledElementLikeFunctionComponentWithOptionalProps x="" className="" css={{}} />;
 
 class ElementLikeClassComponentWithoutProps extends React.Component<StyledElementProps> {
   public render() {
@@ -150,18 +161,18 @@ const StyledElementLikeClassComponentWithoutProps = styled(applyClassName(Elemen
   }}
 />;
 
-class ElementLikeClassComponentWithProps extends React.Component<{ x: string } & StyledElementProps> {
+class ElementLikeClassComponentWithReqruiedProps extends React.Component<{ x: string } & StyledElementProps> {
   public render() {
     return <div className={this.props.className} />;
   }
 }
-const StyledElementLikeClassComponentWithProps = styled(applyClassName(ElementLikeClassComponentWithProps));
+const StyledElementLikeClassComponentWithProps = styled(applyClassName(ElementLikeClassComponentWithReqruiedProps));
 <StyledElementLikeClassComponentWithProps
   x=""
   className=""
   css={{}}
   ref={ref => {
-    const instance: ElementLikeClassComponentWithProps | null = ref;
+    const instance: ElementLikeClassComponentWithReqruiedProps | null = ref;
     instance;
   }}
 />;
@@ -178,10 +189,23 @@ styled(() => <styled.Div css={styledDecoratorA({})} />);
 <styled.Div css={styledDecoratorA} />;
 <styled.Div css={styledDecoratorA({})} />;
 
-const StyledForwardRefComponent = styled(
-  React.forwardRef(({}, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
+const StyledForwardRefComponentWithRequiredProps = styled(
+  React.forwardRef(({}: { x: string }, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
 );
-<StyledForwardRefComponent
+<StyledForwardRefComponentWithRequiredProps
+  x=""
+  css={{}}
+  ref={ref => {
+    const element: HTMLButtonElement | null = ref;
+    element;
+  }}
+/>;
+
+const StyledForwardRefComponentWithOptionalProps = styled(
+  React.forwardRef(({}: { x?: string }, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
+);
+<StyledForwardRefComponentWithOptionalProps
+  x=""
   css={{}}
   ref={ref => {
     const element: HTMLButtonElement | null = ref;
