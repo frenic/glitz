@@ -97,7 +97,7 @@ describe('react styled', () => {
   });
   it('renders styled component with forwardRef', () => {
     const StyledComponent = styled(
-      React.forwardRef(({}, ref: React.Ref<HTMLDivElement>) =>
+      React.forwardRef(({}: {}, ref: React.Ref<HTMLDivElement>) =>
         React.createElement(styled.Div, {
           ref,
         }),
@@ -478,7 +478,7 @@ describe('react styled', () => {
     }
     const ConnectedStyledComponentA = hoc(
       styled(
-        () =>
+        ({}: {}) =>
           React.createElement(styled.Div, {
             ref: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
           }),

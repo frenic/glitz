@@ -59,11 +59,11 @@ export function factory<TProps, TInstance>(
 ): StyledComponentWithRef<TProps, TInstance> {
   const Component = isElementType(type)
     ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-        useAbsorb(dynamics => {
+        useAbsorb(absorbed => {
           const { universal, [type.value]: pre } = useContext(StyleContext) ?? {};
           const className = combineClassNames(
             (restProps as any).className,
-            useGlitz([universal, pre, statics, dynamic, dynamics]),
+            useGlitz([universal, pre, statics, dynamic, absorbed]),
           );
 
           return createElement<any>(type.value, {
@@ -75,8 +75,8 @@ export function factory<TProps, TInstance>(
       )
     : isElementLikeType<TProps, TInstance>(type)
     ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-        useAbsorb(dynamics => {
-          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, dynamics]));
+        useAbsorb(absorbed => {
+          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
 
           return createElement<any>(type.value, {
             ...restProps,
