@@ -5,8 +5,8 @@ import { GlitzProvider } from './GlitzProvider';
 import { StyleAbsorber } from './StyleAbsorber';
 import { styled } from '../styled';
 
-describe('react provider', () => {
-  it('provides instance', () => {
+describe('StyleAbsorber', () => {
+  it('composes style', () => {
     const glitz = new GlitzClient();
     const Spy = styled(
       () =>
@@ -26,5 +26,20 @@ describe('react provider', () => {
       { borderRightColor: 'green' },
     );
     mount(React.createElement(GlitzProvider, { glitz }, React.createElement(Spy, { css: { borderTopColor: 'red' } })));
+  });
+  it('prevent forward of style', () => {
+    const glitz = new GlitzClient();
+    const Spy = styled(
+      () =>
+        React.createElement(StyleAbsorber, {
+          children() {
+            return React.createElement(styled.Div, {
+              ref: el => expect(el?.className).toBe(''),
+            });
+          },
+        }),
+      { borderRightColor: 'green' },
+    );
+    mount(React.createElement(GlitzProvider, { glitz }, React.createElement(Spy)));
   });
 });

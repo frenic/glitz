@@ -5,7 +5,7 @@ import { ThemeContext } from './context';
 import { GlitzProvider } from './GlitzProvider';
 import { ThemeProvider } from './ThemeProvider';
 
-describe('react provider', () => {
+describe('ThemeProvider', () => {
   it('provides instance', () => {
     const theme = { text: 'red' };
     const Spy: React.FunctionComponent = () => {

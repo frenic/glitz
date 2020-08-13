@@ -4,7 +4,7 @@ import * as React from 'react';
 import { GlitzContext } from './context';
 import { GlitzProvider } from './GlitzProvider';
 
-describe('react provider', () => {
+describe('GlitzProvider', () => {
   it('provides instance', () => {
     const glitz = new GlitzClient();
     const Spy: React.FunctionComponent = () => {

@@ -6,7 +6,7 @@ import { StyleContext } from './context';
 import { GlitzProvider } from './GlitzProvider';
 import { StyleProvider } from './StyleProvider';
 
-describe('react provider', () => {
+describe('StyleProvider', () => {
   it('provides style', () => {
     const Spy: React.FunctionComponent = () => {
       const providedStyle = React.useContext(StyleContext);
