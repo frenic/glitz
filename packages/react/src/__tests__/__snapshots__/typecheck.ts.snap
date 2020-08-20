@@ -15,7 +15,7 @@ exports[`typings 2`] = `
 exports[`typings 3`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 232:12 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
   Types of property 'color' are incompatible.
-    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | \\"black\\" | \\"blanchedalmond\\" | ... 171 more ... | undefined'."
+    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
 
 exports[`typings 4`] = `
@@ -23,7 +23,7 @@ exports[`typings 4`] = `
   Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style'."
 `;
 
-exports[`typings 5`] = `"packages/react/src/__tests__/__fixtures__/typings.tsx 236:13 - Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | \\"black\\" | \\"blanchedalmond\\" | ... 171 more ... | undefined'."`;
+exports[`typings 5`] = `"packages/react/src/__tests__/__fixtures__/typings.tsx 236:13 - Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."`;
 
 exports[`typings 6`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 238:20 - No overload matches this call.
@@ -35,7 +35,7 @@ exports[`typings 6`] = `
 exports[`typings 7`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 240:9 - No overload matches this call.
   The last overload gave the following error.
-    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | \\"black\\" | \\"blanchedalmond\\" | ... 171 more ... | undefined'."
+    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
 
 exports[`typings 8`] = `
@@ -46,7 +46,7 @@ exports[`typings 8`] = `
 exports[`typings 9`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 244:25 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
   Types of property 'color' are incompatible.
-    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | \\"black\\" | \\"blanchedalmond\\" | ... 171 more ... | undefined'."
+    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
 
 exports[`typings 10`] = `
@@ -59,7 +59,7 @@ exports[`typings 10`] = `
 exports[`typings 11`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 248:40 - No overload matches this call.
   The last overload gave the following error.
-    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | \\"black\\" | \\"blanchedalmond\\" | ... 171 more ... | undefined'."
+    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
 
 exports[`typings 12`] = `
