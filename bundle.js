@@ -90,6 +90,7 @@ async function build(input, output, type, production) {
       'react',
       'react-is',
       'inline-style-prefixer',
+      'typescript',
     ],
     plugins: [
       resolver(),

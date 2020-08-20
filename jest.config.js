@@ -14,8 +14,8 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.tsx?$': 'ts-jest',
   },
-  testMatch: ['**/src/**/*.spec.(ts|tsx)', '**/__tests__/*.(ts|tsx)'],
+  testMatch: ['**/src/**/*.spec.(ts|tsx)'],
   setupFilesAfterEnv: ['<rootDir>jest.setup.ts'],
 };

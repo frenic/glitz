@@ -1,0 +1,23 @@
+{
+  "name": "@glitz/static-css-ts-transformer",
+  "version": "0.0.0",
+  "main": "./cjs/index.js",
+  "types": "./types/index.d.ts",
+  "license": "MIT",
+  "author": "Anders Ekdahl <anders.ekdahl@avensia.com>",
+  "homepage": "https://github.com/frenic/glitz",
+  "repository": "git@github.com:frenic/glitz.git",
+  "bugs": "https://github.com/frenic/glitz/issues",
+  "peerDependencies": {
+    "typescript": "*"
+  },
+  "scripts": {
+    "clean": "rimraf cjs types",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index",
+    "prepublish": "npm run clean & npm run build"
+  },
+  "files": [
+    "cjs/",
+    "types/"
+  ]
+}
