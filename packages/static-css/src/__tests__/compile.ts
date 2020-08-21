@@ -1,7 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as ts from 'typescript';
-import transformer, { styledName, generatedClassNames } from '..';
+import transformer, { styledName } from '..';
+import { GlitzStatic } from '@glitz/core';
 
 export default function compile(files: { [fileName: string]: string }) {
   const staticGlitz = fs.readFileSync(path.join(__dirname, '..', 'static-glitz.ts')).toString();
@@ -72,8 +73,9 @@ export default function compile(files: { [fileName: string]: string }) {
   };
 
   const program = ts.createProgram(Object.keys(files), compilerOptions, compilerHost);
+  const glitz = new GlitzStatic();
   const transformers: ts.CustomTransformers = {
-    before: [transformer(program)],
+    before: [transformer(program, glitz)],
     after: [],
   };
 
@@ -94,23 +96,7 @@ export default function compile(files: { [fileName: string]: string }) {
     throw new Error('Compilation failed');
   }
 
-  let css = '';
-  for (const mediaQuery of Object.keys(generatedClassNames)) {
-    if (!mediaQuery) {
-      css +=
-        Object.keys(generatedClassNames[mediaQuery])
-          .map(c => `.${generatedClassNames[mediaQuery][c]} { ${c} }`)
-          .join('\n') + '\n';
-    } else {
-      css += `${mediaQuery} {\n  `;
-      css +=
-        Object.keys(generatedClassNames[mediaQuery])
-          .map(c => `.${generatedClassNames[mediaQuery][c]} { ${c} }`)
-          .join('\n  ') + '\n}\n';
-    }
-  }
-
-  outputs['style.css'] = css.trim();
+  outputs['style.css'] = glitz.getStyle();
 
   return outputs;
 }

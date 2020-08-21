@@ -1,0 +1,443 @@
+import { ResolvedDeclarations, ResolvedValue, Style } from '@glitz/type';
+import GlitzStatic from './GlitzStatic';
+
+interface TestStyle extends Style {
+  '@media (min-width: 100px)'?: Style;
+  '@media (min-width: 200px)'?: Style;
+  '@media (min-width: 300px)'?: Style;
+  '@media (min-width: 768px)'?: Style;
+  '@media (min-width: 992px)'?: Style;
+}
+
+describe('server', () => {
+  it('injects plain rule', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects shorthand rule', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        padding: { left: '10px', right: '10px', top: '10px', bottom: '10px' },
+      }),
+    ).toBe('a b c d');
+
+    expect(
+      server.injectStyle({
+        grid: { column: { gap: '10px' } },
+      }),
+    ).toBe('e');
+
+    expect(
+      server.injectStyle({
+        margin: { x: '10px' },
+      }),
+    ).toBe('f g');
+
+    expect(
+      server.injectStyle({
+        margin: { y: '10px' },
+      }),
+    ).toBe('h i');
+
+    expect(
+      server.injectStyle({
+        margin: { xy: '20px' },
+      }),
+    ).toBe('j k l m');
+
+    expect(
+      server.injectStyle({
+        padding: { left: '20px' },
+        paddingLeft: '30px',
+      }),
+    ).toBe('n');
+
+    expect(
+      server.injectStyle({
+        animationName: { from: { padding: { left: '20px' } } },
+      }),
+    ).toBe('o');
+
+    expect(
+      server.injectStyle({
+        fontFamily: { fontFamily: 'x' },
+      }),
+    ).toBe('p');
+
+    expect(
+      server.injectStyle({
+        border: { xy: { width: 0 }, x: { color: 'red' }, y: { color: 'green' } },
+      }),
+    ).toBe('q r s t u v w x');
+
+    expect(
+      server.injectStyle({
+        border: { y: { x: { radius: 0 } } },
+      }),
+    ).toBe('y z a0 a1');
+
+    expect(
+      server.injectStyle({
+        border: { x: { width: '10px' }, left: { width: '20px' } },
+      }),
+    ).toBe('a2 a3');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects pseudo selector', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects nested pseudo selector', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ ':first-child': { ':hover': { color: 'red' } } })).toBe('a');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects attribute selector', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.injectStyle({ '[disabled]': { color: 'red' } })).toBe('b');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects nested attribute selector', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ '[readonly]': { '[disabled]': { color: 'red' } } })).toBe('a');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects media rule', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('c');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { ':hover': { color: 'red' } } })).toBe('d');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects media markup in certain order', () => {
+    const server = new GlitzStatic<TestStyle>({
+      mediaOrder: (a: string, b: string) => {
+        if (a < b) {
+          return -1;
+        }
+        if (a > b) {
+          return 1;
+        }
+        return 0;
+      },
+    });
+
+    expect(server.injectStyle({ '@media (min-width: 300px)': { color: 'red' } })).toBe('a');
+    expect(server.injectStyle({ '@media (min-width: 100px)': { color: 'red' } })).toBe('b');
+    expect(server.injectStyle({ '@media (min-width: 200px)': { color: 'red' } })).toBe('c');
+    expect(server.injectStyle({ color: 'red' })).toBe('d');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects atomic rules', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        color: 'red',
+        background: { color: 'green' },
+        borderLeftColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
+      }),
+    ).toBe('a b c d e f g h i');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects non-atomic rules', () => {
+    const server = new GlitzStatic<TestStyle>({ atomic: false });
+
+    expect(
+      server.injectStyle({
+        color: 'red',
+        background: { color: 'green' },
+        borderLeftColor: 'blue',
+        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
+        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
+      }),
+    ).toBe('a b c');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects keyframes rule', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
+    expect(server.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+    expect(server.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
+    expect(server.injectStyle({ animationName: 'some-thing' })).toBe('c');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects font face rule', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        '@font-face': {
+          fontFamily: 'x',
+          fontStyle: 'normal',
+          fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('a');
+
+    expect(
+      server.injectStyle({
+        fontFamily: {
+          fontFamily: 'y',
+          fontStyle: 'normal',
+          fontWeight: 400,
+          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+        },
+      }),
+    ).toBe('b');
+
+    expect(
+      server.injectStyle({
+        font: {
+          family: {
+            fontFamily: 'y',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+      }),
+    ).toBe('b');
+
+    expect(
+      server.injectStyle({
+        fontFamily: [
+          {
+            fontFamily: 'x',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+          'sans-serif',
+        ],
+      }),
+    ).toBe('c');
+
+    expect(
+      server.injectStyle({
+        font: {
+          family: [
+            {
+              fontFamily: 'x',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              src:
+                "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+            },
+            'sans-serif',
+          ],
+        },
+      }),
+    ).toBe('c');
+
+    expect(
+      server.injectStyle({
+        fontFamily: 'sans-serif',
+      }),
+    ).toBe('d');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects different combinations', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        color: 'red',
+        '@media (min-width: 768px)': { color: 'green' },
+        '@media (min-width: 992px)': { color: 'blue' },
+      }),
+    ).toBe('a b c');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('injects rule deeply', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle([{ color: 'green' }, { color: 'red' }])).toBe('a');
+
+    expect(
+      server.injectStyle([
+        {
+          padding: { left: '10px' },
+        },
+        {
+          paddingLeft: '20px',
+        },
+      ]),
+    ).toBe('b');
+
+    expect(server.injectStyle([{ ':hover': { color: 'green' } }, { ':hover': { color: 'red' } }])).toBe('c');
+    expect(
+      server.injectStyle([
+        { ':first-child': { ':hover': { color: 'green' } } },
+        { ':first-child': { ':hover': { color: 'red' } } },
+      ]),
+    ).toBe('d');
+
+    expect(
+      server.injectStyle([
+        { '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } },
+        { '@keyframes': { from: { color: 'green' }, to: { color: 'blue' } } },
+      ]),
+    ).toBe('e');
+    expect(
+      server.injectStyle([
+        { animationName: { from: { color: 'blue' }, to: { color: 'white' } } },
+        { animationName: { from: { color: 'white' }, to: { color: 'black' } } },
+      ]),
+    ).toBe('f');
+
+    expect(
+      server.injectStyle([
+        {
+          '@font-face': {
+            fontFamily: 'x',
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        },
+        {
+          '@font-face': {
+            fontFamily: 'y',
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+      ]),
+    ).toBe('g');
+    expect(
+      server.injectStyle([
+        {
+          '@font-face': {
+            fontFamily: 'y',
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+          },
+        },
+        {
+          '@font-face': {
+            fontFamily: 'z',
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
+          },
+        },
+      ]),
+    ).toBe('h');
+
+    expect(
+      server.injectStyle([
+        { '@media (min-width: 768px)': { color: 'green' } },
+        { '@media (min-width: 768px)': { color: 'red' } },
+      ]),
+    ).toBe('i');
+    expect(
+      server.injectStyle([
+        { '@media (min-width: 768px)': { ':hover': { color: 'green' } } },
+        { '@media (min-width: 768px)': { ':hover': { color: 'red' } } },
+      ]),
+    ).toBe('j');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('preserves order', () => {
+    const atomic = new GlitzStatic<TestStyle>();
+
+    expect(
+      atomic.injectStyle({
+        padding: { left: '20px', right: '20px', top: '20px' },
+        color: 'red',
+        paddingRight: '30px',
+        ':hover': {
+          color: 'green',
+        },
+        paddingLeft: '30px',
+      }),
+    ).toBe('a b c d e');
+
+    expect(atomic.getStyle()).toMatchSnapshot();
+
+    const nonAtomic = new GlitzStatic<TestStyle>({ atomic: false });
+
+    expect(
+      nonAtomic.injectStyle({
+        padding: { left: '20px', right: '20px', top: '20px' },
+        color: 'red',
+        paddingRight: '30px',
+        ':hover': {
+          color: 'green',
+        },
+        paddingLeft: '30px',
+      }),
+    ).toBe('a b');
+
+    expect(nonAtomic.getStyle()).toMatchSnapshot();
+  });
+  it('deletes properties', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        color: 'red',
+        paddingRight: '10px',
+        padding: { right: undefined },
+        animationName: { from: { color: 'red' }, to: { color: 'green' } },
+        animation: { name: undefined },
+      }),
+    ).toBe('a');
+
+    expect(
+      server.injectStyle([
+        {
+          color: 'red',
+          paddingRight: '10px',
+        },
+        {
+          paddingRight: (null as any) as undefined,
+        },
+      ]),
+    ).toBe('a');
+
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('applies transformer', () => {
+    const server = new GlitzStatic<TestStyle>({
+      transformer: properties => {
+        const prefixed: ResolvedDeclarations = {};
+        for (const property in properties) {
+          const value: ResolvedValue = properties[property];
+          if (property === 'appearance' && value === 'none') {
+            prefixed.MozAppearance = value;
+          }
+          prefixed[property] = properties[property];
+        }
+        return prefixed;
+      },
+    });
+
+    expect(server.injectStyle({ appearance: 'none', animationName: { from: { appearance: 'none' } } })).toBe('a b');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+  it('passes theme', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    expect(server.injectStyle({ color: (theme: any) => theme.text }, { text: 'red' })).toBe('a');
+    expect(server.getStyle()).toMatchSnapshot();
+  });
+});

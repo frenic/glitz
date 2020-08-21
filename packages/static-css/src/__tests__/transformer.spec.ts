@@ -1,14 +1,6 @@
 import compile from './compile';
-import { generatedClassNames } from '..';
 
 type Code = { [fileName: string]: string };
-
-beforeEach(() => {
-  for (const key of Object.keys(generatedClassNames)) {
-    delete generatedClassNames[key];
-    generatedClassNames[''] = {};
-  }
-});
 
 test('can extract simple component', () => {
   const code = {
@@ -29,13 +21,10 @@ const Styled = styled.div({
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props) {
-    return <div id="some-id" className="a0 a1">hello</div>;
+    return <div id="some-id" className="a b">hello</div>;
 }
 `,
-    'style.css': `
-.a0 { width: '100%' }
-.a1 { height: '100%' }
-`,
+    'style.css': `.a{width:100%}.b{height:100%}`,
   };
 
   expectEqual(expected, compile(code));
@@ -64,14 +53,10 @@ const DerivedStyled = styled(Styled, {
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props) {
-    return <div onClick={() => alert('woah!')} className="a2 a0 a1">hello</div>;
+    return <div onClick={() => alert('woah!')} className="a b c">hello</div>;
 }
 `,
-    'style.css': `
-.a0 { width: '100%' }
-.a1 { height: '100%' }
-.a2 { backgroundColor: 'black' }
-`,
+    'style.css': `.a{width:100%}.b{height:100%}.c{background-color:black}`,
   };
 
   expectEqual(expected, compile(code));
@@ -109,7 +94,7 @@ function smallScreen() {
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props) {
-    return <><div className="m10 m11 m20 m21 a0">hello</div><div className="a1 m12"/></>;
+    return <><div className="a b c d e">hello</div><div className="f g"/></>;
 }
 function createCompactStyled(compactStyle, style) {
     return styled(compactStyle)({ '@media (min-width: 768px)': style });
@@ -121,19 +106,7 @@ function smallScreen() {
     return '@media (max-width: 768px)';
 }
 `,
-    'style.css': `
-.a0 { background: '#000' }
-.a1 { margin: '10px' }
-@media (min-width: 768px) {
-  .m10 { width: '50%' }
-  .m11 { height: '50%' }
-  .m12 { margin: '20px' }
-}
-@media (max-width: 768px) {
-  .m20 { width: '100%' }
-  .m21 { height: '100%' }
-}
-`,
+    'style.css': `.e{background:#000}.f{margin:10px}@media (min-width: 768px){.a{width:50%}.b{height:50%}.g{margin:20px}}@media (max-width: 768px){.c{width:100%}.d{height:100%}}`,
   };
 
   expectEqual(expected, compile(code));
@@ -153,12 +126,10 @@ function MyComponent(props: {}) {
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props) {
-    return <div className="a0">hello</div>;
+    return <div className="a">hello</div>;
 }
 `,
-    'style.css': `
-.a0 { backgroundColor: 'black' }
-`,
+    'style.css': `.a{background-color:black}`,
   };
 
   expectEqual(expected, compile(code));
@@ -180,12 +151,10 @@ function MyComponent(props: {}) {
 import { styled } from '@glitz/react';
 const size = '100' + '%';
 function MyComponent(props) {
-    return <div className="a0">hello</div>;
+    return <div className="a">hello</div>;
 }
 `,
-    'style.css': `
-.a0 { height: '100%' }
-`,
+    'style.css': `.a{height:100%}`,
   };
 
   expectEqual(expected, compile(code));

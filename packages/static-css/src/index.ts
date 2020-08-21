@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
 import { isStaticStyleObject } from './static-glitz';
-import { evaluate, requiresRuntimeResult, isRequiresRuntimeResult } from './evaluator';
-
-export const generatedClassNames: { [mediaQuery: string]: { [cssRule: string]: string } } = { '': {} };
+import { evaluate, isRequiresRuntimeResult, RequiresRuntimeResult } from './evaluator';
+import { GlitzStatic } from '@glitz/core';
+import { CommonValue } from '@glitz/type';
 
 export const moduleName = '@glitz/react';
 export const styledName = 'styled';
@@ -10,29 +10,25 @@ export const styledName = 'styled';
 type StaticStyledComponent = {
   componentName: string;
   elementName: string;
-  cssData: CssData;
+  styles: EvaluatedStyle[];
   parent?: StaticStyledComponent;
 };
 
-type StyleObject = ts.ObjectLiteralExpression | { [rule: string]: any };
-
-type CssData = {
-  classNames: string[];
-  styleObject: StyleObject;
-};
+type EvaluatedStyle = { [key: string]: CommonValue | EvaluatedStyle };
 
 type StaticStyledComponents = { [name: string]: StaticStyledComponent };
 
-export default function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
+export default function transformer(program: ts.Program, glitz: GlitzStatic): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName.endsWith('.tsx')) {
+      // TODO: Why only tsx?
       const staticStyledComponent: StaticStyledComponents = {};
       const firstPassTransformedFile = ts.visitEachChild(
         file,
-        node => visitNode(node, program, staticStyledComponent),
+        node => visitNode(node, program, glitz, staticStyledComponent),
         context,
       );
-      return visitNodeAndChildren(firstPassTransformedFile, program, context, staticStyledComponent);
+      return visitNodeAndChildren(firstPassTransformedFile, program, context, glitz, staticStyledComponent);
     } else {
       return file;
     }
@@ -43,28 +39,36 @@ function visitNodeAndChildren(
   node: ts.SourceFile,
   program: ts.Program,
   context: ts.TransformationContext,
+  glitz: GlitzStatic,
   staticStyledComponent: StaticStyledComponents,
 ): ts.SourceFile;
 function visitNodeAndChildren(
   node: ts.Node,
   program: ts.Program,
   context: ts.TransformationContext,
+  glitz: GlitzStatic,
   staticStyledComponent: StaticStyledComponents,
 ): ts.Node | ts.Node[];
 function visitNodeAndChildren(
   node: ts.Node,
   program: ts.Program,
   context: ts.TransformationContext,
+  glitz: GlitzStatic,
   staticStyledComponent: StaticStyledComponents,
 ): ts.Node | ts.Node[] {
   return ts.visitEachChild(
-    visitNode(node, program, staticStyledComponent),
-    childNode => visitNodeAndChildren(childNode, program, context, staticStyledComponent),
+    visitNode(node, program, glitz, staticStyledComponent),
+    childNode => visitNodeAndChildren(childNode, program, context, glitz, staticStyledComponent),
     context,
   );
 }
 
-function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: StaticStyledComponents): any /* TODO */ {
+function visitNode(
+  node: ts.Node,
+  program: ts.Program,
+  glitz: GlitzStatic,
+  staticStyledComponent: StaticStyledComponents,
+): any /* TODO */ {
   const typeChecker = program.getTypeChecker();
   if (ts.isImportDeclaration(node)) {
     if ((node.moduleSpecifier as ts.StringLiteral).text === moduleName) {
@@ -89,11 +93,11 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
               const styleObject = callExpr.arguments[0];
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
                 const cssData = getCssData(styleObject, typeChecker);
-                if (!isRequiresRuntimeResult(cssData)) {
+                if (isEvaluatedStyle(cssData)) {
                   staticStyledComponent[componentName] = {
                     componentName,
                     elementName,
-                    cssData,
+                    styles: [cssData],
                   };
                   return [];
                 }
@@ -113,12 +117,12 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
               const parent = staticStyledComponent[parentName];
               if (parent) {
                 const cssData = getCssData(styleObject, typeChecker, parent);
-                if (!isRequiresRuntimeResult(cssData)) {
+                if (cssData.every(isEvaluatedStyle)) {
                   if (staticStyledComponent[parentName]) {
                     staticStyledComponent[componentName] = {
                       componentName,
                       elementName: staticStyledComponent[parentName].elementName,
-                      cssData,
+                      styles: cssData as EvaluatedStyle[],
                     };
                     return [];
                   }
@@ -132,21 +136,13 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
             componentName[1] === componentName[1].toLowerCase()
           ) {
             const obj = evaluate(declaration.initializer, typeChecker, {});
-            if (!isRequiresRuntimeResult(obj)) {
+            if (isEvaluatedStyle(obj)) {
+              // TODO: What is dis?
               if (isStaticStyleObject(obj) && obj.elementName) {
-                const classNames = [];
-                const styleObject: { [rule: string]: any } = {};
-                for (const styleObj of obj.styleObjects) {
-                  classNames.push(...getClassNames(styleObj));
-                  Object.assign(styleObject, styleObj);
-                }
                 staticStyledComponent[componentName] = {
                   componentName,
                   elementName: obj.elementName,
-                  cssData: {
-                    classNames,
-                    styleObject,
-                  },
+                  styles: obj.styles,
                 };
                 return [];
               }
@@ -176,14 +172,13 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
       ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
     ) {
       const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
-      if (!isRequiresRuntimeResult(cssData)) {
-        const classNames = cssData.classNames;
+      if (isEvaluatedStyle(cssData)) {
         const jsxElement = ts.createJsxSelfClosingElement(
           ts.createIdentifier(elementName),
           undefined,
           ts.createJsxAttributes([
             ...passThroughProps(node.attributes.properties),
-            ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(classNames.join(' '))),
+            ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(cssData))),
           ]),
         );
         ts.setOriginalNode(jsxElement, node);
@@ -212,15 +207,17 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
         ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
       ) {
         const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
-        if (!isRequiresRuntimeResult(cssData)) {
-          const classNames = cssData.classNames;
+        if (isEvaluatedStyle(cssData)) {
           const jsxElement = ts.createJsxElement(
             ts.createJsxOpeningElement(
               ts.createIdentifier(elementName),
               undefined,
               ts.createJsxAttributes([
                 ...passThroughProps(node.openingElement.attributes.properties),
-                ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(classNames.join(' '))),
+                ts.createJsxAttribute(
+                  ts.createIdentifier('className'),
+                  ts.createStringLiteral(glitz.injectStyle(cssData)),
+                ),
               ]),
             ),
             node.children,
@@ -243,7 +240,7 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
               ...passThroughProps(node.openingElement.attributes.properties),
               ts.createJsxAttribute(
                 ts.createIdentifier('className'),
-                ts.createStringLiteral(staticStyledComponent[jsxTagName].cssData.classNames.join(' ')),
+                ts.createStringLiteral(glitz.injectStyle(staticStyledComponent[jsxTagName].styles)),
               ),
             ]),
           ),
@@ -266,7 +263,7 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
           ...passThroughProps(node.attributes.properties),
           ts.createJsxAttribute(
             ts.createIdentifier('className'),
-            ts.createStringLiteral(staticStyledComponent[jsxTagName].cssData.classNames.join(' ')),
+            ts.createStringLiteral(glitz.injectStyle(staticStyledComponent[jsxTagName].styles)),
           ),
         ]),
       );
@@ -279,78 +276,32 @@ function visitNode(node: ts.Node, program: ts.Program, staticStyledComponent: St
 }
 
 function getCssData(
-  styleObject: ts.ObjectLiteralExpression,
+  tsStyle: ts.ObjectLiteralExpression,
+  typeChecker: ts.TypeChecker,
+  parentComponent: StaticStyledComponent,
+): (EvaluatedStyle | RequiresRuntimeResult)[];
+function getCssData(
+  tsStyle: ts.ObjectLiteralExpression,
+  typeChecker: ts.TypeChecker,
+): EvaluatedStyle | RequiresRuntimeResult;
+function getCssData(
+  tsStyle: ts.ObjectLiteralExpression,
   typeChecker: ts.TypeChecker,
   parentComponent?: StaticStyledComponent,
-) {
-  const obj = evaluate(styleObject, typeChecker, {}) as any;
-  if (isRequiresRuntimeResult(obj)) {
-    return obj;
-  }
+): (EvaluatedStyle | RequiresRuntimeResult)[] | EvaluatedStyle | RequiresRuntimeResult {
+  const style = evaluate(tsStyle, typeChecker, {}) as EvaluatedStyle | RequiresRuntimeResult;
+
+  // TODO: Produce requireRuntimeResult() here somehow
 
   if (parentComponent) {
-    const parentObj = evaluateIfNeeded(parentComponent.cssData.styleObject, typeChecker, {}) as any;
-    if (isRequiresRuntimeResult(parentObj)) {
-      // const diag = obj.getDiagnostics();
-      return parentObj;
-    }
-    for (const key of Object.keys(parentObj)) {
-      if (!(key in obj)) {
-        if (typeof parentObj[key] === 'function') {
-          return requiresRuntimeResult('Styled properties as functions needs to be resolved at runtime', styleObject);
-        }
-        obj[key] = parentObj[key];
-      }
-    }
+    return [...parentComponent.styles, style];
   }
 
-  for (const key of Object.keys(obj)) {
-    if (typeof obj[key] === 'function') {
-      return requiresRuntimeResult('Styled properties as functions needs to be resolved at runtime', styleObject);
-    }
-  }
-
-  const classNames = getClassNames(obj);
-
-  return {
-    classNames,
-    styleObject,
-  };
+  return style;
 }
 
-function getClassNames(obj: { [rule: string]: any }) {
-  const classNames = [];
-  for (const key of Object.keys(obj)) {
-    if (typeof obj[key] === 'object') {
-      const mediaQuery = key;
-      if (!(mediaQuery in generatedClassNames)) {
-        generatedClassNames[mediaQuery] = {};
-      }
-      const index = Object.keys(generatedClassNames).indexOf(mediaQuery);
-      for (const innerKey of Object.keys(obj[mediaQuery])) {
-        const css = `${innerKey}: '${obj[mediaQuery][innerKey]}'`;
-        if (!(css in generatedClassNames[mediaQuery])) {
-          generatedClassNames[mediaQuery][css] = 'm' + index + Object.keys(generatedClassNames[mediaQuery]).length;
-        }
-        classNames.push(generatedClassNames[mediaQuery][css]);
-      }
-    } else {
-      const css = `${key}: '${obj[key]}'`;
-      if (!(css in generatedClassNames[''])) {
-        generatedClassNames[''][css] = 'a' + Object.keys(generatedClassNames['']).length;
-      }
-      classNames.push(generatedClassNames[''][css]);
-    }
-  }
-  return classNames;
-}
-
-function evaluateIfNeeded(styleObject: StyleObject, typeChecker: ts.TypeChecker, scope: { [name: string]: any }) {
-  const expression = styleObject as ts.Expression;
-  if (expression.kind && ts.isObjectLiteralExpression(expression)) {
-    return evaluate(expression, typeChecker, scope);
-  }
-  return styleObject as { [rule: string]: any };
+function isEvaluatedStyle(x: EvaluatedStyle | RequiresRuntimeResult): x is EvaluatedStyle {
+  return !isRequiresRuntimeResult(x);
 }
 
 function passThroughProps(props: ts.NodeArray<ts.JsxAttributeLike>) {

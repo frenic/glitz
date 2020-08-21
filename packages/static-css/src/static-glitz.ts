@@ -1,6 +1,6 @@
 export type StaticStyleObject = {
   elementName?: string;
-  styleObjects: { [rule: string]: any }[];
+  styles: { [rule: string]: any }[];
 };
 
 const styledFunction = (...args: any[]) => {
@@ -10,9 +10,9 @@ const styledFunction = (...args: any[]) => {
   const expandedArgs = args.map(expandStyledFunction);
 
   return Object.assign(ret, {
-    styleObjects: expandedArgs
-      .filter(a => typeof a === 'object' || 'styleObjects' in a)
-      .reduce((acc, a) => acc.concat('styleObjects' in a ? a.styleObjects : [a]), []),
+    styles: expandedArgs
+      .filter(a => typeof a === 'object' || 'styles' in a)
+      .reduce((acc, a) => acc.concat('styles' in a ? a.styles : a), []),
     elementName: getString(expandedArgs.find(a => typeof a === 'string' || 'elementName' in a)),
     all: expandedArgs,
   });
@@ -24,7 +24,7 @@ export const styled = Object.assign(styledFunction, {
 });
 
 function expandStyledFunction(a: any) {
-  return typeof a === 'function' ? ('styleObjects' in a ? a : a()) : a;
+  return typeof a === 'function' ? ('styles' in a ? a : a()) : a;
 }
 
 function getString(a: any) {
@@ -36,5 +36,5 @@ export function isStaticStyleObject(obj: unknown): obj is StaticStyleObject {
     return false;
   }
   const staticStyle = (obj as unknown) as StaticStyleObject;
-  return !!staticStyle.styleObjects;
+  return !!staticStyle.styles;
 }
