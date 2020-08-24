@@ -1,78 +1,79 @@
 import * as path from 'path';
-import * as fs from 'fs';
 import * as ts from 'typescript';
 import transformer, { styledName } from '..';
 import { GlitzStatic } from '@glitz/core';
 
 export default function compile(files: { [fileName: string]: string }) {
-  const staticGlitz = fs.readFileSync(path.join(__dirname, '..', 'static-glitz.ts')).toString();
-  files['@glitz/react.ts'] = staticGlitz;
-
   const outputs: { [fileName: string]: string } = {};
 
   const compilerOptions: ts.CompilerOptions = {
     noEmitOnError: true,
     target: ts.ScriptTarget.Latest,
-    lib: ['es2018', 'dom'],
+    moduleResolution: ts.ModuleResolutionKind.NodeJs,
+    lib: ['lib.es2018.d.ts', 'lib.dom.d.ts'],
+    types: [],
     jsx: ts.JsxEmit.Preserve,
   };
 
-  const compilerHost: ts.CompilerHost = {
-    getSourceFile(filename) {
-      if (filename in files) {
-        return ts.createSourceFile(filename, files[filename], ts.ScriptTarget.Latest);
+  const compilerHost = ts.createCompilerHost(compilerOptions);
+
+  const customCompilerHost: ts.CompilerHost = {
+    ...compilerHost,
+    resolveModuleNames(moduleNames, containingFile, _, __, options) {
+      const resolvedModules: ts.ResolvedModule[] = [];
+      for (const moduleName of moduleNames) {
+        if (moduleName === '@glitz/react') {
+          resolvedModules.push({ resolvedFileName: path.join(__dirname, '..', 'static-glitz.ts') });
+          continue;
+        }
+
+        const localTsFileName = `${moduleName.slice(2)}.ts`;
+        if (localTsFileName in files) {
+          resolvedModules.push({ resolvedFileName: localTsFileName });
+          continue;
+        }
+
+        const localTsxFileName = `${moduleName.slice(2)}.tsx`;
+        if (localTsxFileName in files) {
+          resolvedModules.push({ resolvedFileName: localTsxFileName });
+          continue;
+        }
+
+        const result = ts.resolveModuleName(moduleName, containingFile, options, {
+          fileExists(fileName) {
+            return ts.sys.fileExists(fileName);
+          },
+          readFile(fileName) {
+            return ts.sys.readFile(fileName);
+          },
+        });
+        if (result.resolvedModule) {
+          resolvedModules.push(result.resolvedModule);
+        }
       }
-      const libPath = path.join(__dirname, '..', '..', '..', '..', 'node_modules', 'typescript', 'lib');
-      if (filename.indexOf('.d.ts') !== -1 && fs.existsSync(path.join(libPath, filename))) {
-        return ts.createSourceFile(
-          filename,
-          fs.readFileSync(path.join(libPath, filename)).toString(),
-          ts.ScriptTarget.Latest,
-        );
+      return resolvedModules;
+    },
+    getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile) {
+      if (fileName in files) {
+        return ts.createSourceFile(fileName, files[fileName], ts.ScriptTarget.Latest);
       }
-      const possibleLibFile = 'lib.' + filename.replace('.ts', '') + '.d.ts';
-      if (fs.existsSync(path.join(libPath, possibleLibFile))) {
-        return ts.createSourceFile(
-          possibleLibFile,
-          fs.readFileSync(path.join(libPath, possibleLibFile)).toString(),
-          ts.ScriptTarget.Latest,
-        );
+
+      const sourceFile = compilerHost.getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile);
+
+      if (!sourceFile) {
+        console.log('TS asked for file', fileName, 'but that was not passed in to the compile function');
       }
-      console.log('TS asked for file', filename, 'but that was not passed in to the compile function');
-      return undefined;
-    },
-    readFile(fileName: string) {
-      return fileName;
-    },
-    fileExists() {
-      return true;
-    },
-    getDefaultLibFileName() {
-      return 'lib.d.ts';
+
+      return sourceFile;
     },
     writeFile(fileName, data) {
       if (!fileName.includes(styledName)) {
         outputs[fileName] = data;
       }
     },
-    getDirectories() {
-      return null as any;
-    },
-    useCaseSensitiveFileNames() {
-      return false;
-    },
-    getCanonicalFileName(filename) {
-      return filename;
-    },
-    getCurrentDirectory() {
-      return '';
-    },
-    getNewLine() {
-      return '\n';
-    },
   };
 
-  const program = ts.createProgram(Object.keys(files), compilerOptions, compilerHost);
+  const program = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
   const glitz = new GlitzStatic();
   const transformers: ts.CustomTransformers = {
     before: [transformer(program, glitz)],
