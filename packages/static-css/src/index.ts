@@ -301,7 +301,15 @@ function getCssData(
 }
 
 function isEvaluatedStyle(x: EvaluatedStyle | RequiresRuntimeResult): x is EvaluatedStyle {
-  return !isRequiresRuntimeResult(x);
+  if (!isRequiresRuntimeResult(x)) {
+    for (const key of Object.keys(x)) {
+      if (typeof (x as any)[key] === 'function') {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 function passThroughProps(props: ts.NodeArray<ts.JsxAttributeLike>) {

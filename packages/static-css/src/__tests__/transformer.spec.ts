@@ -199,7 +199,7 @@ const DerivedStyled = styled(Styled, {
   expectEqual(expected, compile(code));
 });
 
-test('it bails when it finds a function that can not be statically evaluated', () => {
+test.only('it bails when it finds a function that can not be statically evaluated', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
@@ -222,11 +222,11 @@ const DerivedStyled = styled(Styled, {
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props) {
-    return <styled.Div css={{ color: theme => theme.color }}><DerivedStyled /></styled.Div>;
+    return <styled.Div css={{ color: (theme) => theme.color }}><DerivedStyled /></styled.Div>;
 }
 const Styled = styled.div({
     width: '100%',
-    color: theme => theme.color,
+    color: (theme) => theme.color,
 });
 const DerivedStyled = styled(Styled, {
     backgroundColor: 'black',
