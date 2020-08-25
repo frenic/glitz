@@ -464,30 +464,3 @@ export function isRequiresRuntimeResult(o: unknown): o is RequiresRuntimeResult 
   const res = o as RequiresRuntimeResult;
   return res.__requiresRuntime === true;
 }
-
-// function evaluateVariableDeclarations(
-//   body: ts.FunctionBody,
-//   typeChecker: ts.TypeChecker,
-//   scope: { [name: string]: any },
-// ) {
-//   const localScope: { [name: string]: any } = Object.assign({}, scope);
-//   for (const stmt of body.statements) {
-//     if (ts.isVariableStatement(stmt)) {
-//       for (const decl of stmt.declarationList.declarations) {
-//         if (ts.isIdentifier(decl.name)) {
-//           let value: any = undefined;
-//           if (decl.initializer) {
-//             value = evaluate(decl.initializer, typeChecker, localScope);
-//             if (isRequiresRuntimeResult(value)) {
-//               return value;
-//             }
-//           }
-//           localScope[decl.name.text] = value;
-//         }
-//       }
-//     } else if (ts.isFunctionDeclaration(stmt)) {
-//       // TODO
-//     }
-//   }
-//   return localScope;
-// }

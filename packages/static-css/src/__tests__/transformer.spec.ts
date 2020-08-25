@@ -203,17 +203,29 @@ test.only('it bails when it finds a function that can not be statically evaluate
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
+
 function MyComponent(props: {}) {
-    return <styled.Div css={{ color: (theme: any) => theme.color }}><DerivedStyled /></styled.Div>;
+    return (
+        <>
+            <styled.Div css={{ color: (theme: any) => theme.color }} />
+            <DerivedStyled />
+            <DeepStyled />
+        </>
+    );
 }
 
 const Styled = styled.div({
-    width: '100%',
     color: (theme: any) => theme.color,
 });
 
 const DerivedStyled = styled(Styled, {
     backgroundColor: 'black',
+});
+
+const DeepStyled = styled.div({
+    ':hover': {
+        color: (theme: any) => theme.color,
+    },
 });
 `,
   };
@@ -222,14 +234,22 @@ const DerivedStyled = styled(Styled, {
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props) {
-    return <styled.Div css={{ color: (theme) => theme.color }}><DerivedStyled /></styled.Div>;
+    return (<>
+            <styled.Div css={{ color: (theme) => theme.color }}/>
+            <DerivedStyled />
+            <DeepStyled />
+        </>);
 }
 const Styled = styled.div({
-    width: '100%',
     color: (theme) => theme.color,
 });
 const DerivedStyled = styled(Styled, {
     backgroundColor: 'black',
+});
+const DeepStyled = styled.div({
+    ':hover': {
+        color: (theme) => theme.color,
+    },
 });
 `,
     'style.css': ``,

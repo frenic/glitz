@@ -300,10 +300,14 @@ function getCssData(
   return style;
 }
 
-function isEvaluatedStyle(x: EvaluatedStyle | RequiresRuntimeResult): x is EvaluatedStyle {
-  if (!isRequiresRuntimeResult(x)) {
-    for (const key of Object.keys(x)) {
-      if (typeof (x as any)[key] === 'function') {
+function isEvaluatedStyle(object: EvaluatedStyle | RequiresRuntimeResult): object is EvaluatedStyle {
+  if (!isRequiresRuntimeResult(object)) {
+    for (const key in object) {
+      const value = object[key];
+      if (typeof value === 'function') {
+        return false;
+      }
+      if (value && typeof value === 'object' && !Array.isArray(value) && !isEvaluatedStyle(value)) {
         return false;
       }
     }
