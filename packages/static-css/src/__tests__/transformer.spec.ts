@@ -199,7 +199,7 @@ const DerivedStyled = styled(Styled, {
   expectEqual(expected, compile(code));
 });
 
-test.only('it bails when it finds a function that can not be statically evaluated', () => {
+test('it bails when it finds a function that can not be statically evaluated', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';

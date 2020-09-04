@@ -1,40 +1,427 @@
-export type StaticStyleObject = {
-  elementName?: string;
-  styles: { [rule: string]: any }[];
+const COMPONENT_TYPE = {};
+const ELEMENT_TYPE = {};
+
+type Style = Record<string, any>;
+
+type StaticDecorator = {
+  (): Style[];
+  (style: Style | StaticDecorator): StaticDecorator;
+  (component: StaticComponent, style?: Style): StaticComponent;
 };
 
-const styledFunction = (...args: any[]) => {
-  const ret = (...innerArgs: any[]) => {
-    return styled(...[...args, ...innerArgs]);
-  };
-  const expandedArgs = args.map(expandStyledFunction);
-
-  return Object.assign(ret, {
-    styles: expandedArgs
-      .filter(a => typeof a === 'object' || 'styles' in a)
-      .reduce((acc, a) => acc.concat('styles' in a ? a.styles : a), []),
-    elementName: getString(expandedArgs.find(a => typeof a === 'string' || 'elementName' in a)),
-    all: expandedArgs,
-  });
+type StaticComponent = ((props?: any) => StaticElement) & {
+  styles: Style[];
+  elementName: string;
+  type: typeof COMPONENT_TYPE;
 };
 
-export const styled = Object.assign(styledFunction, {
-  div: (args: any) => styledFunction(...args, 'div'),
-  Div: (props?: any) => styledFunction(props?.css, 'div'),
-});
+type StaticElement = {
+  styles: Style[];
+  elementName: string;
+  type: typeof ELEMENT_TYPE;
+};
 
-function expandStyledFunction(a: any) {
-  return typeof a === 'function' ? ('styles' in a ? a : a()) : a;
-}
+function createStaticStyled(styles: Style[]): StaticDecorator {
+  function decorator(): Style[];
+  function decorator(style: Style): StaticDecorator;
+  function decorator(component: StaticComponent, style?: Style): StaticComponent;
+  function decorator(arg1?: Style | StaticComponent, arg2?: Style) {
+    if (isStaticComponent(arg1)) {
+      return createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, arg2 ?? {}]);
+    }
 
-function getString(a: any) {
-  return typeof a === 'string' ? a : !!a && a.elementName ? a.elementName : undefined;
-}
+    if (typeof arg1 === 'object') {
+      return createStaticStyled([...styles, arg1]);
+    }
 
-export function isStaticStyleObject(obj: unknown): obj is StaticStyleObject {
-  if (!obj || typeof obj !== 'function') {
-    return false;
+    return styles;
   }
-  const staticStyle = (obj as unknown) as StaticStyleObject;
-  return !!staticStyle.styles;
+
+  return decorator;
 }
+
+function createStaticComponent(elementName: string, styles: Style[] = []): StaticComponent {
+  function Component(props: any = {}) {
+    return {
+      styles: [props.css ?? {}, ...styles],
+      elementName,
+      type: ELEMENT_TYPE,
+    };
+  }
+
+  return Object.assign(Component, { styles, elementName, type: COMPONENT_TYPE });
+}
+
+export function isStaticComponent(object: unknown): object is StaticComponent {
+  if ((object as StaticComponent).type === COMPONENT_TYPE) {
+    return true;
+  }
+
+  return false;
+}
+
+export function isStaticElement(object: unknown): object is StaticElement {
+  if ((object as StaticElement).type === ELEMENT_TYPE) {
+    return true;
+  }
+
+  return false;
+}
+
+export const styled = Object.assign(
+  createStaticStyled([]),
+  {
+    a: (style: Style) => createStaticComponent('a', [style]),
+    abbr: (style: Style) => createStaticComponent('abbr', [style]),
+    address: (style: Style) => createStaticComponent('address', [style]),
+    area: (style: Style) => createStaticComponent('area', [style]),
+    article: (style: Style) => createStaticComponent('article', [style]),
+    aside: (style: Style) => createStaticComponent('aside', [style]),
+    audio: (style: Style) => createStaticComponent('audio', [style]),
+    b: (style: Style) => createStaticComponent('b', [style]),
+    base: (style: Style) => createStaticComponent('base', [style]),
+    bdi: (style: Style) => createStaticComponent('bdi', [style]),
+    bdo: (style: Style) => createStaticComponent('bdo', [style]),
+    big: (style: Style) => createStaticComponent('big', [style]),
+    blockquote: (style: Style) => createStaticComponent('blockquote', [style]),
+    body: (style: Style) => createStaticComponent('body', [style]),
+    br: (style: Style) => createStaticComponent('br', [style]),
+    button: (style: Style) => createStaticComponent('button', [style]),
+    canvas: (style: Style) => createStaticComponent('canvas', [style]),
+    caption: (style: Style) => createStaticComponent('caption', [style]),
+    cite: (style: Style) => createStaticComponent('cite', [style]),
+    code: (style: Style) => createStaticComponent('code', [style]),
+    col: (style: Style) => createStaticComponent('col', [style]),
+    colgroup: (style: Style) => createStaticComponent('colgroup', [style]),
+    data: (style: Style) => createStaticComponent('data', [style]),
+    datalist: (style: Style) => createStaticComponent('datalist', [style]),
+    dd: (style: Style) => createStaticComponent('dd', [style]),
+    del: (style: Style) => createStaticComponent('del', [style]),
+    details: (style: Style) => createStaticComponent('details', [style]),
+    dfn: (style: Style) => createStaticComponent('dfn', [style]),
+    dialog: (style: Style) => createStaticComponent('dialog', [style]),
+    div: (style: Style) => createStaticComponent('div', [style]),
+    dl: (style: Style) => createStaticComponent('dl', [style]),
+    dt: (style: Style) => createStaticComponent('dt', [style]),
+    em: (style: Style) => createStaticComponent('em', [style]),
+    embed: (style: Style) => createStaticComponent('embed', [style]),
+    fieldset: (style: Style) => createStaticComponent('fieldset', [style]),
+    figcaption: (style: Style) => createStaticComponent('figcaption', [style]),
+    figure: (style: Style) => createStaticComponent('figure', [style]),
+    footer: (style: Style) => createStaticComponent('footer', [style]),
+    form: (style: Style) => createStaticComponent('form', [style]),
+    h1: (style: Style) => createStaticComponent('h1', [style]),
+    h2: (style: Style) => createStaticComponent('h2', [style]),
+    h3: (style: Style) => createStaticComponent('h3', [style]),
+    h4: (style: Style) => createStaticComponent('h4', [style]),
+    h5: (style: Style) => createStaticComponent('h5', [style]),
+    h6: (style: Style) => createStaticComponent('h6', [style]),
+    head: (style: Style) => createStaticComponent('head', [style]),
+    header: (style: Style) => createStaticComponent('header', [style]),
+    hgroup: (style: Style) => createStaticComponent('hgroup', [style]),
+    hr: (style: Style) => createStaticComponent('hr', [style]),
+    html: (style: Style) => createStaticComponent('html', [style]),
+    i: (style: Style) => createStaticComponent('i', [style]),
+    iframe: (style: Style) => createStaticComponent('iframe', [style]),
+    img: (style: Style) => createStaticComponent('img', [style]),
+    input: (style: Style) => createStaticComponent('input', [style]),
+    ins: (style: Style) => createStaticComponent('ins', [style]),
+    kbd: (style: Style) => createStaticComponent('kbd', [style]),
+    keygen: (style: Style) => createStaticComponent('keygen', [style]),
+    label: (style: Style) => createStaticComponent('label', [style]),
+    legend: (style: Style) => createStaticComponent('legend', [style]),
+    li: (style: Style) => createStaticComponent('li', [style]),
+    link: (style: Style) => createStaticComponent('link', [style]),
+    main: (style: Style) => createStaticComponent('main', [style]),
+    map: (style: Style) => createStaticComponent('map', [style]),
+    mark: (style: Style) => createStaticComponent('mark', [style]),
+    menu: (style: Style) => createStaticComponent('menu', [style]),
+    menuitem: (style: Style) => createStaticComponent('menuitem', [style]),
+    meta: (style: Style) => createStaticComponent('meta', [style]),
+    meter: (style: Style) => createStaticComponent('meter', [style]),
+    nav: (style: Style) => createStaticComponent('nav', [style]),
+    noindex: (style: Style) => createStaticComponent('noindex', [style]),
+    noscript: (style: Style) => createStaticComponent('noscript', [style]),
+    object: (style: Style) => createStaticComponent('object', [style]),
+    ol: (style: Style) => createStaticComponent('ol', [style]),
+    optgroup: (style: Style) => createStaticComponent('optgroup', [style]),
+    option: (style: Style) => createStaticComponent('option', [style]),
+    output: (style: Style) => createStaticComponent('output', [style]),
+    p: (style: Style) => createStaticComponent('p', [style]),
+    param: (style: Style) => createStaticComponent('param', [style]),
+    picture: (style: Style) => createStaticComponent('picture', [style]),
+    pre: (style: Style) => createStaticComponent('pre', [style]),
+    progress: (style: Style) => createStaticComponent('progress', [style]),
+    q: (style: Style) => createStaticComponent('q', [style]),
+    rp: (style: Style) => createStaticComponent('rp', [style]),
+    rt: (style: Style) => createStaticComponent('rt', [style]),
+    ruby: (style: Style) => createStaticComponent('ruby', [style]),
+    s: (style: Style) => createStaticComponent('s', [style]),
+    samp: (style: Style) => createStaticComponent('samp', [style]),
+    slot: (style: Style) => createStaticComponent('slot', [style]),
+    script: (style: Style) => createStaticComponent('script', [style]),
+    section: (style: Style) => createStaticComponent('section', [style]),
+    select: (style: Style) => createStaticComponent('select', [style]),
+    small: (style: Style) => createStaticComponent('small', [style]),
+    source: (style: Style) => createStaticComponent('source', [style]),
+    span: (style: Style) => createStaticComponent('span', [style]),
+    strong: (style: Style) => createStaticComponent('strong', [style]),
+    style: (style: Style) => createStaticComponent('style', [style]),
+    sub: (style: Style) => createStaticComponent('sub', [style]),
+    summary: (style: Style) => createStaticComponent('summary', [style]),
+    sup: (style: Style) => createStaticComponent('sup', [style]),
+    table: (style: Style) => createStaticComponent('table', [style]),
+    template: (style: Style) => createStaticComponent('template', [style]),
+    tbody: (style: Style) => createStaticComponent('tbody', [style]),
+    td: (style: Style) => createStaticComponent('td', [style]),
+    textarea: (style: Style) => createStaticComponent('textarea', [style]),
+    tfoot: (style: Style) => createStaticComponent('tfoot', [style]),
+    th: (style: Style) => createStaticComponent('th', [style]),
+    thead: (style: Style) => createStaticComponent('thead', [style]),
+    time: (style: Style) => createStaticComponent('time', [style]),
+    title: (style: Style) => createStaticComponent('title', [style]),
+    tr: (style: Style) => createStaticComponent('tr', [style]),
+    track: (style: Style) => createStaticComponent('track', [style]),
+    u: (style: Style) => createStaticComponent('u', [style]),
+    ul: (style: Style) => createStaticComponent('ul', [style]),
+    var: (style: Style) => createStaticComponent('var', [style]),
+    video: (style: Style) => createStaticComponent('video', [style]),
+    wbr: (style: Style) => createStaticComponent('wbr', [style]),
+    webview: (style: Style) => createStaticComponent('webview', [style]),
+    svg: (style: Style) => createStaticComponent('svg', [style]),
+    animate: (style: Style) => createStaticComponent('animate', [style]),
+    animateMotion: (style: Style) => createStaticComponent('animateMotion', [style]),
+    animateTransform: (style: Style) => createStaticComponent('animateTransform', [style]),
+    circle: (style: Style) => createStaticComponent('circle', [style]),
+    clipPath: (style: Style) => createStaticComponent('clipPath', [style]),
+    defs: (style: Style) => createStaticComponent('defs', [style]),
+    desc: (style: Style) => createStaticComponent('desc', [style]),
+    ellipse: (style: Style) => createStaticComponent('ellipse', [style]),
+    feBlend: (style: Style) => createStaticComponent('feBlend', [style]),
+    feColorMatrix: (style: Style) => createStaticComponent('feColorMatrix', [style]),
+    feComponentTransfer: (style: Style) => createStaticComponent('feComponentTransfer', [style]),
+    feComposite: (style: Style) => createStaticComponent('feComposite', [style]),
+    feConvolveMatrix: (style: Style) => createStaticComponent('feConvolveMatrix', [style]),
+    feDiffuseLighting: (style: Style) => createStaticComponent('feDiffuseLighting', [style]),
+    feDisplacementMap: (style: Style) => createStaticComponent('feDisplacementMap', [style]),
+    feDistantLight: (style: Style) => createStaticComponent('feDistantLight', [style]),
+    feDropShadow: (style: Style) => createStaticComponent('feDropShadow', [style]),
+    feFlood: (style: Style) => createStaticComponent('feFlood', [style]),
+    feFuncA: (style: Style) => createStaticComponent('feFuncA', [style]),
+    feFuncB: (style: Style) => createStaticComponent('feFuncB', [style]),
+    feFuncG: (style: Style) => createStaticComponent('feFuncG', [style]),
+    feFuncR: (style: Style) => createStaticComponent('feFuncR', [style]),
+    feGaussianBlur: (style: Style) => createStaticComponent('feGaussianBlur', [style]),
+    feImage: (style: Style) => createStaticComponent('feImage', [style]),
+    feMerge: (style: Style) => createStaticComponent('feMerge', [style]),
+    feMergeNode: (style: Style) => createStaticComponent('feMergeNode', [style]),
+    feMorphology: (style: Style) => createStaticComponent('feMorphology', [style]),
+    feOffset: (style: Style) => createStaticComponent('feOffset', [style]),
+    fePointLight: (style: Style) => createStaticComponent('fePointLight', [style]),
+    feSpecularLighting: (style: Style) => createStaticComponent('feSpecularLighting', [style]),
+    feSpotLight: (style: Style) => createStaticComponent('feSpotLight', [style]),
+    feTile: (style: Style) => createStaticComponent('feTile', [style]),
+    feTurbulence: (style: Style) => createStaticComponent('feTurbulence', [style]),
+    filter: (style: Style) => createStaticComponent('filter', [style]),
+    foreignObject: (style: Style) => createStaticComponent('foreignObject', [style]),
+    g: (style: Style) => createStaticComponent('g', [style]),
+    image: (style: Style) => createStaticComponent('image', [style]),
+    line: (style: Style) => createStaticComponent('line', [style]),
+    linearGradient: (style: Style) => createStaticComponent('linearGradient', [style]),
+    marker: (style: Style) => createStaticComponent('marker', [style]),
+    mask: (style: Style) => createStaticComponent('mask', [style]),
+    metadata: (style: Style) => createStaticComponent('metadata', [style]),
+    mpath: (style: Style) => createStaticComponent('mpath', [style]),
+    path: (style: Style) => createStaticComponent('path', [style]),
+    pattern: (style: Style) => createStaticComponent('pattern', [style]),
+    polygon: (style: Style) => createStaticComponent('polygon', [style]),
+    polyline: (style: Style) => createStaticComponent('polyline', [style]),
+    radialGradient: (style: Style) => createStaticComponent('radialGradient', [style]),
+    rect: (style: Style) => createStaticComponent('rect', [style]),
+    stop: (style: Style) => createStaticComponent('stop', [style]),
+    switch: (style: Style) => createStaticComponent('switch', [style]),
+    symbol: (style: Style) => createStaticComponent('symbol', [style]),
+    text: (style: Style) => createStaticComponent('text', [style]),
+    textPath: (style: Style) => createStaticComponent('textPath', [style]),
+    tspan: (style: Style) => createStaticComponent('tspan', [style]),
+    use: (style: Style) => createStaticComponent('use', [style]),
+    view: (style: Style) => createStaticComponent('view', [style]),
+  },
+  {
+    A: createStaticComponent('a'),
+    Abbr: createStaticComponent('abbr'),
+    Address: createStaticComponent('address'),
+    Area: createStaticComponent('area'),
+    Article: createStaticComponent('article'),
+    Aside: createStaticComponent('aside'),
+    Audio: createStaticComponent('audio'),
+    B: createStaticComponent('b'),
+    Base: createStaticComponent('base'),
+    Bdi: createStaticComponent('bdi'),
+    Bdo: createStaticComponent('bdo'),
+    Big: createStaticComponent('big'),
+    Blockquote: createStaticComponent('blockquote'),
+    Body: createStaticComponent('body'),
+    Br: createStaticComponent('br'),
+    Button: createStaticComponent('button'),
+    Canvas: createStaticComponent('canvas'),
+    Caption: createStaticComponent('caption'),
+    Cite: createStaticComponent('cite'),
+    Code: createStaticComponent('code'),
+    Col: createStaticComponent('col'),
+    Colgroup: createStaticComponent('colgroup'),
+    Data: createStaticComponent('data'),
+    Datalist: createStaticComponent('datalist'),
+    Dd: createStaticComponent('dd'),
+    Del: createStaticComponent('del'),
+    Details: createStaticComponent('details'),
+    Dfn: createStaticComponent('dfn'),
+    Dialog: createStaticComponent('dialog'),
+    Div: createStaticComponent('div'),
+    Dl: createStaticComponent('dl'),
+    Dt: createStaticComponent('dt'),
+    Em: createStaticComponent('em'),
+    Embed: createStaticComponent('embed'),
+    Fieldset: createStaticComponent('fieldset'),
+    Figcaption: createStaticComponent('figcaption'),
+    Figure: createStaticComponent('figure'),
+    Footer: createStaticComponent('footer'),
+    Form: createStaticComponent('form'),
+    H1: createStaticComponent('h1'),
+    H2: createStaticComponent('h2'),
+    H3: createStaticComponent('h3'),
+    H4: createStaticComponent('h4'),
+    H5: createStaticComponent('h5'),
+    H6: createStaticComponent('h6'),
+    Head: createStaticComponent('head'),
+    Header: createStaticComponent('header'),
+    Hgroup: createStaticComponent('hgroup'),
+    Hr: createStaticComponent('hr'),
+    Html: createStaticComponent('html'),
+    I: createStaticComponent('i'),
+    Iframe: createStaticComponent('iframe'),
+    Img: createStaticComponent('img'),
+    Input: createStaticComponent('input'),
+    Ins: createStaticComponent('ins'),
+    Kbd: createStaticComponent('kbd'),
+    Keygen: createStaticComponent('keygen'),
+    Label: createStaticComponent('label'),
+    Legend: createStaticComponent('legend'),
+    Li: createStaticComponent('li'),
+    Link: createStaticComponent('link'),
+    Main: createStaticComponent('main'),
+    Map: createStaticComponent('map'),
+    Mark: createStaticComponent('mark'),
+    Menu: createStaticComponent('menu'),
+    Menuitem: createStaticComponent('menuitem'),
+    Meta: createStaticComponent('meta'),
+    Meter: createStaticComponent('meter'),
+    Nav: createStaticComponent('nav'),
+    Noindex: createStaticComponent('noindex'),
+    Noscript: createStaticComponent('noscript'),
+    Object: createStaticComponent('object'),
+    Ol: createStaticComponent('ol'),
+    Optgroup: createStaticComponent('optgroup'),
+    Option: createStaticComponent('option'),
+    Output: createStaticComponent('output'),
+    P: createStaticComponent('p'),
+    Param: createStaticComponent('param'),
+    Picture: createStaticComponent('picture'),
+    Pre: createStaticComponent('pre'),
+    Progress: createStaticComponent('progress'),
+    Q: createStaticComponent('q'),
+    Rp: createStaticComponent('rp'),
+    Rt: createStaticComponent('rt'),
+    Ruby: createStaticComponent('ruby'),
+    S: createStaticComponent('s'),
+    Samp: createStaticComponent('samp'),
+    Slot: createStaticComponent('slot'),
+    Script: createStaticComponent('script'),
+    Section: createStaticComponent('section'),
+    Select: createStaticComponent('select'),
+    Small: createStaticComponent('small'),
+    Source: createStaticComponent('source'),
+    Span: createStaticComponent('span'),
+    Strong: createStaticComponent('strong'),
+    Style: createStaticComponent('style'),
+    Sub: createStaticComponent('sub'),
+    Summary: createStaticComponent('summary'),
+    Sup: createStaticComponent('sup'),
+    Table: createStaticComponent('table'),
+    Template: createStaticComponent('template'),
+    Tbody: createStaticComponent('tbody'),
+    Td: createStaticComponent('td'),
+    Textarea: createStaticComponent('textarea'),
+    Tfoot: createStaticComponent('tfoot'),
+    Th: createStaticComponent('th'),
+    Thead: createStaticComponent('thead'),
+    Time: createStaticComponent('time'),
+    Title: createStaticComponent('title'),
+    Tr: createStaticComponent('tr'),
+    Track: createStaticComponent('track'),
+    U: createStaticComponent('u'),
+    Ul: createStaticComponent('ul'),
+    Var: createStaticComponent('var'),
+    Video: createStaticComponent('video'),
+    Wbr: createStaticComponent('wbr'),
+    Webview: createStaticComponent('webview'),
+    Svg: createStaticComponent('svg'),
+    Animate: createStaticComponent('animate'),
+    AnimateMotion: createStaticComponent('animateMotion'),
+    AnimateTransform: createStaticComponent('animateTransform'),
+    Circle: createStaticComponent('circle'),
+    ClipPath: createStaticComponent('clipPath'),
+    Defs: createStaticComponent('defs'),
+    Desc: createStaticComponent('desc'),
+    Ellipse: createStaticComponent('ellipse'),
+    FeBlend: createStaticComponent('feBlend'),
+    FeColorMatrix: createStaticComponent('feColorMatrix'),
+    FeComponentTransfer: createStaticComponent('feComponentTransfer'),
+    FeComposite: createStaticComponent('feComposite'),
+    FeConvolveMatrix: createStaticComponent('feConvolveMatrix'),
+    FeDiffuseLighting: createStaticComponent('feDiffuseLighting'),
+    FeDisplacementMap: createStaticComponent('feDisplacementMap'),
+    FeDistantLight: createStaticComponent('feDistantLight'),
+    FeDropShadow: createStaticComponent('feDropShadow'),
+    FeFlood: createStaticComponent('feFlood'),
+    FeFuncA: createStaticComponent('feFuncA'),
+    FeFuncB: createStaticComponent('feFuncB'),
+    FeFuncG: createStaticComponent('feFuncG'),
+    FeFuncR: createStaticComponent('feFuncR'),
+    FeGaussianBlur: createStaticComponent('feGaussianBlur'),
+    FeImage: createStaticComponent('feImage'),
+    FeMerge: createStaticComponent('feMerge'),
+    FeMergeNode: createStaticComponent('feMergeNode'),
+    FeMorphology: createStaticComponent('feMorphology'),
+    FeOffset: createStaticComponent('feOffset'),
+    FePointLight: createStaticComponent('fePointLight'),
+    FeSpecularLighting: createStaticComponent('feSpecularLighting'),
+    FeSpotLight: createStaticComponent('feSpotLight'),
+    FeTile: createStaticComponent('feTile'),
+    FeTurbulence: createStaticComponent('feTurbulence'),
+    Filter: createStaticComponent('filter'),
+    ForeignObject: createStaticComponent('foreignObject'),
+    G: createStaticComponent('g'),
+    Image: createStaticComponent('image'),
+    Line: createStaticComponent('line'),
+    LinearGradient: createStaticComponent('linearGradient'),
+    Marker: createStaticComponent('marker'),
+    Mask: createStaticComponent('mask'),
+    Metadata: createStaticComponent('metadata'),
+    Mpath: createStaticComponent('mpath'),
+    Path: createStaticComponent('path'),
+    Pattern: createStaticComponent('pattern'),
+    Polygon: createStaticComponent('polygon'),
+    Polyline: createStaticComponent('polyline'),
+    RadialGradient: createStaticComponent('radialGradient'),
+    Rect: createStaticComponent('rect'),
+    Stop: createStaticComponent('stop'),
+    Switch: createStaticComponent('switch'),
+    Symbol: createStaticComponent('symbol'),
+    Text: createStaticComponent('text'),
+    TextPath: createStaticComponent('textPath'),
+    Tspan: createStaticComponent('tspan'),
+    Use: createStaticComponent('use'),
+    View: createStaticComponent('view'),
+  },
+);

@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { isStaticStyleObject } from './static-glitz';
+import { isStaticElement, isStaticComponent } from './static-glitz';
 import { evaluate, isRequiresRuntimeResult, RequiresRuntimeResult } from './evaluator';
 import { GlitzStatic } from '@glitz/core';
 import { CommonValue } from '@glitz/type';
@@ -93,7 +93,7 @@ function visitNode(
               const styleObject = callExpr.arguments[0];
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
                 const cssData = getCssData(styleObject, typeChecker);
-                if (isEvaluatedStyle(cssData)) {
+                if (isEvaluableStyle(cssData)) {
                   staticStyledComponent[componentName] = {
                     componentName,
                     elementName,
@@ -117,7 +117,7 @@ function visitNode(
               const parent = staticStyledComponent[parentName];
               if (parent) {
                 const cssData = getCssData(styleObject, typeChecker, parent);
-                if (cssData.every(isEvaluatedStyle)) {
+                if (cssData.every(isEvaluableStyle)) {
                   if (staticStyledComponent[parentName]) {
                     staticStyledComponent[componentName] = {
                       componentName,
@@ -135,14 +135,14 @@ function visitNode(
             componentName[0] === componentName[0].toUpperCase() &&
             componentName[1] === componentName[1].toLowerCase()
           ) {
-            const obj = evaluate(declaration.initializer, typeChecker, {});
-            if (isEvaluatedStyle(obj)) {
-              // TODO: What is dis?
-              if (isStaticStyleObject(obj) && obj.elementName) {
+            const object = evaluate(declaration.initializer, typeChecker, {});
+            if (isStaticElement(object)) {
+              if (object.styles.every(isEvaluableStyle)) {
+                // TODO: What is dis?
                 staticStyledComponent[componentName] = {
                   componentName,
-                  elementName: obj.elementName,
-                  styles: obj.styles,
+                  elementName: object.elementName,
+                  styles: object.styles,
                 };
                 return [];
               }
@@ -172,7 +172,7 @@ function visitNode(
       ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
     ) {
       const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
-      if (isEvaluatedStyle(cssData)) {
+      if (isEvaluableStyle(cssData)) {
         const jsxElement = ts.createJsxSelfClosingElement(
           ts.createIdentifier(elementName),
           undefined,
@@ -207,7 +207,7 @@ function visitNode(
         ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
       ) {
         const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
-        if (isEvaluatedStyle(cssData)) {
+        if (isEvaluableStyle(cssData)) {
           const jsxElement = ts.createJsxElement(
             ts.createJsxOpeningElement(
               ts.createIdentifier(elementName),
@@ -300,14 +300,14 @@ function getCssData(
   return style;
 }
 
-function isEvaluatedStyle(object: EvaluatedStyle | RequiresRuntimeResult): object is EvaluatedStyle {
+function isEvaluableStyle(object: EvaluatedStyle | RequiresRuntimeResult): object is EvaluatedStyle {
   if (!isRequiresRuntimeResult(object)) {
     for (const key in object) {
       const value = object[key];
       if (typeof value === 'function') {
         return false;
       }
-      if (value && typeof value === 'object' && !Array.isArray(value) && !isEvaluatedStyle(value)) {
+      if (value && typeof value === 'object' && !Array.isArray(value) && !isEvaluableStyle(value)) {
         return false;
       }
     }
