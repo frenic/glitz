@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { isStaticElement, isStaticComponent } from './static-glitz';
+import { isStaticElement } from './static-glitz';
 import { evaluate, isRequiresRuntimeResult, RequiresRuntimeResult } from './evaluator';
 import { GlitzStatic } from '@glitz/core';
 import { CommonValue } from '@glitz/type';
