@@ -1,6 +1,3 @@
-const COMPONENT_TYPE = {};
-const ELEMENT_TYPE = {};
-
 type Style = Record<string, any>;
 
 type StaticDecorator = {
@@ -12,45 +9,44 @@ type StaticDecorator = {
 type StaticComponent = ((props?: any) => StaticElement) & {
   styles: Style[];
   elementName: string;
-  type: typeof COMPONENT_TYPE;
 };
 
 type StaticElement = {
   styles: Style[];
   elementName: string;
-  type: typeof ELEMENT_TYPE;
 };
 
 function createStaticStyled(styles: Style[]): StaticDecorator {
-  function decorator(arg1?: Style | StaticComponent, arg2?: Style) {
+  function decorator(arg1?: Style | StaticComponent, arg2?: Style): any {
     return isStaticComponent(arg1)
       ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, arg2 ?? {}])
       : typeof arg1 === 'object'
       ? createStaticStyled([...styles, arg1])
-      : styles;
+      : typeof arg1 === 'undefined'
+      ? styles
+      : arg1;
   }
 
-  return decorator as any;
+  return decorator;
 }
 
-function createStaticComponent(elementName: string, styles: Style[] = []): StaticComponent {
+function createStaticComponent(elementName: string, styles?: Style[]): StaticComponent {
   function Component(props: any = {}) {
     return {
-      styles: [props.css ?? {}, ...styles],
+      styles: [props.css ?? {}, ...(styles ?? [])],
       elementName,
-      type: ELEMENT_TYPE,
     };
   }
 
-  return Object.assign(Component, { styles, elementName, type: COMPONENT_TYPE });
+  return Object.assign(Component, { styles: styles ?? [], elementName });
 }
 
-export function isStaticComponent(object: unknown): object is StaticComponent {
-  return (object as StaticComponent).type === COMPONENT_TYPE;
+export function isStaticComponent(object: any): object is StaticComponent {
+  return typeof object === 'function' && !!object.styles && !!object.elementName;
 }
 
-export function isStaticElement(object: unknown): object is StaticElement {
-  return (object as StaticElement).type === ELEMENT_TYPE;
+export function isStaticElement(object: any): object is StaticElement {
+  return typeof object === 'object' && !!object.styles && !!object.elementName;
 }
 
 export const styled = Object.assign(

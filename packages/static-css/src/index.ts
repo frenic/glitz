@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { isStaticElement } from './static-glitz';
+import { isStaticElement, isStaticComponent } from './static-glitz';
 import { evaluate, isRequiresRuntimeResult, RequiresRuntimeResult } from './evaluator';
 import { GlitzStatic } from '@glitz/core';
 import { CommonValue } from '@glitz/type';
@@ -136,7 +136,7 @@ function visitNode(
             componentName[1] === componentName[1].toLowerCase()
           ) {
             const object = evaluate(declaration.initializer, typeChecker, {});
-            if (isStaticElement(object)) {
+            if (isStaticElement(object) || isStaticComponent(object)) {
               if (object.styles.every(isEvaluableStyle)) {
                 // TODO: What is dis?
                 staticStyledComponent[componentName] = {
