@@ -35,7 +35,9 @@
     "clean": "lerna run clean --parallel",
     "lint": "tslint \"packages/*/src/**/*.{ts,tsx}\" --fix",
     "pretty": "prettier --write \"**/*.{js,json,ts,tsx,md}\"",
-    "test": "jest",
+    "test:code": "jest",
+    "test:types": "jest --testMatch \"**/src/**/typecheck.spec.(ts|tsx)\"",
+    "test": "jest --testMatch \"**/src/**/*.spec.(ts|tsx)\"",
     "lazy": "tsc && npm run lint && npm run pretty && npm run test",
     "example": "lerna --scope glitz-example run start --"
   }
