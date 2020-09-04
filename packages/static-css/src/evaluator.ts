@@ -376,6 +376,8 @@ export function evaluate(
     return enm;
   } else if (ts.isSpreadElement(expr)) {
     return evaluate(expr.expression, typeChecker, scope);
+  } else if (ts.isAsExpression(expr)) {
+    return evaluate(expr.expression, typeChecker, scope);
   }
   return requiresRuntimeResult('Unable to evaluate expression, unsupported expression token kind: ' + expr.kind, expr);
 }
