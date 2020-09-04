@@ -195,6 +195,18 @@ const z = x(...y);
   expect(evaluate('z', code)).toBe('1, 2, 3');
 });
 
+test('can use default args', () => {
+  const code = {
+    'entry.ts': `
+const func1 = (y = 1, x = 2) => y + x;
+function func2(z: number, y = 1, x = 2) {
+  return z + y + x;
+}
+`,
+  };
+  expect(evaluate('func1() + func2(1, 1)', code)).toBe(3 + (1 + 1 + 2));
+});
+
 test('can have functions with variables', () => {
   const code = {
     'entry.ts': `

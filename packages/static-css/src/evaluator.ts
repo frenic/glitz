@@ -159,10 +159,11 @@ export function evaluate(
         bodyExpression = expr.body;
       }
     }
-    const parameters: { name: string; isDotDotDot: boolean }[] = [];
+    const parameters: { name: string; isDotDotDot: boolean; defaultValue: any }[] = [];
     for (const parameter of expr.parameters) {
       if (ts.isIdentifier(parameter.name)) {
-        parameters.push({ name: parameter.name.text, isDotDotDot: !!parameter.dotDotDotToken });
+        const defaultValue = parameter.initializer ? evaluate(parameter.initializer, typeChecker, scope) : undefined;
+        parameters.push({ name: parameter.name.text, isDotDotDot: !!parameter.dotDotDotToken, defaultValue });
       } else {
         return requiresRuntimeResult('Static expressions does not support spread', expr);
       }
@@ -178,7 +179,11 @@ export function evaluate(
         if (parameters[i].isDotDotDot) {
           parameterScope[parameters[i].name] = args.slice(i);
         } else {
-          parameterScope[parameters[i].name] = args[i];
+          if (args.length > i) {
+            parameterScope[parameters[i].name] = args[i];
+          } else {
+            parameterScope[parameters[i].name] = parameters[i].defaultValue;
+          }
         }
       }
       return evaluate(bodyExpression, typeChecker, parameterScope);
