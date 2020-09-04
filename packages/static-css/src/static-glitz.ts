@@ -22,22 +22,15 @@ type StaticElement = {
 };
 
 function createStaticStyled(styles: Style[]): StaticDecorator {
-  function decorator(): Style[];
-  function decorator(style: Style): StaticDecorator;
-  function decorator(component: StaticComponent, style?: Style): StaticComponent;
   function decorator(arg1?: Style | StaticComponent, arg2?: Style) {
-    if (isStaticComponent(arg1)) {
-      return createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, arg2 ?? {}]);
-    }
-
-    if (typeof arg1 === 'object') {
-      return createStaticStyled([...styles, arg1]);
-    }
-
-    return styles;
+    return isStaticComponent(arg1)
+      ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, arg2 ?? {}])
+      : typeof arg1 === 'object'
+      ? createStaticStyled([...styles, arg1])
+      : styles;
   }
 
-  return decorator;
+  return decorator as any;
 }
 
 function createStaticComponent(elementName: string, styles: Style[] = []): StaticComponent {
@@ -53,19 +46,11 @@ function createStaticComponent(elementName: string, styles: Style[] = []): Stati
 }
 
 export function isStaticComponent(object: unknown): object is StaticComponent {
-  if ((object as StaticComponent).type === COMPONENT_TYPE) {
-    return true;
-  }
-
-  return false;
+  return (object as StaticComponent).type === COMPONENT_TYPE;
 }
 
 export function isStaticElement(object: unknown): object is StaticElement {
-  if ((object as StaticElement).type === ELEMENT_TYPE) {
-    return true;
-  }
-
-  return false;
+  return (object as StaticElement).type === ELEMENT_TYPE;
 }
 
 export const styled = Object.assign(
