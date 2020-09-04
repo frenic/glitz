@@ -160,30 +160,18 @@ function visitNode(
     node.tagName.expression.escapedText.toString() === styledName
   ) {
     const elementName = node.tagName.name.escapedText.toString().toLowerCase();
-    const cssJsxAttr = node.attributes.properties.find(
-      p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
-    );
-    if (
-      cssJsxAttr &&
-      ts.isJsxAttribute(cssJsxAttr) &&
-      cssJsxAttr.initializer &&
-      ts.isJsxExpression(cssJsxAttr.initializer) &&
-      cssJsxAttr.initializer.expression &&
-      ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
-    ) {
-      const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
-      if (isEvaluableStyle(cssData)) {
-        const jsxElement = ts.createJsxSelfClosingElement(
-          ts.createIdentifier(elementName),
-          undefined,
-          ts.createJsxAttributes([
-            ...passThroughProps(node.attributes.properties),
-            ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(cssData))),
-          ]),
-        );
-        ts.setOriginalNode(jsxElement, node);
-        return jsxElement;
-      }
+    const cssData = getCssDataFromCssProp(node, typeChecker);
+    if (cssData) {
+      const jsxElement = ts.createJsxSelfClosingElement(
+        ts.createIdentifier(elementName),
+        undefined,
+        ts.createJsxAttributes([
+          ...passThroughProps(node.attributes.properties),
+          ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(cssData))),
+        ]),
+      );
+      ts.setOriginalNode(jsxElement, node);
+      return jsxElement;
     }
   }
 
@@ -195,43 +183,38 @@ function visitNode(
       openingElement.tagName.expression.escapedText.toString() === styledName
     ) {
       const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
-      const cssJsxAttr = openingElement.attributes.properties.find(
-        p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
-      );
-      if (
-        cssJsxAttr &&
-        ts.isJsxAttribute(cssJsxAttr) &&
-        cssJsxAttr.initializer &&
-        ts.isJsxExpression(cssJsxAttr.initializer) &&
-        cssJsxAttr.initializer.expression &&
-        ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
-      ) {
-        const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
-        if (isEvaluableStyle(cssData)) {
-          const jsxElement = ts.createJsxElement(
-            ts.createJsxOpeningElement(
-              ts.createIdentifier(elementName),
-              undefined,
-              ts.createJsxAttributes([
-                ...passThroughProps(node.openingElement.attributes.properties),
-                ts.createJsxAttribute(
-                  ts.createIdentifier('className'),
-                  ts.createStringLiteral(glitz.injectStyle(cssData)),
-                ),
-              ]),
-            ),
-            node.children,
-            ts.createJsxClosingElement(ts.createIdentifier(elementName)),
-          );
-          ts.setOriginalNode(jsxElement, node);
-          return jsxElement;
-        }
+      const cssData = getCssDataFromCssProp(openingElement, typeChecker);
+      if (cssData) {
+        const jsxElement = ts.createJsxElement(
+          ts.createJsxOpeningElement(
+            ts.createIdentifier(elementName),
+            undefined,
+            ts.createJsxAttributes([
+              ...passThroughProps(node.openingElement.attributes.properties),
+              ts.createJsxAttribute(
+                ts.createIdentifier('className'),
+                ts.createStringLiteral(glitz.injectStyle(cssData)),
+              ),
+            ]),
+          ),
+          node.children,
+          ts.createJsxClosingElement(ts.createIdentifier(elementName)),
+        );
+        ts.setOriginalNode(jsxElement, node);
+        return jsxElement;
       }
     }
 
     if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
       const jsxTagName = openingElement.tagName.escapedText.toString();
       if (staticStyledComponent[jsxTagName]) {
+        const cssPropData = getCssDataFromCssProp(openingElement, typeChecker);
+        let styles = staticStyledComponent[jsxTagName].styles;
+        if (cssPropData) {
+          styles = styles.slice();
+          styles.push(cssPropData);
+        }
+
         const jsxElement = ts.createJsxElement(
           ts.createJsxOpeningElement(
             ts.createIdentifier(staticStyledComponent[jsxTagName].elementName),
@@ -240,7 +223,7 @@ function visitNode(
               ...passThroughProps(node.openingElement.attributes.properties),
               ts.createJsxAttribute(
                 ts.createIdentifier('className'),
-                ts.createStringLiteral(glitz.injectStyle(staticStyledComponent[jsxTagName].styles)),
+                ts.createStringLiteral(glitz.injectStyle(styles)),
               ),
             ]),
           ),
@@ -256,15 +239,19 @@ function visitNode(
   if (ts.isJsxSelfClosingElement(node) && ts.isIdentifier(node.tagName)) {
     const jsxTagName = node.tagName.escapedText.toString();
     if (staticStyledComponent[jsxTagName]) {
+      const cssPropData = getCssDataFromCssProp(node, typeChecker);
+      let styles = staticStyledComponent[jsxTagName].styles;
+      if (cssPropData) {
+        styles = styles.slice();
+        styles.push(cssPropData);
+      }
+
       const jsxElement = ts.createJsxSelfClosingElement(
         ts.createIdentifier(staticStyledComponent[jsxTagName].elementName),
         undefined,
         ts.createJsxAttributes([
           ...passThroughProps(node.attributes.properties),
-          ts.createJsxAttribute(
-            ts.createIdentifier('className'),
-            ts.createStringLiteral(glitz.injectStyle(staticStyledComponent[jsxTagName].styles)),
-          ),
+          ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(styles))),
         ]),
       );
       ts.setOriginalNode(jsxElement, node);
@@ -298,6 +285,26 @@ function getCssData(
   }
 
   return style;
+}
+
+function getCssDataFromCssProp(node: ts.JsxSelfClosingElement | ts.JsxOpeningElement, typeChecker: ts.TypeChecker) {
+  const cssJsxAttr = node.attributes.properties.find(
+    p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
+  );
+  if (
+    cssJsxAttr &&
+    ts.isJsxAttribute(cssJsxAttr) &&
+    cssJsxAttr.initializer &&
+    ts.isJsxExpression(cssJsxAttr.initializer) &&
+    cssJsxAttr.initializer.expression &&
+    ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
+  ) {
+    const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
+    if (isEvaluableStyle(cssData)) {
+      return cssData;
+    }
+  }
+  return undefined;
 }
 
 function isEvaluableStyle(object: EvaluatedStyle | RequiresRuntimeResult): object is EvaluatedStyle {

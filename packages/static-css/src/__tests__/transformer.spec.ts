@@ -160,6 +160,33 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
+test('can use css prop on declared styled components', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled1 id="my-id" css={{width: '100%'}} />;
+}
+
+const Styled1 = styled.div({
+    height: '100%',
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <div id="my-id" className="a b"/>;
+}
+`,
+    'style.css': `.a{height:100%}.b{width:100%}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('it bails when it finds a variable that can not be statically evaluated', () => {
   const code = {
     'file1.tsx': `
