@@ -69,7 +69,6 @@ function visitNode(
   glitz: GlitzStatic,
   staticStyledComponent: StaticStyledComponents,
 ): any /* TODO */ {
-  const typeChecker = program.getTypeChecker();
   if (ts.isImportDeclaration(node)) {
     if ((node.moduleSpecifier as ts.StringLiteral).text === moduleName) {
       // TODO: Should only do this if the only thing imported is the static/styledx import
@@ -92,7 +91,7 @@ function visitNode(
               const elementName = callExpr.expression.name.escapedText.toString();
               const styleObject = callExpr.arguments[0];
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
-                const cssData = getCssData(styleObject, typeChecker);
+                const cssData = getCssData(styleObject, program);
                 if (isEvaluableStyle(cssData)) {
                   staticStyledComponent[componentName] = {
                     componentName,
@@ -116,7 +115,7 @@ function visitNode(
               const parentName = parentStyledComponent.escapedText.toString();
               const parent = staticStyledComponent[parentName];
               if (parent) {
-                const cssData = getCssData(styleObject, typeChecker, parent);
+                const cssData = getCssData(styleObject, program, parent);
                 if (cssData.every(isEvaluableStyle)) {
                   if (staticStyledComponent[parentName]) {
                     staticStyledComponent[componentName] = {
@@ -135,7 +134,7 @@ function visitNode(
             componentName[0] === componentName[0].toUpperCase() &&
             componentName[1] === componentName[1].toLowerCase()
           ) {
-            const object = evaluate(declaration.initializer, typeChecker, {});
+            const object = evaluate(declaration.initializer, program, {});
             if (isStaticElement(object) || isStaticComponent(object)) {
               if (object.styles.every(isEvaluableStyle)) {
                 // TODO: What is dis?
@@ -160,7 +159,7 @@ function visitNode(
     node.tagName.expression.escapedText.toString() === styledName
   ) {
     const elementName = node.tagName.name.escapedText.toString().toLowerCase();
-    const cssData = getCssDataFromCssProp(node, typeChecker);
+    const cssData = getCssDataFromCssProp(node, program);
     if (cssData) {
       const jsxElement = ts.createJsxSelfClosingElement(
         ts.createIdentifier(elementName),
@@ -183,7 +182,7 @@ function visitNode(
       openingElement.tagName.expression.escapedText.toString() === styledName
     ) {
       const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
-      const cssData = getCssDataFromCssProp(openingElement, typeChecker);
+      const cssData = getCssDataFromCssProp(openingElement, program);
       if (cssData) {
         const jsxElement = ts.createJsxElement(
           ts.createJsxOpeningElement(
@@ -208,7 +207,7 @@ function visitNode(
     if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
       const jsxTagName = openingElement.tagName.escapedText.toString();
       if (staticStyledComponent[jsxTagName]) {
-        const cssPropData = getCssDataFromCssProp(openingElement, typeChecker);
+        const cssPropData = getCssDataFromCssProp(openingElement, program);
         let styles = staticStyledComponent[jsxTagName].styles;
         if (cssPropData) {
           styles = styles.slice();
@@ -239,7 +238,7 @@ function visitNode(
   if (ts.isJsxSelfClosingElement(node) && ts.isIdentifier(node.tagName)) {
     const jsxTagName = node.tagName.escapedText.toString();
     if (staticStyledComponent[jsxTagName]) {
-      const cssPropData = getCssDataFromCssProp(node, typeChecker);
+      const cssPropData = getCssDataFromCssProp(node, program);
       let styles = staticStyledComponent[jsxTagName].styles;
       if (cssPropData) {
         styles = styles.slice();
@@ -264,19 +263,16 @@ function visitNode(
 
 function getCssData(
   tsStyle: ts.ObjectLiteralExpression,
-  typeChecker: ts.TypeChecker,
+  program: ts.Program,
   parentComponent: StaticStyledComponent,
 ): (EvaluatedStyle | RequiresRuntimeResult)[];
+function getCssData(tsStyle: ts.ObjectLiteralExpression, program: ts.Program): EvaluatedStyle | RequiresRuntimeResult;
 function getCssData(
   tsStyle: ts.ObjectLiteralExpression,
-  typeChecker: ts.TypeChecker,
-): EvaluatedStyle | RequiresRuntimeResult;
-function getCssData(
-  tsStyle: ts.ObjectLiteralExpression,
-  typeChecker: ts.TypeChecker,
+  program: ts.Program,
   parentComponent?: StaticStyledComponent,
 ): (EvaluatedStyle | RequiresRuntimeResult)[] | EvaluatedStyle | RequiresRuntimeResult {
-  const style = evaluate(tsStyle, typeChecker, {}) as EvaluatedStyle | RequiresRuntimeResult;
+  const style = evaluate(tsStyle, program, {}) as EvaluatedStyle | RequiresRuntimeResult;
 
   // TODO: Produce requireRuntimeResult() here somehow
 
@@ -287,7 +283,7 @@ function getCssData(
   return style;
 }
 
-function getCssDataFromCssProp(node: ts.JsxSelfClosingElement | ts.JsxOpeningElement, typeChecker: ts.TypeChecker) {
+function getCssDataFromCssProp(node: ts.JsxSelfClosingElement | ts.JsxOpeningElement, program: ts.Program) {
   const cssJsxAttr = node.attributes.properties.find(
     p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
   );
@@ -299,7 +295,7 @@ function getCssDataFromCssProp(node: ts.JsxSelfClosingElement | ts.JsxOpeningEle
     cssJsxAttr.initializer.expression &&
     ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
   ) {
-    const cssData = getCssData(cssJsxAttr.initializer.expression, typeChecker);
+    const cssData = getCssData(cssJsxAttr.initializer.expression, program);
     if (isEvaluableStyle(cssData)) {
       return cssData;
     }

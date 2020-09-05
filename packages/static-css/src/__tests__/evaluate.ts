@@ -30,7 +30,7 @@ export default function (expression: string, files: { [fileName: string]: string
   function visitNode(node: ts.Node, program: ts.Program): any /* TODO */ {
     if (ts.isVariableDeclaration(node)) {
       if (ts.isIdentifier(node.name) && node.initializer && node.name.text === 'expressionToBeEvaluated' + rand) {
-        result = evaluate(node.initializer, program.getTypeChecker(), scope);
+        result = evaluate(node.initializer, program, scope);
       }
     }
     return node;

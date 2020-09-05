@@ -1,10 +1,14 @@
 import * as ts from 'typescript';
+import * as path from 'path';
+import * as fs from 'fs';
 
 export function evaluate(
   expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
-  typeChecker: ts.TypeChecker,
+  program: ts.Program,
   scope: { [name: string]: any },
 ): any {
+  const typeChecker = program.getTypeChecker();
+
   scope.Array = Array;
   scope.Object = Object;
   scope.String = String;
@@ -14,7 +18,7 @@ export function evaluate(
   if (ts.isBinaryExpression(expr)) {
     if (expr.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
       // tslint:disable-next-line: no-shadowed-variable
-      const left = evaluate(expr.left, typeChecker, scope);
+      const left = evaluate(expr.left, program, scope);
       if (isRequiresRuntimeResult(left)) {
         return left;
       }
@@ -22,15 +26,15 @@ export function evaluate(
         return left;
       }
 
-      return evaluate(expr.right, typeChecker, scope);
+      return evaluate(expr.right, program, scope);
     }
 
-    const left = evaluate(expr.left, typeChecker, scope);
+    const left = evaluate(expr.left, program, scope);
     if (isRequiresRuntimeResult(left)) {
       return left;
     }
 
-    const right = evaluate(expr.right, typeChecker, scope);
+    const right = evaluate(expr.right, program, scope);
     if (isRequiresRuntimeResult(right)) {
       return right;
     }
@@ -81,18 +85,18 @@ export function evaluate(
       return false;
     }
   } else if (ts.isParenthesizedExpression(expr)) {
-    return evaluate(expr.expression, typeChecker, scope);
+    return evaluate(expr.expression, program, scope);
   } else if (ts.isConditionalExpression(expr)) {
-    const condition = evaluate(expr.condition, typeChecker, scope);
+    const condition = evaluate(expr.condition, program, scope);
     if (isRequiresRuntimeResult(condition)) {
       return condition;
     }
-    return condition ? evaluate(expr.whenTrue, typeChecker, scope) : evaluate(expr.whenFalse, typeChecker, scope);
+    return condition ? evaluate(expr.whenTrue, program, scope) : evaluate(expr.whenFalse, program, scope);
   } else if (ts.isPrefixUnaryExpression(expr)) {
     if (expr.operator === ts.SyntaxKind.PlusPlusToken || expr.operator === ts.SyntaxKind.MinusMinusToken) {
       return requiresRuntimeResult('-- or ++ expressions are not supported', expr);
     }
-    const value = evaluate(expr.operand, typeChecker, scope);
+    const value = evaluate(expr.operand, program, scope);
     if (isRequiresRuntimeResult(value)) {
       return value;
     }
@@ -110,7 +114,7 @@ export function evaluate(
       return !value;
     }
   } else if (ts.isPropertyAccessExpression(expr)) {
-    const obj = evaluate(expr.expression, typeChecker, scope);
+    const obj = evaluate(expr.expression, program, scope);
     if (isRequiresRuntimeResult(obj)) {
       return obj;
     }
@@ -120,14 +124,14 @@ export function evaluate(
     const property = expr.name.escapedText.toString();
     return obj[property];
   } else if (ts.isElementAccessExpression(expr)) {
-    const obj = evaluate(expr.expression, typeChecker, scope);
+    const obj = evaluate(expr.expression, program, scope);
     if (isRequiresRuntimeResult(obj)) {
       return obj;
     }
     if (!obj && expr.questionDotToken) {
       return undefined;
     }
-    const property = evaluate(expr.argumentExpression, typeChecker, scope);
+    const property = evaluate(expr.argumentExpression, program, scope);
     if (isRequiresRuntimeResult(property)) {
       return property;
     }
@@ -137,7 +141,7 @@ export function evaluate(
   } else if (ts.isTemplateExpression(expr)) {
     let s = expr.head.text;
     for (const span of expr.templateSpans) {
-      const value = evaluate(span.expression, typeChecker, scope);
+      const value = evaluate(span.expression, program, scope);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -162,7 +166,7 @@ export function evaluate(
     const parameters: { name: string; isDotDotDot: boolean; defaultValue: any }[] = [];
     for (const parameter of expr.parameters) {
       if (ts.isIdentifier(parameter.name)) {
-        const defaultValue = parameter.initializer ? evaluate(parameter.initializer, typeChecker, scope) : undefined;
+        const defaultValue = parameter.initializer ? evaluate(parameter.initializer, program, scope) : undefined;
         parameters.push({ name: parameter.name.text, isDotDotDot: !!parameter.dotDotDotToken, defaultValue });
       } else {
         return requiresRuntimeResult('Static expressions does not support spread', expr);
@@ -186,14 +190,14 @@ export function evaluate(
           }
         }
       }
-      return evaluate(bodyExpression, typeChecker, parameterScope);
+      return evaluate(bodyExpression, program, parameterScope);
     };
   } else if (ts.isCallExpression(expr)) {
     // tslint:disable-next-line: ban-types
     let callable: Function;
     let callableContext: any = null;
     if (ts.isPropertyAccessExpression(expr.expression)) {
-      callableContext = evaluate(expr.expression.expression, typeChecker, scope);
+      callableContext = evaluate(expr.expression.expression, program, scope);
       if (isRequiresRuntimeResult(callableContext)) {
         return callableContext;
       }
@@ -201,7 +205,7 @@ export function evaluate(
       callable = callableContext[name];
     } else {
       // tslint:disable-next-line: ban-types
-      callable = evaluate(expr.expression, typeChecker, scope) as Function;
+      callable = evaluate(expr.expression, program, scope) as Function;
     }
     if (isRequiresRuntimeResult(callable)) {
       return callable;
@@ -211,7 +215,7 @@ export function evaluate(
     }
     const args = [];
     for (const arg of expr.arguments) {
-      const value = evaluate(arg, typeChecker, scope);
+      const value = evaluate(arg, program, scope);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -228,7 +232,7 @@ export function evaluate(
     }
     return callable.apply(callableContext, args);
   } else if (ts.isTypeOfExpression(expr)) {
-    const value = evaluate(expr.expression, typeChecker, scope);
+    const value = evaluate(expr.expression, program, scope);
     if (isRequiresRuntimeResult(value)) {
       return value;
     }
@@ -250,7 +254,7 @@ export function evaluate(
       return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
     }
     if (!symbol.valueDeclaration) {
-      symbol = resolveImportSymbol(expr.text, symbol, typeChecker);
+      [symbol, program] = resolveImportSymbol(expr.text, symbol, program);
     }
     if (!symbol.valueDeclaration) {
       return requiresRuntimeResult('Unable to find the value declaration of imported symbol', expr);
@@ -265,13 +269,13 @@ export function evaluate(
       if (!symbol.valueDeclaration.initializer) {
         return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
       }
-      return evaluate(symbol.valueDeclaration.initializer, typeChecker, scope);
+      return evaluate(symbol.valueDeclaration.initializer, program, scope);
     }
     if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
-      return evaluate(symbol.valueDeclaration, typeChecker, scope);
+      return evaluate(symbol.valueDeclaration, program, scope);
     }
     if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-      return evaluate(symbol.valueDeclaration, typeChecker, scope);
+      return evaluate(symbol.valueDeclaration, program, scope);
     }
     return requiresRuntimeResult('Not implemented: ' + expr.text + ', ' + expr.kind, expr);
   } else if (ts.isNoSubstitutionTemplateLiteral(expr)) {
@@ -292,7 +296,7 @@ export function evaluate(
     const obj: any = {};
     for (const property of expr.properties) {
       if (ts.isSpreadAssignment(property)) {
-        const spreadObject = evaluate(property.expression, typeChecker, scope);
+        const spreadObject = evaluate(property.expression, program, scope);
         if (isRequiresRuntimeResult(spreadObject)) {
           return spreadObject;
         }
@@ -304,7 +308,7 @@ export function evaluate(
         }
         if (property.name && ts.isComputedPropertyName(property.name)) {
           // tslint:disable-next-line: no-shadowed-variable
-          const value = evaluate(property.name.expression, typeChecker, scope);
+          const value = evaluate(property.name.expression, program, scope);
           if (isRequiresRuntimeResult(value)) {
             return value;
           }
@@ -315,13 +319,13 @@ export function evaluate(
         }
         let value: any;
         if (ts.isPropertyAssignment(property)) {
-          value = evaluate(property.initializer, typeChecker, scope);
+          value = evaluate(property.initializer, program, scope);
           if (isRequiresRuntimeResult(value)) {
             return value;
           }
         }
         if (ts.isShorthandPropertyAssignment(property)) {
-          value = evaluate(property.name, typeChecker, scope);
+          value = evaluate(property.name, program, scope);
           if (isRequiresRuntimeResult(value)) {
             return value;
           }
@@ -334,7 +338,7 @@ export function evaluate(
   } else if (ts.isArrayLiteralExpression(expr)) {
     const array: any[] = [];
     for (const element of expr.elements) {
-      const value = evaluate(element, typeChecker, scope);
+      const value = evaluate(element, program, scope);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -358,7 +362,7 @@ export function evaluate(
       if (ts.isIdentifier(member.name) || ts.isStringLiteral(member.name) || ts.isNumericLiteral(member.name)) {
         memberName = member.name.text;
       } else if (ts.isComputedPropertyName(member.name)) {
-        const value = evaluate(member.name.expression, typeChecker, scope);
+        const value = evaluate(member.name.expression, program, scope);
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -370,7 +374,7 @@ export function evaluate(
         enm[memberName] = i;
         enm[i] = memberName;
       } else {
-        const value = evaluate(member.initializer, typeChecker, scope);
+        const value = evaluate(member.initializer, program, scope);
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -380,24 +384,143 @@ export function evaluate(
     }
     return enm;
   } else if (ts.isSpreadElement(expr)) {
-    return evaluate(expr.expression, typeChecker, scope);
+    return evaluate(expr.expression, program, scope);
   } else if (ts.isAsExpression(expr)) {
-    return evaluate(expr.expression, typeChecker, scope);
+    return evaluate(expr.expression, program, scope);
   }
   return requiresRuntimeResult('Unable to evaluate expression, unsupported expression token kind: ' + expr.kind, expr);
 }
 
-function resolveImportSymbol(variableName: string, symbol: ts.Symbol, typeChecker: ts.TypeChecker) {
+let staticGlitzProgram: ts.Program | undefined = undefined;
+function getStaticGlitzProgram() {
+  if (staticGlitzProgram) {
+    return staticGlitzProgram;
+  }
+  const compilerOptions: ts.CompilerOptions = {
+    noEmitOnError: true,
+    target: ts.ScriptTarget.Latest,
+    moduleResolution: ts.ModuleResolutionKind.NodeJs,
+    lib: ['lib.es2018.d.ts', 'lib.dom.d.ts'],
+    types: [],
+    jsx: ts.JsxEmit.Preserve,
+  };
+
+  const files: { [moduleName: string]: string } = {
+    '@glitz/react.ts': fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString(),
+  };
+
+  const compilerHost = ts.createCompilerHost(compilerOptions);
+
+  const customCompilerHost: ts.CompilerHost = {
+    ...compilerHost,
+    resolveModuleNames(moduleNames, containingFile, _, __, options) {
+      const resolvedModules: ts.ResolvedModule[] = [];
+      for (const moduleName of moduleNames) {
+        const localTsFileName = `${moduleName.slice(2)}.ts`;
+        if (localTsFileName in files) {
+          resolvedModules.push({ resolvedFileName: localTsFileName });
+          continue;
+        }
+
+        const localTsxFileName = `${moduleName.slice(2)}.tsx`;
+        if (localTsxFileName in files) {
+          resolvedModules.push({ resolvedFileName: localTsxFileName });
+          continue;
+        }
+
+        const result = ts.resolveModuleName(moduleName, containingFile, options, {
+          fileExists(fileName) {
+            return ts.sys.fileExists(fileName);
+          },
+          readFile(fileName) {
+            return ts.sys.readFile(fileName);
+          },
+        });
+        if (result.resolvedModule) {
+          resolvedModules.push(result.resolvedModule);
+        }
+      }
+      return resolvedModules;
+    },
+    getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile) {
+      if (fileName in files) {
+        return ts.createSourceFile(fileName, files[fileName], ts.ScriptTarget.Latest);
+      }
+
+      const sourceFile = compilerHost.getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile);
+
+      if (!sourceFile) {
+        console.log('TS asked for file', fileName, 'but that was not passed in to the compile function');
+      }
+
+      return sourceFile;
+    },
+    writeFile() {},
+  };
+
+  staticGlitzProgram = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
+  return staticGlitzProgram;
+}
+
+let staticGlitzExports: { [name: string]: ts.Symbol } | undefined = undefined;
+function getStaticGlitzExports() {
+  if (staticGlitzExports) {
+    return [staticGlitzExports, staticGlitzProgram as ts.Program] as const;
+  }
+  staticGlitzExports = {};
+
+  const program = getStaticGlitzProgram();
+  const typeChecker = program.getTypeChecker();
+  const staticSource = program.getSourceFile('@glitz/react.ts');
+  if (!staticSource) {
+    throw new Error('Cannot find static Glitz file');
+  }
+
+  for (const stmt of staticSource.statements) {
+    if (
+      ts.isVariableStatement(stmt) &&
+      stmt.modifiers &&
+      stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)
+    ) {
+      for (const decl of stmt.declarationList.declarations) {
+        staticGlitzExports[decl.name.getText()] = typeChecker.getSymbolAtLocation(decl.name)!;
+      }
+    }
+
+    if (
+      ts.isFunctionDeclaration(stmt) &&
+      stmt.modifiers &&
+      stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword) &&
+      stmt.name
+    ) {
+      staticGlitzExports[stmt.name.getText()] = typeChecker.getSymbolAtLocation(stmt.name)!;
+    }
+  }
+  return [staticGlitzExports, staticGlitzProgram as ts.Program] as const;
+}
+
+function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program) {
+  let typeChecker = program.getTypeChecker();
   if (!symbol.valueDeclaration) {
     const importSpecifier = symbol.declarations[0];
     if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {
-      const importSymbol = typeChecker.getSymbolAtLocation(importSpecifier.parent.parent.parent.moduleSpecifier);
-      if (importSymbol) {
-        const exports = typeChecker.getExportsOfModule(importSymbol);
-        for (const exp of exports) {
-          if (exp.escapedName === variableName) {
-            symbol = exp;
-            break;
+      if (importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '') === '@glitz/react') {
+        const [staticGlitzExports, staticGlitzProgram] = getStaticGlitzExports();
+        if (variableName in staticGlitzExports) {
+          symbol = staticGlitzExports[variableName];
+          program = staticGlitzProgram;
+        } else {
+          throw new Error(`Unable to resolve '${variableName}' in static-glitz.ts`);
+        }
+      } else {
+        const importSymbol = typeChecker.getSymbolAtLocation(importSpecifier.parent.parent.parent.moduleSpecifier);
+        if (importSymbol) {
+          const exports = typeChecker.getExportsOfModule(importSymbol);
+          for (const exp of exports) {
+            if (exp.escapedName === variableName) {
+              symbol = exp;
+              break;
+            }
           }
         }
       }
@@ -415,7 +538,7 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, typeChecke
           for (const exp of exports) {
             if (exp.escapedName === variableToLookFor) {
               if (!exp.valueDeclaration) {
-                symbol = resolveImportSymbol(variableToLookFor, exp, typeChecker);
+                [symbol, program] = resolveImportSymbol(variableToLookFor, exp, program);
               } else {
                 symbol = exp;
               }
@@ -431,7 +554,7 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, typeChecke
       }
     }
   }
-  return symbol;
+  return [symbol, program] as const;
 }
 
 export type RequiresRuntimeResult = {
