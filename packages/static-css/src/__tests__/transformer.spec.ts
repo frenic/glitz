@@ -1,6 +1,4 @@
-import compile from './compile';
-
-type Code = { [fileName: string]: string };
+import compile, { Code, TransformerDiagnostics } from './compile';
 
 test('can extract simple component', () => {
   const code = {
@@ -62,6 +60,229 @@ const Styled = styled.div({
   };
 
   expectEqual(expected, compile(code));
+});
+
+test('bails all if it finds a comment that it should skip', () => {
+  const code = {
+    'file1.tsx': `
+/** @glitz-all-dynamic */
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled1 id="some-id"><Styled2 /></Styled1>;
+}
+
+const Styled1 = styled.div({
+    width: '100%',
+    height: '100%'
+});
+
+const Styled2 = styled.div({
+    width: '100%',
+    height: '100%'
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+/** @glitz-all-dynamic */
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <Styled1 id="some-id"><Styled2 /></Styled1>;
+}
+const Styled1 = styled.div({
+    width: '100%',
+    height: '100%'
+});
+const Styled2 = styled.div({
+    width: '100%',
+    height: '100%'
+});
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
+test('warns when a component cannot be extracted but a comment says it should', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled id="some-id">hello</Styled>;
+}
+
+/** @glitz-static */
+const Styled = styled.div({
+    width: (window as any).theWidth,
+    height: '100%'
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <Styled id="some-id">hello</Styled>;
+}
+/** @glitz-static */
+const Styled = styled.div({
+    width: window.theWidth,
+    height: '100%'
+});
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code), [
+    {
+      message: 'Component marked with @glitz-static could not be statically evaluated',
+      severity: 'error',
+      file: 'file1.tsx',
+      line: 4,
+      source: `const Styled = styled.div({
+    width: (window as any).theWidth,
+    height: '100%'
+});`,
+      innerDiagnostic: {
+        file: 'file1.tsx',
+        line: 8,
+        message: "Unable to resolve identifier 'window'",
+        severity: 'error',
+        source: 'window',
+      },
+    },
+  ]);
+});
+
+test('adds info diagnostics when it cannot evaluate', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled id="some-id">hello</Styled>;
+}
+
+const Styled = styled.div({
+    width: (theme) => theme.theWidth,
+    height: '100%'
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <Styled id="some-id">hello</Styled>;
+}
+const Styled = styled.div({
+    width: (theme) => theme.theWidth,
+    height: '100%'
+});
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code), [
+    {
+      message: 'Styled component could not be statically evaluated',
+      severity: 'info',
+      file: 'file1.tsx',
+      line: 4,
+      source: `const Styled = styled.div({
+    width: (theme) => theme.theWidth,
+    height: '100%'
+});`,
+      innerDiagnostic: {
+        file: 'file1.tsx',
+        line: 7,
+        message: 'Functions in style objects requires runtime',
+        severity: 'info',
+        source: '(theme) => theme.theWidth',
+      },
+    },
+  ]);
+});
+
+test('warns when a component cannot be extracted but a comment says all should', () => {
+  const code = {
+    'file1.tsx': `
+/** @glitz-all-static */
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled1 id="some-id"><Styled2 /></Styled1>;
+}
+
+const Styled1 = styled.div({
+    width: (window as any).theWidth,
+    height: '100%'
+});
+
+const Styled2 = styled.div({
+    width: '100%',
+    height: (window as any).theHeight
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+/** @glitz-all-static */
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <Styled1 id="some-id"><Styled2 /></Styled1>;
+}
+const Styled1 = styled.div({
+    width: window.theWidth,
+    height: '100%'
+});
+const Styled2 = styled.div({
+    width: '100%',
+    height: window.theHeight
+});
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code), [
+    {
+      message: 'Component marked with @glitz-static could not be statically evaluated',
+      severity: 'error',
+      file: 'file1.tsx',
+      line: 5,
+      source: `const Styled1 = styled.div({
+    width: (window as any).theWidth,
+    height: '100%'
+});`,
+      innerDiagnostic: {
+        file: 'file1.tsx',
+        line: 8,
+        message: "Unable to resolve identifier 'window'",
+        severity: 'error',
+        source: 'window',
+      },
+    },
+    {
+      message: 'Component marked with @glitz-static could not be statically evaluated',
+      severity: 'error',
+      file: 'file1.tsx',
+      line: 10,
+      source: `const Styled2 = styled.div({
+    width: '100%',
+    height: (window as any).theHeight
+});`,
+      innerDiagnostic: {
+        file: 'file1.tsx',
+        line: 14,
+        message: "Unable to resolve identifier 'window'",
+        severity: 'error',
+        source: 'window',
+      },
+    },
+  ]);
 });
 
 test('can extract derived component', () => {
@@ -397,10 +618,21 @@ const DeepStyled = styled.div({
   expectEqual(expected, compile(code));
 });
 
-function expectEqual(expected: Code, compiled: Code) {
+function expectEqual(
+  expected: Code,
+  results: readonly [Code, TransformerDiagnostics],
+  expectedDiagnostics: TransformerDiagnostics = [],
+) {
+  const [compiled, diagnostics] = results;
   Object.keys(expected).forEach(fileName => {
     expect(fileName + ':\n' + compiled[fileName].trim().replace(/\r/g, '')).toBe(
       fileName + ':\n' + expected[fileName].trim().replace(/\r/g, ''),
     );
   });
+  for (let i = 0; i < expectedDiagnostics.length; i++) {
+    const expectedDiagnostic = expectedDiagnostics[i];
+    const diagnostic = diagnostics[i];
+
+    expect(diagnostic).toEqual(expectedDiagnostic);
+  }
 }

@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
-import { moduleName } from './index';
+import { moduleName, FunctionWithTsNode } from './index';
 
 export function evaluate(
   expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
@@ -186,25 +186,28 @@ export function evaluate(
       }
     }
 
-    return (...args: any[]) => {
-      if (bodyExpression === undefined) {
-        return undefined;
-      }
+    return Object.assign(
+      (...args: any[]) => {
+        if (bodyExpression === undefined) {
+          return undefined;
+        }
 
-      const parameterScope: { [argName: string]: any } = { ...scope };
-      for (let i = 0; i < parameters.length; i++) {
-        if (parameters[i].isDotDotDot) {
-          parameterScope[parameters[i].name] = args.slice(i);
-        } else {
-          if (args.length > i) {
-            parameterScope[parameters[i].name] = args[i];
+        const parameterScope: { [argName: string]: any } = { ...scope };
+        for (let i = 0; i < parameters.length; i++) {
+          if (parameters[i].isDotDotDot) {
+            parameterScope[parameters[i].name] = args.slice(i);
           } else {
-            parameterScope[parameters[i].name] = parameters[i].defaultValue;
+            if (args.length > i) {
+              parameterScope[parameters[i].name] = args[i];
+            } else {
+              parameterScope[parameters[i].name] = parameters[i].defaultValue;
+            }
           }
         }
-      }
-      return evaluate(bodyExpression, program, parameterScope);
-    };
+        return evaluate(bodyExpression, program, parameterScope);
+      },
+      { tsNode: expr },
+    ) as FunctionWithTsNode;
   } else if (ts.isCallExpression(expr)) {
     // tslint:disable-next-line: ban-types
     let callable: Function;
@@ -573,7 +576,7 @@ export type RequiresRuntimeResult = {
   __requiresRuntime: true;
   message: string;
   node?: ts.Node;
-  getDiagnostics(): undefined | { line: number; source: string; file: string };
+  getDiagnostics(): undefined | { line: number; source: string; file: string; message: string };
 };
 
 export function requiresRuntimeResult(message: string, node?: ts.Node): RequiresRuntimeResult {
@@ -591,6 +594,7 @@ export function requiresRuntimeResult(message: string, node?: ts.Node): Requires
       }
 
       return {
+        message,
         source: node.getText(file),
         file: file.fileName,
         line: file.getLineAndCharacterOfPosition(node.pos).line,

@@ -1,10 +1,13 @@
 import * as path from 'path';
 import * as ts from 'typescript';
-import transformer, { styledName } from '..';
+import transformer, { styledName, Diagnostic } from '..';
 import { GlitzStatic } from '@glitz/core';
 
+export type TransformerDiagnostics = Array<Diagnostic>;
+export type Code = { [fileName: string]: string };
+
 export default function compile(files: { [fileName: string]: string }) {
-  const outputs: { [fileName: string]: string } = {};
+  const outputs: Code = {};
 
   const compilerOptions: ts.CompilerOptions = {
     noEmitOnError: true,
@@ -77,8 +80,10 @@ export default function compile(files: { [fileName: string]: string }) {
 
   const program = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
   const glitz = new GlitzStatic();
+
+  let transformerDiagnostics: TransformerDiagnostics = [];
   const transformers: ts.CustomTransformers = {
-    before: [transformer(program, glitz)],
+    before: [transformer(program, glitz, diagnostic => transformerDiagnostics.push(diagnostic))],
     after: [],
   };
 
@@ -101,5 +106,5 @@ export default function compile(files: { [fileName: string]: string }) {
 
   outputs['style.css'] = glitz.getStyle();
 
-  return outputs;
+  return [outputs, transformerDiagnostics] as const;
 }
