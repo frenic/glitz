@@ -78,6 +78,9 @@ function visitNode(
       return node;
     }
   }
+  if (shouldSkip(node)) {
+    return node;
+  }
   if (ts.isVariableStatement(node)) {
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
@@ -266,6 +269,26 @@ function visitNode(
   }
 
   return node;
+}
+
+function shouldSkip(node: ts.Node) {
+  if (!node) {
+    return true;
+  }
+  const jsDoc = (node as any).jsDoc;
+  if (jsDoc && Array.isArray(jsDoc)) {
+    for (const comment of jsDoc) {
+      if (
+        comment &&
+        comment.tags &&
+        Array.isArray(comment.tags) &&
+        comment.tags.find((t: ts.JSDocTag) => t.tagName.text === 'glitz-dynamic')
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function getCssData(

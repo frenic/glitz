@@ -30,6 +30,40 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
+test('bails if it finds a comment that it should skip', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled id="some-id">hello</Styled>;
+}
+
+/** @glitz-dynamic */
+const Styled = styled.div({
+    width: '100%',
+    height: '100%'
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <Styled id="some-id">hello</Styled>;
+}
+/** @glitz-dynamic */
+const Styled = styled.div({
+    width: '100%',
+    height: '100%'
+});
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('can extract derived component', () => {
   const code = {
     'file1.tsx': `

@@ -10,7 +10,7 @@
       "name": "Jest Tests",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceRoot}\\node_modules\\jest\\bin\\jest.js",
-      "args": ["--maxWorkers", "1"],
+      "args": ["--testMatch", "**/static-css/src/**/*.spec.(ts|tsx)", "--maxWorkers", "1"],
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
