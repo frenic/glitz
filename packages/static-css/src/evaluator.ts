@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
+import { moduleName } from './index';
 
 export function evaluate(
   expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
@@ -417,9 +418,8 @@ function getStaticGlitzProgram() {
     jsx: ts.JsxEmit.Preserve,
   };
 
-  const files: { [moduleName: string]: string } = {
-    '@glitz/react.ts': fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString(),
-  };
+  const files: { [moduleName: string]: string } = {};
+  files[moduleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
 
   const compilerHost = ts.createCompilerHost(compilerOptions);
 
@@ -483,7 +483,7 @@ function getStaticGlitzExports() {
 
   const program = getStaticGlitzProgram();
   const typeChecker = program.getTypeChecker();
-  const staticSource = program.getSourceFile('@glitz/react.ts');
+  const staticSource = program.getSourceFile(moduleName + '.ts');
   if (!staticSource) {
     throw new Error('Cannot find static Glitz file');
   }
@@ -516,7 +516,7 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
   if (!symbol.valueDeclaration) {
     const importSpecifier = symbol.declarations[0];
     if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {
-      if (importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '') === '@glitz/react') {
+      if (importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '') === moduleName) {
         const [staticGlitzExports, staticGlitzProgram] = getStaticGlitzExports();
         if (variableName in staticGlitzExports) {
           symbol = staticGlitzExports[variableName];
