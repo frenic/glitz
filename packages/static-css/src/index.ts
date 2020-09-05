@@ -16,19 +16,18 @@ type StaticStyledComponent = {
 
 type EvaluatedStyle = { [key: string]: CommonValue | EvaluatedStyle };
 
-type StaticStyledComponents = { [name: string]: StaticStyledComponent };
+type StaticStyledComponents = Map<ts.Symbol, StaticStyledComponent>;
 
 export default function transformer(program: ts.Program, glitz: GlitzStatic): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName.endsWith('.tsx')) {
-      // TODO: Why only tsx?
-      const staticStyledComponent: StaticStyledComponents = {};
+      const staticStyledComponents = new Map<ts.Symbol, StaticStyledComponent>();
       const firstPassTransformedFile = ts.visitEachChild(
         file,
-        node => visitNode(node, program, glitz, staticStyledComponent),
+        node => visitNode(node, program, glitz, staticStyledComponents),
         context,
       );
-      return visitNodeAndChildren(firstPassTransformedFile, program, context, glitz, staticStyledComponent);
+      return visitNodeAndChildren(firstPassTransformedFile, program, context, glitz, staticStyledComponents);
     } else {
       return file;
     }
@@ -40,25 +39,25 @@ function visitNodeAndChildren(
   program: ts.Program,
   context: ts.TransformationContext,
   glitz: GlitzStatic,
-  staticStyledComponent: StaticStyledComponents,
+  staticStyledComponents: StaticStyledComponents,
 ): ts.SourceFile;
 function visitNodeAndChildren(
   node: ts.Node,
   program: ts.Program,
   context: ts.TransformationContext,
   glitz: GlitzStatic,
-  staticStyledComponent: StaticStyledComponents,
+  staticStyledComponents: StaticStyledComponents,
 ): ts.Node | ts.Node[];
 function visitNodeAndChildren(
   node: ts.Node,
   program: ts.Program,
   context: ts.TransformationContext,
   glitz: GlitzStatic,
-  staticStyledComponent: StaticStyledComponents,
+  staticStyledComponents: StaticStyledComponents,
 ): ts.Node | ts.Node[] {
   return ts.visitEachChild(
-    visitNode(node, program, glitz, staticStyledComponent),
-    childNode => visitNodeAndChildren(childNode, program, context, glitz, staticStyledComponent),
+    visitNode(node, program, glitz, staticStyledComponents),
+    childNode => visitNodeAndChildren(childNode, program, context, glitz, staticStyledComponents),
     context,
   );
 }
@@ -67,8 +66,9 @@ function visitNode(
   node: ts.Node,
   program: ts.Program,
   glitz: GlitzStatic,
-  staticStyledComponent: StaticStyledComponents,
+  staticStyledComponents: StaticStyledComponents,
 ): any /* TODO */ {
+  const typeChecker = program.getTypeChecker();
   if (ts.isImportDeclaration(node)) {
     if ((node.moduleSpecifier as ts.StringLiteral).text === moduleName) {
       // TODO: Should only do this if the only thing imported is the static/styledx import
@@ -82,7 +82,9 @@ function visitNode(
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
       if (ts.isIdentifier(declaration.name) && declaration.initializer) {
-        const componentName = declaration.name.escapedText.toString();
+        const componentSymbol = typeChecker.getSymbolAtLocation(declaration.name)!;
+        const componentName = declaration.name.getText();
+
         if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
           const callExpr = declaration.initializer;
 
@@ -93,11 +95,12 @@ function visitNode(
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
                 const cssData = getCssData(styleObject, program);
                 if (isEvaluableStyle(cssData)) {
-                  staticStyledComponent[componentName] = {
+                  staticStyledComponents.set;
+                  staticStyledComponents.set(componentSymbol, {
                     componentName,
                     elementName,
                     styles: [cssData],
-                  };
+                  });
                   return [];
                 }
               }
@@ -112,23 +115,26 @@ function visitNode(
             const styleObject = callExpr.arguments[1];
 
             if (ts.isIdentifier(parentStyledComponent) && ts.isObjectLiteralExpression(styleObject)) {
-              const parentName = parentStyledComponent.escapedText.toString();
-              const parent = staticStyledComponent[parentName];
+              const parentSymbol = typeChecker.getSymbolAtLocation(parentStyledComponent)!;
+              const parent = staticStyledComponents.get(parentSymbol);
               if (parent) {
                 const cssData = getCssData(styleObject, program, parent);
                 if (cssData.every(isEvaluableStyle)) {
-                  if (staticStyledComponent[parentName]) {
-                    staticStyledComponent[componentName] = {
-                      componentName,
-                      elementName: staticStyledComponent[parentName].elementName,
-                      styles: cssData as EvaluatedStyle[],
-                    };
-                    return [];
-                  }
+                  staticStyledComponents.set(componentSymbol, {
+                    componentName,
+                    elementName: parent.elementName,
+                    styles: cssData as EvaluatedStyle[],
+                  });
+                  return [];
                 }
               }
             }
           }
+
+          // Since some declarations of styled components are complex and look like:
+          // const Styled = createComponent();
+          // we look at the variable name to see if it's a variable with Pascal case
+          // and in that case try to evaluate it to a styled component.
           if (
             componentName.length > 1 &&
             componentName[0] === componentName[0].toUpperCase() &&
@@ -137,12 +143,11 @@ function visitNode(
             const object = evaluate(declaration.initializer, program, {});
             if (isStaticElement(object) || isStaticComponent(object)) {
               if (object.styles.every(isEvaluableStyle)) {
-                // TODO: What is dis?
-                staticStyledComponent[componentName] = {
+                staticStyledComponents.set(componentSymbol, {
                   componentName,
                   elementName: object.elementName,
                   styles: object.styles,
-                };
+                });
                 return [];
               }
             }
@@ -205,10 +210,11 @@ function visitNode(
     }
 
     if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
-      const jsxTagName = openingElement.tagName.escapedText.toString();
-      if (staticStyledComponent[jsxTagName]) {
+      const jsxTagSymbol = typeChecker.getSymbolAtLocation(openingElement.tagName);
+      if (jsxTagSymbol && staticStyledComponents.has(jsxTagSymbol)) {
         const cssPropData = getCssDataFromCssProp(openingElement, program);
-        let styles = staticStyledComponent[jsxTagName].styles;
+        const styledComponent = staticStyledComponents.get(jsxTagSymbol)!;
+        let styles = styledComponent.styles;
         if (cssPropData) {
           styles = styles.slice();
           styles.push(cssPropData);
@@ -216,7 +222,7 @@ function visitNode(
 
         const jsxElement = ts.createJsxElement(
           ts.createJsxOpeningElement(
-            ts.createIdentifier(staticStyledComponent[jsxTagName].elementName),
+            ts.createIdentifier(styledComponent.elementName),
             undefined,
             ts.createJsxAttributes([
               ...passThroughProps(node.openingElement.attributes.properties),
@@ -227,7 +233,7 @@ function visitNode(
             ]),
           ),
           node.children,
-          ts.createJsxClosingElement(ts.createIdentifier(staticStyledComponent[jsxTagName].elementName)),
+          ts.createJsxClosingElement(ts.createIdentifier(styledComponent.elementName)),
         );
         ts.setOriginalNode(jsxElement, node);
         return jsxElement;
@@ -236,17 +242,18 @@ function visitNode(
   }
 
   if (ts.isJsxSelfClosingElement(node) && ts.isIdentifier(node.tagName)) {
-    const jsxTagName = node.tagName.escapedText.toString();
-    if (staticStyledComponent[jsxTagName]) {
+    const jsxTagSymbol = typeChecker.getSymbolAtLocation(node.tagName);
+    if (jsxTagSymbol && staticStyledComponents.has(jsxTagSymbol)) {
       const cssPropData = getCssDataFromCssProp(node, program);
-      let styles = staticStyledComponent[jsxTagName].styles;
+      const styledComponent = staticStyledComponents.get(jsxTagSymbol)!;
+      let styles = styledComponent.styles;
       if (cssPropData) {
         styles = styles.slice();
         styles.push(cssPropData);
       }
 
       const jsxElement = ts.createJsxSelfClosingElement(
-        ts.createIdentifier(staticStyledComponent[jsxTagName].elementName),
+        ts.createIdentifier(styledComponent.elementName),
         undefined,
         ts.createJsxAttributes([
           ...passThroughProps(node.attributes.properties),

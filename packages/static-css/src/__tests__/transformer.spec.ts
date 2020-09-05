@@ -135,6 +135,84 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
+test('components can have the same name in different files', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled>hello1</Styled>;
+}
+
+const Styled = styled.div({
+    backgroundColor: 'black',
+});
+`,
+    'file2.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled>hello2</Styled>;
+}
+
+const Styled = styled.div({
+    backgroundColor: 'red',
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <div className="a">hello1</div>;
+}
+`,
+    'file2.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <div className="b">hello2</div>;
+}
+`,
+    'style.css': `.a{background-color:black}.b{background-color:red}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
+test('components can have the same name in the same file', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent1(props: {}) {
+    const Styled = styled.div({
+        backgroundColor: 'black',
+    });
+    return <Styled>hello1</Styled>;
+}
+function MyComponent2(props: {}) {
+  const Styled = styled.div({
+      backgroundColor: 'red',
+  });
+  return <Styled>hello2</Styled>;
+}
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent1(props) {
+    return <div className="a">hello1</div>;
+}
+function MyComponent2(props) {
+    return <div className="b">hello2</div>;
+}
+`,
+    'style.css': `.a{background-color:black}.b{background-color:red}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('can use variables in style object', () => {
   const code = {
     'file1.tsx': `
