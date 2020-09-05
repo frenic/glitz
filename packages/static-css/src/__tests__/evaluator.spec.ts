@@ -228,6 +228,38 @@ const x = () => {
   expect(evaluate('y() + x()', code)).toBe(2 + 3);
 });
 
+test('bails if functions have if statements', () => {
+  const code = {
+    'entry.ts': `
+const y = () => {
+  let local = 1;
+  if (local === 1) {
+    local = 2;
+  }
+  return local + 1;
+};
+`,
+  };
+  const res = evaluate('y()', code);
+  expect(isRequiresRuntimeResult(res)).toBe(true);
+});
+
+test('bails if functions have loop statements', () => {
+  const code = {
+    'entry.ts': `
+const y = () => {
+  let local = 1;
+  while (local < 10) {
+    local++;
+  }
+  return local + 1;
+};
+`,
+  };
+  const res = evaluate('y()', code);
+  expect(isRequiresRuntimeResult(res)).toBe(true);
+});
+
 test('values that are unknown at compile time gets reported correctly', () => {
   const code = {
     'entry.ts': `

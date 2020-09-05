@@ -153,11 +153,23 @@ export function evaluate(
     let bodyExpression: ts.Expression | undefined;
     if (expr.body) {
       if (ts.isBlock(expr.body)) {
-        const returnStatement = expr.body.statements.find(s => ts.isReturnStatement(s)) as
-          | ts.ReturnStatement
-          | undefined;
-        if (returnStatement) {
-          bodyExpression = returnStatement.expression;
+        const returnStatements = expr.body.statements.filter(s => ts.isReturnStatement(s)) as ts.ReturnStatement[];
+        if (returnStatements.length === 1) {
+          bodyExpression = returnStatements[0].expression;
+        } else if (returnStatements.length < 1) {
+          return requiresRuntimeResult('Static expressions does not support functions with multiple returns', expr);
+        }
+
+        const ifStatements = expr.body.statements.filter(s => ts.isIfStatement(s));
+        if (ifStatements.length) {
+          return requiresRuntimeResult('Static expressions does not support functions with if statements', expr);
+        }
+
+        const loopStatements = expr.body.statements.filter(
+          s => ts.isForInStatement(s) || ts.isForOfStatement(s) || ts.isWhileStatement(s) || ts.isDoStatement(s),
+        );
+        if (loopStatements.length) {
+          return requiresRuntimeResult('Static expressions does not support functions with loops', expr);
         }
       } else {
         bodyExpression = expr.body;
