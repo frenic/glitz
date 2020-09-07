@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`StyleProvider renders input with style 1`] = `"<style data-glitz>.a{box-sizing:border-box}.b{line-height:1.2}.c{margin-top:0}.d{margin-bottom:10px}</style>"`;

@@ -5,12 +5,10 @@ import {
   PropsWithChildren,
   ComponentType,
   forwardRef,
-  useContext,
   createElement,
   Ref,
   PropsWithRef,
 } from 'react';
-import { StyleContext } from '../components/context';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_COMPOSE } from './constants';
 import { StyledDecorator } from './decorator';
@@ -60,11 +58,7 @@ export function factory<TProps, TInstance>(
   const Component = isElementType(type)
     ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
         useAbsorb(absorbed => {
-          const { universal, [type.value]: pre } = useContext(StyleContext) ?? {};
-          const className = combineClassNames(
-            (restProps as any).className,
-            useGlitz([universal, pre, statics, dynamic, absorbed]),
-          );
+          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
 
           return createElement<any>(type.value, {
             ...restProps,

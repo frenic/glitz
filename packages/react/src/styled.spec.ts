@@ -9,7 +9,6 @@ import { styled } from './styled';
 import { applyClassName } from './styled/apply-class-name';
 import { StyledElementProps } from './styled/types';
 import { ThemeProvider } from './components/ThemeProvider';
-import { StyleProvider } from './components/StyleProvider';
 import { WithRefProp } from './styled/create';
 
 describe('react styled', () => {
@@ -456,17 +455,6 @@ describe('react styled', () => {
     tree.setState({ color: 'green' });
 
     expect(tree.getDOMNode().className).toBe('b');
-  });
-  it('styles with provided style', () => {
-    mountWithGlitz(
-      React.createElement(
-        StyleProvider,
-        { include: { div: { color: 'red' } }, div: { color: 'green', backgroundColor: 'blue' } },
-        React.createElement(styled.Div, {
-          ref: (el: HTMLDivElement) => expect(el.className).toBe('a b'),
-        }),
-      ),
-    );
   });
   it('styles with HOC in between', () => {
     function hoc<TProps, TInstance>(
