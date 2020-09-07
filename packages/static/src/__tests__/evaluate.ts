@@ -58,7 +58,7 @@ export default function (expression: string, files: { [fileName: string]: string
           continue;
         }
 
-        const result = ts.resolveModuleName(moduleName, containingFile, options, {
+        const resolvedModule = ts.resolveModuleName(moduleName, containingFile, options, {
           fileExists(fileName) {
             return ts.sys.fileExists(fileName);
           },
@@ -66,8 +66,8 @@ export default function (expression: string, files: { [fileName: string]: string
             return ts.sys.readFile(fileName);
           },
         });
-        if (result.resolvedModule) {
-          resolvedModules.push(result.resolvedModule);
+        if (resolvedModule.resolvedModule) {
+          resolvedModules.push(resolvedModule.resolvedModule);
         }
       }
       return resolvedModules;

@@ -407,10 +407,10 @@ export function evaluate(
   return requiresRuntimeResult('Unable to evaluate expression, unsupported expression token kind: ' + expr.kind, expr);
 }
 
-let staticGlitzProgram: ts.Program | undefined = undefined;
+let cachedStaticGlitzProgram: ts.Program | undefined;
 function getStaticGlitzProgram() {
-  if (staticGlitzProgram) {
-    return staticGlitzProgram;
+  if (cachedStaticGlitzProgram) {
+    return cachedStaticGlitzProgram;
   }
   const compilerOptions: ts.CompilerOptions = {
     noEmitOnError: true,
@@ -430,20 +430,20 @@ function getStaticGlitzProgram() {
     ...compilerHost,
     resolveModuleNames(moduleNames, containingFile, _, __, options) {
       const resolvedModules: ts.ResolvedModule[] = [];
-      for (const moduleName of moduleNames) {
-        const localTsFileName = `${moduleName.slice(2)}.ts`;
+      for (const name of moduleNames) {
+        const localTsFileName = `${name.slice(2)}.ts`;
         if (localTsFileName in files) {
           resolvedModules.push({ resolvedFileName: localTsFileName });
           continue;
         }
 
-        const localTsxFileName = `${moduleName.slice(2)}.tsx`;
+        const localTsxFileName = `${name.slice(2)}.tsx`;
         if (localTsxFileName in files) {
           resolvedModules.push({ resolvedFileName: localTsxFileName });
           continue;
         }
 
-        const result = ts.resolveModuleName(moduleName, containingFile, options, {
+        const result = ts.resolveModuleName(name, containingFile, options, {
           fileExists(fileName) {
             return ts.sys.fileExists(fileName);
           },
@@ -470,19 +470,21 @@ function getStaticGlitzProgram() {
 
       return sourceFile;
     },
-    writeFile() {},
+    writeFile() {
+      /** noop */
+    },
   };
 
-  staticGlitzProgram = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
-  return staticGlitzProgram;
+  cachedStaticGlitzProgram = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
+  return cachedStaticGlitzProgram;
 }
 
-let staticGlitzExports: { [name: string]: ts.Symbol } | undefined = undefined;
+let cachedStaticGlitzExports: { [name: string]: ts.Symbol } | undefined;
 function getStaticGlitzExports() {
-  if (staticGlitzExports) {
-    return [staticGlitzExports, staticGlitzProgram as ts.Program] as const;
+  if (cachedStaticGlitzExports) {
+    return [cachedStaticGlitzExports, cachedStaticGlitzProgram as ts.Program] as const;
   }
-  staticGlitzExports = {};
+  cachedStaticGlitzExports = {};
 
   const program = getStaticGlitzProgram();
   const typeChecker = program.getTypeChecker();
@@ -498,7 +500,7 @@ function getStaticGlitzExports() {
       stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)
     ) {
       for (const decl of stmt.declarationList.declarations) {
-        staticGlitzExports[decl.name.getText()] = typeChecker.getSymbolAtLocation(decl.name)!;
+        cachedStaticGlitzExports[decl.name.getText()] = typeChecker.getSymbolAtLocation(decl.name)!;
       }
     }
 
@@ -508,14 +510,14 @@ function getStaticGlitzExports() {
       stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword) &&
       stmt.name
     ) {
-      staticGlitzExports[stmt.name.getText()] = typeChecker.getSymbolAtLocation(stmt.name)!;
+      cachedStaticGlitzExports[stmt.name.getText()] = typeChecker.getSymbolAtLocation(stmt.name)!;
     }
   }
-  return [staticGlitzExports, staticGlitzProgram as ts.Program] as const;
+  return [cachedStaticGlitzExports, cachedStaticGlitzProgram as ts.Program] as const;
 }
 
 function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program) {
-  let typeChecker = program.getTypeChecker();
+  const typeChecker = program.getTypeChecker();
   if (!symbol.valueDeclaration) {
     const importSpecifier = symbol.declarations[0];
     if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {

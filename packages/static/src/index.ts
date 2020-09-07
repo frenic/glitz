@@ -7,7 +7,8 @@ import { CommonValue } from '@glitz/type';
 export const moduleName = '@glitz/react';
 export const styledName = 'styled';
 
-export type FunctionWithTsNode = Function & {
+export type FunctionWithTsNode = {
+  (...args: any[]): any;
   tsNode?: ts.Node;
 };
 
@@ -146,7 +147,6 @@ function visitNode(
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
                 const cssData = getCssData(styleObject, program, node);
                 if (isEvaluableStyle(cssData)) {
-                  staticStyledComponents.set;
                   staticStyledComponents.set(componentSymbol, {
                     componentName,
                     elementName,
@@ -358,14 +358,14 @@ function visitNode(
 }
 
 function reportRequiresRuntimeResultWhenShouldBeStatic(
-  requiresRuntimeResult: RequiresRuntimeResult | RequiresRuntimeResult[],
+  requiresRuntimeResults: RequiresRuntimeResult | RequiresRuntimeResult[],
   node: ts.Node,
   reporter: DiagnosticsReporter,
 ) {
   reportRequiresRuntimeResult(
     'Component marked with @glitz-static could not be statically evaluated',
     'error',
-    requiresRuntimeResult,
+    requiresRuntimeResults,
     node,
     reporter,
   );
@@ -374,13 +374,11 @@ function reportRequiresRuntimeResultWhenShouldBeStatic(
 function reportRequiresRuntimeResult(
   message: string,
   severity: 'error' | 'warning' | 'info',
-  requiresRuntimeResult: RequiresRuntimeResult | RequiresRuntimeResult[],
+  requiresRuntimeResults: RequiresRuntimeResult | RequiresRuntimeResult[],
   node: ts.Node,
   reporter: DiagnosticsReporter,
 ) {
-  const requiresRuntimeResults = Array.isArray(requiresRuntimeResult) ? requiresRuntimeResult : [requiresRuntimeResult];
-
-  for (const result of requiresRuntimeResults) {
+  for (const result of Array.isArray(requiresRuntimeResults) ? requiresRuntimeResults : [requiresRuntimeResults]) {
     const requireRuntimeDiagnostics = result.getDiagnostics()!;
     const file = node.getSourceFile();
     reporter({

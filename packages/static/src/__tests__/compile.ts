@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import transformer, { styledName, Diagnostic } from '..';
 import { GlitzStatic } from '@glitz/core';
 
-export type TransformerDiagnostics = Array<Diagnostic>;
+export type TransformerDiagnostics = Diagnostic[];
 export type Code = { [fileName: string]: string };
 
 export default function compile(files: { [fileName: string]: string }) {
@@ -81,7 +81,7 @@ export default function compile(files: { [fileName: string]: string }) {
   const program = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
   const glitz = new GlitzStatic();
 
-  let transformerDiagnostics: TransformerDiagnostics = [];
+  const transformerDiagnostics: TransformerDiagnostics = [];
   const transformers: ts.CustomTransformers = {
     before: [transformer(program, glitz, diagnostic => transformerDiagnostics.push(diagnostic))],
     after: [],
