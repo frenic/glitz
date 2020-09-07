@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
-import { moduleName, FunctionWithTsNode } from './index';
+import { moduleName, FunctionWithTsNode } from './transformer';
 
 export function evaluate(
   expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,

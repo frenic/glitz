@@ -8,6 +8,9 @@
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
+  "dependencies": {
+    "@glitz/core": "^3.0.0-alpha.5"
+  },
   "peerDependencies": {
     "typescript": "*"
   },

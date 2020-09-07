@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as ts from 'typescript';
-import transformer, { styledName, Diagnostic } from '..';
+import { transformer, styledName, Diagnostic } from '../transformer';
 import { GlitzStatic } from '@glitz/core';
 
 export type TransformerDiagnostics = Diagnostic[];
