@@ -1,5 +1,5 @@
 {
-  "name": "@glitz/static-css-ts-transformer",
+  "name": "@glitz/static",
   "version": "0.0.0",
   "main": "./cjs/index.js",
   "types": "./types/index.d.ts",
