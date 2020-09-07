@@ -4,8 +4,11 @@ import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 
+type StyleDetails = [string, { [name: string]: string }, string];
+
 export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
   public getStyleMarkup: () => string;
+  public getStyleStreamDetails: () => StyleDetails[];
   constructor(options: Options = {}) {
     const prefix = options.prefix;
     const classHasher = createHashCounter(prefix);
@@ -23,8 +26,9 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
 
     super(injector, options.transformer, options.atomic);
 
+    const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
+
     this.getStyleMarkup = () => {
-      const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
       let markup = '';
       if (plain) {
         markup += `<style data-${identifier}>${plain.getStyle()}</style>`;
@@ -34,6 +38,24 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
         markup += `<style data-${identifier} media="${media}">${mediaIndex[media].getStyle()}</style>`;
       }
       return markup;
+    };
+
+    this.getStyleStreamDetails = () => {
+      const details: StyleDetails[] = [];
+      if (plain) {
+        const css = plain.getStyleStream();
+        if (css) {
+          details.push(['style', { [`data-${identifier}`]: '' }, css]);
+        }
+      }
+      const medias = options.mediaOrder ? Object.keys(mediaIndex).sort(options.mediaOrder) : Object.keys(mediaIndex);
+      for (const media of medias) {
+        const css = mediaIndex[media].getStyleStream();
+        if (css) {
+          details.push(['style', { [`data-${identifier}`]: '', media }, css]);
+        }
+      }
+      return details;
     };
   }
 }

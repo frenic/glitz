@@ -10,32 +10,19 @@ export default class Injector {
   public injectKeyframes: (declarationList: ResolvedDeclarationList) => string;
   public injectFontFace: (declarations: ResolvedDeclarations) => string;
   constructor(
-    plainIndex: { [block: string]: string },
-    selectorIndex: { [selector: string]: { [block: string]: string } },
-    keyframesIndex: { [blockList: string]: string },
-    fontFaceIndex: { [block: string]: string },
-    incrementClassHash: () => string,
-    incrementKeyframesHash: () => string,
-    injectNewClassRule?: (className: string, block: string, selector?: string) => void,
-    injectNewKeyframesRule?: (name: string, blockList: string) => void,
-    injectNewFontFaceRule?: (block: string) => void,
+    plainClassName: (block: string) => string,
+    selectorClassName: (selector: string, block: string) => string,
+    keyframeName: (blockList: string) => string,
+    handleFontFace: (block: string) => void,
   ) {
     this.injectClassName = (declarations, selector) => {
       const block = parseDeclarationBlock(declarations);
-      const index = selector ? (selectorIndex[selector] = selectorIndex[selector] || {}) : plainIndex;
 
-      if (index[block]) {
-        return index[block];
+      if (selector) {
+        return selectorClassName(selector, block);
+      } else {
+        return plainClassName(block);
       }
-
-      const className = incrementClassHash();
-      index[block] = className;
-
-      if (injectNewClassRule) {
-        injectNewClassRule(className, block, selector);
-      }
-
-      return className;
     };
 
     this.injectKeyframes = declarationList => {
@@ -45,18 +32,7 @@ export default class Injector {
         blockList += formatRule(identifier, keyframeBlock);
       }
 
-      if (keyframesIndex[blockList]) {
-        return keyframesIndex[blockList];
-      }
-
-      const name = incrementKeyframesHash();
-      keyframesIndex[blockList] = name;
-
-      if (injectNewKeyframesRule) {
-        injectNewKeyframesRule(name, blockList);
-      }
-
-      return name;
+      return keyframeName(blockList);
     };
 
     this.injectFontFace = original => {
@@ -81,15 +57,7 @@ export default class Injector {
 
       const block = parseDeclarationBlock(declarations);
 
-      if (fontFaceIndex[block]) {
-        return fontFaceIndex[block];
-      }
-
-      fontFaceIndex[block] = family;
-
-      if (injectNewFontFaceRule) {
-        injectNewFontFaceRule(block);
-      }
+      handleFontFace(block);
 
       return family;
     };

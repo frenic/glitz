@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`typings 1`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 228:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & { a: boolean; b?: undefined; } & { css?: Style | Style[] | StyledDecorator | undefined; } & { children?: ReactNode; }) | (IntrinsicAttributes & ... 2 more ... & { ...; })'.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 228:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & { a: boolean; b?: undefined; } & { css?: Style | StyledDecorator | Style[] | undefined; } & { children?: ReactNode; }) | (IntrinsicAttributes & ... 2 more ... & { ...; })'.
   Type '{ a: true; b: true; }' is not assignable to type '{ a?: undefined; b: boolean; }'.
     Types of property 'a' are incompatible.
       Type 'true' is not assignable to type 'undefined'."
 `;
 
 exports[`typings 2`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 230:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
-  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[] | StyledDecorator'."
+"packages/react/src/__tests__/__fixtures__/typings.tsx 230:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
+  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | Style[]'."
 `;
 
 exports[`typings 3`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 232:12 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 232:12 - Type '{ color: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
   Types of property 'color' are incompatible.
     Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
@@ -39,12 +39,12 @@ exports[`typings 7`] = `
 `;
 
 exports[`typings 8`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 242:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
-  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[] | StyledDecorator'."
+"packages/react/src/__tests__/__fixtures__/typings.tsx 242:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
+  Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | Style[]'."
 `;
 
 exports[`typings 9`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 244:25 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | StyledDecorator | undefined'.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 244:25 - Type '{ color: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
   Types of property 'color' are incompatible.
     Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
@@ -65,7 +65,7 @@ exports[`typings 11`] = `
 exports[`typings 12`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 250:7 - No overload matches this call.
   The last overload gave the following error.
-    Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any> | FunctionComponent<{}>'.
+    Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'FunctionComponent<{}> | StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any>'.
       Type '() => Promise<unknown>' is not assignable to type 'FunctionComponent<{}>'.
         Type 'Promise<unknown>' is missing the following properties from type 'ReactElement<any, any>': type, props, key"
 `;
@@ -73,7 +73,7 @@ exports[`typings 12`] = `
 exports[`typings 13`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 252:7 - No overload matches this call.
   The last overload gave the following error.
-    Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any> | FunctionComponent<{}>'.
+    Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'FunctionComponent<{}> | StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any>'.
       Type '() => Promise<unknown>' is not assignable to type 'FunctionComponent<{}>'.
         Type 'Promise<unknown>' is not assignable to type 'ReactElement<any, any>'."
 `;

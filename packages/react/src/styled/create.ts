@@ -16,6 +16,7 @@ import { isElementType, StyledElement } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 import useGlitz, { DirtyStyle } from './use-glitz';
 import { useAbsorb, useForward } from './compose';
+import { useStream } from './stream';
 
 export type WithRefProp<TProps, TInstance> = PropsWithoutRef<TProps> & RefAttributes<TInstance>;
 export type WithoutRefProp<TProps> = TProps extends PropsWithRef<TProps> ? PropsWithoutRef<TProps> : TProps;
@@ -60,11 +61,13 @@ export function factory<TProps, TInstance>(
         useAbsorb(absorbed => {
           const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
 
-          return createElement<any>(type.value, {
-            ...restProps,
-            className,
-            ref,
-          });
+          return useStream(
+            createElement<any>(type.value, {
+              ...restProps,
+              className,
+              ref,
+            }),
+          );
         }),
       )
     : isElementLikeType<TProps, TInstance>(type)
@@ -72,11 +75,13 @@ export function factory<TProps, TInstance>(
         useAbsorb(absorbed => {
           const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
 
-          return createElement<any>(type.value, {
-            ...restProps,
-            className,
-            ref,
-          });
+          return useStream(
+            createElement<any>(type.value, {
+              ...restProps,
+              className,
+              ref,
+            }),
+          );
         }),
       )
     : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>

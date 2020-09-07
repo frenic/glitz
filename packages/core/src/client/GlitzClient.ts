@@ -53,10 +53,10 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
     super(injector, options.transformer, options.atomic);
 
-    const preRenderStyles = document.head.querySelectorAll<HTMLStyleElement>(`[data-${identifier}]`);
+    const preRenderedStyleElements = document.head.querySelectorAll<HTMLStyleElement>(`[data-${identifier}]`);
 
-    if (preRenderStyles) {
-      for (const element of preRenderStyles) {
+    if (preRenderedStyleElements) {
+      for (const element of preRenderedStyleElements) {
         // Injector for style elements without `media` is stored with an empty key. So if there's any reason to have
         // more than one of these in the future we need to change that part.
         const media = element.media;
@@ -88,6 +88,16 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
             }
           }
         }
+      }
+    }
+
+    const streamedStyleElements = document.body.querySelectorAll<HTMLStyleElement>(`[data-${identifier}]`);
+
+    if (streamedStyleElements) {
+      for (const element of streamedStyleElements) {
+        const media = element.media;
+        injector(media).hydrate(element);
+        element.parentNode!.removeChild(element);
       }
     }
   }
