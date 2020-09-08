@@ -3,59 +3,59 @@ import Base from '../core/Base';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
-
-type StyleDetails = [string, { [name: string]: string }, string];
+import { createHydrate } from '../utils/hydrate';
+import { formatMediaRule } from '../utils/format';
 
 export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
+  public hydrate: (css: string) => void;
   public getStyleMarkup: () => string;
-  public getStyleStreamDetails: () => StyleDetails[];
+  public getStyleStream: () => [string, { [name: string]: string }, string] | undefined;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
-    const classHasher = createHashCounter(prefix);
-    const keyframesHasher = createHashCounter(prefix);
+    const incrementClassNameHash = createHashCounter(prefix);
+    const incrementKeyframesHash = createHashCounter(prefix);
 
     let plain: InjectorServer;
     const mediaIndex: {
       [media: string]: InjectorServer;
     } = {};
 
-    const injector = (media?: string) =>
+    const getInjector = (media?: string) =>
       media
-        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classHasher, keyframesHasher))
-        : (plain = plain || new InjectorServer(classHasher, keyframesHasher));
+        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(incrementClassNameHash, incrementKeyframesHash))
+        : (plain = plain || new InjectorServer(incrementClassNameHash, incrementKeyframesHash));
 
-    super(injector, options.transformer, options.atomic);
+    super(getInjector, options.transformer, options.atomic);
+
+    this.hydrate = createHydrate(getInjector, incrementClassNameHash, incrementKeyframesHash);
 
     const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
 
     this.getStyleMarkup = () => {
       let markup = '';
       if (plain) {
-        markup += `<style data-${identifier}>${plain.getStyle()}</style>`;
+        markup += `<style data-${identifier}>${plain.getStyleResult()}</style>`;
       }
       const medias = options.mediaOrder ? Object.keys(mediaIndex).sort(options.mediaOrder) : Object.keys(mediaIndex);
       for (const media of medias) {
-        markup += `<style data-${identifier} media="${media}">${mediaIndex[media].getStyle()}</style>`;
+        markup += `<style data-${identifier} media="${media}">${mediaIndex[media].getStyleResult()}</style>`;
       }
       return markup;
     };
 
-    this.getStyleStreamDetails = () => {
-      const details: StyleDetails[] = [];
+    this.getStyleStream = () => {
+      let css = '';
       if (plain) {
-        const css = plain.getStyleStream();
-        if (css) {
-          details.push(['style', { [`data-${identifier}`]: '' }, css]);
-        }
+        css += plain.getStyleStream();
       }
       const medias = options.mediaOrder ? Object.keys(mediaIndex).sort(options.mediaOrder) : Object.keys(mediaIndex);
       for (const media of medias) {
-        const css = mediaIndex[media].getStyleStream();
-        if (css) {
-          details.push(['style', { [`data-${identifier}`]: '', media }, css]);
-        }
+        css += formatMediaRule(media, mediaIndex[media].getStyleStream());
       }
-      return details;
+      if (css) {
+        return ['style', { [`data-${identifier}`]: '' }, css];
+      }
+      return undefined;
     };
   }
 }

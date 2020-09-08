@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`client increments plain hash 1`] = `".c {color: blue;}"`;
-
 exports[`client injects attribute selector 1`] = `".a[disabled] {color: red;}"`;
 
 exports[`client injects attribute selector 2`] = `".b[disabled] {color: green; background-color: black;}"`;

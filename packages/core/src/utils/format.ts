@@ -11,7 +11,11 @@ export function formatKeyframesRule(name: string, blockList: string) {
 }
 
 export function formatFontFaceRule(block: string) {
-  return `@font-face {${block}}`;
+  return formatRule('@font-face', block);
+}
+
+export function formatMediaRule(query: string, block: string) {
+  return `@media ${formatRule(query, block)}`;
 }
 
 const PRETTY_REGEX = /[{:;}]|(?:(["']).*?\1)/g;

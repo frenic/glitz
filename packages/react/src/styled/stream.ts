@@ -7,19 +7,18 @@ export function useStream(node: ReactElement) {
   const glitz = useContext(GlitzContext);
 
   if (stream && glitz instanceof GlitzServer) {
-    const styles = glitz.getStyleStreamDetails();
+    const style = glitz.getStyleStream();
 
-    if (styles.length > 0) {
+    if (style) {
+      // tslint:disable-next-line: variable-name
+      const [tag, props, __html] = style;
       return createElement(
         Fragment,
         null,
-        // tslint:disable-next-line: variable-name
-        ...styles.map(([tag, props, __html]) =>
-          createElement(tag, {
-            ...props,
-            dangerouslySetInnerHTML: { __html },
-          }),
-        ),
+        createElement(tag, {
+          ...props,
+          dangerouslySetInnerHTML: { __html },
+        }),
         node,
       );
     }

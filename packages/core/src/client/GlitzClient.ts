@@ -4,12 +4,14 @@ import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
+import { createHydrate } from '../utils/hydrate';
 
 export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
+  public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
-    const classHasher = createHashCounter(prefix);
-    const keyframesHasher = createHashCounter(prefix);
+    const incrementClassNameHash = createHashCounter(prefix);
+    const incrementKeyframesHash = createHashCounter(prefix);
 
     const mediaOrderOption = options.mediaOrder;
     const mediaSheets: { [media: string]: HTMLStyleElement } = {};
@@ -22,7 +24,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
     const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
 
-    const injector = (media?: string) => {
+    const getInjector = (media?: string) => {
       if (media) {
         if (mediaIndex[media]) {
           return mediaIndex[media];
@@ -39,7 +41,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
         insertStyleElement(element, insertBefore);
 
-        return (mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher));
+        return (mediaIndex[media] = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash));
       } else {
         if (plain) {
           return plain;
@@ -47,29 +49,34 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
         const element = insertStyleElement(createStyleElement(media, identifier), initialMediaSheet);
 
-        return (plain = new InjectorClient(element, classHasher, keyframesHasher));
+        return (plain = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash));
       }
     };
 
-    super(injector, options.transformer, options.atomic);
+    super(getInjector, options.transformer, options.atomic);
 
-    const preRenderedStyleElements = document.head.querySelectorAll<HTMLStyleElement>(`[data-${identifier}]`);
+    const hydrate = (this.hydrate = createHydrate(getInjector, incrementClassNameHash, incrementKeyframesHash));
+
+    const preRenderedStyleElements = document.head.querySelectorAll<HTMLStyleElement>(`style[data-${identifier}]`);
 
     if (preRenderedStyleElements) {
       for (const element of preRenderedStyleElements) {
         // Injector for style elements without `media` is stored with an empty key. So if there's any reason to have
         // more than one of these in the future we need to change that part.
         const media = element.media;
+        let injector: InjectorClient;
 
         if (media) {
           if (!initialMediaSheet) {
             initialMediaSheet = element;
           }
           mediaSheets[media] = element;
-          mediaIndex[media] = new InjectorClient(element, classHasher, keyframesHasher);
+          injector = mediaIndex[media] = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash);
         } else {
-          plain = new InjectorClient(element, classHasher, keyframesHasher);
+          injector = plain = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash);
         }
+
+        hydrate(element.textContent!, injector);
       }
 
       if (process.env.NODE_ENV !== 'production') {
@@ -91,12 +98,11 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       }
     }
 
-    const streamedStyleElements = document.body.querySelectorAll<HTMLStyleElement>(`[data-${identifier}]`);
+    const streamedStyleElements = document.body.querySelectorAll<HTMLStyleElement>(`style[data-${identifier}]`);
 
     if (streamedStyleElements) {
       for (const element of streamedStyleElements) {
-        const media = element.media;
-        injector(media).hydrate(element);
+        hydrate(element.textContent!, undefined, (injector, rule) => injector.injectRaw(rule));
         element.parentNode!.removeChild(element);
       }
     }

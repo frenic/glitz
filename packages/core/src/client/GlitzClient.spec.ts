@@ -688,13 +688,13 @@ describe('client', () => {
     expect(sheet.cssRules[0].cssText).toMatchSnapshot();
   });
   it('hydrates plain rule', () => {
-    createStyle(null, '.a{color:red}.b{color:green}');
+    createStyle(undefined, '.a{color:red}.b{color:green}');
     const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ color: 'green' })).toBe('b');
   });
   it('hydrates media rule', () => {
-    createStyle(null, '.a{color:red}.b:hover{color:green}');
+    createStyle(undefined, '.a{color:red}.b:hover{color:green}');
     createStyle('(min-width: 768px)', '.c{color:blue}.d:hover{color:white}');
     const client = new GlitzClient<TestStyle>();
 
@@ -704,7 +704,7 @@ describe('client', () => {
   });
   it('hydrates keyframes rule', () => {
     createStyle(
-      null,
+      undefined,
       '.a{animation-name:a}.b{animation-name:b}@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}',
     );
     const client = new GlitzClient<TestStyle>();
@@ -715,9 +715,9 @@ describe('client', () => {
   });
   it('hydrates font face rule', () => {
     createStyle(
-      null,
-      "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}" +
-        "@font-face {font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}" +
+      undefined,
+      "@font-face{font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}" +
+        "@font-face{font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}" +
         '.a{font-family:x}.b{font-family:y}.c{font-family:z,sans-serif}',
     );
     const client = new GlitzClient<TestStyle>();
@@ -783,7 +783,7 @@ describe('client', () => {
     ).toBe('c');
   });
   it('hydrates multiple different combinations', () => {
-    createStyle(null, '.a{color:red}');
+    createStyle(undefined, '.a{color:red}');
     createStyle('(min-width: 768px)', '.b{color:green}');
     createStyle('(min-width: 992px)', '.c{color:blue}');
     const client = new GlitzClient<TestStyle>();
@@ -806,10 +806,18 @@ describe('client', () => {
       };
     }
 
-    createStyle(null, '.a{-moz-column-gap:1px;column-gap:1px}');
+    createStyle(undefined, '.a{-moz-column-gap:1px;column-gap:1px}');
     const client = new GlitzClient<TestStyle>({ transformer });
 
     expect(client.injectStyle({ columnGap: 1 as 0 })).toBe('a');
+  });
+  it('hydrates static style', () => {
+    const client = new GlitzClient<TestStyle>();
+    client.hydrate('.a{color:red}.b:hover{color:green}@media (min-width: 768px){.c{color:blue}.d:hover{color:white}}');
+    expect(client.injectStyle({ color: 'red', ':hover': { color: 'green' } })).toBe('a b');
+    expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'blue', ':hover': { color: 'white' } } })).toBe(
+      'c d',
+    );
   });
   it('applies transformer', () => {
     const style = createStyle();
@@ -980,18 +988,16 @@ describe('client', () => {
   });
 });
 
-function createStyle(media?: string | null, css?: string) {
+function createStyle(media: HTMLLinkElement['media'] = '', css?: string) {
   const element = document.createElement('style');
   element.dataset.glitz = undefined;
-  document.head.appendChild(element);
-
-  if (media) {
-    element.media = media;
-  }
+  element.media = media;
 
   if (css) {
     element.appendChild(document.createTextNode(css));
   }
+
+  document.head.appendChild(element);
 
   return element;
 }
