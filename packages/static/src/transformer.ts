@@ -37,7 +37,7 @@ type StaticStyledComponents = Map<ts.Symbol, StaticStyledComponent>;
 export function transformer(
   program: ts.Program,
   glitz: GlitzStatic,
-  diagnosticsReporter: DiagnosticsReporter,
+  diagnosticsReporter?: DiagnosticsReporter,
 ): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName.endsWith('.tsx')) {
@@ -49,7 +49,7 @@ export function transformer(
       const staticStyledComponents = new Map<ts.Symbol, StaticStyledComponent>();
       const firstPassTransformedFile = ts.visitEachChild(
         file,
-        node => visitNode(node, program, glitz, staticStyledComponents, diagnosticsReporter, allShouldBeStatic),
+        node => visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, diagnosticsReporter),
         context,
       );
       return visitNodeAndChildren(
@@ -58,8 +58,8 @@ export function transformer(
         context,
         glitz,
         staticStyledComponents,
-        diagnosticsReporter,
         allShouldBeStatic,
+        diagnosticsReporter,
       );
     } else {
       return file;
@@ -73,8 +73,8 @@ function visitNodeAndChildren(
   context: ts.TransformationContext,
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
-  diagnosticsReporter: DiagnosticsReporter,
   allShouldBeStatic: boolean,
+  diagnosticsReporter?: DiagnosticsReporter,
 ): ts.SourceFile;
 function visitNodeAndChildren(
   node: ts.Node,
@@ -82,8 +82,8 @@ function visitNodeAndChildren(
   context: ts.TransformationContext,
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
-  diagnosticsReporter: DiagnosticsReporter,
   allShouldBeStatic: boolean,
+  diagnosticsReporter?: DiagnosticsReporter,
 ): ts.Node | ts.Node[];
 function visitNodeAndChildren(
   node: ts.Node,
@@ -91,11 +91,11 @@ function visitNodeAndChildren(
   context: ts.TransformationContext,
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
-  diagnosticsReporter: DiagnosticsReporter,
   allShouldBeStatic: boolean,
+  diagnosticsReporter?: DiagnosticsReporter,
 ): ts.Node | ts.Node[] {
   return ts.visitEachChild(
-    visitNode(node, program, glitz, staticStyledComponents, diagnosticsReporter, allShouldBeStatic),
+    visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, diagnosticsReporter),
     childNode =>
       visitNodeAndChildren(
         childNode,
@@ -103,8 +103,8 @@ function visitNodeAndChildren(
         context,
         glitz,
         staticStyledComponents,
-        diagnosticsReporter,
         allShouldBeStatic,
+        diagnosticsReporter,
       ),
     context,
   );
@@ -115,8 +115,8 @@ function visitNode(
   program: ts.Program,
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
-  diagnosticsReporter: DiagnosticsReporter,
   allShouldBeStatic: boolean,
+  diagnosticsReporter?: DiagnosticsReporter,
 ): any /* TODO */ {
   const typeChecker = program.getTypeChecker();
   if (ts.isImportDeclaration(node)) {
@@ -155,15 +155,19 @@ function visitNode(
                   });
                   return [];
                 } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                  reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
+                  if (diagnosticsReporter) {
+                    reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
+                  }
                 } else {
-                  reportRequiresRuntimeResult(
-                    'Styled component could not be statically evaluated',
-                    'info',
-                    cssData,
-                    node,
-                    diagnosticsReporter,
-                  );
+                  if (diagnosticsReporter) {
+                    reportRequiresRuntimeResult(
+                      'Styled component could not be statically evaluated',
+                      'info',
+                      cssData,
+                      node,
+                      diagnosticsReporter,
+                    );
+                  }
                 }
               }
             }
@@ -189,19 +193,23 @@ function visitNode(
                   });
                   return [];
                 } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                  reportRequiresRuntimeResultWhenShouldBeStatic(
-                    cssData.filter(isRequiresRuntimeResult),
-                    node,
-                    diagnosticsReporter,
-                  );
+                  if (diagnosticsReporter) {
+                    reportRequiresRuntimeResultWhenShouldBeStatic(
+                      cssData.filter(isRequiresRuntimeResult),
+                      node,
+                      diagnosticsReporter,
+                    );
+                  }
                 } else {
-                  reportRequiresRuntimeResult(
-                    'Styled component could not be statically evaluated',
-                    'info',
-                    cssData.filter(isRequiresRuntimeResult),
-                    node,
-                    diagnosticsReporter,
-                  );
+                  if (diagnosticsReporter) {
+                    reportRequiresRuntimeResult(
+                      'Styled component could not be statically evaluated',
+                      'info',
+                      cssData.filter(isRequiresRuntimeResult),
+                      node,
+                      diagnosticsReporter,
+                    );
+                  }
                 }
               }
             }
@@ -226,19 +234,23 @@ function visitNode(
                 });
                 return [];
               } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                reportRequiresRuntimeResultWhenShouldBeStatic(
-                  object.styles.filter(isRequiresRuntimeResult),
-                  node,
-                  diagnosticsReporter,
-                );
+                if (diagnosticsReporter) {
+                  reportRequiresRuntimeResultWhenShouldBeStatic(
+                    object.styles.filter(isRequiresRuntimeResult),
+                    node,
+                    diagnosticsReporter,
+                  );
+                }
               } else {
-                reportRequiresRuntimeResult(
-                  'Styled component could not be statically evaluated',
-                  'info',
-                  object.styles.filter(isRequiresRuntimeResult),
-                  node,
-                  diagnosticsReporter,
-                );
+                if (diagnosticsReporter) {
+                  reportRequiresRuntimeResult(
+                    'Styled component could not be statically evaluated',
+                    'info',
+                    object.styles.filter(isRequiresRuntimeResult),
+                    node,
+                    diagnosticsReporter,
+                  );
+                }
               }
             }
           }
@@ -254,7 +266,7 @@ function visitNode(
     node.tagName.expression.escapedText.toString() === styledName
   ) {
     const elementName = node.tagName.name.escapedText.toString().toLowerCase();
-    const cssData = getCssDataFromCssProp(node, program, diagnosticsReporter, allShouldBeStatic);
+    const cssData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
     if (cssData) {
       const jsxElement = ts.createJsxSelfClosingElement(
         ts.createIdentifier(elementName),
@@ -277,7 +289,7 @@ function visitNode(
       openingElement.tagName.expression.escapedText.toString() === styledName
     ) {
       const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
-      const cssData = getCssDataFromCssProp(openingElement, program, diagnosticsReporter, allShouldBeStatic);
+      const cssData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
       if (cssData) {
         const jsxElement = ts.createJsxElement(
           ts.createJsxOpeningElement(
@@ -302,7 +314,7 @@ function visitNode(
     if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
       const jsxTagSymbol = typeChecker.getSymbolAtLocation(openingElement.tagName);
       if (jsxTagSymbol && staticStyledComponents.has(jsxTagSymbol)) {
-        const cssPropData = getCssDataFromCssProp(openingElement, program, diagnosticsReporter, allShouldBeStatic);
+        const cssPropData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
         const styledComponent = staticStyledComponents.get(jsxTagSymbol)!;
         let styles = styledComponent.styles;
         if (cssPropData) {
@@ -334,7 +346,7 @@ function visitNode(
   if (ts.isJsxSelfClosingElement(node) && ts.isIdentifier(node.tagName)) {
     const jsxTagSymbol = typeChecker.getSymbolAtLocation(node.tagName);
     if (jsxTagSymbol && staticStyledComponents.has(jsxTagSymbol)) {
-      const cssPropData = getCssDataFromCssProp(node, program, diagnosticsReporter, allShouldBeStatic);
+      const cssPropData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
       const styledComponent = staticStyledComponents.get(jsxTagSymbol)!;
       let styles = styledComponent.styles;
       if (cssPropData) {
@@ -469,8 +481,8 @@ function anyValuesAreFunctions(style: EvaluatedStyle): boolean | FunctionWithTsN
 function getCssDataFromCssProp(
   node: ts.JsxSelfClosingElement | ts.JsxOpeningElement,
   program: ts.Program,
-  diagnosticsReporter: DiagnosticsReporter,
   allShouldBeStatic: boolean,
+  diagnosticsReporter?: DiagnosticsReporter,
 ) {
   const cssJsxAttr = node.attributes.properties.find(
     p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
@@ -487,15 +499,19 @@ function getCssDataFromCssProp(
     if (isEvaluableStyle(cssData)) {
       return cssData;
     } else if (allShouldBeStatic) {
-      reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
+      if (diagnosticsReporter) {
+        reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
+      }
     } else {
-      reportRequiresRuntimeResult(
-        'css prop could not be statically evaluated',
-        'info',
-        cssData,
-        node,
-        diagnosticsReporter,
-      );
+      if (diagnosticsReporter) {
+        reportRequiresRuntimeResult(
+          'css prop could not be statically evaluated',
+          'info',
+          cssData,
+          node,
+          diagnosticsReporter,
+        );
+      }
     }
   }
   return undefined;
