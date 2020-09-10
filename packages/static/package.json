@@ -16,7 +16,7 @@
   },
   "scripts": {
     "clean": "rimraf cjs types",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index",
+    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjs index && node post-bundle.js",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [
