@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import { GlitzStatic } from '@glitz/core';
-import { isStaticElement, isStaticComponent } from './static-glitz';
+import { isStaticElement, isStaticComponent } from './shared';
 import { evaluate, isRequiresRuntimeResult, RequiresRuntimeResult, requiresRuntimeResult } from './evaluator';
 
 export const moduleName = '@glitz/react';

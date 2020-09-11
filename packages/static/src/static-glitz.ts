@@ -1,19 +1,9 @@
-type Style = Record<string, any>;
+import { isStaticComponent, Style, StaticComponent } from './shared';
 
 type StaticDecorator = {
   (): Style[];
   (style: Style | StaticDecorator): StaticDecorator;
   (component: StaticComponent, style?: Style): StaticComponent;
-};
-
-type StaticComponent = ((props?: any) => StaticElement) & {
-  styles: Style[];
-  elementName: string;
-};
-
-type StaticElement = {
-  styles: Style[];
-  elementName: string;
 };
 
 function createStaticStyled(styles: Style[]): StaticDecorator {
@@ -39,14 +29,6 @@ function createStaticComponent(elementName: string, styles?: Style[]): StaticCom
   }
 
   return Object.assign(Component, { styles: styles ?? [], elementName });
-}
-
-export function isStaticComponent(object: any): object is StaticComponent {
-  return typeof object === 'function' && !!object.styles && !!object.elementName;
-}
-
-export function isStaticElement(object: any): object is StaticElement {
-  return typeof object === 'object' && !!object.styles && !!object.elementName;
 }
 
 export const styled = Object.assign(

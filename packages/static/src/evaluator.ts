@@ -423,6 +423,7 @@ function getStaticGlitzProgram() {
 
   const files: { [moduleName: string]: string } = {};
   files[moduleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
+  files['shared.ts'] = fs.readFileSync(path.join(__dirname, 'shared.ts')).toString();
 
   const compilerHost = ts.createCompilerHost(compilerOptions);
 
