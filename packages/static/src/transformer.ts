@@ -172,7 +172,10 @@ function visitNode(
       }
     }
   }
-  if (ts.isVariableStatement(node)) {
+  if (
+    ts.isVariableStatement(node) &&
+    (!node.modifiers || !node.modifiers.find(m => m.kind == ts.SyntaxKind.ExportKeyword))
+  ) {
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
       if (ts.isIdentifier(declaration.name) && declaration.initializer) {

@@ -570,6 +570,35 @@ const Styled3 = styled.div({
   expectEqual(expected, compile(code));
 });
 
+test('it bails if a declared component is used outside of JSX', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled1 />;
+}
+export const Styled1 = styled.div({
+  height: '100%',
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    return <Styled1 />;
+}
+export const Styled1 = styled.div({
+    height: '100%',
+});
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('it bails when it finds a variable that can not be statically evaluated', () => {
   const code = {
     'file1.tsx': `
