@@ -520,6 +520,56 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
+test('it bails if a declared component is used outside of JSX', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    const X = <Styled3 />;
+    (window as any).exposeComponent = { x: Styled1, y: Styled3 };
+    return <><Styled1 id="my-id" css={{ width: '100%' }}/><Styled2 /><X /><Styled4 /></>;
+}
+const Styled1 = styled.div({
+    height: '100%',
+});
+const Styled2 = styled.div({
+  height: '75%',
+});
+Styled2.displayName = 'Styled2';
+const Styled3 = styled.div({
+  height: '50%',
+});
+const Styled4 = styled.div({
+  height: '25%',
+});
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props) {
+    const X = <Styled3 />;
+    window.exposeComponent = { x: Styled1, y: Styled3 };
+    return <><Styled1 id="my-id" css={{ width: '100%' }}/><Styled2 /><X /><div className="b"/></>;
+}
+const Styled1 = styled.div({
+    height: '100%',
+});
+const Styled2 = styled.div({
+    height: '75%',
+});
+Styled2.displayName = 'Styled2';
+const Styled3 = styled.div({
+    height: '50%',
+});
+`,
+    'style.css': `.a{height:50%}.b{height:25%}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('it bails when it finds a variable that can not be statically evaluated', () => {
   const code = {
     'file1.tsx': `

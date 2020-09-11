@@ -32,7 +32,10 @@ export type Diagnostic = {
 };
 type DiagnosticsReporter = (diagnostic: Diagnostic) => unknown;
 
-type StaticStyledComponents = Map<ts.Symbol, StaticStyledComponent>;
+type StaticStyledComponents = {
+  symbolToComponent: Map<ts.Symbol, StaticStyledComponent>;
+  symbolsWithReferencesOutsideJsx: Map<ts.Symbol, StaticStyledComponent>;
+};
 
 export function transformer(
   program: ts.Program,
@@ -46,21 +49,45 @@ export function transformer(
       }
       const allShouldBeStatic = !!file.statements.find(s => hasJSDocTag(s, 'glitz-all-static'));
 
-      const staticStyledComponents = new Map<ts.Symbol, StaticStyledComponent>();
-      const firstPassTransformedFile = ts.visitEachChild(
+      const staticStyledComponents = {
+        symbolToComponent: new Map<ts.Symbol, StaticStyledComponent>(),
+        symbolsWithReferencesOutsideJsx: new Map<ts.Symbol, StaticStyledComponent>(),
+      };
+      const firstPassTransformedFile = visitNodeAndChildren(
         file,
-        node => visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, diagnosticsReporter),
+        program,
         context,
+        glitz,
+        staticStyledComponents,
+        allShouldBeStatic,
+        true,
+        diagnosticsReporter,
       );
-      return visitNodeAndChildren(
+      let transformedNode = visitNodeAndChildren(
         firstPassTransformedFile,
         program,
         context,
         glitz,
         staticStyledComponents,
         allShouldBeStatic,
+        false,
         diagnosticsReporter,
       );
+
+      if (staticStyledComponents.symbolsWithReferencesOutsideJsx.size !== 0) {
+        transformedNode = visitNodeAndChildren(
+          firstPassTransformedFile,
+          program,
+          context,
+          glitz,
+          staticStyledComponents,
+          allShouldBeStatic,
+          false,
+          diagnosticsReporter,
+        );
+      }
+
+      return transformedNode;
     } else {
       return file;
     }
@@ -74,6 +101,7 @@ function visitNodeAndChildren(
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
+  isFirstPass: boolean,
   diagnosticsReporter?: DiagnosticsReporter,
 ): ts.SourceFile;
 function visitNodeAndChildren(
@@ -83,6 +111,7 @@ function visitNodeAndChildren(
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
+  isFirstPass: boolean,
   diagnosticsReporter?: DiagnosticsReporter,
 ): ts.Node | ts.Node[];
 function visitNodeAndChildren(
@@ -92,10 +121,11 @@ function visitNodeAndChildren(
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
+  isFirstPass: boolean,
   diagnosticsReporter?: DiagnosticsReporter,
 ): ts.Node | ts.Node[] {
   return ts.visitEachChild(
-    visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, diagnosticsReporter),
+    visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, isFirstPass, diagnosticsReporter),
     childNode =>
       visitNodeAndChildren(
         childNode,
@@ -104,6 +134,7 @@ function visitNodeAndChildren(
         glitz,
         staticStyledComponents,
         allShouldBeStatic,
+        isFirstPass,
         diagnosticsReporter,
       ),
     context,
@@ -116,6 +147,7 @@ function visitNode(
   glitz: GlitzStatic,
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
+  isFirstPass: boolean,
   diagnosticsReporter?: DiagnosticsReporter,
 ): any /* TODO */ {
   const typeChecker = program.getTypeChecker();
@@ -131,11 +163,28 @@ function visitNode(
   if (hasJSDocTag(node, 'glitz-dynamic')) {
     return node;
   }
+  if (ts.isIdentifier(node) && !isStaticComponentVariableUse(node)) {
+    const symbol = typeChecker.getSymbolAtLocation(node);
+    if (symbol && staticStyledComponents.symbolToComponent.has(symbol)) {
+      const component = staticStyledComponents.symbolToComponent.get(symbol)!;
+      if (!staticStyledComponents.symbolsWithReferencesOutsideJsx.has(symbol)) {
+        staticStyledComponents.symbolsWithReferencesOutsideJsx.set(symbol, component);
+      }
+    }
+  }
   if (ts.isVariableStatement(node)) {
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
       if (ts.isIdentifier(declaration.name) && declaration.initializer) {
         const componentSymbol = typeChecker.getSymbolAtLocation(declaration.name)!;
+        if (staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)) {
+          return node;
+        }
+
+        if (!isFirstPass) {
+          return replaceComponentDeclarationNode(componentSymbol, node, staticStyledComponents);
+        }
+
         const componentName = declaration.name.getText();
 
         if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
@@ -148,12 +197,13 @@ function visitNode(
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
                 const cssData = getCssData(styleObject, program, node);
                 if (isEvaluableStyle(cssData)) {
-                  staticStyledComponents.set(componentSymbol, {
+                  const component = {
                     componentName,
                     elementName,
                     styles: [cssData],
-                  });
-                  return [];
+                  };
+                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                  return node;
                 } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
                   if (diagnosticsReporter) {
                     reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
@@ -182,16 +232,17 @@ function visitNode(
 
             if (ts.isIdentifier(parentStyledComponent) && ts.isObjectLiteralExpression(styleObject)) {
               const parentSymbol = typeChecker.getSymbolAtLocation(parentStyledComponent)!;
-              const parent = staticStyledComponents.get(parentSymbol);
+              const parent = staticStyledComponents.symbolToComponent.get(parentSymbol);
               if (parent) {
                 const cssData = getCssData(styleObject, program, node, parent);
                 if (cssData.every(isEvaluableStyle)) {
-                  staticStyledComponents.set(componentSymbol, {
+                  const component = {
                     componentName,
                     elementName: parent.elementName,
                     styles: cssData as EvaluatedStyle[],
-                  });
-                  return [];
+                  };
+                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                  return node;
                 } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
                   if (diagnosticsReporter) {
                     reportRequiresRuntimeResultWhenShouldBeStatic(
@@ -227,12 +278,12 @@ function visitNode(
             const object = evaluate(declaration.initializer, program, {});
             if (isStaticElement(object) || isStaticComponent(object)) {
               if (object.styles.every(isEvaluableStyle)) {
-                staticStyledComponents.set(componentSymbol, {
+                const component = {
                   componentName,
                   elementName: object.elementName,
                   styles: object.styles,
-                });
-                return [];
+                };
+                staticStyledComponents.symbolToComponent.set(componentSymbol, component);
               } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
                 if (diagnosticsReporter) {
                   reportRequiresRuntimeResultWhenShouldBeStatic(
@@ -312,9 +363,13 @@ function visitNode(
 
     if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
       const jsxTagSymbol = typeChecker.getSymbolAtLocation(openingElement.tagName);
-      if (jsxTagSymbol && staticStyledComponents.has(jsxTagSymbol)) {
+      if (
+        jsxTagSymbol &&
+        staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
+        !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
+      ) {
         const cssPropData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
-        const styledComponent = staticStyledComponents.get(jsxTagSymbol)!;
+        const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
         let styles = styledComponent.styles;
         if (cssPropData) {
           styles = styles.slice();
@@ -343,9 +398,13 @@ function visitNode(
 
   if (ts.isJsxSelfClosingElement(node) && ts.isIdentifier(node.tagName)) {
     const jsxTagSymbol = typeChecker.getSymbolAtLocation(node.tagName);
-    if (jsxTagSymbol && staticStyledComponents.has(jsxTagSymbol)) {
+    if (
+      jsxTagSymbol &&
+      staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
+      !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
+    ) {
       const cssPropData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
-      const styledComponent = staticStyledComponents.get(jsxTagSymbol)!;
+      const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
       let styles = styledComponent.styles;
       if (cssPropData) {
         styles = styles.slice();
@@ -366,6 +425,35 @@ function visitNode(
   }
 
   return node;
+}
+
+function replaceComponentDeclarationNode(
+  componentSymbol: ts.Symbol,
+  node: ts.Node,
+  staticStyledComponents: StaticStyledComponents,
+) {
+  if (
+    staticStyledComponents.symbolToComponent.has(componentSymbol) &&
+    !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)
+  ) {
+    return [];
+  }
+  return node;
+}
+
+function isStaticComponentVariableUse(node: ts.Node) {
+  const parent = node.parent;
+  if (parent) {
+    if (ts.isVariableDeclaration(parent)) {
+      return true;
+    }
+    if (ts.isCallExpression(parent)) {
+      if (parent.expression.getText() === styledName) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function reportRequiresRuntimeResultWhenShouldBeStatic(
