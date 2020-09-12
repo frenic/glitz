@@ -737,27 +737,24 @@ test('can extract advanced custom component', () => {
     'file1.tsx': `
 import { styled } from '@glitz/react';
 
-function MyComponent(props: {}) {
-    return (
-        <Base css={{ borderBottomColor: 'blue' }} />
-    );
-}
-
 const Base = styled.div({ backgroundColor: 'green' });
 
-const Styled = styled(MyComponent, { color: 'red' });
+const Styled = styled(Base, { color: 'red' });
+
+function MyComponent(props: {}) {
+    return <Styled css={{ borderBottomColor: 'blue' }} />;
+}
 `,
   };
 
   const expected = {
     'file1.jsx': `
 import { styled } from '@glitz/react';
-
 function MyComponent(props) {
-    return (<div className="a b c"/>);
+    return <div className="a b c"/>;
 }
 `,
-    'style.css': `.a{color:red}.b{background-color:green}.c{border-bottom-color:blue}`,
+    'style.css': `.a{background-color:green}.b{color:red}.c{border-bottom-color:blue}`,
   };
 
   expectEqual(expected, compile(code));
