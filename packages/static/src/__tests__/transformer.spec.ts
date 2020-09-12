@@ -532,6 +532,7 @@ function MyComponent(props: {}) {
 const Styled1 = styled.div({
     height: '100%',
 });
+/** @glitz-static */
 const Styled2 = styled.div({
   height: '75%',
 });
@@ -556,6 +557,7 @@ function MyComponent(props) {
 const Styled1 = styled.div({
     height: '100%',
 });
+/** @glitz-static */
 const Styled2 = styled.div({
     height: '75%',
 });
@@ -567,36 +569,29 @@ const Styled3 = styled.div({
     'style.css': `.a{height:50%}.b{height:25%}`,
   };
 
-  expectEqual(expected, compile(code));
-});
-
-test('it bails if a declared component is used outside of JSX', () => {
-  const code = {
-    'file1.tsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props: {}) {
-    return <Styled1 />;
-}
-export const Styled1 = styled.div({
-  height: '100%',
-});
-`,
-  };
-
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <Styled1 />;
-}
-export const Styled1 = styled.div({
-    height: '100%',
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(expected, compile(code), [
+    {
+      file: 'file1.tsx',
+      message: "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
+      source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
+      severity: 'info',
+      line: 4,
+    },
+    {
+      file: 'file1.tsx',
+      message: "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
+      source: "Styled2.displayName = 'Styled2';",
+      severity: 'error',
+      line: 13,
+    },
+    {
+      file: 'file1.tsx',
+      message: "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
+      source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
+      severity: 'info',
+      line: 4,
+    },
+  ]);
 });
 
 test('it bails when it finds a variable that can not be statically evaluated', () => {

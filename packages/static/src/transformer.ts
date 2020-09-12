@@ -34,7 +34,10 @@ type DiagnosticsReporter = (diagnostic: Diagnostic) => unknown;
 
 type StaticStyledComponents = {
   symbolToComponent: Map<ts.Symbol, StaticStyledComponent>;
-  symbolsWithReferencesOutsideJsx: Map<ts.Symbol, StaticStyledComponent>;
+  symbolsWithReferencesOutsideJsx: Map<
+    ts.Symbol,
+    { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: boolean }
+  >;
 };
 
 export function transformer(
@@ -51,7 +54,10 @@ export function transformer(
 
       const staticStyledComponents = {
         symbolToComponent: new Map<ts.Symbol, StaticStyledComponent>(),
-        symbolsWithReferencesOutsideJsx: new Map<ts.Symbol, StaticStyledComponent>(),
+        symbolsWithReferencesOutsideJsx: new Map<
+          ts.Symbol,
+          { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: false }
+        >(),
       };
       const firstPassTransformedFile = visitNodeAndChildren(
         file,
@@ -102,7 +108,7 @@ function visitNodeAndChildren(
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
-  diagnosticsReporter?: DiagnosticsReporter,
+  diagnosticsReporter: DiagnosticsReporter | undefined,
 ): ts.SourceFile;
 function visitNodeAndChildren(
   node: ts.Node,
@@ -112,7 +118,7 @@ function visitNodeAndChildren(
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
-  diagnosticsReporter?: DiagnosticsReporter,
+  diagnosticsReporter: DiagnosticsReporter | undefined,
 ): ts.Node | ts.Node[];
 function visitNodeAndChildren(
   node: ts.Node,
@@ -122,7 +128,7 @@ function visitNodeAndChildren(
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
-  diagnosticsReporter?: DiagnosticsReporter,
+  diagnosticsReporter: DiagnosticsReporter | undefined,
 ): ts.Node | ts.Node[] {
   return ts.visitEachChild(
     visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, isFirstPass, diagnosticsReporter),
@@ -148,7 +154,7 @@ function visitNode(
   staticStyledComponents: StaticStyledComponents,
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
-  diagnosticsReporter?: DiagnosticsReporter,
+  diagnosticsReporter: DiagnosticsReporter | undefined,
 ): any /* TODO */ {
   const typeChecker = program.getTypeChecker();
   if (ts.isImportDeclaration(node)) {
@@ -168,8 +174,13 @@ function visitNode(
     if (symbol && staticStyledComponents.symbolToComponent.has(symbol)) {
       const component = staticStyledComponents.symbolToComponent.get(symbol)!;
       if (!staticStyledComponents.symbolsWithReferencesOutsideJsx.has(symbol)) {
-        staticStyledComponents.symbolsWithReferencesOutsideJsx.set(symbol, component);
+        staticStyledComponents.symbolsWithReferencesOutsideJsx.set(symbol, {
+          component,
+          references: [],
+          hasBeenReported: false,
+        });
       }
+      staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
     }
   }
   if (
@@ -180,15 +191,19 @@ function visitNode(
       const declaration = node.declarationList.declarations[0];
       if (ts.isIdentifier(declaration.name) && declaration.initializer) {
         const componentSymbol = typeChecker.getSymbolAtLocation(declaration.name)!;
-        if (staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)) {
-          return node;
-        }
+        const shouldBeStatic = hasJSDocTag(node, 'glitz-static') || allShouldBeStatic;
+        const componentName = declaration.name.getText();
 
         if (!isFirstPass) {
-          return replaceComponentDeclarationNode(componentSymbol, node, staticStyledComponents);
+          return replaceComponentDeclarationNode(
+            componentSymbol,
+            componentName,
+            node,
+            staticStyledComponents,
+            shouldBeStatic,
+            diagnosticsReporter,
+          );
         }
-
-        const componentName = declaration.name.getText();
 
         if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
           const callExpr = declaration.initializer;
@@ -207,7 +222,7 @@ function visitNode(
                   };
                   staticStyledComponents.symbolToComponent.set(componentSymbol, component);
                   return node;
-                } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                } else if (shouldBeStatic) {
                   if (diagnosticsReporter) {
                     reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
                   }
@@ -432,22 +447,69 @@ function visitNode(
 
 function replaceComponentDeclarationNode(
   componentSymbol: ts.Symbol,
+  componentName: string,
   node: ts.Node,
   staticStyledComponents: StaticStyledComponents,
+  shouldBeStatic: boolean,
+  diagnosticsReporter: DiagnosticsReporter | undefined,
 ) {
-  if (
-    staticStyledComponents.symbolToComponent.has(componentSymbol) &&
-    !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)
-  ) {
+  if (staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)) {
+    if (diagnosticsReporter) {
+      const outsideJsxUsage = staticStyledComponents.symbolsWithReferencesOutsideJsx.get(componentSymbol)!;
+      if (!outsideJsxUsage.hasBeenReported) {
+        const references = outsideJsxUsage.references;
+
+        for (const reference of references) {
+          const sourceFile = reference.getSourceFile();
+          let stmt = getStatement(reference);
+
+          diagnosticsReporter({
+            file: sourceFile.fileName,
+            message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
+            source: stmt.getText(),
+            severity: shouldBeStatic ? 'error' : 'info',
+            line: sourceFile.getLineAndCharacterOfPosition(reference.pos).line,
+          });
+        }
+        outsideJsxUsage.hasBeenReported = true;
+      }
+    }
+    return node;
+  }
+
+  if (staticStyledComponents.symbolToComponent.has(componentSymbol)) {
     return [];
   }
+
   return node;
+}
+
+function getStatement(node: ts.Node): ts.Node {
+  if (!node.parent) {
+    return node;
+  }
+  if (ts.isSourceFile(node.parent)) {
+    return node;
+  }
+  if (ts.isBlock(node.parent)) {
+    return node;
+  }
+  return getStatement(node.parent);
 }
 
 function isStaticComponentVariableUse(node: ts.Node) {
   const parent = node.parent;
   if (parent) {
     if (ts.isVariableDeclaration(parent)) {
+      return true;
+    }
+    if (ts.isJsxSelfClosingElement(parent)) {
+      return true;
+    }
+    if (ts.isJsxOpeningElement(parent)) {
+      return true;
+    }
+    if (ts.isJsxClosingElement(parent)) {
       return true;
     }
     if (ts.isCallExpression(parent)) {
@@ -462,7 +524,7 @@ function isStaticComponentVariableUse(node: ts.Node) {
 function reportRequiresRuntimeResultWhenShouldBeStatic(
   requiresRuntimeResults: RequiresRuntimeResult | RequiresRuntimeResult[],
   node: ts.Node,
-  reporter: DiagnosticsReporter,
+  reporter: DiagnosticsReporter | undefined,
 ) {
   reportRequiresRuntimeResult(
     'Component marked with @glitz-static could not be statically evaluated',
@@ -478,25 +540,26 @@ function reportRequiresRuntimeResult(
   severity: 'error' | 'warning' | 'info',
   requiresRuntimeResults: RequiresRuntimeResult | RequiresRuntimeResult[],
   node: ts.Node,
-  reporter: DiagnosticsReporter,
+  reporter: DiagnosticsReporter | undefined,
 ) {
   for (const result of Array.isArray(requiresRuntimeResults) ? requiresRuntimeResults : [requiresRuntimeResults]) {
     const requireRuntimeDiagnostics = result.getDiagnostics()!;
     const file = node.getSourceFile();
-    reporter({
-      message,
-      file: file.fileName,
-      line: file.getLineAndCharacterOfPosition(node.pos).line,
-      source: node.getText(),
-      severity,
-      innerDiagnostic: {
-        file: requireRuntimeDiagnostics.file,
-        line: requireRuntimeDiagnostics.line,
-        message: requireRuntimeDiagnostics.message,
-        source: requireRuntimeDiagnostics.source,
+    reporter &&
+      reporter({
+        message,
+        file: file.fileName,
+        line: file.getLineAndCharacterOfPosition(node.pos).line,
+        source: node.getText(),
         severity,
-      },
-    });
+        innerDiagnostic: {
+          file: requireRuntimeDiagnostics.file,
+          line: requireRuntimeDiagnostics.line,
+          message: requireRuntimeDiagnostics.message,
+          source: requireRuntimeDiagnostics.source,
+          severity,
+        },
+      });
   }
 }
 
