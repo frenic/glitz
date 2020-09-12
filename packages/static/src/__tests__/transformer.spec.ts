@@ -692,6 +692,131 @@ const DeepStyled = styled.div({
   expectEqual(expected, compile(code));
 });
 
+test('can extract simple custom component', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props: {}) {
+    return (
+        <styled.Div css={{ backgroundColor: 'green' }} />
+    );
+}
+
+const Styled = styled(MyComponent, { color: 'red' });
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props) {
+    return (<div className="a b" />);
+}
+`,
+    'style.css': `.a{color:red}.b{background-color:green}}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
+test('can extract advanced custom component', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props: {}) {
+    return (
+        <Base css={{ borderBottomColor: 'blue' }} />
+    );
+}
+
+const Base = styled.div({ backgroundColor: 'green' });
+
+const Styled = styled(MyComponent, { color: 'red' });
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props) {
+    return (<div className="a b c"/>);
+}
+`,
+    'style.css': `.a{color:red}.b{background-color:green}.c{border-bottom-color:blue}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
+test('can extract inline custom component', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+const MyComponent = styled(
+    (props: {}) => {
+        return (
+            <styled.Div css={{ backgroundColor: 'green' }} />
+        );
+    },
+    { color: 'red' }
+);
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+
+const MyComponent = (props) => {
+    return (<div className="a b" />);
+}
+`,
+    'style.css': `.a{color:red}.b{background-color:green}}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
+test('bails when css prop is used outside', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props: {}) {
+    return (
+        <styled.Div css={{ backgroundColor: 'green' }} />
+    );
+}
+
+const Styled = styled(MyComponent, { color: 'red' });
+
+const node = <MyComponent css={{ borderBottomColor: 'blue' }} />
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props) {
+    return (<styled.Div css={{ backgroundColor: 'green' }} />);
+}
+
+const Styled = styled(MyComponent, { color: 'red' });
+
+const node = <Styled css={{ borderBottomColor: 'blue' }} />
+`,
+    'style.css': ``,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 function expectEqual(
   expected: Code,
   results: readonly [Code, TransformerDiagnostics],
