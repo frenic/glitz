@@ -130,21 +130,34 @@ function visitNodeAndChildren(
   isFirstPass: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
 ): ts.Node | ts.Node[] {
-  return ts.visitEachChild(
-    visitNode(node, program, glitz, staticStyledComponents, allShouldBeStatic, isFirstPass, diagnosticsReporter),
-    childNode =>
-      visitNodeAndChildren(
-        childNode,
-        program,
-        context,
-        glitz,
-        staticStyledComponents,
-        allShouldBeStatic,
-        isFirstPass,
-        diagnosticsReporter,
-      ),
-    context,
+  const visitedNode = visitNode(
+    node,
+    program,
+    glitz,
+    staticStyledComponents,
+    allShouldBeStatic,
+    isFirstPass,
+    diagnosticsReporter,
   );
+  if (visitedNode) {
+    return ts.visitEachChild(
+      visitedNode,
+      childNode =>
+        visitNodeAndChildren(
+          childNode,
+          program,
+          context,
+          glitz,
+          staticStyledComponents,
+          allShouldBeStatic,
+          isFirstPass,
+          diagnosticsReporter,
+        ),
+      context,
+    );
+  } else {
+    return [];
+  }
 }
 
 function visitNode(
@@ -155,7 +168,7 @@ function visitNode(
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
-): any /* TODO */ {
+): ts.Node | undefined {
   const typeChecker = program.getTypeChecker();
   if (ts.isImportDeclaration(node)) {
     if ((node.moduleSpecifier as ts.StringLiteral).text === moduleName) {
@@ -478,7 +491,7 @@ function replaceComponentDeclarationNode(
   }
 
   if (staticStyledComponents.symbolToComponent.has(componentSymbol)) {
-    return [];
+    return undefined;
   }
 
   return node;
