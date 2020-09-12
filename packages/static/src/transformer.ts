@@ -170,15 +170,6 @@ function visitNode(
   diagnosticsReporter: DiagnosticsReporter | undefined,
 ): ts.Node | undefined {
   const typeChecker = program.getTypeChecker();
-  if (ts.isImportDeclaration(node)) {
-    if ((node.moduleSpecifier as ts.StringLiteral).text === moduleName) {
-      // TODO: Should only do this if the only thing imported is the static/styledx import
-      // return [];
-
-      // TODO: Do we need to remove this? Will it get dead code eliminated?
-      return node;
-    }
-  }
   if (hasJSDocTag(node, 'glitz-dynamic')) {
     return node;
   }
