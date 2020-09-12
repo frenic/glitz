@@ -752,6 +752,39 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
+test('composes to first styled component in custom component', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props: {}) {
+    return (
+      <div>
+        <styled.Div>
+          <styled.Div css={{ backgroundColor: 'green' }} />
+        </styled.Div>
+      </div>
+    );
+}
+
+const Styled = styled(MyComponent, { color: 'red' });
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+
+function MyComponent(props) {
+    return (<div><div className="a"><div className="b"/></div></div>);
+}
+`,
+    'style.css': `.a{color:red}.b{background-color:green}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('can extract inline custom component', () => {
   const code = {
     'file1.tsx': `
