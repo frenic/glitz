@@ -38,6 +38,7 @@ type StaticStyledComponents = {
     ts.Symbol,
     { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: boolean }
   >;
+  extendedComponentSymbols: ts.Symbol[];
 };
 
 export function transformer(
@@ -58,6 +59,7 @@ export function transformer(
           ts.Symbol,
           { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: false }
         >(),
+        extendedComponentSymbols: [],
       };
       const firstPassTransformedFile = visitNodeAndChildren(
         file,
@@ -187,6 +189,22 @@ function visitNode(
       staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
     }
   }
+  if (
+    isFirstPass &&
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.escapedText === styledName &&
+    node.arguments.length > 0
+  ) {
+    const parentComponent = node.arguments[0];
+    if (ts.isIdentifier(parentComponent)) {
+      const symbol = typeChecker.getSymbolAtLocation(parentComponent);
+      if (symbol) {
+        staticStyledComponents.extendedComponentSymbols.push(symbol);
+      }
+    }
+  }
+
   if (
     ts.isVariableStatement(node) &&
     (!node.modifiers || !node.modifiers.find(m => m.kind == ts.SyntaxKind.ExportKeyword))
@@ -332,88 +350,111 @@ function visitNode(
     }
   }
 
-  if (
-    ts.isJsxSelfClosingElement(node) &&
-    ts.isPropertyAccessExpression(node.tagName) &&
-    ts.isIdentifier(node.tagName.expression) &&
-    node.tagName.expression.escapedText.toString() === styledName
-  ) {
-    const elementName = node.tagName.name.escapedText.toString().toLowerCase();
-    const cssData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
-    if (cssData) {
-      const jsxElement = ts.createJsxSelfClosingElement(
-        ts.createIdentifier(elementName),
-        undefined,
-        ts.createJsxAttributes([
-          ...passThroughProps(node.attributes.properties),
-          ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(cssData))),
-        ]),
-      );
-      ts.setOriginalNode(jsxElement, node);
-      return jsxElement;
-    }
-  }
-
-  if (ts.isJsxElement(node)) {
-    const openingElement = node.openingElement;
+  if (!isFirstPass) {
     if (
-      ts.isPropertyAccessExpression(openingElement.tagName) &&
-      ts.isIdentifier(openingElement.tagName.expression) &&
-      openingElement.tagName.expression.escapedText.toString() === styledName
+      ts.isJsxSelfClosingElement(node) &&
+      ts.isPropertyAccessExpression(node.tagName) &&
+      ts.isIdentifier(node.tagName.expression) &&
+      node.tagName.expression.escapedText.toString() === styledName
     ) {
-      const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
-      const cssData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
-      if (cssData) {
-        const jsxOpeningElement = ts.createJsxOpeningElement(
-          ts.createIdentifier(elementName),
-          undefined,
-          ts.createJsxAttributes([
-            ...passThroughProps(node.openingElement.attributes.properties),
-            ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(cssData))),
-          ]),
-        );
-        ts.setOriginalNode(jsxOpeningElement, node.openingElement);
-
-        const jsxClosingElement = ts.createJsxClosingElement(ts.createIdentifier(elementName));
-        ts.setOriginalNode(jsxClosingElement, node.closingElement);
-
-        const jsxElement = ts.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
-        ts.setOriginalNode(jsxElement, node);
-        return jsxElement;
+      if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
+        const elementName = node.tagName.name.escapedText.toString().toLowerCase();
+        const cssData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
+        if (cssData) {
+          const jsxElement = ts.createJsxSelfClosingElement(
+            ts.createIdentifier(elementName),
+            undefined,
+            ts.createJsxAttributes([
+              ...passThroughProps(node.attributes.properties),
+              ts.createJsxAttribute(
+                ts.createIdentifier('className'),
+                ts.createStringLiteral(glitz.injectStyle(cssData)),
+              ),
+            ]),
+          );
+          ts.setOriginalNode(jsxElement, node);
+          return jsxElement;
+        }
+      } else {
+        reportTopLevelJsxInComposedComponent(node, diagnosticsReporter);
       }
     }
 
-    if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
-      const jsxTagSymbol = typeChecker.getSymbolAtLocation(openingElement.tagName);
+    if (ts.isJsxElement(node)) {
+      const openingElement = node.openingElement;
       if (
-        jsxTagSymbol &&
-        staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
-        !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
+        ts.isPropertyAccessExpression(openingElement.tagName) &&
+        ts.isIdentifier(openingElement.tagName.expression) &&
+        openingElement.tagName.expression.escapedText.toString() === styledName
       ) {
-        const cssPropData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
-        const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-        let styles = styledComponent.styles;
-        if (cssPropData) {
-          styles = styles.slice();
-          styles.push(cssPropData);
+        if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
+          const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
+          const cssData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
+          if (cssData) {
+            const jsxOpeningElement = ts.createJsxOpeningElement(
+              ts.createIdentifier(elementName),
+              undefined,
+              ts.createJsxAttributes([
+                ...passThroughProps(node.openingElement.attributes.properties),
+                ts.createJsxAttribute(
+                  ts.createIdentifier('className'),
+                  ts.createStringLiteral(glitz.injectStyle(cssData)),
+                ),
+              ]),
+            );
+            ts.setOriginalNode(jsxOpeningElement, node.openingElement);
+
+            const jsxClosingElement = ts.createJsxClosingElement(ts.createIdentifier(elementName));
+            ts.setOriginalNode(jsxClosingElement, node.closingElement);
+
+            const jsxElement = ts.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
+            ts.setOriginalNode(jsxElement, node);
+            return jsxElement;
+          }
+        } else {
+          reportTopLevelJsxInComposedComponent(node, diagnosticsReporter);
         }
+      }
 
-        const jsxOpeningElement = ts.createJsxOpeningElement(
-          ts.createIdentifier(styledComponent.elementName),
-          undefined,
-          ts.createJsxAttributes([
-            ...passThroughProps(node.openingElement.attributes.properties),
-            ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(styles))),
-          ]),
-        );
-        ts.setOriginalNode(jsxOpeningElement, node.openingElement);
+      if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
+        const jsxTagSymbol = typeChecker.getSymbolAtLocation(openingElement.tagName);
+        if (
+          jsxTagSymbol &&
+          staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
+          !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
+        ) {
+          if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
+            const cssPropData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
+            const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
+            let styles = styledComponent.styles;
+            if (cssPropData) {
+              styles = styles.slice();
+              styles.push(cssPropData);
+            }
 
-        const jsxClosingElement = ts.createJsxClosingElement(ts.createIdentifier(styledComponent.elementName));
-        ts.setOriginalNode(jsxClosingElement, node.closingElement);
+            const jsxOpeningElement = ts.createJsxOpeningElement(
+              ts.createIdentifier(styledComponent.elementName),
+              undefined,
+              ts.createJsxAttributes([
+                ...passThroughProps(node.openingElement.attributes.properties),
+                ts.createJsxAttribute(
+                  ts.createIdentifier('className'),
+                  ts.createStringLiteral(glitz.injectStyle(styles)),
+                ),
+              ]),
+            );
+            ts.setOriginalNode(jsxOpeningElement, node.openingElement);
 
-        const jsxElement = ts.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
-        ts.setOriginalNode(jsxElement, node);
-        return jsxElement;
+            const jsxClosingElement = ts.createJsxClosingElement(ts.createIdentifier(styledComponent.elementName));
+            ts.setOriginalNode(jsxClosingElement, node.closingElement);
+
+            const jsxElement = ts.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
+            ts.setOriginalNode(jsxElement, node);
+            return jsxElement;
+          } else {
+            reportTopLevelJsxInComposedComponent(node, diagnosticsReporter);
+          }
+        }
       }
     }
   }
@@ -425,28 +466,45 @@ function visitNode(
       staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
       !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
     ) {
-      const cssPropData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
-      const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-      let styles = styledComponent.styles;
-      if (cssPropData) {
-        styles = styles.slice();
-        styles.push(cssPropData);
-      }
+      if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
+        const cssPropData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
+        const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
+        let styles = styledComponent.styles;
+        if (cssPropData) {
+          styles = styles.slice();
+          styles.push(cssPropData);
+        }
 
-      const jsxElement = ts.createJsxSelfClosingElement(
-        ts.createIdentifier(styledComponent.elementName),
-        undefined,
-        ts.createJsxAttributes([
-          ...passThroughProps(node.attributes.properties),
-          ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(styles))),
-        ]),
-      );
-      ts.setOriginalNode(jsxElement, node);
-      return jsxElement;
+        const jsxElement = ts.createJsxSelfClosingElement(
+          ts.createIdentifier(styledComponent.elementName),
+          undefined,
+          ts.createJsxAttributes([
+            ...passThroughProps(node.attributes.properties),
+            ts.createJsxAttribute(ts.createIdentifier('className'), ts.createStringLiteral(glitz.injectStyle(styles))),
+          ]),
+        );
+        ts.setOriginalNode(jsxElement, node);
+        return jsxElement;
+      } else {
+        reportTopLevelJsxInComposedComponent(node, diagnosticsReporter);
+      }
     }
   }
 
   return node;
+}
+
+function getComponentSymbol(node: ts.Node, typeChecker: ts.TypeChecker): ts.Symbol | undefined {
+  if (!node || ts.isSourceFile(node)) {
+    return undefined;
+  }
+  if (ts.isFunctionDeclaration(node) && node.name) {
+    return typeChecker.getSymbolAtLocation(node.name);
+  }
+  if ((ts.isFunctionExpression(node) || ts.isArrowFunction(node)) && ts.isVariableDeclaration(node.parent)) {
+    return typeChecker.getSymbolAtLocation(node.parent.name);
+  }
+  return getComponentSymbol(node.parent, typeChecker);
 }
 
 function replaceComponentDeclarationNode(
@@ -486,6 +544,42 @@ function replaceComponentDeclarationNode(
   }
 
   return node;
+}
+
+function isTopLevelJsxInComposedComponent(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker,
+  staticStyledComponents: StaticStyledComponents,
+) {
+  while (ts.isParenthesizedExpression(node)) {
+    node = node.parent;
+  }
+  const containingComponentSymbol = getComponentSymbol(node, typeChecker);
+  if (
+    containingComponentSymbol &&
+    staticStyledComponents.extendedComponentSymbols.indexOf(containingComponentSymbol) !== -1
+  ) {
+    if (ts.isReturnStatement(node.parent)) {
+      return true;
+    }
+    if (ts.isArrowFunction(node.parent)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function reportTopLevelJsxInComposedComponent(node: ts.Node, diagnosticsReporter: DiagnosticsReporter | undefined) {
+  const sourceFile = node.getSourceFile();
+  diagnosticsReporter &&
+    diagnosticsReporter({
+      message:
+        'styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+      file: sourceFile.fileName,
+      line: sourceFile.getLineAndCharacterOfPosition(node.pos).line,
+      severity: 'info',
+      source: node.getText(),
+    });
 }
 
 function getStatement(node: ts.Node): ts.Node {

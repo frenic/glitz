@@ -692,33 +692,44 @@ const DeepStyled = styled.div({
   expectEqual(expected, compile(code));
 });
 
-test('can extract simple custom component', () => {
+test('bails on inline styles inside extended components', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
-
-function MyComponent(props: {}) {
-    return (
-        <styled.Div css={{ backgroundColor: 'green' }} />
-    );
+function StyledWrapper(props: {}) {
+    return <styled.Div css={{ backgroundColor: 'green' }} />;
 }
-
-const Styled = styled(MyComponent, { color: 'red' });
+const Styled = styled(StyledWrapper, { color: 'red' });
+function MyComponent(props: {}) {
+    return <StyledWrapper />;
+}
 `,
   };
 
   const expected = {
     'file1.jsx': `
 import { styled } from '@glitz/react';
-
+function StyledWrapper(props) {
+    return <styled.Div css={{ backgroundColor: 'green' }}/>;
+}
+const Styled = styled(StyledWrapper, { color: 'red' });
 function MyComponent(props) {
-    return (<div className="a b" />);
+    return <StyledWrapper />;
 }
 `,
-    'style.css': `.a{color:red}.b{background-color:green}}`,
+    'style.css': ``,
   };
 
-  expectEqual(expected, compile(code));
+  expectEqual(expected, compile(code), [
+    {
+      message:
+        'styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+      file: 'file1.tsx',
+      line: 3,
+      severity: 'info',
+      source: "<styled.Div css={{ backgroundColor: 'green' }} />",
+    },
+  ]);
 });
 
 test('can extract advanced custom component', () => {
