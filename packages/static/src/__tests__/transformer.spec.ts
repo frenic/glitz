@@ -802,7 +802,7 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
-test.only('supports passing styles without element name to styled()', () => {
+test('supports passing styles without element name to styled()', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';

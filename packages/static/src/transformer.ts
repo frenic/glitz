@@ -254,122 +254,51 @@ function visitNode(
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
       if (ts.isIdentifier(declaration.name) && declaration.initializer) {
-        const componentSymbol = typeChecker.getSymbolAtLocation(declaration.name)!;
-        const shouldBeStatic = hasJSDocTag(node, 'glitz-static') || allShouldBeStatic;
-        const componentName = declaration.name.getText();
+        const componentSymbol = typeChecker.getSymbolAtLocation(declaration.name);
+        if (componentSymbol) {
+          const shouldBeStatic = hasJSDocTag(node, 'glitz-static') || allShouldBeStatic;
+          const componentName = declaration.name.getText();
 
-        if (!isFirstPass) {
-          return replaceComponentDeclarationNode(
-            componentSymbol,
-            componentName,
-            node,
-            staticStyledComponents,
-            shouldBeStatic,
-            diagnosticsReporter,
-          );
-        }
-
-        if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
-          const callExpr = declaration.initializer;
-
-          if (ts.isPropertyAccessExpression(callExpr.expression) && ts.isIdentifier(callExpr.expression.expression)) {
-            if (callExpr.expression.expression.escapedText === styledName) {
-              const elementName = callExpr.expression.name.escapedText.toString();
-              const styleObject = callExpr.arguments[0];
-              if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
-                // We now know that: node == `const [variable name] = styled.[element name]({[css rules]})`
-
-                const cssData = getCssData(styleObject, program, node);
-                if (isEvaluableStyle(cssData)) {
-                  const component = {
-                    componentName,
-                    elementName,
-                    styles: [cssData],
-                  };
-                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
-                  return node;
-                } else if (shouldBeStatic) {
-                  if (diagnosticsReporter) {
-                    reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
-                  }
-                } else {
-                  if (diagnosticsReporter) {
-                    reportRequiresRuntimeResult(
-                      'Styled component could not be statically evaluated',
-                      'info',
-                      cssData,
-                      node,
-                      diagnosticsReporter,
-                    );
-                  }
-                }
-              }
-            }
+          if (!isFirstPass) {
+            return replaceComponentDeclarationNode(
+              componentSymbol,
+              componentName,
+              node,
+              staticStyledComponents,
+              shouldBeStatic,
+              diagnosticsReporter,
+            );
           }
-          if (ts.isIdentifier(callExpr.expression) && callExpr.expression.escapedText.toString() === styledName) {
-            if (callExpr.arguments.length === 1) {
-              const styleObject = callExpr.arguments[0];
-              if (ts.isObjectLiteralExpression(styleObject)) {
-                // We now know that: node == `const [variable name] = styled({[css rules]})`
 
-                const cssData = getCssData(styleObject, program, node);
-                if (isEvaluableStyle(cssData)) {
-                  const component: StaticStyledComponent = {
-                    componentName,
-                    elementName: undefined,
-                    styles: [cssData],
-                  };
-                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
-                  return node;
-                } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                  if (diagnosticsReporter) {
-                    reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
-                  }
-                } else {
-                  if (diagnosticsReporter) {
-                    reportRequiresRuntimeResult(
-                      'Styled component could not be statically evaluated',
-                      'info',
-                      cssData,
-                      node,
-                      diagnosticsReporter,
-                    );
-                  }
-                }
-              }
-            } else if (callExpr.arguments.length === 2) {
-              const parentStyledComponent = callExpr.arguments[0];
-              const styleObject = callExpr.arguments[1];
+          if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
+            const callExpr = declaration.initializer;
 
-              if (ts.isIdentifier(parentStyledComponent) && ts.isObjectLiteralExpression(styleObject)) {
-                // We now know that: node == `const [variable name] = styled([component to compose], {[css rules]})`
-                const parentSymbol = typeChecker.getSymbolAtLocation(parentStyledComponent)!;
-                const parent = staticStyledComponents.symbolToComponent.get(parentSymbol);
-                if (parent) {
-                  const cssData = getCssData(styleObject, program, node, parent);
-                  if (cssData.every(isEvaluableStyle)) {
+            if (ts.isPropertyAccessExpression(callExpr.expression) && ts.isIdentifier(callExpr.expression.expression)) {
+              if (callExpr.expression.expression.escapedText === styledName) {
+                const elementName = callExpr.expression.name.escapedText.toString();
+                const styleObject = callExpr.arguments[0];
+                if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
+                  // We now know that: node == `const [variable name] = styled.[element name]({[css rules]})`
+
+                  const cssData = getCssData(styleObject, program, node);
+                  if (isEvaluableStyle(cssData)) {
                     const component = {
                       componentName,
-                      elementName: parent.elementName,
-                      styles: cssData as EvaluatedStyle[],
-                      parent,
+                      elementName,
+                      styles: [cssData],
                     };
                     staticStyledComponents.symbolToComponent.set(componentSymbol, component);
                     return node;
-                  } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                  } else if (shouldBeStatic) {
                     if (diagnosticsReporter) {
-                      reportRequiresRuntimeResultWhenShouldBeStatic(
-                        cssData.filter(isRequiresRuntimeResult),
-                        node,
-                        diagnosticsReporter,
-                      );
+                      reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
                     }
                   } else {
                     if (diagnosticsReporter) {
                       reportRequiresRuntimeResult(
                         'Styled component could not be statically evaluated',
                         'info',
-                        cssData.filter(isRequiresRuntimeResult),
+                        cssData,
                         node,
                         diagnosticsReporter,
                       );
@@ -378,48 +307,56 @@ function visitNode(
                 }
               }
             }
-          }
+            if (ts.isIdentifier(callExpr.expression) && callExpr.expression.escapedText.toString() === styledName) {
+              if (callExpr.arguments.length === 1) {
+                const styleObject = callExpr.arguments[0];
+                if (ts.isObjectLiteralExpression(styleObject)) {
+                  // We now know that: node == `const [variable name] = styled({[css rules]})`
 
-          // Since some declarations of styled components are complex and look like:
-          // const Styled = createComponent();
-          // we look at the variable name to see if it's a variable with Pascal case
-          // and in that case try to evaluate it to a styled component.
-          if (
-            componentName.length > 1 &&
-            componentName[0] === componentName[0].toUpperCase() &&
-            componentName[1] === componentName[1].toLowerCase()
-          ) {
-            let isThreewayComposition = false;
-            if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.initializer.expression)) {
-              const symbol = typeChecker.getSymbolAtLocation(declaration.initializer.expression);
-              if (
-                symbol &&
-                staticStyledComponents.symbolToComponent.has(symbol) &&
-                declaration.initializer.arguments.length === 2
-              ) {
-                isThreewayComposition = true;
+                  const cssData = getCssData(styleObject, program, node);
+                  if (isEvaluableStyle(cssData)) {
+                    const component: StaticStyledComponent = {
+                      componentName,
+                      elementName: undefined,
+                      styles: [cssData],
+                    };
+                    staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                    return node;
+                  } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                    if (diagnosticsReporter) {
+                      reportRequiresRuntimeResultWhenShouldBeStatic(cssData, node, diagnosticsReporter);
+                    }
+                  } else {
+                    if (diagnosticsReporter) {
+                      reportRequiresRuntimeResult(
+                        'Styled component could not be statically evaluated',
+                        'info',
+                        cssData,
+                        node,
+                        diagnosticsReporter,
+                      );
+                    }
+                  }
+                }
+              } else if (callExpr.arguments.length === 2) {
+                const parentStyledComponent = callExpr.arguments[0];
+                const styleObject = callExpr.arguments[1];
 
-                const composeComponent = staticStyledComponents.symbolToComponent.get(symbol)!;
-                const baseComponentIdentifier = declaration.initializer.arguments[0];
-                const styleObject = declaration.initializer.arguments[1];
-
-                if (ts.isIdentifier(baseComponentIdentifier) && ts.isObjectLiteralExpression(styleObject)) {
-                  const baseComponentSymbol = typeChecker.getSymbolAtLocation(baseComponentIdentifier);
-                  if (baseComponentSymbol && staticStyledComponents.symbolToComponent.has(baseComponentSymbol)) {
-                    const baseComponent = staticStyledComponents.symbolToComponent.get(baseComponentSymbol)!;
-
-                    const cssData = getCssData(styleObject, program, node, baseComponent);
+                if (ts.isIdentifier(parentStyledComponent) && ts.isObjectLiteralExpression(styleObject)) {
+                  // We now know that: node == `const [variable name] = styled([component to compose], {[css rules]})`
+                  const parentSymbol = typeChecker.getSymbolAtLocation(parentStyledComponent)!;
+                  const parent = staticStyledComponents.symbolToComponent.get(parentSymbol);
+                  if (parent) {
+                    const cssData = getCssData(styleObject, program, node, parent);
                     if (cssData.every(isEvaluableStyle)) {
-                      const styles = composeComponent.styles.slice();
-                      styles.push(...(cssData as EvaluatedStyle[]));
-
-                      const component: StaticStyledComponent = {
+                      const component = {
                         componentName,
-                        elementName: baseComponent.elementName,
-                        styles,
-                        parent: baseComponent,
+                        elementName: parent.elementName,
+                        styles: cssData as EvaluatedStyle[],
+                        parent,
                       };
                       staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                      return node;
                     } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
                       if (diagnosticsReporter) {
                         reportRequiresRuntimeResultWhenShouldBeStatic(
@@ -444,33 +381,98 @@ function visitNode(
               }
             }
 
-            if (!isThreewayComposition) {
-              const object = evaluate(declaration.initializer, program, {});
-              if (isStaticElement(object) || isStaticComponent(object)) {
-                if (object.styles.every(isEvaluableStyle)) {
-                  const component = {
-                    componentName,
-                    elementName: object.elementName,
-                    styles: object.styles,
-                  };
-                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
-                } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                  if (diagnosticsReporter) {
-                    reportRequiresRuntimeResultWhenShouldBeStatic(
-                      object.styles.filter(isRequiresRuntimeResult),
-                      node,
-                      diagnosticsReporter,
-                    );
+            // Since some declarations of styled components are complex and look like:
+            // const Styled = createComponent();
+            // we look at the variable name to see if it's a variable with Pascal case
+            // and in that case try to evaluate it to a styled component.
+            if (
+              componentName.length > 1 &&
+              componentName[0] === componentName[0].toUpperCase() &&
+              componentName[1] === componentName[1].toLowerCase()
+            ) {
+              let isThreewayComposition = false;
+              if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.initializer.expression)) {
+                const symbol = typeChecker.getSymbolAtLocation(declaration.initializer.expression);
+                if (
+                  symbol &&
+                  staticStyledComponents.symbolToComponent.has(symbol) &&
+                  declaration.initializer.arguments.length === 2
+                ) {
+                  isThreewayComposition = true;
+
+                  const composeComponent = staticStyledComponents.symbolToComponent.get(symbol)!;
+                  const baseComponentIdentifier = declaration.initializer.arguments[0];
+                  const styleObject = declaration.initializer.arguments[1];
+
+                  if (ts.isIdentifier(baseComponentIdentifier) && ts.isObjectLiteralExpression(styleObject)) {
+                    const baseComponentSymbol = typeChecker.getSymbolAtLocation(baseComponentIdentifier);
+                    if (baseComponentSymbol && staticStyledComponents.symbolToComponent.has(baseComponentSymbol)) {
+                      const baseComponent = staticStyledComponents.symbolToComponent.get(baseComponentSymbol)!;
+
+                      const cssData = getCssData(styleObject, program, node, baseComponent);
+                      if (cssData.every(isEvaluableStyle)) {
+                        const styles = composeComponent.styles.slice();
+                        styles.push(...(cssData as EvaluatedStyle[]));
+
+                        const component: StaticStyledComponent = {
+                          componentName,
+                          elementName: baseComponent.elementName,
+                          styles,
+                          parent: baseComponent,
+                        };
+                        staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                      } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                        if (diagnosticsReporter) {
+                          reportRequiresRuntimeResultWhenShouldBeStatic(
+                            cssData.filter(isRequiresRuntimeResult),
+                            node,
+                            diagnosticsReporter,
+                          );
+                        }
+                      } else {
+                        if (diagnosticsReporter) {
+                          reportRequiresRuntimeResult(
+                            'Styled component could not be statically evaluated',
+                            'info',
+                            cssData.filter(isRequiresRuntimeResult),
+                            node,
+                            diagnosticsReporter,
+                          );
+                        }
+                      }
+                    }
                   }
-                } else {
-                  if (diagnosticsReporter) {
-                    reportRequiresRuntimeResult(
-                      'Styled component could not be statically evaluated',
-                      'info',
-                      object.styles.filter(isRequiresRuntimeResult),
-                      node,
-                      diagnosticsReporter,
-                    );
+                }
+              }
+
+              if (!isThreewayComposition) {
+                const object = evaluate(declaration.initializer, program, {});
+                if (isStaticElement(object) || isStaticComponent(object)) {
+                  if (object.styles.every(isEvaluableStyle)) {
+                    const component = {
+                      componentName,
+                      elementName: object.elementName,
+                      styles: object.styles,
+                    };
+                    staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                  } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                    if (diagnosticsReporter) {
+                      reportRequiresRuntimeResultWhenShouldBeStatic(
+                        object.styles.filter(isRequiresRuntimeResult),
+                        node,
+                        diagnosticsReporter,
+                      );
+                    }
+                  } else {
+                    if (diagnosticsReporter) {
+                      reportRequiresRuntimeResult(
+                        'Styled component could not be statically evaluated',
+                        'info',
+                        object.styles.filter(isRequiresRuntimeResult),
+                        node,
+                        diagnosticsReporter,
+                      );
+                    }
                   }
                 }
               }
