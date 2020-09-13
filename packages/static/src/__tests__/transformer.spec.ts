@@ -733,6 +733,47 @@ function MyComponent(props) {
   ]);
 });
 
+test('bails on second level inline styles inside extended components as long as top level is simple elements', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function StyledWrapper(props: {}) {
+    return <div><styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div></div>;
+}
+const Styled = styled(StyledWrapper, { color: 'red' });
+function MyComponent(props: {}) {
+    return <StyledWrapper />;
+}
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+function StyledWrapper(props) {
+    return <div><styled.Div css={{ backgroundColor: 'green' }}><div className="a"/></styled.Div></div>;
+}
+const Styled = styled(StyledWrapper, { color: 'red' });
+function MyComponent(props) {
+    return <StyledWrapper />;
+}
+`,
+    'style.css': `.a{background-color:red}`,
+  };
+
+  expectEqual(expected, compile(code), [
+    {
+      message:
+        'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+      file: 'file1.tsx',
+      line: 3,
+      severity: 'info',
+      source:
+        "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+    },
+  ]);
+});
+
 test('can extract advanced custom component', () => {
   const code = {
     'file1.tsx': `
@@ -799,7 +840,7 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
-test('can extract inline custom component', () => {
+test('bails on inline custom component', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';

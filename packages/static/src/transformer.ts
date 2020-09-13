@@ -651,15 +651,30 @@ function replaceComponentDeclarationNode(
 
 // If a top level JSX element (that is, the top element returned) in a component
 // has been composed we need to bail because Glitz needs the runtime component
-// in order to do composition safely.
+// in order to do composition safely. Note that top level is both:
+// return <styled.Div ... />;
+// as well as:
+// return <div><div><styled.Div ... /></div></div>;
+// because Glitz will compose with the first styled component it finds.
 function isTopLevelJsxInComposedComponent(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
   staticStyledComponents: StaticStyledComponents,
 ) {
   let parent = node.parent;
-  while (ts.isParenthesizedExpression(parent)) {
-    parent = parent.parent;
+  while (true) {
+    if (ts.isParenthesizedExpression(parent)) {
+      parent = parent.parent;
+    } else if (
+      // Detects if the parent is a simple <div></div> or any other element
+      ts.isJsxElement(parent) &&
+      ts.isIdentifier(parent.openingElement.tagName) &&
+      parent.openingElement.tagName.text === parent.openingElement.tagName.text.toLowerCase()
+    ) {
+      parent = parent.parent;
+    } else {
+      break;
+    }
   }
   const containingComponentSymbol = getComponentSymbol(node, typeChecker);
 
