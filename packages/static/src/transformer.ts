@@ -33,12 +33,19 @@ export type Diagnostic = {
 type DiagnosticsReporter = (diagnostic: Diagnostic) => unknown;
 
 type StaticStyledComponents = {
+  // This contains a mapping of a symbol to a component. The key is a TS symbol instead
+  // of the variable name because multiple components with the same name can exist in different
+  // scopes in the same file.
   symbolToComponent: Map<ts.Symbol, StaticStyledComponent>;
+  // If a component has usage outside of JSX it will exist in this map. Usage outside
+  // of JSX is things like `TheComponent.displayName = 'Xyz';` or `doSomething(TheComponent);`
   symbolsWithReferencesOutsideJsx: Map<
     ts.Symbol,
     { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: boolean }
   >;
-  extendedComponentSymbols: ts.Symbol[];
+  // This is a list of symbols pointing to all components that has been composed
+  // using const OtherComp = styled(ThisComponentWillBeInComposedComponentSymbols, {});
+  composedComponentSymbols: ts.Symbol[];
 };
 
 export function transformer(
@@ -59,8 +66,14 @@ export function transformer(
           ts.Symbol,
           { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: false }
         >(),
-        extendedComponentSymbols: [],
+        composedComponentSymbols: [],
       };
+
+      // We first make a first pass to gather information about the file and populate `staticStyledComponents`.
+      // The reason why we can't do this in a single pass is because we visit the file from top to bottom, and there
+      // might be declarations at the bottom of the file that affects the top of the file.
+      // The biggest issue here is that styled components are typically declared at the bottom of the file
+      // and used in the top of the file, and we need to find the declarations before we can run transformation.
       const firstPassTransformedFile = visitNodeAndChildren(
         file,
         program,
@@ -82,6 +95,21 @@ export function transformer(
         diagnosticsReporter,
       );
 
+      // We make a third pass if we find components with uses outside of JSX, because we might have
+      // made a transformation that we can't really do. Such as this:
+      //
+      // function MyComponent() {
+      //   const x = <Styled />;
+      //   window.Styled = Styled;
+      //   return x;
+      // }
+      // const Styled = styled.div({});
+      //
+      // In our first pass we collect the component declarations, and then in our second
+      // pass we replace JSX with static classNames. But since `const x = <Styled />;` comes
+      // before `window.Styled = Styled;` we will incorrectly inline it in the second pass
+      // and later realize our mistake. This third pass fixes that by bailing on components
+      // that are used outside of JSX.
       if (staticStyledComponents.symbolsWithReferencesOutsideJsx.size !== 0) {
         transformedNode = visitNodeAndChildren(
           firstPassTransformedFile,
@@ -172,9 +200,12 @@ function visitNode(
   diagnosticsReporter: DiagnosticsReporter | undefined,
 ): ts.Node | undefined {
   const typeChecker = program.getTypeChecker();
+
   if (hasJSDocTag(node, 'glitz-dynamic')) {
     return node;
   }
+
+  // This detects any non JSX usage of a variable pointing to a styled component
   if (ts.isIdentifier(node) && !isStaticComponentVariableUse(node)) {
     const symbol = typeChecker.getSymbolAtLocation(node);
     if (symbol && staticStyledComponents.symbolToComponent.has(symbol)) {
@@ -189,6 +220,12 @@ function visitNode(
       staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
     }
   }
+
+  // This collects all compositions of components, that is, calls like this:
+  // const Derived = styled(TheComponentToCollect, {color: 'red'});
+  //
+  // We need to collect that information because we have to bail in some situations
+  // if a component has been composed.
   if (
     isFirstPass &&
     ts.isCallExpression(node) &&
@@ -200,11 +237,16 @@ function visitNode(
     if (ts.isIdentifier(parentComponent)) {
       const symbol = typeChecker.getSymbolAtLocation(parentComponent);
       if (symbol) {
-        staticStyledComponents.extendedComponentSymbols.push(symbol);
+        staticStyledComponents.composedComponentSymbols.push(symbol);
       }
     }
   }
 
+  // This is where we either collect or replace/transform a styled component declaration
+  // like this:
+  // const Styled = styled.div({color: 'red'});
+  // or:
+  // const Styled = styled(TheParent, {color: 'red'});
   if (
     ts.isVariableStatement(node) &&
     (!node.modifiers || !node.modifiers.find(m => m.kind == ts.SyntaxKind.ExportKeyword))
@@ -235,6 +277,8 @@ function visitNode(
               const elementName = callExpr.expression.name.escapedText.toString();
               const styleObject = callExpr.arguments[0];
               if (callExpr.arguments.length === 1 && !!styleObject && ts.isObjectLiteralExpression(styleObject)) {
+                // We now know that: node == `const [variable name] = styled.[element name]({[css rules]})`
+
                 const cssData = getCssData(styleObject, program, node);
                 if (isEvaluableStyle(cssData)) {
                   const component = {
@@ -271,6 +315,7 @@ function visitNode(
             const styleObject = callExpr.arguments[1];
 
             if (ts.isIdentifier(parentStyledComponent) && ts.isObjectLiteralExpression(styleObject)) {
+              // We now know that: node == `const [variable name] = styled([component to compose], {[css rules]})`
               const parentSymbol = typeChecker.getSymbolAtLocation(parentStyledComponent)!;
               const parent = staticStyledComponents.symbolToComponent.get(parentSymbol);
               if (parent) {
@@ -350,6 +395,11 @@ function visitNode(
     }
   }
 
+  // On the second and third passes we look for JSX tags to actually
+  // replace. We _could_ look for these even if the first pass and
+  // replace JSX uses where the component has been defined before
+  // it's used in JSX (which is uncommon) but since we either way
+  // need to make multiple passes we skip JSX on the first.
   if (!isFirstPass) {
     if (
       ts.isJsxSelfClosingElement(node) &&
@@ -357,10 +407,12 @@ function visitNode(
       ts.isIdentifier(node.tagName.expression) &&
       node.tagName.expression.escapedText.toString() === styledName
     ) {
+      // We now know that: node == `<styled.[element name] />`
       if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
         const elementName = node.tagName.name.escapedText.toString().toLowerCase();
         const cssData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
         if (cssData) {
+          // Everything is static, replace `<styled.[element name] />` with `<[element name] className="[classes]" />`
           const jsxElement = ts.createJsxSelfClosingElement(
             ts.createIdentifier(elementName),
             undefined,
@@ -387,10 +439,12 @@ function visitNode(
         ts.isIdentifier(openingElement.tagName.expression) &&
         openingElement.tagName.expression.escapedText.toString() === styledName
       ) {
+        // We now know that: node == `<styled.[element name]>[zero or more children]</styled.[element name]>`
         if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
           const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
           const cssData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
           if (cssData) {
+            // Everything is static, replace `<[element name] className="[classes]">[zero or more children]</[element name]>`
             const jsxOpeningElement = ts.createJsxOpeningElement(
               ts.createIdentifier(elementName),
               undefined,
@@ -423,6 +477,9 @@ function visitNode(
           staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
           !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
         ) {
+          // We now know that: node == `<[styled component name] [zero or more props]>[zero or more children]</[styled component name]>`
+          // and we also know that the JSX points to a component that is 100% static
+          // and is not referenced outside of JSX.
           if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
             const cssPropData = getCssDataFromCssProp(openingElement, program, allShouldBeStatic, diagnosticsReporter);
             const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
@@ -432,6 +489,7 @@ function visitNode(
               styles.push(cssPropData);
             }
 
+            // Everything is static, replace with `<[element name] className="[classes]" [zero or more props]>[zero or more children]</[element name]>`
             const jsxOpeningElement = ts.createJsxOpeningElement(
               ts.createIdentifier(styledComponent.elementName),
               undefined,
@@ -466,6 +524,9 @@ function visitNode(
       staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
       !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
     ) {
+      // We now know that: node == `<[styled component name] [zero or more props] />`
+      // and we also know that the JSX points to a component that is 100% static
+      // and is not referenced outside of JSX.
       if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
         const cssPropData = getCssDataFromCssProp(node, program, allShouldBeStatic, diagnosticsReporter);
         const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
@@ -475,6 +536,7 @@ function visitNode(
           styles.push(cssPropData);
         }
 
+        // Everything is static, replace with `<[element name] className="[classes]" [zero or more props] />`
         const jsxElement = ts.createJsxSelfClosingElement(
           ts.createIdentifier(styledComponent.elementName),
           undefined,
@@ -494,6 +556,9 @@ function visitNode(
   return node;
 }
 
+// For any node inside a component, traverse up until we find a component declaration
+// and return the symbol for it. Used to detect if JSX is inside a component that has been
+// composed.
 function getComponentSymbol(node: ts.Node, typeChecker: ts.TypeChecker): ts.Symbol | undefined {
   if (!node || ts.isSourceFile(node)) {
     return undefined;
@@ -507,6 +572,44 @@ function getComponentSymbol(node: ts.Node, typeChecker: ts.TypeChecker): ts.Symb
   return getComponentSymbol(node.parent, typeChecker);
 }
 
+// Detects if the node is inside a component that is declared inline inside a call to styled, such as:
+// const Styled = styled((props) => <styled.Div css={{ color: 'red' }}, { color: 'blue' })
+// Used to bail on top level static css inside such components.
+function isInsideInlineStyledComponent(node: ts.Node) {
+  let func: ts.ArrowFunction | ts.FunctionExpression | undefined = undefined;
+  while (true) {
+    if (ts.isArrowFunction(node)) {
+      func = node;
+    }
+    if (ts.isFunctionExpression(node)) {
+      func = node;
+    }
+    node = node.parent;
+    if (!node || ts.isSourceFile(node)) {
+      break;
+    }
+  }
+  if (!func) {
+    return false;
+  }
+  if (
+    ts.isCallExpression(func.parent) &&
+    ts.isIdentifier(func.parent.expression) &&
+    func.parent.expression.text === styledName
+  ) {
+    return true;
+  }
+  return false;
+}
+
+// Used to removed declarations of components that is guaranteed to be static and no longer referenced.
+// A smart minifier could probably detect that the variable is no longer used but it can't be certain
+// that a call to `styled(...)` doesn't have any side effects so it would remove the variable but keep
+// the call to `styled(...)`, transforming this:
+// const Styled = styled(...);
+// to:
+// styled(...);
+// which isn't good enough for us.
 function replaceComponentDeclarationNode(
   componentSymbol: ts.Symbol,
   componentName: string,
@@ -546,25 +649,30 @@ function replaceComponentDeclarationNode(
   return node;
 }
 
+// If a top level JSX element (that is, the top element returned) in a component
+// has been composed we need to bail because Glitz needs the runtime component
+// in order to do composition safely.
 function isTopLevelJsxInComposedComponent(
   node: ts.Node,
   typeChecker: ts.TypeChecker,
   staticStyledComponents: StaticStyledComponents,
 ) {
-  while (ts.isParenthesizedExpression(node)) {
-    node = node.parent;
+  let parent = node.parent;
+  while (ts.isParenthesizedExpression(parent)) {
+    parent = parent.parent;
   }
   const containingComponentSymbol = getComponentSymbol(node, typeChecker);
+
+  if (!ts.isReturnStatement(parent) && !ts.isArrowFunction(parent)) {
+    return false;
+  }
+
   if (
-    containingComponentSymbol &&
-    staticStyledComponents.extendedComponentSymbols.indexOf(containingComponentSymbol) !== -1
+    (containingComponentSymbol &&
+      staticStyledComponents.composedComponentSymbols.indexOf(containingComponentSymbol) !== -1) ||
+    isInsideInlineStyledComponent(node)
   ) {
-    if (ts.isReturnStatement(node.parent)) {
-      return true;
-    }
-    if (ts.isArrowFunction(node.parent)) {
-      return true;
-    }
+    return true;
   }
   return false;
 }
@@ -574,7 +682,7 @@ function reportTopLevelJsxInComposedComponent(node: ts.Node, diagnosticsReporter
   diagnosticsReporter &&
     diagnosticsReporter({
       message:
-        'styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+        'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
       file: sourceFile.fileName,
       line: sourceFile.getLineAndCharacterOfPosition(node.pos).line,
       severity: 'info',
@@ -582,6 +690,9 @@ function reportTopLevelJsxInComposedComponent(node: ts.Node, diagnosticsReporter
     });
 }
 
+// A statement is basically a node that is on its own line, and we sometimes want to traverse up and find the
+// node for the whole line because it makes more sense in an error/info message to see a full line than just
+// an expression that's part of a line.
 function getStatement(node: ts.Node): ts.Node {
   if (!node.parent) {
     return node;
@@ -595,6 +706,8 @@ function getStatement(node: ts.Node): ts.Node {
   return getStatement(node.parent);
 }
 
+// Used to detect if the use of an identifier to a styled component is "safe" from
+// a static perspective, or if the use should trigger bailing on extraction.
 function isStaticComponentVariableUse(node: ts.Node) {
   const parent = node.parent;
   if (parent) {
