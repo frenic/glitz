@@ -802,39 +802,38 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
-// This is skipped because we don't want to inline color:red inside MyComponent, simply
-// because MyComponent can be used in other places where it shouldn't have color:red.
-// We could of course detect that it's only composed once and only used in the composition
-// and inject color:red then, but that's hardly a real-world use case and it'll cause
-// the transformer to be slower than needed for an uncommon scenario.
-test.skip('composes to first styled component in custom component', () => {
+test.only('supports passing styles without element name to styled()', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
+const List = styled.ul({
+    color: 'red',
+});
 
-function MyComponent(props: {}) {
-    return (
-      <div>
-        <styled.Div>
-          <styled.Div css={{ backgroundColor: 'green' }} />
-        </styled.Div>
-      </div>
-    );
-}
+const listStyled = styled({
+    listStyle: 'square',
+});
 
-const Styled = styled(MyComponent, { color: 'red' });
+const ImportantList = listStyled(List, {
+    fontWeight: 'bold',
+});
+
+const node = <ImportantList />;
 `,
   };
 
   const expected = {
     'file1.jsx': `
 import { styled } from '@glitz/react';
-
-function MyComponent(props) {
-    return (<div><div className="a"><div className="b"/></div></div>);
-}
+const List = styled.ul({
+    color: 'red',
+});
+const listStyled = styled({
+    listStyle: 'square',
+});
+const node = <ul className="a b c"/>;
 `,
-    'style.css': `.a{color:red}.b{background-color:green}`,
+    'style.css': `.a{list-style:square}.b{color:red}.c{font-weight:bold}`,
   };
 
   expectEqual(expected, compile(code));
@@ -856,32 +855,6 @@ import { styled } from '@glitz/react';
 const MyComponent = styled((props) => {
     return <styled.Div css={{ backgroundColor: 'green' }}/>;
 }, { color: 'red' });
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
-});
-
-// Since everything is static here, I think this example should not bail
-// If either StyledParent or Styled here was not 100% static it would
-// not transform the last line either.
-test.skip('bails when css prop is used outside', () => {
-  const code = {
-    'file1.tsx': `
-import { styled } from '@glitz/react';
-const StyledParent = styled.div({ backgroundColor: 'green' });
-const Styled = styled(StyledParent, { color: 'red' });
-const node = <Styled css={{ borderBottomColor: 'blue' }}/>;
-`,
-  };
-
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-const StyledParent = styled.div({ backgroundColor: 'green' });
-const Styled = styled(StyledParent, { color: 'red' });
-const node = <Styled css={{ borderBottomColor: 'blue' }}/>;
 `,
     'style.css': ``,
   };
