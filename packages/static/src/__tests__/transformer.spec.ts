@@ -8,10 +8,11 @@ function MyComponent(props: {}) {
     return <Styled id="some-id">hello</Styled>;
 }
 
-const Styled = styled.div({
-    width: '100%',
-    height: '100%'
-});
+const styleObject = {
+  width: '100%',
+  height: '100%'
+};
+const Styled = styled.div(styleObject);
 `,
   };
 
@@ -21,6 +22,10 @@ const Styled = styled.div({
       function MyComponent(props) {
           return <div id=\\"some-id\\" className=\\"a b\\">hello</div>;
       }
+      const styleObject = {
+          width: '100%',
+          height: '100%'
+      };
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{height:100%}"`);
