@@ -839,6 +839,43 @@ const node = <ul className="a b c"/>;
   expectEqual(expected, compile(code));
 });
 
+test('can import a styled component', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+export const List = styled.ul({
+    color: 'red',
+});
+`,
+    'file2.tsx': `
+import { List } from './file1';
+const node = <List />;
+`,
+    'file3.tsx': `
+import { List as MyList } from './file1';
+const node = <MyList />;
+`,
+  };
+
+  const expected = {
+    'file1.jsx': `
+import { styled } from '@glitz/react';
+export const List = styled.ul({
+    color: 'red',
+});
+`,
+    'file2.jsx': `
+const node = <ul className="a"/>;
+`,
+    'file3.jsx': `
+const node = <ul className="a"/>;
+`,
+    'style.css': `.a{color:red}`,
+  };
+
+  expectEqual(expected, compile(code));
+});
+
 test('bails on inline custom component', () => {
   const code = {
     'file1.tsx': `

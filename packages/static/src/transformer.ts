@@ -221,6 +221,48 @@ function visitNode(
     }
   }
 
+  // This evaluates imported styled components
+  if (ts.isImportSpecifier(node) && isFirstPass) {
+    const symbol = typeChecker.getSymbolAtLocation(node.name);
+    if (symbol) {
+      const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program, {});
+      if (isStaticComponent(potentialStyledComponent)) {
+        const component: StaticStyledComponent = {
+          componentName: node.name.text,
+          elementName: potentialStyledComponent.elementName,
+          styles: potentialStyledComponent.styles,
+        };
+        staticStyledComponents.symbolToComponent.set(symbol, component);
+        return node;
+      }
+    }
+  }
+
+  if (
+    ts.isImportDeclaration(node) &&
+    node.importClause &&
+    node.importClause.namedBindings &&
+    ts.isNamedImports(node.importClause.namedBindings) &&
+    !isFirstPass
+  ) {
+    let importedStaticComponents = 0;
+    for (const element of node.importClause.namedBindings.elements) {
+      const symbol = typeChecker.getSymbolAtLocation(element.name);
+      if (
+        symbol &&
+        staticStyledComponents.symbolToComponent.has(symbol) &&
+        !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(symbol)
+      ) {
+        importedStaticComponents++;
+      }
+    }
+
+    if (importedStaticComponents === node.importClause.namedBindings.elements.length) {
+      return undefined;
+    }
+    return node;
+  }
+
   // This collects all compositions of components, that is, calls like this:
   // const Derived = styled(TheComponentToCollect, {color: 'red'});
   //
@@ -828,6 +870,9 @@ function isStaticComponentVariableUse(node: ts.Node) {
       return true;
     }
     if (ts.isJsxOpeningElement(parent)) {
+      return true;
+    }
+    if (ts.isImportSpecifier(parent)) {
       return true;
     }
     if (ts.isJsxClosingElement(parent)) {
