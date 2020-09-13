@@ -692,12 +692,12 @@ const DeepStyled = styled.div({
   expectEqual(expected, compile(code));
 });
 
-test('bails on inline styles inside extended components', () => {
+test('bails on top level inline styles inside extended components', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
 function StyledWrapper(props: {}) {
-    return <styled.Div css={{ backgroundColor: 'green' }} />;
+    return <styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>;
 }
 const Styled = styled(StyledWrapper, { color: 'red' });
 function MyComponent(props: {}) {
@@ -710,24 +710,25 @@ function MyComponent(props: {}) {
     'file1.jsx': `
 import { styled } from '@glitz/react';
 function StyledWrapper(props) {
-    return <styled.Div css={{ backgroundColor: 'green' }}/>;
+    return <styled.Div css={{ backgroundColor: 'green' }}><div className="a"/></styled.Div>;
 }
 const Styled = styled(StyledWrapper, { color: 'red' });
 function MyComponent(props) {
     return <StyledWrapper />;
 }
 `,
-    'style.css': ``,
+    'style.css': `.a{background-color:red}`,
   };
 
   expectEqual(expected, compile(code), [
     {
       message:
-        'styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+        'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
       file: 'file1.tsx',
       line: 3,
       severity: 'info',
-      source: "<styled.Div css={{ backgroundColor: 'green' }} />",
+      source:
+        "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
     },
   ]);
 });
@@ -760,7 +761,12 @@ function MyComponent(props) {
   expectEqual(expected, compile(code));
 });
 
-test('composes to first styled component in custom component', () => {
+// This is skipped because we don't want to inline color:red inside MyComponent, simply
+// because MyComponent can be used in other places where it shouldn't have color:red.
+// We could of course detect that it's only composed once and only used in the composition
+// and inject color:red then, but that's hardly a real-world use case and it'll cause
+// the transformer to be slower than needed for an uncommon scenario.
+test.skip('composes to first styled component in custom component', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
@@ -797,60 +803,44 @@ test('can extract inline custom component', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
-
-const MyComponent = styled(
-    (props: {}) => {
-        return (
-            <styled.Div css={{ backgroundColor: 'green' }} />
-        );
-    },
-    { color: 'red' }
-);
+const MyComponent = styled((props: {}) => {
+    return <styled.Div css={{ backgroundColor: 'green' }}/>;
+}, { color: 'red' });
 `,
   };
 
   const expected = {
     'file1.jsx': `
 import { styled } from '@glitz/react';
-
-const MyComponent = (props) => {
-    return (<div className="a b" />);
-}
+const MyComponent = styled((props) => {
+    return <styled.Div css={{ backgroundColor: 'green' }}/>;
+}, { color: 'red' });
 `,
-    'style.css': `.a{color:red}.b{background-color:green}}`,
+    'style.css': ``,
   };
 
   expectEqual(expected, compile(code));
 });
 
-test('bails when css prop is used outside', () => {
+// Since everything is static here, I think this example should not bail
+// If either StyledParent or Styled here was not 100% static it would
+// not transform the last line either.
+test.skip('bails when css prop is used outside', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
-
-function MyComponent(props: {}) {
-    return (
-        <styled.Div css={{ backgroundColor: 'green' }} />
-    );
-}
-
-const Styled = styled(MyComponent, { color: 'red' });
-
-const node = <MyComponent css={{ borderBottomColor: 'blue' }} />
+const StyledParent = styled.div({ backgroundColor: 'green' });
+const Styled = styled(StyledParent, { color: 'red' });
+const node = <Styled css={{ borderBottomColor: 'blue' }}/>;
 `,
   };
 
   const expected = {
     'file1.jsx': `
 import { styled } from '@glitz/react';
-
-function MyComponent(props) {
-    return (<styled.Div css={{ backgroundColor: 'green' }} />);
-}
-
-const Styled = styled(MyComponent, { color: 'red' });
-
-const node = <Styled css={{ borderBottomColor: 'blue' }} />
+const StyledParent = styled.div({ backgroundColor: 'green' });
+const Styled = styled(StyledParent, { color: 'red' });
+const node = <Styled css={{ borderBottomColor: 'blue' }}/>;
 `,
     'style.css': ``,
   };
