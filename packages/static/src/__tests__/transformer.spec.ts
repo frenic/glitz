@@ -15,17 +15,16 @@ const Styled = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div id="some-id" className="a b">hello</div>;
-}
-`,
-    'style.css': `.a{width:100%}.b{height:100%}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div id=\\"some-id\\" className=\\"a b\\">hello</div>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{height:100%}"`);
+  });
 });
 
 test('bails if it finds a comment that it should skip', () => {
@@ -44,22 +43,21 @@ const Styled = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <Styled id="some-id">hello</Styled>;
-}
-/** @glitz-dynamic */
-const Styled = styled.div({
-    width: '100%',
-    height: '100%'
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <Styled id=\\"some-id\\">hello</Styled>;
+      }
+      /** @glitz-dynamic */
+      const Styled = styled.div({
+          width: '100%',
+          height: '100%'
+      });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
 });
 
 test('bails all if it finds a comment that it should skip', () => {
@@ -83,26 +81,25 @@ const Styled2 = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-/** @glitz-all-dynamic */
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <Styled1 id="some-id"><Styled2 /></Styled1>;
-}
-const Styled1 = styled.div({
-    width: '100%',
-    height: '100%'
-});
-const Styled2 = styled.div({
-    width: '100%',
-    height: '100%'
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "/** @glitz-all-dynamic */
+      import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <Styled1 id=\\"some-id\\"><Styled2 /></Styled1>;
+      }
+      const Styled1 = styled.div({
+          width: '100%',
+          height: '100%'
+      });
+      const Styled2 = styled.div({
+          width: '100%',
+          height: '100%'
+      });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
 });
 
 test('warns when a component cannot be extracted but a comment says it should', () => {
@@ -121,40 +118,43 @@ const Styled = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <Styled id="some-id">hello</Styled>;
-}
-/** @glitz-static */
-const Styled = styled.div({
-    width: window.theWidth,
-    height: '100%'
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code), [
-    {
-      message: 'Component marked with @glitz-static could not be statically evaluated',
-      severity: 'error',
-      file: 'file1.tsx',
-      line: 4,
-      source: `const Styled = styled.div({
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            return <Styled id=\\"some-id\\">hello</Styled>;
+        }
+        /** @glitz-static */
+        const Styled = styled.div({
+            width: window.theWidth,
+            height: '100%'
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    },
+    [
+      {
+        message: 'Component marked with @glitz-static could not be statically evaluated',
+        severity: 'error',
+        file: 'file1.tsx',
+        line: 4,
+        source: `const Styled = styled.div({
     width: (window as any).theWidth,
     height: '100%'
 });`,
-      innerDiagnostic: {
-        file: 'file1.tsx',
-        line: 8,
-        message: "Unable to resolve identifier 'window'",
-        severity: 'error',
-        source: 'window',
+        innerDiagnostic: {
+          file: 'file1.tsx',
+          line: 8,
+          message: "Unable to resolve identifier 'window'",
+          severity: 'error',
+          source: 'window',
+        },
       },
-    },
-  ]);
+    ],
+  );
 });
 
 test('adds info diagnostics when it cannot evaluate', () => {
@@ -172,39 +172,42 @@ const Styled = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <Styled id="some-id">hello</Styled>;
-}
-const Styled = styled.div({
-    width: (theme) => theme.theWidth,
-    height: '100%'
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code), [
-    {
-      message: 'Styled component could not be statically evaluated',
-      severity: 'info',
-      file: 'file1.tsx',
-      line: 4,
-      source: `const Styled = styled.div({
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            return <Styled id=\\"some-id\\">hello</Styled>;
+        }
+        const Styled = styled.div({
+            width: (theme) => theme.theWidth,
+            height: '100%'
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    },
+    [
+      {
+        message: 'Styled component could not be statically evaluated',
+        severity: 'info',
+        file: 'file1.tsx',
+        line: 4,
+        source: `const Styled = styled.div({
     width: (theme) => theme.theWidth,
     height: '100%'
 });`,
-      innerDiagnostic: {
-        file: 'file1.tsx',
-        line: 7,
-        message: 'Functions in style objects requires runtime',
-        severity: 'info',
-        source: '(theme) => theme.theWidth',
+        innerDiagnostic: {
+          file: 'file1.tsx',
+          line: 7,
+          message: 'Functions in style objects requires runtime',
+          severity: 'info',
+          source: '(theme) => theme.theWidth',
+        },
       },
-    },
-  ]);
+    ],
+  );
 });
 
 test('warns when a component cannot be extracted but a comment says all should', () => {
@@ -228,61 +231,64 @@ const Styled2 = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-/** @glitz-all-static */
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <Styled1 id="some-id"><Styled2 /></Styled1>;
-}
-const Styled1 = styled.div({
-    width: window.theWidth,
-    height: '100%'
-});
-const Styled2 = styled.div({
-    width: '100%',
-    height: window.theHeight
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code), [
-    {
-      message: 'Component marked with @glitz-static could not be statically evaluated',
-      severity: 'error',
-      file: 'file1.tsx',
-      line: 5,
-      source: `const Styled1 = styled.div({
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "/** @glitz-all-static */
+        import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            return <Styled1 id=\\"some-id\\"><Styled2 /></Styled1>;
+        }
+        const Styled1 = styled.div({
+            width: window.theWidth,
+            height: '100%'
+        });
+        const Styled2 = styled.div({
+            width: '100%',
+            height: window.theHeight
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    },
+    [
+      {
+        message: 'Component marked with @glitz-static could not be statically evaluated',
+        severity: 'error',
+        file: 'file1.tsx',
+        line: 5,
+        source: `const Styled1 = styled.div({
     width: (window as any).theWidth,
     height: '100%'
 });`,
-      innerDiagnostic: {
-        file: 'file1.tsx',
-        line: 8,
-        message: "Unable to resolve identifier 'window'",
-        severity: 'error',
-        source: 'window',
+        innerDiagnostic: {
+          file: 'file1.tsx',
+          line: 8,
+          message: "Unable to resolve identifier 'window'",
+          severity: 'error',
+          source: 'window',
+        },
       },
-    },
-    {
-      message: 'Component marked with @glitz-static could not be statically evaluated',
-      severity: 'error',
-      file: 'file1.tsx',
-      line: 10,
-      source: `const Styled2 = styled.div({
+      {
+        message: 'Component marked with @glitz-static could not be statically evaluated',
+        severity: 'error',
+        file: 'file1.tsx',
+        line: 10,
+        source: `const Styled2 = styled.div({
     width: '100%',
     height: (window as any).theHeight
 });`,
-      innerDiagnostic: {
-        file: 'file1.tsx',
-        line: 14,
-        message: "Unable to resolve identifier 'window'",
-        severity: 'error',
-        source: 'window',
+        innerDiagnostic: {
+          file: 'file1.tsx',
+          line: 14,
+          message: "Unable to resolve identifier 'window'",
+          severity: 'error',
+          source: 'window',
+        },
       },
-    },
-  ]);
+    ],
+  );
 });
 
 test('can extract derived component', () => {
@@ -304,17 +310,16 @@ const DerivedStyled = styled(Styled, {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div onClick={() => alert('woah!')} className="a b c">hello</div>;
-}
-`,
-    'style.css': `.a{width:100%}.b{height:100%}.c{background-color:black}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div onClick={() => alert('woah!')} className=\\"a b c\\">hello</div>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{height:100%}.c{background-color:black}"`);
+  });
 });
 
 test('correctly handles media queries', () => {
@@ -345,26 +350,27 @@ function smallScreen() {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <><div className="a b c d e">hello</div><div className="f g"/></>;
-}
-function createCompactStyled(compactStyle, style) {
-    return styled(compactStyle)({ '@media (min-width: 768px)': style });
-}
-function largeScreen() {
-    return '@media (min-width: 768px)';
-}
-function smallScreen() {
-    return '@media (max-width: 768px)';
-}
-`,
-    'style.css': `.e{background:#000}.f{margin:10px}@media (min-width: 768px){.a{width:50%}.b{height:50%}.g{margin:20px}}@media (max-width: 768px){.c{width:100%}.d{height:100%}}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <><div className=\\"a b c d e\\">hello</div><div className=\\"f g\\"/></>;
+      }
+      function createCompactStyled(compactStyle, style) {
+          return styled(compactStyle)({ '@media (min-width: 768px)': style });
+      }
+      function largeScreen() {
+          return '@media (min-width: 768px)';
+      }
+      function smallScreen() {
+          return '@media (max-width: 768px)';
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".e{background:#000}.f{margin:10px}@media (min-width: 768px){.a{width:50%}.b{height:50%}.g{margin:20px}}@media (max-width: 768px){.c{width:100%}.d{height:100%}}"`,
+    );
+  });
 });
 
 test('can use an inline component', () => {
@@ -377,17 +383,16 @@ function MyComponent(props: {}) {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div className="a">hello</div>;
-}
-`,
-    'style.css': `.a{background-color:black}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div className=\\"a\\">hello</div>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}"`);
+  });
 });
 
 test('components can have the same name in different files', () => {
@@ -414,23 +419,23 @@ const Styled = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div className="a">hello1</div>;
-}
-`,
-    'file2.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div className="b">hello2</div>;
-}
-`,
-    'style.css': `.a{background-color:black}.b{background-color:red}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div className=\\"a\\">hello1</div>;
+      }
+      "
+    `);
+    expect(result['file2.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div className=\\"b\\">hello2</div>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}.b{background-color:red}"`);
+  });
 });
 
 test('components can have the same name in the same file', () => {
@@ -452,20 +457,19 @@ function MyComponent2(props: {}) {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent1(props) {
-    return <div className="a">hello1</div>;
-}
-function MyComponent2(props) {
-    return <div className="b">hello2</div>;
-}
-`,
-    'style.css': `.a{background-color:black}.b{background-color:red}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent1(props) {
+          return <div className=\\"a\\">hello1</div>;
+      }
+      function MyComponent2(props) {
+          return <div className=\\"b\\">hello2</div>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}.b{background-color:red}"`);
+  });
 });
 
 test('can use variables in style object', () => {
@@ -479,18 +483,17 @@ function MyComponent(props: {}) {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-const size = '100' + '%';
-function MyComponent(props) {
-    return <div className="a">hello</div>;
-}
-`,
-    'style.css': `.a{height:100%}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const size = '100' + '%';
+      function MyComponent(props) {
+          return <div className=\\"a\\">hello</div>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
+  });
 });
 
 test('can use css prop on declared styled components', () => {
@@ -507,17 +510,16 @@ const Styled1 = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div id="my-id" className="a b"/>;
-}
-`,
-    'style.css': `.a{height:100%}.b{width:100%}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div id=\\"my-id\\" className=\\"a b\\"/>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
+  });
 });
 
 test('it bails if a declared component is used outside of JSX', () => {
@@ -546,52 +548,55 @@ const Styled4 = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    const X = <Styled3 />;
-    window.exposeComponent = { x: Styled1, y: Styled3 };
-    return <><Styled1 id="my-id" css={{ width: '100%' }}/><Styled2 /><X /><div className="b"/></>;
-}
-const Styled1 = styled.div({
-    height: '100%',
-});
-/** @glitz-static */
-const Styled2 = styled.div({
-    height: '75%',
-});
-Styled2.displayName = 'Styled2';
-const Styled3 = styled.div({
-    height: '50%',
-});
-`,
-    'style.css': `.a{height:50%}.b{height:25%}`,
-  };
-
-  expectEqual(expected, compile(code), [
-    {
-      file: 'file1.tsx',
-      message: "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
-      source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
-      severity: 'info',
-      line: 4,
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            const X = <Styled3 />;
+            window.exposeComponent = { x: Styled1, y: Styled3 };
+            return <><Styled1 id=\\"my-id\\" css={{ width: '100%' }}/><Styled2 /><X /><div className=\\"b\\"/></>;
+        }
+        const Styled1 = styled.div({
+            height: '100%',
+        });
+        /** @glitz-static */
+        const Styled2 = styled.div({
+            height: '75%',
+        });
+        Styled2.displayName = 'Styled2';
+        const Styled3 = styled.div({
+            height: '50%',
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:50%}.b{height:25%}"`);
     },
-    {
-      file: 'file1.tsx',
-      message: "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
-      source: "Styled2.displayName = 'Styled2';",
-      severity: 'error',
-      line: 13,
-    },
-    {
-      file: 'file1.tsx',
-      message: "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
-      source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
-      severity: 'info',
-      line: 4,
-    },
-  ]);
+    [
+      {
+        file: 'file1.tsx',
+        message: "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
+        source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
+        severity: 'info',
+        line: 4,
+      },
+      {
+        file: 'file1.tsx',
+        message: "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
+        source: "Styled2.displayName = 'Styled2';",
+        severity: 'error',
+        line: 13,
+      },
+      {
+        file: 'file1.tsx',
+        message: "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
+        source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
+        severity: 'info',
+        line: 4,
+      },
+    ],
+  );
 });
 
 test('it bails when it finds a variable that can not be statically evaluated', () => {
@@ -613,24 +618,23 @@ const DerivedStyled = styled(Styled, {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <styled.Div css={{ height: window.innerHeight }}><DerivedStyled /></styled.Div>;
-}
-const Styled = styled.div({
-    width: '100%',
-    height: window.innerHeight + 'px',
-});
-const DerivedStyled = styled(Styled, {
-    backgroundColor: 'black',
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <styled.Div css={{ height: window.innerHeight }}><DerivedStyled /></styled.Div>;
+      }
+      const Styled = styled.div({
+          width: '100%',
+          height: window.innerHeight + 'px',
+      });
+      const DerivedStyled = styled(Styled, {
+          backgroundColor: 'black',
+      });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
 });
 
 test('it bails when it finds a function that can not be statically evaluated', () => {
@@ -664,32 +668,31 @@ const DeepStyled = styled.div({
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return (<>
-            <styled.Div css={{ color: (theme) => theme.color }}/>
-            <DerivedStyled />
-            <DeepStyled />
-        </>);
-}
-const Styled = styled.div({
-    color: (theme) => theme.color,
-});
-const DerivedStyled = styled(Styled, {
-    backgroundColor: 'black',
-});
-const DeepStyled = styled.div({
-    ':hover': {
-        color: (theme) => theme.color,
-    },
-});
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return (<>
+                  <styled.Div css={{ color: (theme) => theme.color }}/>
+                  <DerivedStyled />
+                  <DeepStyled />
+              </>);
+      }
+      const Styled = styled.div({
+          color: (theme) => theme.color,
+      });
+      const DerivedStyled = styled(Styled, {
+          backgroundColor: 'black',
+      });
+      const DeepStyled = styled.div({
+          ':hover': {
+              color: (theme) => theme.color,
+          },
+      });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
 });
 
 test('bails on top level inline styles inside extended components', () => {
@@ -706,31 +709,34 @@ function MyComponent(props: {}) {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function StyledWrapper(props) {
-    return <styled.Div css={{ backgroundColor: 'green' }}><div className="a"/></styled.Div>;
-}
-const Styled = styled(StyledWrapper, { color: 'red' });
-function MyComponent(props) {
-    return <StyledWrapper />;
-}
-`,
-    'style.css': `.a{background-color:red}`,
-  };
-
-  expectEqual(expected, compile(code), [
-    {
-      message:
-        'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
-      file: 'file1.tsx',
-      line: 3,
-      severity: 'info',
-      source:
-        "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function StyledWrapper(props) {
+            return <styled.Div css={{ backgroundColor: 'green' }}><div className=\\"a\\"/></styled.Div>;
+        }
+        const Styled = styled(StyledWrapper, { color: 'red' });
+        function MyComponent(props) {
+            return <StyledWrapper />;
+        }
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
     },
-  ]);
+    [
+      {
+        message:
+          'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+        file: 'file1.tsx',
+        line: 3,
+        severity: 'info',
+        source:
+          "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+      },
+    ],
+  );
 });
 
 test('bails on second level inline styles inside extended components as long as top level is simple elements', () => {
@@ -747,31 +753,34 @@ function MyComponent(props: {}) {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function StyledWrapper(props) {
-    return <div><styled.Div css={{ backgroundColor: 'green' }}><div className="a"/></styled.Div></div>;
-}
-const Styled = styled(StyledWrapper, { color: 'red' });
-function MyComponent(props) {
-    return <StyledWrapper />;
-}
-`,
-    'style.css': `.a{background-color:red}`,
-  };
-
-  expectEqual(expected, compile(code), [
-    {
-      message:
-        'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
-      file: 'file1.tsx',
-      line: 3,
-      severity: 'info',
-      source:
-        "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function StyledWrapper(props) {
+            return <div><styled.Div css={{ backgroundColor: 'green' }}><div className=\\"a\\"/></styled.Div></div>;
+        }
+        const Styled = styled(StyledWrapper, { color: 'red' });
+        function MyComponent(props) {
+            return <StyledWrapper />;
+        }
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
     },
-  ]);
+    [
+      {
+        message:
+          'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
+        file: 'file1.tsx',
+        line: 3,
+        severity: 'info',
+        source:
+          "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+      },
+    ],
+  );
 });
 
 test('can extract advanced custom component', () => {
@@ -789,17 +798,18 @@ function MyComponent(props: {}) {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-function MyComponent(props) {
-    return <div className="a b c"/>;
-}
-`,
-    'style.css': `.a{background-color:green}.b{color:red}.c{border-bottom-color:blue}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function MyComponent(props) {
+          return <div className=\\"a b c\\"/>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".a{background-color:green}.b{color:red}.c{border-bottom-color:blue}"`,
+    );
+  });
 });
 
 test('supports passing styles without element name to styled()', () => {
@@ -822,21 +832,20 @@ const node = <ImportantList />;
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-const List = styled.ul({
-    color: 'red',
-});
-const listStyled = styled({
-    listStyle: 'square',
-});
-const node = <ul className="a b c"/>;
-`,
-    'style.css': `.a{color:red}.b{list-style:square}.c{font-weight:bold}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const List = styled.ul({
+          color: 'red',
+      });
+      const listStyled = styled({
+          listStyle: 'square',
+      });
+      const node = <ul className=\\"a b c\\"/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{list-style:square}.c{font-weight:bold}"`);
+  });
 });
 
 test('can import a styled component', () => {
@@ -857,23 +866,24 @@ const node = <MyList />;
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-export const List = styled.ul({
-    color: 'red',
-});
-`,
-    'file2.jsx': `
-const node = <ul className="a"/>;
-`,
-    'file3.jsx': `
-const node = <ul className="a"/>;
-`,
-    'style.css': `.a{color:red}`,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      export const List = styled.ul({
+          color: 'red',
+      });
+      "
+    `);
+    expect(result['file2.jsx']).toMatchInlineSnapshot(`
+      "const node = <ul className=\\"a\\"/>;
+      "
+    `);
+    expect(result['file3.jsx']).toMatchInlineSnapshot(`
+      "const node = <ul className=\\"a\\"/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}"`);
+  });
 });
 
 test('bails on inline custom component', () => {
@@ -886,30 +896,32 @@ const MyComponent = styled((props: {}) => {
 `,
   };
 
-  const expected = {
-    'file1.jsx': `
-import { styled } from '@glitz/react';
-const MyComponent = styled((props) => {
-    return <styled.Div css={{ backgroundColor: 'green' }}/>;
-}, { color: 'red' });
-`,
-    'style.css': ``,
-  };
-
-  expectEqual(expected, compile(code));
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const MyComponent = styled((props) => {
+          return <styled.Div css={{ backgroundColor: 'green' }}/>;
+      }, { color: 'red' });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
 });
 
 function expectEqual(
-  expected: Code,
   results: readonly [Code, TransformerDiagnostics],
+  test: (result: Code) => void,
   expectedDiagnostics: TransformerDiagnostics = [],
 ) {
   const [compiled, diagnostics] = results;
-  Object.keys(expected).forEach(fileName => {
-    expect(fileName + ':\n' + compiled[fileName].trim().replace(/\r/g, '')).toBe(
-      fileName + ':\n' + expected[fileName].trim().replace(/\r/g, ''),
-    );
-  });
+  test(
+    Object.keys(compiled).reduce<Code>((result, fileName) => {
+      if (!fileName.endsWith('fake-glitz.js')) {
+        result[fileName] = compiled[fileName];
+      }
+      return result;
+    }, {}),
+  );
   for (let i = 0; i < expectedDiagnostics.length; i++) {
     const expectedDiagnostic = expectedDiagnostics[i];
     const diagnostic = diagnostics[i];
