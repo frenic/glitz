@@ -223,7 +223,7 @@ function visitNode(
 
   // This evaluates imported styled components
   if (ts.isImportSpecifier(node) && isFirstPass) {
-    if (isComponentName(node.name.text) || node.name.text.endsWith('Decorator')) {
+    if (isComponentName(node.name.text)) {
       const symbol = typeChecker.getSymbolAtLocation(node.name);
       if (symbol) {
         const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program, {});
@@ -240,6 +240,7 @@ function visitNode(
     }
   }
 
+  // TODO: We should detect imported decorators as well and remove them
   if (
     ts.isImportDeclaration(node) &&
     node.importClause &&

@@ -855,14 +855,20 @@ import { styled } from '@glitz/react';
 export const List = styled.ul({
     color: 'red',
 });
+export const listDecorator = styled({
+    backgroundColor: 'red',
+});
 `,
     'file2.tsx': `
 import { List } from './file1';
 const node = <List />;
 `,
     'file3.tsx': `
-import { List as MyList } from './file1';
-const node = <MyList />;
+import { List as MyList, listDecorator } from './file1';
+const MyNewList = listDecorator(MyList, {
+    fontWeight: 'bold',
+});
+const node = <MyNewList />;
 `,
   };
 
@@ -872,6 +878,9 @@ const node = <MyList />;
       export const List = styled.ul({
           color: 'red',
       });
+      export const listDecorator = styled({
+          backgroundColor: 'red',
+      });
       "
     `);
     expect(result['file2.jsx']).toMatchInlineSnapshot(`
@@ -879,10 +888,11 @@ const node = <MyList />;
       "
     `);
     expect(result['file3.jsx']).toMatchInlineSnapshot(`
-      "const node = <ul className=\\"a\\"/>;
+      "import { List as MyList, listDecorator } from './file1';
+      const node = <ul className=\\"a b c\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:red}.c{font-weight:bold}"`);
   });
 });
 
