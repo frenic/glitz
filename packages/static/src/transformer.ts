@@ -429,11 +429,7 @@ function visitNode(
             // const Styled = createComponent();
             // we look at the variable name to see if it's a variable with Pascal case
             // and in that case try to evaluate it to a styled component.
-            if (
-              componentName.length > 1 &&
-              componentName[0] === componentName[0].toUpperCase() &&
-              componentName[1] === componentName[1].toLowerCase()
-            ) {
+            if (isComponentName(componentName)) {
               const object = evaluate(declaration.initializer, program, {});
               if (isStaticElement(object) || isStaticComponent(object)) {
                 if (object.styles.every(isEvaluableStyle)) {

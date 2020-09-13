@@ -522,6 +522,9 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
   if (!symbol.valueDeclaration) {
     const importSpecifier = symbol.declarations[0];
     if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {
+      if (importSpecifier.propertyName) {
+        variableName = importSpecifier.propertyName.text;
+      }
       if (importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '') === moduleName) {
         const [staticGlitzExports, staticGlitzProgram] = getStaticGlitzExports();
         if (variableName in staticGlitzExports) {
