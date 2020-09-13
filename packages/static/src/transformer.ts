@@ -223,17 +223,19 @@ function visitNode(
 
   // This evaluates imported styled components
   if (ts.isImportSpecifier(node) && isFirstPass) {
-    const symbol = typeChecker.getSymbolAtLocation(node.name);
-    if (symbol) {
-      const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program, {});
-      if (isStaticComponent(potentialStyledComponent)) {
-        const component: StaticStyledComponent = {
-          componentName: node.name.text,
-          elementName: potentialStyledComponent.elementName,
-          styles: potentialStyledComponent.styles,
-        };
-        staticStyledComponents.symbolToComponent.set(symbol, component);
-        return node;
+    if (isComponentName(node.name.text) || node.name.text.endsWith('Decorator')) {
+      const symbol = typeChecker.getSymbolAtLocation(node.name);
+      if (symbol) {
+        const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program, {});
+        if (isStaticComponent(potentialStyledComponent)) {
+          const component: StaticStyledComponent = {
+            componentName: node.name.text,
+            elementName: potentialStyledComponent.elementName,
+            styles: potentialStyledComponent.styles,
+          };
+          staticStyledComponents.symbolToComponent.set(symbol, component);
+          return node;
+        }
       }
     }
   }
@@ -432,89 +434,32 @@ function visitNode(
               componentName[0] === componentName[0].toUpperCase() &&
               componentName[1] === componentName[1].toLowerCase()
             ) {
-              let isThreewayComposition = false;
-              if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.initializer.expression)) {
-                const symbol = typeChecker.getSymbolAtLocation(declaration.initializer.expression);
-                if (
-                  symbol &&
-                  staticStyledComponents.symbolToComponent.has(symbol) &&
-                  declaration.initializer.arguments.length === 2
-                ) {
-                  isThreewayComposition = true;
-
-                  const composeComponent = staticStyledComponents.symbolToComponent.get(symbol)!;
-                  const baseComponentIdentifier = declaration.initializer.arguments[0];
-                  const styleObject = declaration.initializer.arguments[1];
-
-                  if (ts.isIdentifier(baseComponentIdentifier) && ts.isObjectLiteralExpression(styleObject)) {
-                    const baseComponentSymbol = typeChecker.getSymbolAtLocation(baseComponentIdentifier);
-                    if (baseComponentSymbol && staticStyledComponents.symbolToComponent.has(baseComponentSymbol)) {
-                      const baseComponent = staticStyledComponents.symbolToComponent.get(baseComponentSymbol)!;
-
-                      const cssData = getCssData(styleObject, program, node, baseComponent);
-                      if (cssData.every(isEvaluableStyle)) {
-                        const styles = composeComponent.styles.slice();
-                        styles.push(...(cssData as EvaluatedStyle[]));
-
-                        const component: StaticStyledComponent = {
-                          componentName,
-                          elementName: baseComponent.elementName,
-                          styles,
-                          parent: baseComponent,
-                        };
-                        staticStyledComponents.symbolToComponent.set(componentSymbol, component);
-                      } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                        if (diagnosticsReporter) {
-                          reportRequiresRuntimeResultWhenShouldBeStatic(
-                            cssData.filter(isRequiresRuntimeResult),
-                            node,
-                            diagnosticsReporter,
-                          );
-                        }
-                      } else {
-                        if (diagnosticsReporter) {
-                          reportRequiresRuntimeResult(
-                            'Styled component could not be statically evaluated',
-                            'info',
-                            cssData.filter(isRequiresRuntimeResult),
-                            node,
-                            diagnosticsReporter,
-                          );
-                        }
-                      }
-                    }
+              const object = evaluate(declaration.initializer, program, {});
+              if (isStaticElement(object) || isStaticComponent(object)) {
+                if (object.styles.every(isEvaluableStyle)) {
+                  const component = {
+                    componentName,
+                    elementName: object.elementName,
+                    styles: object.styles,
+                  };
+                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                  if (diagnosticsReporter) {
+                    reportRequiresRuntimeResultWhenShouldBeStatic(
+                      object.styles.filter(isRequiresRuntimeResult),
+                      node,
+                      diagnosticsReporter,
+                    );
                   }
-                }
-              }
-
-              if (!isThreewayComposition) {
-                const object = evaluate(declaration.initializer, program, {});
-                if (isStaticElement(object) || isStaticComponent(object)) {
-                  if (object.styles.every(isEvaluableStyle)) {
-                    const component = {
-                      componentName,
-                      elementName: object.elementName,
-                      styles: object.styles,
-                    };
-                    staticStyledComponents.symbolToComponent.set(componentSymbol, component);
-                  } else if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
-                    if (diagnosticsReporter) {
-                      reportRequiresRuntimeResultWhenShouldBeStatic(
-                        object.styles.filter(isRequiresRuntimeResult),
-                        node,
-                        diagnosticsReporter,
-                      );
-                    }
-                  } else {
-                    if (diagnosticsReporter) {
-                      reportRequiresRuntimeResult(
-                        'Styled component could not be statically evaluated',
-                        'info',
-                        object.styles.filter(isRequiresRuntimeResult),
-                        node,
-                        diagnosticsReporter,
-                      );
-                    }
+                } else {
+                  if (diagnosticsReporter) {
+                    reportRequiresRuntimeResult(
+                      'Styled component could not be statically evaluated',
+                      'info',
+                      object.styles.filter(isRequiresRuntimeResult),
+                      node,
+                      diagnosticsReporter,
+                    );
                   }
                 }
               }
@@ -1058,4 +1003,16 @@ function passThroughProps(props: ts.NodeArray<ts.JsxAttributeLike>) {
     }
     return true;
   });
+}
+
+function isComponentName(name: string) {
+  if (!name) {
+    return false;
+  }
+  const firstChar = name[0];
+  const secondChar = name[1];
+  if (firstChar === firstChar.toUpperCase() && secondChar && secondChar === secondChar.toLowerCase()) {
+    return true;
+  }
+  return false;
 }

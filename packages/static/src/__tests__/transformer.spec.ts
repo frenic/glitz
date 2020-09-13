@@ -833,7 +833,7 @@ const listStyled = styled({
 });
 const node = <ul className="a b c"/>;
 `,
-    'style.css': `.a{list-style:square}.b{color:red}.c{font-weight:bold}`,
+    'style.css': `.a{color:red}.b{list-style:square}.c{font-weight:bold}`,
   };
 
   expectEqual(expected, compile(code));
