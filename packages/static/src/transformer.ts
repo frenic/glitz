@@ -858,13 +858,17 @@ function getCssData(
   return style;
 }
 
-function anyValuesAreFunctions(style: EvaluatedStyle): boolean | FunctionWithTsNode {
+function anyValuesAreFunctions(style: EvaluatedStyle, level = 0): boolean | FunctionWithTsNode {
+  if (level > 10) {
+    console.log('Possibly infinite recursion detected in:', style);
+    return false;
+  }
   if (style && typeof style === 'object') {
     for (const key in style) {
       if (typeof style[key] === 'function') {
         return (style[key] as unknown) as FunctionWithTsNode;
       } else if (style[key] && typeof style[key] === 'object' && !Array.isArray(style[key])) {
-        const func = anyValuesAreFunctions(style[key] as EvaluatedStyle);
+        const func = anyValuesAreFunctions(style[key] as EvaluatedStyle, level + 1);
         if (func !== false) {
           return func;
         }
