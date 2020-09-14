@@ -26,6 +26,7 @@ const Styled = styled.div(styleObject);
           width: '100%',
           height: '100%'
       };
+      const Styled = /*#__PURE__*/ styled.div(styleObject);
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{height:100%}"`);
@@ -55,7 +56,7 @@ const Styled = styled.div({
           return <Styled id=\\"some-id\\">hello</Styled>;
       }
       /** @glitz-dynamic */
-      const Styled = styled.div({
+      const Styled = /*#__PURE__*/ styled.div({
           width: '100%',
           height: '100%'
       });
@@ -132,7 +133,7 @@ const Styled = styled.div({
             return <Styled id=\\"some-id\\">hello</Styled>;
         }
         /** @glitz-static */
-        const Styled = styled.div({
+        const Styled = /*#__PURE__*/ styled.div({
             width: window.theWidth,
             height: '100%'
         });
@@ -185,7 +186,7 @@ const Styled = styled.div({
         function MyComponent(props) {
             return <Styled id=\\"some-id\\">hello</Styled>;
         }
-        const Styled = styled.div({
+        const Styled = /*#__PURE__*/ styled.div({
             width: (theme) => theme.theWidth,
             height: '100%'
         });
@@ -245,11 +246,11 @@ const Styled2 = styled.div({
         function MyComponent(props) {
             return <Styled1 id=\\"some-id\\"><Styled2 /></Styled1>;
         }
-        const Styled1 = styled.div({
+        const Styled1 = /*#__PURE__*/ styled.div({
             width: window.theWidth,
             height: '100%'
         });
-        const Styled2 = styled.div({
+        const Styled2 = /*#__PURE__*/ styled.div({
             width: '100%',
             height: window.theHeight
         });
@@ -321,13 +322,20 @@ const DerivedStyled = styled(Styled, {
       function MyComponent(props) {
           return <div onClick={() => alert('woah!')} className=\\"a b c\\">hello</div>;
       }
+      const Styled = /*#__PURE__*/ styled.div({
+          width: '100%',
+          height: '100%'
+      });
+      const DerivedStyled = /*#__PURE__*/ styled(Styled, {
+          backgroundColor: 'black',
+      });
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{height:100%}.c{background-color:black}"`);
   });
 });
 
-test('correctly handles media queries', () => {
+test.only('correctly handles media queries', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
@@ -361,9 +369,15 @@ function smallScreen() {
       function MyComponent(props) {
           return <><div className=\\"c d e f a\\">hello</div><div className=\\"b g\\"/></>;
       }
+      const Styled = /*#__PURE__*/ styled.div({
+          [largeScreen()]: { width: '50%', height: '50%' },
+          [smallScreen()]: { width: '100%', height: '100%' },
+          background: '#000',
+      });
       function createCompactStyled(compactStyle, style) {
-          return styled(compactStyle)({ '@media (min-width: 768px)': style });
+          return /*#__PURE__*/ styled(compactStyle)({ '@media (min-width: 768px)': style });
       }
+      const MediaComp = /*#__PURE__*/ createCompactStyled({ margin: '10px' }, { margin: '20px' })(styled.Div);
       function largeScreen() {
           return '@media (min-width: 768px)';
       }
@@ -430,6 +444,9 @@ const Styled = styled.div({
       function MyComponent(props) {
           return <div className=\\"a\\">hello1</div>;
       }
+      const Styled = /*#__PURE__*/ styled.div({
+          backgroundColor: 'black',
+      });
       "
     `);
     expect(result['file2.jsx']).toMatchInlineSnapshot(`
@@ -437,6 +454,9 @@ const Styled = styled.div({
       function MyComponent(props) {
           return <div className=\\"b\\">hello2</div>;
       }
+      const Styled = /*#__PURE__*/ styled.div({
+          backgroundColor: 'red',
+      });
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}.b{background-color:red}"`);
@@ -466,9 +486,15 @@ function MyComponent2(props: {}) {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent1(props) {
+          const Styled = /*#__PURE__*/ styled.div({
+              backgroundColor: 'black',
+          });
           return <div className=\\"a\\">hello1</div>;
       }
       function MyComponent2(props) {
+          const Styled = /*#__PURE__*/ styled.div({
+              backgroundColor: 'red',
+          });
           return <div className=\\"b\\">hello2</div>;
       }
       "
@@ -521,6 +547,9 @@ const Styled1 = styled.div({
       function MyComponent(props) {
           return <div id=\\"my-id\\" className=\\"a b\\"/>;
       }
+      const Styled1 = /*#__PURE__*/ styled.div({
+          height: '100%',
+      });
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
@@ -563,16 +592,19 @@ const Styled4 = styled.div({
             window.exposeComponent = { x: Styled1, y: Styled3 };
             return <><Styled1 id=\\"my-id\\" css={{ width: '100%' }}/><Styled2 /><X /><div className=\\"d\\"/></>;
         }
-        const Styled1 = styled.div({
+        const Styled1 = /*#__PURE__*/ styled.div({
             height: '100%',
         });
         /** @glitz-static */
-        const Styled2 = styled.div({
+        const Styled2 = /*#__PURE__*/ styled.div({
             height: '75%',
         });
         Styled2.displayName = 'Styled2';
-        const Styled3 = styled.div({
+        const Styled3 = /*#__PURE__*/ styled.div({
             height: '50%',
+        });
+        const Styled4 = /*#__PURE__*/ styled.div({
+            height: '25%',
         });
         "
       `);
@@ -629,11 +661,11 @@ const DerivedStyled = styled(Styled, {
       function MyComponent(props) {
           return <styled.Div css={{ height: window.innerHeight }}><DerivedStyled /></styled.Div>;
       }
-      const Styled = styled.div({
+      const Styled = /*#__PURE__*/ styled.div({
           width: '100%',
           height: window.innerHeight + 'px',
       });
-      const DerivedStyled = styled(Styled, {
+      const DerivedStyled = /*#__PURE__*/ styled(Styled, {
           backgroundColor: 'black',
       });
       "
@@ -683,13 +715,13 @@ const DeepStyled = styled.div({
                   <DeepStyled />
               </>);
       }
-      const Styled = styled.div({
+      const Styled = /*#__PURE__*/ styled.div({
           color: (theme) => theme.color,
       });
-      const DerivedStyled = styled(Styled, {
+      const DerivedStyled = /*#__PURE__*/ styled(Styled, {
           backgroundColor: 'black',
       });
-      const DeepStyled = styled.div({
+      const DeepStyled = /*#__PURE__*/ styled.div({
           ':hover': {
               color: (theme) => theme.color,
           },
@@ -722,7 +754,7 @@ function MyComponent(props: {}) {
         function StyledWrapper(props) {
             return <styled.Div css={{ backgroundColor: 'green' }}><div className=\\"a\\"/></styled.Div>;
         }
-        const Styled = styled(StyledWrapper, { color: 'red' });
+        const Styled = /*#__PURE__*/ styled(StyledWrapper, { color: 'red' });
         function MyComponent(props) {
             return <StyledWrapper />;
         }
@@ -766,7 +798,7 @@ function MyComponent(props: {}) {
         function StyledWrapper(props) {
             return <div><styled.Div css={{ backgroundColor: 'green' }}><div className=\\"a\\"/></styled.Div></div>;
         }
-        const Styled = styled(StyledWrapper, { color: 'red' });
+        const Styled = /*#__PURE__*/ styled(StyledWrapper, { color: 'red' });
         function MyComponent(props) {
             return <StyledWrapper />;
         }
@@ -806,6 +838,8 @@ function MyComponent(props: {}) {
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
+      const Base = /*#__PURE__*/ styled.div({ backgroundColor: 'green' });
+      const Styled = /*#__PURE__*/ styled(Base, { color: 'red' });
       function MyComponent(props) {
           return <div className=\\"a b c\\"/>;
       }
@@ -840,11 +874,14 @@ const node = <ImportantList />;
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
-      const List = styled.ul({
+      const List = /*#__PURE__*/ styled.ul({
           color: 'red',
       });
-      const listStyled = styled({
+      const listStyled = /*#__PURE__*/ styled({
           listStyle: 'square',
+      });
+      const ImportantList = /*#__PURE__*/ listStyled(List, {
+          fontWeight: 'bold',
       });
       const node = <ul className=\\"a b c\\"/>;
       "
@@ -880,10 +917,10 @@ const node = <MyNewList />;
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
-      export const List = styled.ul({
+      export const List = /*#__PURE__*/ styled.ul({
           color: 'red',
       });
-      export const listDecorator = styled({
+      export const listDecorator = /*#__PURE__*/ styled({
           backgroundColor: 'red',
       });
       "
@@ -895,6 +932,9 @@ const node = <MyNewList />;
     `);
     expect(result['file3.jsx']).toMatchInlineSnapshot(`
       "import { List as MyList, listDecorator } from './file1';
+      const MyNewList = /*#__PURE__*/ listDecorator(MyList, {
+          fontWeight: 'bold',
+      });
       const node = <ul className=\\"a b c\\"/>;
       "
     `);
@@ -915,7 +955,7 @@ const MyComponent = styled((props: {}) => {
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
-      const MyComponent = styled((props) => {
+      const MyComponent = /*#__PURE__*/ styled((props) => {
           return <styled.Div css={{ backgroundColor: 'green' }}/>;
       }, { color: 'red' });
       "

@@ -1,13 +1,15 @@
 import { isStaticComponent, Style, StaticComponent } from './shared';
 
+type ReactFunctionComponent = (props?: any) => any;
+
 type StaticDecorator = {
   (): Style[];
   (style: Style | StaticDecorator): StaticDecorator;
-  (component: StaticComponent, style?: Style): StaticComponent;
+  (component: StaticComponent | ReactFunctionComponent, style?: Style): StaticComponent;
 };
 
 function createStaticStyled(styles: Style[]): StaticDecorator {
-  function decorator(arg1?: Style | StaticComponent, arg2?: Style): any {
+  function decorator(arg1?: Style | StaticComponent | ReactFunctionComponent, arg2?: Style): any {
     return isStaticComponent(arg1)
       ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, arg2 ?? {}])
       : typeof arg1 === 'object'

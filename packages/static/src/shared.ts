@@ -3,6 +3,7 @@ export type Style = Record<string, any>;
 export type StaticComponent = ((props?: any) => StaticElement) & {
   styles: Style[];
   elementName: string;
+  displayName?: string;
 };
 
 export type StaticElement = {

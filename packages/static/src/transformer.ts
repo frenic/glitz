@@ -261,6 +261,10 @@ function visitNode(
     }
   }
 
+  if (isFirstPass && ts.isCallExpression(node) && isStyledCall(node)) {
+    ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
+  }
+
   // This is where we either collect or replace/transform a styled component declaration
   // like this:
   // const Styled = styled.div({color: 'red'});
@@ -279,14 +283,14 @@ function visitNode(
           const componentName = declaration.name.getText();
 
           if (!isFirstPass) {
-            return replaceComponentDeclarationNode(
+            reportUsageOutsideOfJsxIfNeeded(
               componentSymbol,
               componentName,
-              node,
               staticStyledComponents,
               shouldBeStatic,
               diagnosticsReporter,
             );
+            return node;
           }
 
           if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
@@ -297,6 +301,16 @@ function visitNode(
             if (isComponentName(componentName)) {
               const object = evaluate(declaration.initializer, program, {});
               if (isStaticElement(object) || isStaticComponent(object)) {
+                const type = typeChecker.getTypeAtLocation(declaration.initializer.expression);
+                if (type.aliasSymbol && type.aliasSymbol.escapedName === 'StaticDecorator') {
+                  ts.addSyntheticLeadingComment(
+                    declaration.initializer,
+                    ts.SyntaxKind.MultiLineCommentTrivia,
+                    '#__PURE__',
+                    false,
+                  );
+                }
+
                 if (object.styles.every(isEvaluableStyle)) {
                   const component = {
                     componentName,
@@ -573,51 +587,33 @@ function isInsideInlineStyledComponent(node: ts.Node) {
   return false;
 }
 
-// Used to removed declarations of components that is guaranteed to be static and no longer referenced.
-// A smart minifier could probably detect that the variable is no longer used but it can't be certain
-// that a call to `styled(...)` doesn't have any side effects so it would remove the variable but keep
-// the call to `styled(...)`, transforming this:
-// const Styled = styled(...);
-// to:
-// styled(...);
-// which isn't good enough for us.
-function replaceComponentDeclarationNode(
+function reportUsageOutsideOfJsxIfNeeded(
   componentSymbol: ts.Symbol,
   componentName: string,
-  node: ts.Node,
   staticStyledComponents: StaticStyledComponents,
   shouldBeStatic: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
 ) {
-  if (staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)) {
-    if (diagnosticsReporter) {
-      const outsideJsxUsage = staticStyledComponents.symbolsWithReferencesOutsideJsx.get(componentSymbol)!;
-      if (!outsideJsxUsage.hasBeenReported) {
-        const references = outsideJsxUsage.references;
+  if (diagnosticsReporter && staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)) {
+    const outsideJsxUsage = staticStyledComponents.symbolsWithReferencesOutsideJsx.get(componentSymbol)!;
+    if (!outsideJsxUsage.hasBeenReported) {
+      const references = outsideJsxUsage.references;
 
-        for (const reference of references) {
-          const sourceFile = reference.getSourceFile();
-          let stmt = getStatement(reference);
+      for (const reference of references) {
+        const sourceFile = reference.getSourceFile();
+        let stmt = getStatement(reference);
 
-          diagnosticsReporter({
-            file: sourceFile.fileName,
-            message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
-            source: stmt.getText(),
-            severity: shouldBeStatic ? 'error' : 'info',
-            line: sourceFile.getLineAndCharacterOfPosition(reference.pos).line,
-          });
-        }
-        outsideJsxUsage.hasBeenReported = true;
+        diagnosticsReporter({
+          file: sourceFile.fileName,
+          message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
+          source: stmt.getText(),
+          severity: shouldBeStatic ? 'error' : 'info',
+          line: sourceFile.getLineAndCharacterOfPosition(reference.pos).line,
+        });
       }
+      outsideJsxUsage.hasBeenReported = true;
     }
-    return node;
   }
-
-  if (staticStyledComponents.symbolToComponent.has(componentSymbol)) {
-    return undefined;
-  }
-
-  return node;
 }
 
 // If a top level JSX element (that is, the top element returned) in a component

@@ -27,7 +27,7 @@ export default function compile(files: { [fileName: string]: string }) {
       for (const moduleName of moduleNames) {
         if (moduleName === '@glitz/react') {
           resolvedModules.push({
-            resolvedFileName: path.join(__dirname, 'fake-glitz.ts'),
+            resolvedFileName: path.join(__dirname, '..', 'static-glitz.ts'),
           });
           continue;
         }
