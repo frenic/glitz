@@ -468,8 +468,8 @@ function visitNode(
               diagnosticsReporter,
             );
             const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-            if (styledComponent.elementName) {
-              let styles = styledComponent.styles;
+            if (styledComponent.elementName && styledComponent.styles.every(isEvaluableStyle)) {
+              let styles = styledComponent.styles.filter(style => !!style);
               if (cssPropData) {
                 styles = styles.slice();
                 styles.push(cssPropData);
@@ -517,8 +517,8 @@ function visitNode(
       if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
         const cssPropData = getCssDataFromCssProp(node, program, glitz, allShouldBeStatic, diagnosticsReporter);
         const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-        if (styledComponent.elementName) {
-          let styles = styledComponent.styles;
+        if (styledComponent.elementName && styledComponent.styles.every(isEvaluableStyle)) {
+          let styles = styledComponent.styles.filter(style => !!style);
           if (cssPropData) {
             styles = styles.slice();
             styles.push(cssPropData);
@@ -851,7 +851,7 @@ function anyValuesAreFunctions(style: EvaluatedStyle): boolean | FunctionWithTsN
     for (const key in style) {
       if (typeof style[key] === 'function') {
         return (style[key] as unknown) as FunctionWithTsNode;
-      } else if (typeof style[key] === 'object') {
+      } else if (style[key] && typeof style[key] === 'object' && !Array.isArray(style[key])) {
         const func = anyValuesAreFunctions(style[key] as EvaluatedStyle);
         if (func !== false) {
           return func;
