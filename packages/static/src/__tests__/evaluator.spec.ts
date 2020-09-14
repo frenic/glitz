@@ -207,6 +207,21 @@ function func2(z: number, y = 1, x = 2) {
   expect(evaluate('func1() + func2(1, 1)', code)).toBe(3 + (1 + 1 + 2));
 });
 
+test('handles function scope correctly', () => {
+  const code = {
+    'entry.ts': `
+function func() {
+  const myVar = 'local myVar';
+  return myVar;
+}
+function entry(myVar) {
+  return func();
+}
+`,
+  };
+  expect(evaluate('entry("outside myVar")', code)).toBe('local myVar');
+});
+
 test('can have functions with variables', () => {
   const code = {
     'entry.ts': `

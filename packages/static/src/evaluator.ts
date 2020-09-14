@@ -6,10 +6,11 @@ import { moduleName, FunctionWithTsNode } from './transformer';
 export function evaluate(
   expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
   program: ts.Program,
-  scope: { [name: string]: any },
+  scope?: Map<ts.Symbol, any>,
+  globals?: { [name: string]: any },
 ): any {
   try {
-    return evaluateInternal(expr, program, scope);
+    return evaluateInternal(expr, program, scope, globals);
   } catch (e) {
     if (!(e instanceof EvaluationError)) {
       console.log('Error evaluating expression:', expr.getText());
@@ -30,23 +31,27 @@ class EvaluationError extends Error {
   }
 }
 
+const globalGlobals: { [name: string]: any } = {};
+
+globalGlobals.Array = Array;
+globalGlobals.Object = Object;
+globalGlobals.String = String;
+globalGlobals.Number = Number;
+globalGlobals.Boolean = Boolean;
+globalGlobals.RegExp = RegExp;
+
 function evaluateInternal(
   expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
   program: ts.Program,
-  scope: { [name: string]: any },
+  scope?: Map<ts.Symbol, any>,
+  globals?: { [name: string]: any },
 ): any {
   const typeChecker = program.getTypeChecker();
 
-  scope.Array = Array;
-  scope.Object = Object;
-  scope.String = String;
-  scope.Number = Number;
-  scope.Boolean = Boolean;
-  scope.RegExp = RegExp;
   if (ts.isBinaryExpression(expr)) {
     if (expr.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
       // tslint:disable-next-line: no-shadowed-variable
-      const left = evaluate(expr.left, program, scope);
+      const left = evaluate(expr.left, program, scope, globals);
       if (isRequiresRuntimeResult(left)) {
         return left;
       }
@@ -54,15 +59,15 @@ function evaluateInternal(
         return left;
       }
 
-      return evaluate(expr.right, program, scope);
+      return evaluate(expr.right, program, scope, globals);
     }
 
-    const left = evaluate(expr.left, program, scope);
+    const left = evaluate(expr.left, program, scope, globals);
     if (isRequiresRuntimeResult(left)) {
       return left;
     }
 
-    const right = evaluate(expr.right, program, scope);
+    const right = evaluate(expr.right, program, scope, globals);
     if (isRequiresRuntimeResult(right)) {
       return right;
     }
@@ -113,18 +118,20 @@ function evaluateInternal(
       return false;
     }
   } else if (ts.isParenthesizedExpression(expr)) {
-    return evaluate(expr.expression, program, scope);
+    return evaluate(expr.expression, program, scope, globals);
   } else if (ts.isConditionalExpression(expr)) {
-    const condition = evaluate(expr.condition, program, scope);
+    const condition = evaluate(expr.condition, program, scope, globals);
     if (isRequiresRuntimeResult(condition)) {
       return condition;
     }
-    return condition ? evaluate(expr.whenTrue, program, scope) : evaluate(expr.whenFalse, program, scope);
+    return condition
+      ? evaluate(expr.whenTrue, program, scope, globals)
+      : evaluate(expr.whenFalse, program, scope, globals);
   } else if (ts.isPrefixUnaryExpression(expr)) {
     if (expr.operator === ts.SyntaxKind.PlusPlusToken || expr.operator === ts.SyntaxKind.MinusMinusToken) {
       return requiresRuntimeResult('-- or ++ expressions are not supported', expr);
     }
-    const value = evaluate(expr.operand, program, scope);
+    const value = evaluate(expr.operand, program, scope, globals);
     if (isRequiresRuntimeResult(value)) {
       return value;
     }
@@ -142,7 +149,7 @@ function evaluateInternal(
       return !value;
     }
   } else if (ts.isPropertyAccessExpression(expr)) {
-    const obj = evaluate(expr.expression, program, scope);
+    const obj = evaluate(expr.expression, program, scope, globals);
     if (isRequiresRuntimeResult(obj)) {
       return obj;
     }
@@ -152,14 +159,14 @@ function evaluateInternal(
     const property = expr.name.escapedText.toString();
     return obj[property];
   } else if (ts.isElementAccessExpression(expr)) {
-    const obj = evaluate(expr.expression, program, scope);
+    const obj = evaluate(expr.expression, program, scope, globals);
     if (isRequiresRuntimeResult(obj)) {
       return obj;
     }
     if (!obj && expr.questionDotToken) {
       return undefined;
     }
-    const property = evaluate(expr.argumentExpression, program, scope);
+    const property = evaluate(expr.argumentExpression, program, scope, globals);
     if (isRequiresRuntimeResult(property)) {
       return property;
     }
@@ -169,7 +176,7 @@ function evaluateInternal(
   } else if (ts.isTemplateExpression(expr)) {
     let s = expr.head.text;
     for (const span of expr.templateSpans) {
-      const value = evaluate(span.expression, program, scope);
+      const value = evaluate(span.expression, program, scope, globals);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -203,11 +210,22 @@ function evaluateInternal(
         bodyExpression = expr.body;
       }
     }
-    const parameters: { name: string; isDotDotDot: boolean; defaultValue: any }[] = [];
+    const parameters: { name: string; symbol: ts.Symbol; isDotDotDot: boolean; defaultValue: any }[] = [];
     for (const parameter of expr.parameters) {
       if (ts.isIdentifier(parameter.name)) {
-        const defaultValue = parameter.initializer ? evaluate(parameter.initializer, program, scope) : undefined;
-        parameters.push({ name: parameter.name.text, isDotDotDot: !!parameter.dotDotDotToken, defaultValue });
+        const defaultValue = parameter.initializer
+          ? evaluate(parameter.initializer, program, scope, globals)
+          : undefined;
+        const symbol = typeChecker.getSymbolAtLocation(parameter.name);
+        if (!symbol) {
+          return requiresRuntimeResult('Static expressions requires TS symbols', expr);
+        }
+        parameters.push({
+          name: parameter.name.text,
+          symbol,
+          isDotDotDot: !!parameter.dotDotDotToken,
+          defaultValue,
+        });
       } else {
         return requiresRuntimeResult('Static expressions does not support spread', expr);
       }
@@ -219,19 +237,24 @@ function evaluateInternal(
           return undefined;
         }
 
-        const parameterScope: { [argName: string]: any } = { ...scope };
+        const parameterScope = new Map<ts.Symbol, any>();
+        if (scope) {
+          for (const [k, v] of scope.entries()) {
+            parameterScope.set(k, v);
+          }
+        }
         for (let i = 0; i < parameters.length; i++) {
           if (parameters[i].isDotDotDot) {
-            parameterScope[parameters[i].name] = args.slice(i);
+            parameterScope.set(parameters[i].symbol, args.slice(i));
           } else {
             if (args.length > i) {
-              parameterScope[parameters[i].name] = args[i];
+              parameterScope.set(parameters[i].symbol, args[i]);
             } else {
-              parameterScope[parameters[i].name] = parameters[i].defaultValue;
+              parameterScope.set(parameters[i].symbol, parameters[i].defaultValue);
             }
           }
         }
-        return evaluate(bodyExpression, program, parameterScope);
+        return evaluate(bodyExpression, program, parameterScope, globals);
       },
       { tsNode: expr },
     ) as FunctionWithTsNode;
@@ -240,7 +263,7 @@ function evaluateInternal(
     let callable: Function;
     let callableContext: any = null;
     if (ts.isPropertyAccessExpression(expr.expression)) {
-      callableContext = evaluate(expr.expression.expression, program, scope);
+      callableContext = evaluate(expr.expression.expression, program, scope, globals);
       if (isRequiresRuntimeResult(callableContext)) {
         return callableContext;
       }
@@ -248,7 +271,7 @@ function evaluateInternal(
       callable = callableContext[name];
     } else {
       // tslint:disable-next-line: ban-types
-      callable = evaluate(expr.expression, program, scope) as Function;
+      callable = evaluate(expr.expression, program, scope, globals) as Function;
     }
     if (isRequiresRuntimeResult(callable)) {
       return callable;
@@ -258,7 +281,7 @@ function evaluateInternal(
     }
     const args = [];
     for (const arg of expr.arguments) {
-      const value = evaluate(arg, program, scope);
+      const value = evaluate(arg, program, scope, globals);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -275,14 +298,17 @@ function evaluateInternal(
     }
     return callable.apply(callableContext, args);
   } else if (ts.isTypeOfExpression(expr)) {
-    const value = evaluate(expr.expression, program, scope);
+    const value = evaluate(expr.expression, program, scope, globals);
     if (isRequiresRuntimeResult(value)) {
       return value;
     }
     return typeof value;
   } else if (ts.isIdentifier(expr)) {
-    if (expr.text in scope) {
-      return scope[expr.text];
+    if (globals && expr.text in globals) {
+      return globals[expr.text];
+    }
+    if (expr.text in globalGlobals) {
+      return globalGlobals[expr.text];
     }
     if (expr.text === 'undefined') {
       return undefined;
@@ -295,6 +321,9 @@ function evaluateInternal(
     let symbol = typeChecker.getSymbolAtLocation(expr);
     if (!symbol) {
       return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
+    }
+    if (scope && scope.has(symbol)) {
+      return scope.get(symbol);
     }
     if (!symbol.valueDeclaration) {
       [symbol, program] = resolveImportSymbol(expr.text, symbol, program);
@@ -312,13 +341,16 @@ function evaluateInternal(
       if (!symbol.valueDeclaration.initializer) {
         return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
       }
-      return evaluate(symbol.valueDeclaration.initializer, program, scope);
+      return evaluate(symbol.valueDeclaration.initializer, program, scope, globals);
     }
     if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
-      return evaluate(symbol.valueDeclaration, program, scope);
+      return evaluate(symbol.valueDeclaration, program, scope, globals);
     }
     if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-      return evaluate(symbol.valueDeclaration, program, scope);
+      return evaluate(symbol.valueDeclaration, program, scope, globals);
+    }
+    if (scope && scope.has(symbol)) {
+      return scope.get(symbol);
     }
     return requiresRuntimeResult('Not implemented: ' + expr.text + ', ' + expr.kind, expr);
   } else if (ts.isNoSubstitutionTemplateLiteral(expr)) {
@@ -351,7 +383,7 @@ function evaluateInternal(
         }
         if (property.name && ts.isComputedPropertyName(property.name)) {
           // tslint:disable-next-line: no-shadowed-variable
-          const value = evaluate(property.name.expression, program, scope);
+          const value = evaluate(property.name.expression, program, scope, globals);
           if (isRequiresRuntimeResult(value)) {
             return value;
           }
@@ -362,10 +394,10 @@ function evaluateInternal(
         }
         let value: any;
         if (ts.isPropertyAssignment(property)) {
-          value = evaluate(property.initializer, program, scope);
+          value = evaluate(property.initializer, program, scope, globals);
         }
         if (ts.isShorthandPropertyAssignment(property)) {
-          value = evaluate(property.name, program, scope);
+          value = evaluate(property.name, program, scope, globals);
         }
 
         obj[propertyName] = value;
@@ -375,7 +407,7 @@ function evaluateInternal(
   } else if (ts.isArrayLiteralExpression(expr)) {
     const array: any[] = [];
     for (const element of expr.elements) {
-      const value = evaluate(element, program, scope);
+      const value = evaluate(element, program, scope, globals);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -399,7 +431,7 @@ function evaluateInternal(
       if (ts.isIdentifier(member.name) || ts.isStringLiteral(member.name) || ts.isNumericLiteral(member.name)) {
         memberName = member.name.text;
       } else if (ts.isComputedPropertyName(member.name)) {
-        const value = evaluate(member.name.expression, program, scope);
+        const value = evaluate(member.name.expression, program, scope, globals);
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -411,7 +443,7 @@ function evaluateInternal(
         enm[memberName] = i;
         enm[i] = memberName;
       } else {
-        const value = evaluate(member.initializer, program, scope);
+        const value = evaluate(member.initializer, program, scope, globals);
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -421,9 +453,9 @@ function evaluateInternal(
     }
     return enm;
   } else if (ts.isSpreadElement(expr)) {
-    return evaluate(expr.expression, program, scope);
+    return evaluate(expr.expression, program, scope, globals);
   } else if (ts.isAsExpression(expr)) {
-    return evaluate(expr.expression, program, scope);
+    return evaluate(expr.expression, program, scope, globals);
   }
   return requiresRuntimeResult('Unable to evaluate expression, unsupported expression token kind: ' + expr.kind, expr);
 }

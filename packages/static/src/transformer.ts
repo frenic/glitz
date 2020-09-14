@@ -226,7 +226,7 @@ function visitNode(
     if (isComponentName(node.name.text)) {
       const symbol = typeChecker.getSymbolAtLocation(node.name);
       if (symbol) {
-        const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program, {});
+        const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program);
         if (isStaticComponent(potentialStyledComponent)) {
           const component: StaticStyledComponent = {
             componentName: node.name.text,
@@ -299,7 +299,7 @@ function visitNode(
             // we look at the variable name to see if it's a variable with Pascal case
             // and in that case try to evaluate it to a styled component.
             if (isComponentName(componentName)) {
-              const object = evaluate(declaration.initializer, program, {});
+              const object = evaluate(declaration.initializer, program);
               if (isStaticElement(object) || isStaticComponent(object)) {
                 const type = typeChecker.getTypeAtLocation(declaration.initializer.expression);
                 // We can't know which variables are decorators like we can with calls to the styled
@@ -825,7 +825,7 @@ function getCssData(
   glitz: GlitzStatic,
   parentComponent?: StaticStyledComponent,
 ): (EvaluatedStyle | RequiresRuntimeResult)[] | EvaluatedStyle | RequiresRuntimeResult {
-  const style = evaluate(tsStyle, program, {}) as EvaluatedStyle | RequiresRuntimeResult;
+  const style = evaluate(tsStyle, program) as EvaluatedStyle | RequiresRuntimeResult;
   glitz.injectStyle(stripUnevaluableProperties(style));
   const requiresRuntime = getRequiresRuntimeResult(style);
   if (requiresRuntime) {
