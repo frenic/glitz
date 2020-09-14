@@ -335,7 +335,7 @@ const DerivedStyled = styled(Styled, {
   });
 });
 
-test.only('correctly handles media queries', () => {
+test('correctly handles media queries', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';

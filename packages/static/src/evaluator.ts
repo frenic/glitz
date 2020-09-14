@@ -272,7 +272,7 @@ export function evaluate(
     if (!symbol.valueDeclaration) {
       [symbol, program] = resolveImportSymbol(expr.text, symbol, program);
     }
-    if (!symbol.valueDeclaration) {
+    if (!symbol || !symbol.valueDeclaration) {
       return requiresRuntimeResult('Unable to find the value declaration of imported symbol', expr);
     }
     if (ts.isShorthandPropertyAssignment(symbol.valueDeclaration)) {
@@ -525,7 +525,7 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
           symbol = staticGlitzExports[variableName];
           program = staticGlitzProgram;
         } else {
-          throw new Error(`Unable to resolve '${variableName}' in static-glitz.ts`);
+          return [undefined, program] as const;
         }
       } else {
         const importSymbol = typeChecker.getSymbolAtLocation(importSpecifier.parent.parent.parent.moduleSpecifier);
@@ -553,7 +553,11 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
           for (const exp of exports) {
             if (exp.escapedName === variableToLookFor) {
               if (!exp.valueDeclaration) {
-                [symbol, program] = resolveImportSymbol(variableToLookFor, exp, program);
+                const importResult = resolveImportSymbol(variableToLookFor, exp, program);
+                if (!importResult[0]) {
+                  return [undefined, program] as const;
+                }
+                [symbol, program] = importResult;
               } else {
                 symbol = exp;
               }
