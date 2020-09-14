@@ -889,7 +889,8 @@ const node = <MyNewList />;
       "
     `);
     expect(result['file2.jsx']).toMatchInlineSnapshot(`
-      "const node = <ul className=\\"a\\"/>;
+      "import { List } from './file1';
+      const node = <ul className=\\"a\\"/>;
       "
     `);
     expect(result['file3.jsx']).toMatchInlineSnapshot(`

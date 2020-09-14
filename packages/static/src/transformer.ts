@@ -240,32 +240,6 @@ function visitNode(
     }
   }
 
-  // TODO: We should detect imported decorators as well and remove them
-  if (
-    ts.isImportDeclaration(node) &&
-    node.importClause &&
-    node.importClause.namedBindings &&
-    ts.isNamedImports(node.importClause.namedBindings) &&
-    !isFirstPass
-  ) {
-    let importedStaticComponents = 0;
-    for (const element of node.importClause.namedBindings.elements) {
-      const symbol = typeChecker.getSymbolAtLocation(element.name);
-      if (
-        symbol &&
-        staticStyledComponents.symbolToComponent.has(symbol) &&
-        !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(symbol)
-      ) {
-        importedStaticComponents++;
-      }
-    }
-
-    if (importedStaticComponents === node.importClause.namedBindings.elements.length) {
-      return undefined;
-    }
-    return node;
-  }
-
   // This collects all compositions of components, that is, calls like this:
   // const Derived = styled(TheComponentToCollect, {color: 'red'});
   //
