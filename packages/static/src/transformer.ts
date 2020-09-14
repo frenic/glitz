@@ -302,7 +302,14 @@ function visitNode(
               const object = evaluate(declaration.initializer, program, {});
               if (isStaticElement(object) || isStaticComponent(object)) {
                 const type = typeChecker.getTypeAtLocation(declaration.initializer.expression);
-                if (type.aliasSymbol && type.aliasSymbol.escapedName === 'StaticDecorator') {
+                // We can't know which variables are decorators like we can with calls to the styled
+                // function, so we need to determine that by the type name. Note that the type name
+                // in the tests is called StaticDecorator but in the "real" world it's StyledDecorator.
+                if (
+                  type.aliasSymbol &&
+                  (type.aliasSymbol.escapedName === 'StaticDecorator' ||
+                    type.aliasSymbol.escapedName === 'StyledDecorator')
+                ) {
                   ts.addSyntheticLeadingComment(
                     declaration.initializer,
                     ts.SyntaxKind.MultiLineCommentTrivia,
