@@ -228,14 +228,26 @@ function visitNode(
       if (symbol) {
         const potentialStyledComponent = evaluate(node.propertyName ?? node.name, program);
         if (isStaticComponent(potentialStyledComponent)) {
-          const component: StaticStyledComponent = {
-            componentName: node.name.text,
-            elementName: potentialStyledComponent.elementName,
-            styles: potentialStyledComponent.styles,
-          };
-          staticStyledComponents.symbolToComponent.set(symbol, component);
-          return node;
+          if (potentialStyledComponent.styles.every(isEvaluableStyle)) {
+            const component: StaticStyledComponent = {
+              componentName: node.name.text,
+              elementName: potentialStyledComponent.elementName,
+              styles: potentialStyledComponent.styles,
+            };
+            staticStyledComponents.symbolToComponent.set(symbol, component);
+          } else {
+            if (diagnosticsReporter) {
+              reportRequiresRuntimeResult(
+                'Styled component could not be statically evaluated',
+                'info',
+                potentialStyledComponent.styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
+                node,
+                diagnosticsReporter,
+              );
+            }
+          }
         }
+        return node;
       }
     }
   }
@@ -468,7 +480,7 @@ function visitNode(
               diagnosticsReporter,
             );
             const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-            if (styledComponent.elementName && styledComponent.styles.every(isEvaluableStyle)) {
+            if (styledComponent.elementName) {
               let styles = styledComponent.styles.filter(style => !!style);
               if (cssPropData) {
                 styles = styles.slice();
@@ -517,7 +529,7 @@ function visitNode(
       if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
         const cssPropData = getCssDataFromCssProp(node, program, glitz, allShouldBeStatic, diagnosticsReporter);
         const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-        if (styledComponent.elementName && styledComponent.styles.every(isEvaluableStyle)) {
+        if (styledComponent.elementName) {
           let styles = styledComponent.styles.filter(style => !!style);
           if (cssPropData) {
             styles = styles.slice();
