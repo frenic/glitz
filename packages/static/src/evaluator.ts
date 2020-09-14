@@ -8,6 +8,20 @@ export function evaluate(
   program: ts.Program,
   scope: { [name: string]: any },
 ): any {
+  try {
+    return evaluateInternal(expr, program, scope);
+  } catch (e) {
+    console.log('Error evaluating expression:', expr.getText());
+    console.log('Expression exists in file:', expr.getSourceFile().fileName);
+    throw e;
+  }
+}
+
+function evaluateInternal(
+  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
+  program: ts.Program,
+  scope: { [name: string]: any },
+): any {
   const typeChecker = program.getTypeChecker();
 
   scope.Array = Array;
