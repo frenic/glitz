@@ -11,9 +11,22 @@ export function evaluate(
   try {
     return evaluateInternal(expr, program, scope);
   } catch (e) {
-    console.log('Error evaluating expression:', expr.getText());
-    console.log('Expression exists in file:', expr.getSourceFile().fileName);
-    throw e;
+    if (!(e instanceof EvaluationError)) {
+      console.log('Error evaluating expression:', expr.getText());
+      console.log('Expression exists in file:', expr.getSourceFile().fileName);
+      throw new EvaluationError(e);
+    } else {
+      throw e;
+    }
+  }
+}
+
+class EvaluationError extends Error {
+  constructor(e: Error) {
+    super();
+    this.message = e.message;
+    this.name = e.name;
+    this.stack = e.stack;
   }
 }
 
