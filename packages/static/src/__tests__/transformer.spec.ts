@@ -138,7 +138,7 @@ const Styled = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
     },
     [
       {
@@ -191,7 +191,7 @@ const Styled = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
     },
     [
       {
@@ -255,7 +255,7 @@ const Styled2 = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
     },
     [
       {
@@ -359,7 +359,7 @@ function smallScreen() {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <><div className=\\"a b c d e\\">hello</div><div className=\\"f g\\"/></>;
+          return <><div className=\\"c d e f a\\">hello</div><div className=\\"b g\\"/></>;
       }
       function createCompactStyled(compactStyle, style) {
           return styled(compactStyle)({ '@media (min-width: 768px)': style });
@@ -373,7 +373,7 @@ function smallScreen() {
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(
-      `".e{background:#000}.f{margin:10px}@media (min-width: 768px){.a{width:50%}.b{height:50%}.g{margin:20px}}@media (max-width: 768px){.c{width:100%}.d{height:100%}}"`,
+      `".a{background:#000}.b{margin:10px}@media (min-width: 768px){.c{width:50%}.d{height:50%}.g{margin:20px}}@media (max-width: 768px){.e{width:100%}.f{height:100%}}"`,
     );
   });
 });
@@ -561,7 +561,7 @@ const Styled4 = styled.div({
         function MyComponent(props) {
             const X = <Styled3 />;
             window.exposeComponent = { x: Styled1, y: Styled3 };
-            return <><Styled1 id=\\"my-id\\" css={{ width: '100%' }}/><Styled2 /><X /><div className=\\"b\\"/></>;
+            return <><Styled1 id=\\"my-id\\" css={{ width: '100%' }}/><Styled2 /><X /><div className=\\"d\\"/></>;
         }
         const Styled1 = styled.div({
             height: '100%',
@@ -576,7 +576,7 @@ const Styled4 = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:50%}.b{height:25%}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{height:75%}.c{height:50%}.d{height:25%}"`);
     },
     [
       {
@@ -638,7 +638,7 @@ const DerivedStyled = styled(Styled, {
       });
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{background-color:black}"`);
   });
 });
 
@@ -696,7 +696,7 @@ const DeepStyled = styled.div({
       });
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}"`);
   });
 });
 

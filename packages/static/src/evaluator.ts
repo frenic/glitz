@@ -336,15 +336,9 @@ export function evaluate(
         let value: any;
         if (ts.isPropertyAssignment(property)) {
           value = evaluate(property.initializer, program, scope);
-          if (isRequiresRuntimeResult(value)) {
-            return value;
-          }
         }
         if (ts.isShorthandPropertyAssignment(property)) {
           value = evaluate(property.name, program, scope);
-          if (isRequiresRuntimeResult(value)) {
-            return value;
-          }
         }
 
         obj[propertyName] = value;
