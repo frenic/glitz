@@ -272,7 +272,7 @@ function visitNode(
   // const Styled = styled(TheParent, {color: 'red'});
   if (
     ts.isVariableStatement(node) &&
-    (!node.modifiers || !node.modifiers.find(m => m.kind == ts.SyntaxKind.ExportKeyword))
+    (!node.modifiers || !node.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword))
   ) {
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
@@ -568,7 +568,7 @@ function getComponentSymbol(node: ts.Node, typeChecker: ts.TypeChecker): ts.Symb
 // const Styled = styled((props) => <styled.Div css={{ color: 'red' }}, { color: 'blue' })
 // Used to bail on top level static css inside such components.
 function isInsideInlineStyledComponent(node: ts.Node) {
-  let func: ts.ArrowFunction | ts.FunctionExpression | undefined = undefined;
+  let func: ts.ArrowFunction | ts.FunctionExpression | undefined;
   while (true) {
     if (ts.isArrowFunction(node)) {
       func = node;
@@ -608,7 +608,7 @@ function reportUsageOutsideOfJsxIfNeeded(
 
       for (const reference of references) {
         const sourceFile = reference.getSourceFile();
-        let stmt = getStatement(reference);
+        const stmt = getStatement(reference);
 
         diagnosticsReporter({
           file: sourceFile.fileName,
@@ -668,7 +668,7 @@ function isTopLevelJsxInComposedComponent(
 
 function reportTopLevelJsxInComposedComponent(node: ts.Node, diagnosticsReporter: DiagnosticsReporter | undefined) {
   const sourceFile = node.getSourceFile();
-  diagnosticsReporter &&
+  if (diagnosticsReporter) {
     diagnosticsReporter({
       message:
         'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
@@ -677,6 +677,7 @@ function reportTopLevelJsxInComposedComponent(node: ts.Node, diagnosticsReporter
       severity: 'info',
       source: node.getText(),
     });
+  }
 }
 
 // A statement is basically a node that is on its own line, and we sometimes want to traverse up and find the
@@ -746,7 +747,7 @@ function reportRequiresRuntimeResult(
   reporter: DiagnosticsReporter | undefined,
 ) {
   for (const result of Array.isArray(requiresRuntimeResults) ? requiresRuntimeResults : [requiresRuntimeResults]) {
-    let innerDiagnostics: Diagnostic[] = [];
+    const innerDiagnostics: Diagnostic[] = [];
     let requiresRuntime = getRequiresRuntimeResult(result);
     if (!requiresRuntime) {
       const propFunc = anyValuesAreFunctions(result as EvaluatedStyle);
@@ -773,7 +774,7 @@ function reportRequiresRuntimeResult(
     }
     const file = node.getSourceFile();
     for (const innerDiagnostic of innerDiagnostics) {
-      reporter &&
+      if (reporter) {
         reporter({
           message,
           file: file.fileName,
@@ -782,6 +783,7 @@ function reportRequiresRuntimeResult(
           severity,
           innerDiagnostic,
         });
+      }
     }
   }
 }
