@@ -83,7 +83,7 @@ export default function compile(files: { [fileName: string]: string }) {
 
   const transformerDiagnostics: TransformerDiagnostics = [];
   const transformers: ts.CustomTransformers = {
-    before: [transformer(program, glitz, diagnostic => transformerDiagnostics.push(diagnostic))],
+    before: [transformer(program, glitz, diagnostic => transformerDiagnostics.push(diagnostic), 'development')],
     after: [],
   };
 

@@ -52,6 +52,7 @@ export function transformer(
   program: ts.Program,
   glitz: GlitzStatic,
   diagnosticsReporter?: DiagnosticsReporter,
+  mode?: 'development' | 'production',
 ): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName.endsWith('.tsx')) {
@@ -83,6 +84,7 @@ export function transformer(
         allShouldBeStatic,
         true,
         diagnosticsReporter,
+        mode,
       );
       let transformedNode = visitNodeAndChildren(
         firstPassTransformedFile,
@@ -93,6 +95,7 @@ export function transformer(
         allShouldBeStatic,
         false,
         diagnosticsReporter,
+        mode,
       );
 
       // We make a third pass if we find components with uses outside of JSX, because we might have
@@ -120,6 +123,7 @@ export function transformer(
           allShouldBeStatic,
           false,
           diagnosticsReporter,
+          mode,
         );
       }
 
@@ -139,6 +143,7 @@ function visitNodeAndChildren(
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
+  mode: 'development' | 'production' | undefined,
 ): ts.SourceFile;
 function visitNodeAndChildren(
   node: ts.Node,
@@ -149,6 +154,7 @@ function visitNodeAndChildren(
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
+  mode: 'development' | 'production' | undefined,
 ): ts.Node | ts.Node[];
 function visitNodeAndChildren(
   node: ts.Node,
@@ -159,6 +165,7 @@ function visitNodeAndChildren(
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
+  mode: 'development' | 'production' | undefined,
 ): ts.Node | ts.Node[] {
   const visitedNode = visitNode(
     node,
@@ -168,6 +175,7 @@ function visitNodeAndChildren(
     allShouldBeStatic,
     isFirstPass,
     diagnosticsReporter,
+    mode,
   );
   if (visitedNode) {
     return ts.visitEachChild(
@@ -182,6 +190,7 @@ function visitNodeAndChildren(
           allShouldBeStatic,
           isFirstPass,
           diagnosticsReporter,
+          mode,
         ),
       context,
     );
@@ -198,6 +207,7 @@ function visitNode(
   allShouldBeStatic: boolean,
   isFirstPass: boolean,
   diagnosticsReporter: DiagnosticsReporter | undefined,
+  mode: 'development' | 'production' | undefined,
 ): ts.Node | undefined {
   const typeChecker = program.getTypeChecker();
 
@@ -410,6 +420,14 @@ function visitNode(
                 ts.createIdentifier('className'),
                 ts.createStringLiteral(glitz.injectStyle(cssData)),
               ),
+              ...(mode === 'development'
+                ? [
+                    ts.createJsxAttribute(
+                      ts.createIdentifier('data-glitzname'),
+                      ts.createStringLiteral('styled.' + node.tagName.name.escapedText),
+                    ),
+                  ]
+                : []),
             ]),
           );
           ts.setOriginalNode(jsxElement, node);
@@ -442,6 +460,14 @@ function visitNode(
                   ts.createIdentifier('className'),
                   ts.createStringLiteral(glitz.injectStyle(cssData)),
                 ),
+                ...(mode === 'development'
+                  ? [
+                      ts.createJsxAttribute(
+                        ts.createIdentifier('data-glitzname'),
+                        ts.createStringLiteral('styled.' + openingElement.tagName.name.escapedText),
+                      ),
+                    ]
+                  : []),
               ]),
             );
             ts.setOriginalNode(jsxOpeningElement, node.openingElement);
@@ -494,6 +520,14 @@ function visitNode(
                     ts.createIdentifier('className'),
                     ts.createStringLiteral(glitz.injectStyle(styles)),
                   ),
+                  ...(mode === 'development' && styledComponent.componentName
+                    ? [
+                        ts.createJsxAttribute(
+                          ts.createIdentifier('data-glitzname'),
+                          ts.createStringLiteral(styledComponent.componentName),
+                        ),
+                      ]
+                    : []),
                 ]),
               );
               ts.setOriginalNode(jsxOpeningElement, node.openingElement);
@@ -543,6 +577,14 @@ function visitNode(
                 ts.createIdentifier('className'),
                 ts.createStringLiteral(glitz.injectStyle(styles)),
               ),
+              ...(mode === 'development' && styledComponent.componentName
+                ? [
+                    ts.createJsxAttribute(
+                      ts.createIdentifier('data-glitzname'),
+                      ts.createStringLiteral(styledComponent.componentName),
+                    ),
+                  ]
+                : []),
             ]),
           );
           ts.setOriginalNode(jsxElement, node);
