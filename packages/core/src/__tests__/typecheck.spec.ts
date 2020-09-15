@@ -4,7 +4,4 @@ import { typescriptDiagnostics } from '../../../../test-utils';
 test('typings', () => {
   const errors = typescriptDiagnostics(resolve(__dirname, '__fixtures__/typings.ts'));
   expect(errors.length).toBe(0);
-  for (const error of errors) {
-    expect(error).toMatchSnapshot();
-  }
 });

@@ -23,7 +23,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
   });
   it('injects shorthand rule', () => {
     const style = createStyle();
@@ -37,10 +37,10 @@ describe('client', () => {
     ).toBe('a b c d');
 
     expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {padding-left: 10px;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {padding-right: 10px;}"`);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c {padding-top: 10px;}"`);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d {padding-bottom: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -49,7 +49,7 @@ describe('client', () => {
     ).toBe('e');
 
     expect(sheet.cssRules).toHaveLength(5);
-    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".e {grid-column-gap: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -58,8 +58,8 @@ describe('client', () => {
     ).toBe('f g');
 
     expect(sheet.cssRules).toHaveLength(7);
-    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".f {margin-left: 10px;}"`);
+    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`".g {margin-right: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -68,8 +68,8 @@ describe('client', () => {
     ).toBe('h i');
 
     expect(sheet.cssRules).toHaveLength(9);
-    expect(sheet.cssRules[7].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[8].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[7].cssText).toMatchInlineSnapshot(`".h {margin-top: 10px;}"`);
+    expect(sheet.cssRules[8].cssText).toMatchInlineSnapshot(`".i {margin-bottom: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -78,10 +78,10 @@ describe('client', () => {
     ).toBe('j k l m');
 
     expect(sheet.cssRules).toHaveLength(13);
-    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[10].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[11].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[12].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[9].cssText).toMatchInlineSnapshot(`".j {margin-left: 20px;}"`);
+    expect(sheet.cssRules[10].cssText).toMatchInlineSnapshot(`".k {margin-right: 20px;}"`);
+    expect(sheet.cssRules[11].cssText).toMatchInlineSnapshot(`".l {margin-top: 20px;}"`);
+    expect(sheet.cssRules[12].cssText).toMatchInlineSnapshot(`".m {margin-bottom: 20px;}"`);
 
     expect(
       client.injectStyle({
@@ -91,7 +91,7 @@ describe('client', () => {
     ).toBe('n');
 
     expect(sheet.cssRules).toHaveLength(14);
-    expect(sheet.cssRules[13].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[13].cssText).toMatchInlineSnapshot(`".n {padding-left: 30px;}"`);
 
     expect(
       client.injectStyle({
@@ -100,8 +100,12 @@ describe('client', () => {
     ).toBe('o');
 
     expect(sheet.cssRules).toHaveLength(16);
-    expect(sheet.cssRules[14].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[15].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[14].cssText).toMatchInlineSnapshot(`
+      "@keyframes a { 
+        from {padding-left: 20px;} 
+      }"
+    `);
+    expect(sheet.cssRules[15].cssText).toMatchInlineSnapshot(`".o {animation-name: a;}"`);
 
     expect(
       client.injectStyle({
@@ -110,8 +114,8 @@ describe('client', () => {
     ).toBe('p');
 
     expect(sheet.cssRules).toHaveLength(18);
-    expect(sheet.cssRules[16].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[17].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[16].cssText).toMatchInlineSnapshot(`"@font-face {font-family: x;}"`);
+    expect(sheet.cssRules[17].cssText).toMatchInlineSnapshot(`".p {font-family: x;}"`);
 
     expect(
       client.injectStyle({
@@ -120,14 +124,14 @@ describe('client', () => {
     ).toBe('q r s t u v w x');
 
     expect(sheet.cssRules).toHaveLength(26);
-    expect(sheet.cssRules[18].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[19].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[20].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[21].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[22].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[23].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[24].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[25].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[18].cssText).toMatchInlineSnapshot(`".q {border-left-width: 0;}"`);
+    expect(sheet.cssRules[19].cssText).toMatchInlineSnapshot(`".r {border-right-width: 0;}"`);
+    expect(sheet.cssRules[20].cssText).toMatchInlineSnapshot(`".s {border-top-width: 0;}"`);
+    expect(sheet.cssRules[21].cssText).toMatchInlineSnapshot(`".t {border-bottom-width: 0;}"`);
+    expect(sheet.cssRules[22].cssText).toMatchInlineSnapshot(`".u {border-left-color: red;}"`);
+    expect(sheet.cssRules[23].cssText).toMatchInlineSnapshot(`".v {border-right-color: red;}"`);
+    expect(sheet.cssRules[24].cssText).toMatchInlineSnapshot(`".w {border-top-color: green;}"`);
+    expect(sheet.cssRules[25].cssText).toMatchInlineSnapshot(`".x {border-bottom-color: green;}"`);
 
     expect(
       client.injectStyle({
@@ -136,10 +140,10 @@ describe('client', () => {
     ).toBe('y z a0 a1');
 
     expect(sheet.cssRules).toHaveLength(30);
-    expect(sheet.cssRules[26].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[27].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[28].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[29].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[26].cssText).toMatchInlineSnapshot(`".y {border-top-left-radius: 0;}"`);
+    expect(sheet.cssRules[27].cssText).toMatchInlineSnapshot(`".z {border-top-right-radius: 0;}"`);
+    expect(sheet.cssRules[28].cssText).toMatchInlineSnapshot(`".a0 {border-bottom-left-radius: 0;}"`);
+    expect(sheet.cssRules[29].cssText).toMatchInlineSnapshot(`".a1 {border-bottom-right-radius: 0;}"`);
 
     expect(
       client.injectStyle({
@@ -148,8 +152,8 @@ describe('client', () => {
     ).toBe('a2 a3');
 
     expect(sheet.cssRules).toHaveLength(32);
-    expect(sheet.cssRules[30].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[31].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[30].cssText).toMatchInlineSnapshot(`".a2 {border-right-width: 10px;}"`);
+    expect(sheet.cssRules[31].cssText).toMatchInlineSnapshot(`".a3 {border-left-width: 20px;}"`);
   });
   it('injects pseudo selector', () => {
     const style = createStyle();
@@ -161,7 +165,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b:hover {color: red;}"`);
   });
   it('injects nested pseudo selector', () => {
     const style = createStyle();
@@ -172,7 +176,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a:first-child:hover {color: red;}"`);
   });
   it('injects attribute selector', () => {
     const style = createStyle();
@@ -184,7 +188,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b[disabled] {color: red;}"`);
   });
   it('injects nested attribute selector', () => {
     const style = createStyle();
@@ -195,7 +199,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a[readonly][disabled] {color: red;}"`);
   });
   it('injects mixed selectors', () => {
     const style = createStyle();
@@ -206,7 +210,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a[disabled]:hover {color: red;}"`);
   });
   it('injects media rule', () => {
     const style = createStyle();
@@ -223,7 +227,7 @@ describe('client', () => {
 
     expect(sheet.cssRules).toHaveLength(2);
     expect(mediaSheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".c {color: red;}"`);
   });
   it('injects media elements in certain order', () => {
     const order = ['(min-width: 100px)', '(min-width: 200px)', '(min-width: 1000px)'];
@@ -303,20 +307,20 @@ describe('client', () => {
     ).toBe('a b c d e f g h i j k l');
 
     expect(sheet.cssRules).toHaveLength(6);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {background-color: green;}"`);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c {border-left-color: blue;}"`);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d:hover {color: red;}"`);
+    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".e:hover {background-color: green;}"`);
+    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".f:hover {border-left-color: blue;}"`);
 
     expect(mediaSheet.cssRules).toHaveLength(6);
-    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[2].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[3].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[4].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[5].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".g {color: red;}"`);
+    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".h {background-color: green;}"`);
+    expect(mediaSheet.cssRules[2].cssText).toMatchInlineSnapshot(`".i {border-left-color: blue;}"`);
+    expect(mediaSheet.cssRules[3].cssText).toMatchInlineSnapshot(`".j:hover {color: red;}"`);
+    expect(mediaSheet.cssRules[4].cssText).toMatchInlineSnapshot(`".k:hover {background-color: green;}"`);
+    expect(mediaSheet.cssRules[5].cssText).toMatchInlineSnapshot(`".l:hover {border-left-color: blue;}"`);
   });
   it('injects non-atomic rules', () => {
     const style = createStyle();
@@ -341,12 +345,20 @@ describe('client', () => {
     ).toBe('a b c d');
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
+      `".a {color: red; background-color: green; border-left-color: blue;}"`,
+    );
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(
+      `".b:hover {color: red; background-color: green; border-left-color: blue;}"`,
+    );
 
     expect(mediaSheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(
+      `".c {color: red; background-color: green; border-left-color: blue;}"`,
+    );
+    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(
+      `".d:hover {color: red; background-color: green; border-left-color: blue;}"`,
+    );
   });
   it('injects keyframes rule', () => {
     const style = createStyle();
@@ -357,21 +369,31 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`
+      "@keyframes a { 
+        from {color: red;} 
+        to {color: green;} 
+      }"
+    `);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {animation-name: a;}"`);
 
     expect(client.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
 
     expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`
+      "@keyframes b { 
+        from {color: blue;} 
+        to {color: white;} 
+      }"
+    `);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".b {animation-name: b;}"`);
 
     expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
 
     expect(client.injectStyle({ animationName: 'some-thing' })).toBe('c');
 
     expect(sheet.cssRules).toHaveLength(5);
-    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".c {animation-name: some-thing;}"`);
   });
   it('injects font face rule', () => {
     const style = createStyle();
@@ -391,8 +413,10 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
+      `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: x;}"`,
+    );
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {font-family: x;}"`);
 
     expect(
       client.injectStyle({
@@ -419,8 +443,10 @@ describe('client', () => {
     ).toBe('b');
 
     expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(
+      `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: y;}"`,
+    );
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".b {font-family: y;}"`);
 
     expect(
       client.injectStyle({
@@ -454,7 +480,7 @@ describe('client', () => {
     ).toBe('c');
 
     expect(sheet.cssRules).toHaveLength(6);
-    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".c {font-family: z,sans-serif;}"`);
 
     expect(
       client.injectStyle({
@@ -463,7 +489,7 @@ describe('client', () => {
     ).toBe('d');
 
     expect(sheet.cssRules).toHaveLength(7);
-    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`".d {font-family: sans-serif;}"`);
   });
   it('injects different combinations', () => {
     const style1 = createStyle();
@@ -482,17 +508,17 @@ describe('client', () => {
     const sheet1 = style1.sheet as CSSStyleSheet;
 
     expect(sheet1.cssRules).toHaveLength(1);
-    expect(sheet1.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet1.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
 
     const sheet2 = style2.sheet as CSSStyleSheet;
 
     expect(sheet2.cssRules).toHaveLength(1);
-    expect(sheet2.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet2.cssRules[0].cssText).toMatchInlineSnapshot(`".b {color: green;}"`);
 
     const sheet3 = style3.sheet as CSSStyleSheet;
 
     expect(sheet3.cssRules).toHaveLength(1);
-    expect(sheet3.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet3.cssRules[0].cssText).toMatchInlineSnapshot(`".c {color: blue;}"`);
   });
   it('injects rule deeply', () => {
     const style = createStyle();
@@ -503,7 +529,7 @@ describe('client', () => {
     expect(client.injectStyle([{ color: 'green' }, { color: 'red' }])).toBe('a');
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
 
     expect(
       client.injectStyle([
@@ -517,7 +543,7 @@ describe('client', () => {
     ).toBe('b');
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {padding-left: 20px;}"`);
 
     expect(client.injectStyle([{ ':hover': { color: 'green' } }, { ':hover': { color: 'red' } }])).toBe('c');
     expect(
@@ -528,8 +554,8 @@ describe('client', () => {
     ).toBe('d');
 
     expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[3].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c:hover {color: red;}"`);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d:first-child:hover {color: red;}"`);
 
     expect(
       client.injectStyle([
@@ -545,10 +571,20 @@ describe('client', () => {
     ).toBe('f');
 
     expect(sheet.cssRules).toHaveLength(8);
-    expect(sheet.cssRules[4].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[5].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[6].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[7].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`
+      "@keyframes a { 
+        from {color: green;} 
+        to {color: blue;} 
+      }"
+    `);
+    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".e {animation-name: a;}"`);
+    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`
+      "@keyframes b { 
+        from {color: white;} 
+        to {color: black;} 
+      }"
+    `);
+    expect(sheet.cssRules[7].cssText).toMatchInlineSnapshot(`".f {animation-name: b;}"`);
 
     expect(
       client.injectStyle([
@@ -584,10 +620,14 @@ describe('client', () => {
     ).toBe('h');
 
     expect(sheet.cssRules).toHaveLength(12);
-    expect(sheet.cssRules[8].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[9].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[10].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[11].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[8].cssText).toMatchInlineSnapshot(
+      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: x;}"`,
+    );
+    expect(sheet.cssRules[9].cssText).toMatchInlineSnapshot(`".g {font-family: x;}"`);
+    expect(sheet.cssRules[10].cssText).toMatchInlineSnapshot(
+      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: z;}"`,
+    );
+    expect(sheet.cssRules[11].cssText).toMatchInlineSnapshot(`".h {font-family: z;}"`);
 
     const mediaSheet = media.sheet as CSSStyleSheet;
 
@@ -605,8 +645,8 @@ describe('client', () => {
     ).toBe('j');
 
     expect(mediaSheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(mediaSheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".i {color: red;}"`);
+    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".j:hover {color: red;}"`);
   });
   it('preserves order', () => {
     const style1 = createStyle();
@@ -627,11 +667,11 @@ describe('client', () => {
     ).toBe('a b c d e');
 
     expect(sheet1.cssRules).toHaveLength(5);
-    expect(sheet1.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet1.cssRules[1].cssText).toMatchSnapshot();
-    expect(sheet1.cssRules[2].cssText).toMatchSnapshot();
-    expect(sheet1.cssRules[3].cssText).toMatchSnapshot();
-    expect(sheet1.cssRules[4].cssText).toMatchSnapshot();
+    expect(sheet1.cssRules[0].cssText).toMatchInlineSnapshot(`".a {padding-top: 20px;}"`);
+    expect(sheet1.cssRules[1].cssText).toMatchInlineSnapshot(`".b {color: red;}"`);
+    expect(sheet1.cssRules[2].cssText).toMatchInlineSnapshot(`".c {padding-right: 30px;}"`);
+    expect(sheet1.cssRules[3].cssText).toMatchInlineSnapshot(`".d:hover {color: green;}"`);
+    expect(sheet1.cssRules[4].cssText).toMatchInlineSnapshot(`".e {padding-left: 30px;}"`);
 
     style1.remove();
 
@@ -653,8 +693,10 @@ describe('client', () => {
     ).toBe('a b');
 
     expect(sheet2.cssRules).toHaveLength(2);
-    expect(sheet2.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet2.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet2.cssRules[0].cssText).toMatchInlineSnapshot(
+      `".a {padding-top: 20px; color: red; padding-right: 30px; padding-left: 30px;}"`,
+    );
+    expect(sheet2.cssRules[1].cssText).toMatchInlineSnapshot(`".b:hover {color: green;}"`);
   });
   it('deletes properties', () => {
     const style = createStyle();
@@ -685,7 +727,7 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
   });
   it('hydrates plain rule', () => {
     createStyle(undefined, '.a{color:red}.b{color:green}');
@@ -840,9 +882,13 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(3);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[2].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`
+      "@keyframes a { 
+        from {-moz-appearance: none; appearance: none;} 
+      }"
+    `);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {-moz-appearance: none; appearance: none;}"`);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".b {animation-name: a;}"`);
   });
   it('errors with invalid value type', () => {
     const client = new GlitzClient<TestStyle>();
@@ -984,7 +1030,7 @@ describe('client', () => {
 
     const sheet = style.sheet as CSSStyleSheet;
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
   });
 });
 

@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`number to unit injects atomic style with numeric values with default units 1`] = `"<style data-glitz>.a{width:1px}.b{height:1px;height:max-content}.c{padding-left:1px}.d{columns:1}.e{line-height:1}.f{left:0}.g{order:1}.h{animation-duration:1ms}.i{transition-duration:0ms}</style>"`;
-
-exports[`number to unit injects atomic style with numeric values with different units 1`] = `"<style data-glitz>.a{width:1rem}.b{height:1rem;height:max-content}.c{padding-left:1px}.d{columns:1em}.e{line-height:1}.f{left:0}.g{order:1}.h{animation-duration:1s}.i{transition-duration:0ms}</style>"`;
-
-exports[`number to unit injects non-atomic style with numeric values with default units 1`] = `"<style data-glitz>.a{width:1px;height:1px;height:max-content;padding-left:1px;columns:1;line-height:1;left:0;order:1;animation-duration:1ms;transition-duration:0ms}</style>"`;
-
-exports[`number to unit injects non-atomic style with numeric values with different units 1`] = `"<style data-glitz>.a{width:1rem;height:1rem;height:max-content;padding-left:1px;columns:1em;line-height:1;left:0;order:1;animation-duration:1s;transition-duration:0ms}</style>"`;

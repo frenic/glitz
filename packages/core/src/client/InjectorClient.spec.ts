@@ -16,8 +16,8 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {color: green; background-color: black;}"`);
   });
   it('injects pseudo selector', () => {
     const style = createStyle();
@@ -29,8 +29,8 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a:hover {color: red;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b:hover {color: green; background-color: black;}"`);
   });
   it('injects attribute selector', () => {
     const style = createStyle();
@@ -42,8 +42,8 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
-    expect(sheet.cssRules[1].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a[disabled] {color: red;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b[disabled] {color: green; background-color: black;}"`);
   });
   it('injects keyframes rule', () => {
     const style = createStyle();
@@ -54,7 +54,12 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`
+      "@keyframes a { 
+        from {color: red;} 
+        to {color: green;} 
+      }"
+    `);
   });
   it('injects font face rule', () => {
     const style = createStyle();
@@ -72,7 +77,9 @@ describe('client', () => {
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchSnapshot();
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
+      `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: x;}"`,
+    );
   });
   it('injects fallback rule', () => {
     // Use Puppeteer
