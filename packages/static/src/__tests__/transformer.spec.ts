@@ -1034,7 +1034,7 @@ const MyComponent = styled((props: {}) => {
       }, { color: 'red' });
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}"`);
   });
 });
 

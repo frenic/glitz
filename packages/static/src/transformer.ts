@@ -415,10 +415,10 @@ function visitNode(
       node.tagName.expression.escapedText.toString() === styledName
     ) {
       // We now know that: node == `<styled.[element name] />`
-      if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
-        const elementName = node.tagName.name.escapedText.toString().toLowerCase();
-        const cssData = getCssDataFromCssProp(node, program, glitz, allShouldBeStatic, diagnosticsReporter);
-        if (cssData) {
+      const elementName = node.tagName.name.escapedText.toString().toLowerCase();
+      const cssData = getCssDataFromCssProp(node, program, glitz, allShouldBeStatic, diagnosticsReporter);
+      if (cssData) {
+        if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
           // Everything is static, replace `<styled.[element name] />` with `<[element name] className="[classes]" />`
           const jsxElement = ts.createJsxSelfClosingElement(
             ts.createIdentifier(elementName),
@@ -441,9 +441,9 @@ function visitNode(
           );
           ts.setOriginalNode(jsxElement, node);
           return jsxElement;
+        } else {
+          reportTopLevelJsxInComposedComponent(node, diagnosticsReporter);
         }
-      } else {
-        reportTopLevelJsxInComposedComponent(node, diagnosticsReporter);
       }
     }
 
