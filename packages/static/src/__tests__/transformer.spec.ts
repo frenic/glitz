@@ -890,6 +890,30 @@ const node = <ImportantList />;
   });
 });
 
+test('can use decorator in css prop', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+const colorDecorator = styled({
+    backgroundColor: 'red',
+});
+const node1 = <styled.Div css={colorDecorator()} />;
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const colorDecorator = /*#__PURE__*/ styled({
+          backgroundColor: 'red',
+      });
+      const node1 = <div className=\\"a\\" data-glitzname=\\"styled.Div\\"/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
+  });
+});
+
 test('can import a styled component', () => {
   const code = {
     'file1.tsx': `

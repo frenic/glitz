@@ -871,20 +871,20 @@ function hasJSDocTag(node: ts.Node, jsDocTag: string) {
 }
 
 function getCssData(
-  tsStyle: ts.ObjectLiteralExpression,
+  tsStyle: ts.Expression,
   program: ts.Program,
   node: ts.Node,
   glitz: GlitzStatic,
   parentComponent: StaticStyledComponent,
 ): (EvaluatedStyle | RequiresRuntimeResult)[];
 function getCssData(
-  tsStyle: ts.ObjectLiteralExpression,
+  tsStyle: ts.Expression,
   program: ts.Program,
   node: ts.Node,
   glitz: GlitzStatic,
 ): EvaluatedStyle | RequiresRuntimeResult;
 function getCssData(
-  tsStyle: ts.ObjectLiteralExpression,
+  tsStyle: ts.Expression,
   program: ts.Program,
   node: ts.Node,
   glitz: GlitzStatic,
@@ -946,8 +946,7 @@ function getCssDataFromCssProp(
     ts.isJsxAttribute(cssJsxAttr) &&
     cssJsxAttr.initializer &&
     ts.isJsxExpression(cssJsxAttr.initializer) &&
-    cssJsxAttr.initializer.expression &&
-    ts.isObjectLiteralExpression(cssJsxAttr.initializer.expression)
+    cssJsxAttr.initializer.expression
   ) {
     const cssData = getCssData(cssJsxAttr.initializer.expression, program, node, glitz);
     if (isEvaluableStyle(cssData)) {
