@@ -695,8 +695,8 @@ function isTopLevelJsxInComposedComponent(
   typeChecker: ts.TypeChecker,
   staticStyledComponents: StaticStyledComponents,
 ) {
-  let parent = node.parent;
-  while (true) {
+  let parent: ts.Node | undefined = node.parent;
+  while (parent) {
     if (ts.isParenthesizedExpression(parent)) {
       parent = parent.parent;
     } else if (
@@ -709,6 +709,11 @@ function isTopLevelJsxInComposedComponent(
     } else {
       break;
     }
+  }
+  // If we don't have a parent something has removed the node.parent
+  // and we bail because we can't be sure
+  if (!parent) {
+    return true;
   }
   const containingComponentSymbol = getComponentSymbol(node, typeChecker);
 
