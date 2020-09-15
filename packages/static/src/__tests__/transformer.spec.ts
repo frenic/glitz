@@ -1038,6 +1038,26 @@ const MyComponent = styled((props: {}) => {
   });
 });
 
+test('bails on spread after css prop', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+const obj: any = {};
+const node = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const obj = {};
+      const node = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
+});
+
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,
