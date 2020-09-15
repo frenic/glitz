@@ -1,7 +1,13 @@
 import * as ts from 'typescript';
 import { GlitzStatic } from '@glitz/core';
 import { isStaticElement, isStaticComponent } from './shared';
-import { evaluate, isRequiresRuntimeResult, RequiresRuntimeResult, requiresRuntimeResult } from './evaluator';
+import {
+  evaluate,
+  isRequiresRuntimeResult,
+  RequiresRuntimeResult,
+  requiresRuntimeResult,
+  evaluationCache,
+} from './evaluator';
 
 export const moduleName = '@glitz/react';
 export const styledName = 'styled';
@@ -56,6 +62,9 @@ export function transformer(
 ): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName.endsWith('.tsx')) {
+      if (file.fileName in evaluationCache) {
+        delete evaluationCache[file.fileName];
+      }
       if (file.statements.find(s => hasJSDocTag(s, 'glitz-all-dynamic'))) {
         return file;
       }

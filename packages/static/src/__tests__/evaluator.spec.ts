@@ -1,4 +1,4 @@
-import { isRequiresRuntimeResult, RequiresRuntimeResult } from '../evaluator';
+import { isRequiresRuntimeResult, RequiresRuntimeResult, cacheHits } from '../evaluator';
 import evaluate from './evaluate';
 
 test('can evaluate a variable', () => {
@@ -290,6 +290,40 @@ const y = window.innerHeight + 100;
   expect(diagnostics?.source).toBe('window');
   expect(diagnostics?.line).toBe(3);
   expect(diagnostics?.file).toBe('entry.ts');
+});
+
+test('can inject variables', () => {
+  const code = {
+    'entry.ts': `
+const y = window.innerHeight + 100;
+`,
+  };
+  expect(evaluate('y', code, { window: { innerHeight: 100 } })).toBe(200);
+});
+
+test('exported values are cached', () => {
+  const code = {
+    'cached-file1.ts': `
+export function func() {
+  return 1;
+}
+    `,
+    'file2.ts': `
+import { func } from './cached-file1';
+export function otherFunc() {
+  return 2 + func();
+}
+    `,
+    'entry.ts': `
+import { func } from './cached-file1';
+import { otherFunc } from './file2';
+
+const x = func() + otherFunc();
+`,
+  };
+  expect(evaluate('x', code)).toBe(1 + 2 + 1);
+  expect('cached-file1.ts' in cacheHits).toBeTruthy();
+  expect(cacheHits['cached-file1.ts']['func']).toBe(1);
 });
 
 test('can inject variables', () => {

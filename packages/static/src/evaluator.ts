@@ -31,6 +31,9 @@ class EvaluationError extends Error {
   }
 }
 
+export const evaluationCache: { [fileName: string]: Map<ts.Symbol, any> } = {};
+export const cacheHits: { [fileName: string]: { [variableName: string]: number } } = {};
+
 const globalGlobals: { [name: string]: any } = {};
 
 globalGlobals.Array = Array;
@@ -325,8 +328,26 @@ function evaluateInternal(
     if (scope && scope.has(symbol)) {
       return scope.get(symbol);
     }
+    let fileNameToCacheFor: string | undefined = undefined;
+    let evaluationResult: any = undefined;
+    let hasEvaluated = false;
     if (!symbol.valueDeclaration) {
-      [symbol, program] = resolveImportSymbol(expr.text, symbol, program);
+      [symbol, program, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, program);
+      if (symbol && fileNameToCacheFor) {
+        if (fileNameToCacheFor in evaluationCache) {
+          const cache = evaluationCache[fileNameToCacheFor];
+          if (cache.has(symbol)) {
+            if (!(fileNameToCacheFor in cacheHits)) {
+              cacheHits[fileNameToCacheFor] = {};
+            }
+            if (!(symbol.escapedName.toString() in cacheHits[fileNameToCacheFor])) {
+              cacheHits[fileNameToCacheFor][symbol.escapedName.toString()] = 0;
+            }
+            cacheHits[fileNameToCacheFor][symbol.escapedName.toString()]++;
+            return cache.get(symbol);
+          }
+        }
+      }
     }
     if (!symbol || !symbol.valueDeclaration) {
       return requiresRuntimeResult('Unable to find the value declaration of imported symbol', expr);
@@ -341,18 +362,30 @@ function evaluateInternal(
       if (!symbol.valueDeclaration.initializer) {
         return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
       }
-      return evaluate(symbol.valueDeclaration.initializer, program, scope, globals);
+      evaluationResult = evaluate(symbol.valueDeclaration.initializer, program, scope, globals);
+      hasEvaluated = true;
     }
     if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
-      return evaluate(symbol.valueDeclaration, program, scope, globals);
+      evaluationResult = evaluate(symbol.valueDeclaration, program, scope, globals);
+      hasEvaluated = true;
     }
     if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-      return evaluate(symbol.valueDeclaration, program, scope, globals);
+      evaluationResult = evaluate(symbol.valueDeclaration, program, scope, globals);
+      hasEvaluated = true;
     }
     if (scope && scope.has(symbol)) {
       return scope.get(symbol);
     }
-    return requiresRuntimeResult('Not implemented: ' + expr.text + ', ' + expr.kind, expr);
+    if (!hasEvaluated) {
+      evaluationResult = requiresRuntimeResult('Not implemented: ' + expr.text + ', ' + expr.kind, expr);
+    }
+    if (fileNameToCacheFor) {
+      if (!(fileNameToCacheFor in evaluationCache)) {
+        evaluationCache[fileNameToCacheFor] = new Map<ts.Symbol, any>();
+      }
+      evaluationCache[fileNameToCacheFor].set(symbol, evaluationResult);
+    }
+    return evaluationResult;
   } else if (ts.isNoSubstitutionTemplateLiteral(expr)) {
     return expr.text;
   } else if (ts.isStringLiteral(expr)) {
@@ -572,13 +605,15 @@ function getStaticGlitzExports() {
 
 function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program) {
   const typeChecker = program.getTypeChecker();
+  let fileName: string | undefined = undefined;
   if (!symbol.valueDeclaration) {
     const importSpecifier = symbol.declarations[0];
     if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {
       if (importSpecifier.propertyName) {
         variableName = importSpecifier.propertyName.text;
       }
-      if (importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '') === moduleName) {
+      fileName = importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '');
+      if (fileName === moduleName) {
         const [staticGlitzExports, staticGlitzProgram] = getStaticGlitzExports();
         if (variableName in staticGlitzExports) {
           symbol = staticGlitzExports[variableName];
@@ -589,6 +624,9 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
       } else {
         const importSymbol = typeChecker.getSymbolAtLocation(importSpecifier.parent.parent.parent.moduleSpecifier);
         if (importSymbol) {
+          if (ts.isSourceFile(importSymbol.valueDeclaration)) {
+            fileName = importSymbol.valueDeclaration.fileName;
+          }
           const exports = typeChecker.getExportsOfModule(importSymbol);
           for (const exp of exports) {
             if (exp.escapedName === variableName) {
@@ -614,9 +652,9 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
               if (!exp.valueDeclaration) {
                 const importResult = resolveImportSymbol(variableToLookFor, exp, program);
                 if (!importResult[0]) {
-                  return [undefined, program] as const;
+                  return [undefined, program, undefined] as const;
                 }
-                [symbol, program] = importResult;
+                [symbol, program, fileName] = importResult;
               } else {
                 symbol = exp;
               }
@@ -632,7 +670,7 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
       }
     }
   }
-  return [symbol, program] as const;
+  return [symbol, program, fileName] as const;
 }
 
 export type RequiresRuntimeResult = {
