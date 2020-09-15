@@ -1,12 +1,13 @@
-import { Style } from '@glitz/type';
-import Base from '../core/Base';
+import { Style, Theme } from '@glitz/type';
+import { Base, createInjectStyle } from '../core/Base';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 import { createHydrate } from '../utils/hydrate';
 
-export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
+export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
+  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
   public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
@@ -18,7 +19,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
     let initialMediaSheet: HTMLStyleElement | null = null;
 
     let plain: InjectorClient;
-    const mediaIndex: {
+    const mediaInjectors: {
       [media: string]: InjectorClient;
     } = {};
 
@@ -26,8 +27,8 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
     const getInjector = (media?: string) => {
       if (media) {
-        if (mediaIndex[media]) {
-          return mediaIndex[media];
+        if (mediaInjectors[media]) {
+          return mediaInjectors[media];
         }
 
         const element = (mediaSheets[media] = createStyleElement(media, identifier));
@@ -41,7 +42,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
 
         insertStyleElement(element, insertBefore);
 
-        return (mediaIndex[media] = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash));
+        return (mediaInjectors[media] = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash));
       } else {
         if (plain) {
           return plain;
@@ -53,9 +54,9 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       }
     };
 
-    super(getInjector, options.transformer);
+    this.injectStyle = createInjectStyle(getInjector, options.transformer);
 
-    const hydrate = (this.hydrate = createHydrate(getInjector, incrementClassNameHash, incrementKeyframesHash));
+    const hydrate = (this.hydrate = createHydrate(getInjector));
 
     const preRenderedStyleElements = document.head.querySelectorAll<HTMLStyleElement>(`style[data-${identifier}]`);
 
@@ -71,7 +72,11 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
             initialMediaSheet = element;
           }
           mediaSheets[media] = element;
-          injector = mediaIndex[media] = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash);
+          injector = mediaInjectors[media] = new InjectorClient(
+            element,
+            incrementClassNameHash,
+            incrementKeyframesHash,
+          );
         } else {
           injector = plain = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash);
         }

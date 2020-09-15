@@ -89,6 +89,73 @@ describe('server', () => {
     expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
     expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a{color:red;color:green}"`);
   });
+  it('resets plain rule', () => {
+    const classNameHash = createHashCounter();
+    const keyframesHash = createHashCounter();
+    const injector = new InjectorServer(classNameHash, keyframesHash);
+
+    injector.hydrateClassName('color:red', 'a');
+    injector.hydrateClassName('color:green', 'b');
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'blue' })).toBe('c');
+    classNameHash.reset();
+    keyframesHash.reset();
+    injector.reset();
+    expect(injector.injectClassName({ color: 'red' })).toBe('a');
+    expect(injector.injectClassName({ color: 'blue' })).toBe('c');
+  });
+  it('resets pseudo rule', () => {
+    const classNameHash = createHashCounter();
+    const keyframesHash = createHashCounter();
+    const injector = new InjectorServer(classNameHash, keyframesHash);
+
+    injector.hydrateClassName('color:red', 'a', ':hover');
+    injector.hydrateClassName('color:green', 'b', ':hover');
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'blue' }, ':hover')).toBe('c');
+    classNameHash.reset();
+    keyframesHash.reset();
+    injector.reset();
+    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injector.injectClassName({ color: 'blue' }, ':hover')).toBe('c');
+  });
+  it('resets attribute rule', () => {
+    const classNameHash = createHashCounter();
+    const keyframesHash = createHashCounter();
+    const injector = new InjectorServer(classNameHash, keyframesHash);
+
+    injector.hydrateClassName('color:red', 'a', '[disabled]');
+    injector.hydrateClassName('color:green', 'b', '[disabled]');
+    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
+    expect(injector.injectClassName({ color: 'blue' }, '[disabled]')).toBe('c');
+    classNameHash.reset();
+    keyframesHash.reset();
+    injector.reset();
+    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
+    expect(injector.injectClassName({ color: 'blue' }, '[disabled]')).toBe('c');
+  });
+  it('resets keyframes rule', () => {
+    const classNameHash = createHashCounter();
+    const keyframesHash = createHashCounter();
+    const injector = new InjectorServer(classNameHash, keyframesHash);
+
+    injector.hydrateKeyframes('from{color:red}to{color:green}', 'a');
+    injector.hydrateKeyframes('from{color:green}to{color:blue}', 'b');
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'blue' }, to: { color: 'white' } })).toBe('c');
+    classNameHash.reset();
+    keyframesHash.reset();
+    injector.reset();
+    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injector.injectKeyframes({ from: { color: 'blue' }, to: { color: 'white' } })).toBe('c');
+  });
+  it('throws when hydrating after injection', () => {
+    const injector = createInjector();
+
+    injector.hydrateClassName('color:red', 'a');
+    injector.injectClassName({ color: 'red' });
+    expect(() => injector.hydrateClassName('color:green', 'b')).toThrowError();
+  });
 });
 
 function createInjector() {

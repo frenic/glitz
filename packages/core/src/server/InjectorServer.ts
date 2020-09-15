@@ -1,5 +1,6 @@
 import Injector from '../core/Injector';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
+import { HashCounter } from '../utils/hash';
 
 export default class InjectorServer extends Injector {
   public getStyleResult: () => string;
@@ -7,59 +8,63 @@ export default class InjectorServer extends Injector {
   public hydrateClassName: (body: string, className: string, suffix?: string) => void;
   public hydrateKeyframes: (body: string, name: string) => void;
   public hydrateFontFace: (body: string) => void;
-  constructor(incrementClassHash: () => string, incrementKeyframesHash: () => string) {
-    const plainFullIndex: { [block: string]: string } = {};
-    const selectorFullIndex: { [selector: string]: { [block: string]: string } } = {};
-    const keyframesFullIndex: { [block: string]: string } = {};
-    const fontFaceFullIndex: string[] = [];
+  public reset: () => boolean;
+  constructor(classNameHash: HashCounter, keyframesHash: HashCounter) {
+    let plainFullIndex: { [block: string]: string } = {};
+    let selectorFullIndex: { [selector: string]: { [block: string]: string } } = {};
+    let keyframesFullIndex: { [block: string]: string } = {};
+    let fontFaceFullIndex: string[] = [];
 
-    const plainResultIndex: { [block: string]: string } = {};
-    const selectorResultIndex: { [selector: string]: { [block: string]: string } } = {};
-    const keyframesResultIndex: { [block: string]: string } = {};
-    const fontFaceResultIndex: string[] = [];
+    const plainHydrationIndex: { [block: string]: string } = {};
+    const selectorHydrationIndex: { [selector: string]: { [block: string]: string } } = {};
+    const keyframesHydrationIndex: { [block: string]: string } = {};
+    const fontFaceHydrationIndex: string[] = [];
+    let forbidHydration = false;
 
-    const plainStreamIndex: { [block: string]: string } = {};
-    const selectorStreamIndex: { [selector: string]: { [block: string]: string } } = {};
-    const keyframesStreamIndex: { [block: string]: string } = {};
-    const fontFaceStreamIndex: string[] = [];
+    let plainResultIndex: { [block: string]: string } = {};
+    let selectorResultIndex: { [selector: string]: { [block: string]: string } } = {};
+    let keyframesResultIndex: { [block: string]: string } = {};
+    let fontFaceResultIndex: string[] = [];
+
+    let plainStreamIndex: { [block: string]: string } = {};
+    let selectorStreamIndex: { [selector: string]: { [block: string]: string } } = {};
+    let keyframesStreamIndex: { [block: string]: string } = {};
+    let fontFaceStreamIndex: string[] = [];
 
     super(
-      block => {
-        if (plainFullIndex[block]) {
-          return plainFullIndex[block];
-        }
-
-        const className = incrementClassHash();
-        plainFullIndex[block] = plainResultIndex[block] = plainStreamIndex[block] = className;
-
-        return className;
-      },
-      (selector, block) => {
-        const full = (selectorFullIndex[selector] = selectorFullIndex[selector] || {});
+      (block, selector) => {
+        forbidHydration = true;
+        const full = selector ? (selectorFullIndex[selector] = selectorFullIndex[selector] ?? {}) : plainFullIndex;
 
         if (full[block]) {
           return full[block];
         }
 
-        const className = incrementClassHash();
+        const className = classNameHash();
 
-        const result = (selectorResultIndex[selector] = selectorResultIndex[selector] || {});
-        const stream = (selectorStreamIndex[selector] = selectorStreamIndex[selector] || {});
+        const result = selector
+          ? (selectorResultIndex[selector] = selectorResultIndex[selector] ?? {})
+          : plainResultIndex;
+        const stream = selector
+          ? (selectorStreamIndex[selector] = selectorStreamIndex[selector] ?? {})
+          : plainStreamIndex;
         full[block] = result[block] = stream[block] = className;
 
         return className;
       },
       blockList => {
+        forbidHydration = true;
         if (keyframesFullIndex[blockList]) {
           return keyframesFullIndex[blockList];
         }
 
-        const name = incrementKeyframesHash();
+        const name = keyframesHash();
         keyframesFullIndex[blockList] = keyframesResultIndex[blockList] = keyframesStreamIndex[blockList] = name;
 
         return name;
       },
       block => {
+        forbidHydration = true;
         if (fontFaceFullIndex.indexOf(block) === -1) {
           fontFaceFullIndex.push(block);
           fontFaceResultIndex.push(block);
@@ -124,17 +129,78 @@ export default class InjectorServer extends Injector {
       return css;
     };
 
+    function allowHydrationCheck() {
+      if (forbidHydration) {
+        throw new Error('Hydration is prohibited after injections');
+      }
+    }
+
     this.hydrateClassName = (body, className, suffix) => {
-      const index = suffix ? (selectorFullIndex[suffix] = selectorFullIndex[suffix] || {}) : plainFullIndex;
-      index[body] = className;
+      allowHydrationCheck();
+      classNameHash();
+      const full = suffix ? (selectorFullIndex[suffix] = selectorFullIndex[suffix] ?? {}) : plainFullIndex;
+      const hydration = suffix
+        ? (selectorHydrationIndex[suffix] = selectorHydrationIndex[suffix] ?? {})
+        : plainHydrationIndex;
+      full[body] = hydration[body] = className;
     };
 
     this.hydrateKeyframes = (body, name) => {
+      allowHydrationCheck();
+      keyframesHash();
       keyframesFullIndex[body] = name;
+      keyframesHydrationIndex[body] = name;
     };
 
     this.hydrateFontFace = body => {
+      allowHydrationCheck();
       fontFaceFullIndex.push(body);
+      fontFaceHydrationIndex.push(body);
+    };
+
+    this.reset = () => {
+      plainFullIndex = {};
+      selectorFullIndex = {};
+      keyframesFullIndex = {};
+      fontFaceFullIndex = [];
+      plainResultIndex = {};
+      selectorResultIndex = {};
+      keyframesResultIndex = {};
+      fontFaceResultIndex = [];
+      plainStreamIndex = {};
+      selectorStreamIndex = {};
+      keyframesStreamIndex = {};
+      fontFaceStreamIndex = [];
+
+      let shouldDelete = true;
+
+      for (const body in plainHydrationIndex) {
+        shouldDelete = false;
+        classNameHash();
+        plainFullIndex[body] = plainHydrationIndex[body];
+      }
+
+      for (const selector in selectorHydrationIndex) {
+        for (const body in selectorHydrationIndex[selector]) {
+          shouldDelete = false;
+          classNameHash();
+          const index = (selectorFullIndex[selector] = selectorFullIndex[selector] ?? {});
+          index[body] = selectorHydrationIndex[selector][body];
+        }
+      }
+
+      for (const body in keyframesHydrationIndex) {
+        shouldDelete = false;
+        keyframesHash();
+        keyframesFullIndex[body] = keyframesHydrationIndex[body];
+      }
+
+      for (const body of fontFaceHydrationIndex) {
+        shouldDelete = false;
+        fontFaceFullIndex.push(body);
+      }
+
+      return shouldDelete;
     };
   }
 }

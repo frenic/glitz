@@ -418,4 +418,23 @@ describe('server', () => {
     expect(server.injectStyle({ color: (theme: any) => theme.text }, { text: 'red' })).toBe('a');
     expect(server.getStyleMarkup()).toMatchInlineSnapshot(`"<style data-glitz>.a{color:red}</style>"`);
   });
+  it('hydrates and resets', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    server.hydrate('.a{color:red}.b{color:green}@media (min-width: 768px){.c{color:red}.d{color:green}}');
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('c');
+    expect(server.injectStyle({ color: 'blue' })).toBe('e');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { color: 'blue' } })).toBe('f');
+    expect(server.injectStyle({ '@media (min-width: 992px)': { color: 'blue' } })).toBe('g');
+    expect(server.getStyleMarkup()).toMatchInlineSnapshot(
+      `"<style data-glitz>.e{color:blue}</style><style data-glitz media=\\"(min-width: 768px)\\">.f{color:blue}</style><style data-glitz media=\\"(min-width: 992px)\\">.g{color:blue}</style>"`,
+    );
+    server.reset();
+    expect(server.injectStyle({ color: 'red' })).toBe('a');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('c');
+    expect(server.injectStyle({ color: 'blue' })).toBe('e');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { color: 'blue' } })).toBe('f');
+    expect(server.injectStyle({ '@media (min-width: 992px)': { color: 'blue' } })).toBe('g');
+  });
 });

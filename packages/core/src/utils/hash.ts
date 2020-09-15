@@ -1,4 +1,9 @@
-export function createHashCounter(prefix: string = '') {
+export type HashCounter = {
+  (): string;
+  reset(): void;
+};
+
+export function createHashCounter(prefix: string = ''): HashCounter {
   let count = 0;
   let offset = 10;
   let msb = 35;
@@ -22,5 +27,12 @@ export function createHashCounter(prefix: string = '') {
     return prefix + virtualCount.toString(36);
   };
 
-  return increment;
+  return Object.assign(increment, {
+    reset() {
+      count = 0;
+      offset = 10;
+      msb = 35;
+      power = 1;
+    },
+  });
 }

@@ -10,19 +10,13 @@ export default class Injector {
   public injectKeyframes: (declarationList: ResolvedDeclarationList) => string;
   public injectFontFace: (declarations: ResolvedDeclarations) => string;
   constructor(
-    plainClassName: (block: string) => string,
-    selectorClassName: (selector: string, block: string) => string,
+    className: (block: string, selector?: string) => string,
     keyframeName: (blockList: string) => string,
     handleFontFace: (block: string) => void,
   ) {
     this.injectClassName = (declarations, selector) => {
       const block = parseDeclarationBlock(declarations);
-
-      if (selector) {
-        return selectorClassName(selector, block);
-      } else {
-        return plainClassName(block);
-      }
+      return className(block, selector);
     };
 
     this.injectKeyframes = declarationList => {

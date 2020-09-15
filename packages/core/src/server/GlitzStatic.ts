@@ -1,11 +1,12 @@
-import { Style } from '@glitz/type';
-import Base from '../core/Base';
+import { Style, Theme } from '@glitz/type';
+import { Base, createInjectStyle } from '../core/Base';
 import { Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 import { formatMediaRule } from '../utils/format';
 
-export default class GlitzStatic<TStyle = Style> extends Base<TStyle> {
+export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
+  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
   public getStyle: () => string;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
@@ -22,7 +23,7 @@ export default class GlitzStatic<TStyle = Style> extends Base<TStyle> {
         ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(incrementClassNameHash, incrementKeyframesHash))
         : (plain = plain || new InjectorServer(incrementClassNameHash, incrementKeyframesHash));
 
-    super(injector, options.transformer);
+    this.injectStyle = createInjectStyle(injector, options.transformer);
 
     this.getStyle = () => {
       let css = '';

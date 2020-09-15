@@ -328,8 +328,8 @@ function evaluateInternal(
     if (scope && scope.has(symbol)) {
       return scope.get(symbol);
     }
-    let fileNameToCacheFor: string | undefined = undefined;
-    let evaluationResult: any = undefined;
+    let fileNameToCacheFor: string | undefined;
+    let evaluationResult: any;
     let hasEvaluated = false;
     if (!symbol.valueDeclaration) {
       [symbol, program, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, program);
@@ -605,7 +605,7 @@ function getStaticGlitzExports() {
 
 function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program) {
   const typeChecker = program.getTypeChecker();
-  let fileName: string | undefined = undefined;
+  let fileName: string | undefined;
   if (!symbol.valueDeclaration) {
     const importSpecifier = symbol.declarations[0];
     if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {
