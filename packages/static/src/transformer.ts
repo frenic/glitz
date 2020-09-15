@@ -282,10 +282,7 @@ function visitNode(
   // const Styled = styled.div({color: 'red'});
   // or:
   // const Styled = styled(TheParent, {color: 'red'});
-  if (
-    ts.isVariableStatement(node) &&
-    (!node.modifiers || !node.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword))
-  ) {
+  if (ts.isVariableStatement(node)) {
     if (node.declarationList.declarations.length === 1) {
       const declaration = node.declarationList.declarations[0];
       if (ts.isIdentifier(declaration.name) && declaration.initializer) {

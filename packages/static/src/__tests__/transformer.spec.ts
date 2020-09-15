@@ -863,7 +863,7 @@ const listStyled = styled({
     listStyle: 'square',
 });
 
-const ImportantList = listStyled(List, {
+export const ImportantList = listStyled(List, {
     fontWeight: 'bold',
 });
 
@@ -880,7 +880,7 @@ const node = <ImportantList />;
       const listStyled = /*#__PURE__*/ styled({
           listStyle: 'square',
       });
-      const ImportantList = /*#__PURE__*/ listStyled(List, {
+      export const ImportantList = /*#__PURE__*/ listStyled(List, {
           fontWeight: 'bold',
       });
       const node = <ul className=\\"a b c\\"/>;
