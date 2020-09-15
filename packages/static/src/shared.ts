@@ -1,5 +1,7 @@
 export type Style = Record<string, any>;
 
+export type Styles = Style | Style[];
+
 export type StaticComponent = ((props?: any) => StaticElement) & {
   styles: Style[];
   elementName: string;

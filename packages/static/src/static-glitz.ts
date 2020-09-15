@@ -1,19 +1,23 @@
-import { isStaticComponent, Style, StaticComponent } from './shared';
+import { isStaticComponent, StaticComponent, Style, Styles } from './shared';
 
 type ReactFunctionComponent = (props?: any) => any;
 
 type StaticDecorator = {
   (): Style[];
-  (style: Style | StaticDecorator): StaticDecorator;
-  (component: StaticComponent | ReactFunctionComponent, style?: Style): StaticComponent;
+  (style: Styles): StaticDecorator;
+  (component: StaticComponent | ReactFunctionComponent, style?: Styles): StaticComponent;
 };
 
 function createStaticStyled(styles: Style[]): StaticDecorator {
-  function decorator(arg1?: Style | StaticComponent | ReactFunctionComponent, arg2?: Style): any {
+  function decorator(arg1?: Styles | StaticComponent | ReactFunctionComponent, arg2?: Styles): any {
     return isStaticComponent(arg1)
-      ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, arg2 ?? {}])
+      ? createStaticComponent(arg1.elementName, [
+          ...arg1.styles,
+          ...styles,
+          ...(Array.isArray(arg2) ? arg2 : arg2 ? [arg2] : []),
+        ])
       : typeof arg1 === 'object'
-      ? createStaticStyled([...styles, arg1])
+      ? createStaticStyled([...styles, ...(Array.isArray(arg1) ? arg1 : [arg1])])
       : typeof arg1 === 'undefined'
       ? styles
       : arg1;
@@ -25,7 +29,7 @@ function createStaticStyled(styles: Style[]): StaticDecorator {
 function createStaticComponent(elementName: string, styles?: Style[]): StaticComponent {
   function Component(props: any = {}) {
     return {
-      styles: [props.css ?? {}, ...(styles ?? [])],
+      styles: [...((Array.isArray(props.css) ? props.css : props.css ? [props.css] : []) ?? {}), ...(styles ?? [])],
       elementName,
     };
   }

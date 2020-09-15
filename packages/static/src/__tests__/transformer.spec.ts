@@ -894,23 +894,49 @@ test('can use decorator in css prop', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
-const colorDecorator = styled({
-    backgroundColor: 'red',
-});
-const node1 = <styled.Div css={colorDecorator()} />;
+const colorDecorator = styled({ backgroundColor: 'red' });
+const paddingDecorator = styled({ paddingTop: '10px' });
+const decorator = colorDecorator(paddingDecorator());
+const node1 = <styled.Div css={decorator()} />;
 `,
   };
 
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
-      const colorDecorator = /*#__PURE__*/ styled({
-          backgroundColor: 'red',
-      });
-      const node1 = <div className=\\"a\\" data-glitzname=\\"styled.Div\\"/>;
+      const colorDecorator = /*#__PURE__*/ styled({ backgroundColor: 'red' });
+      const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
+      const decorator = colorDecorator(paddingDecorator());
+      const node1 = <div className=\\"a b\\" data-glitzname=\\"styled.Div\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{padding-top:10px}"`);
+  });
+});
+
+test('can use decorator in styled', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+const colorDecorator = styled({ backgroundColor: 'red' });
+const paddingDecorator = styled({ paddingTop: '10px' });
+const decorator = colorDecorator(paddingDecorator());
+const ColorDiv = styled(styled.Div, decorator());
+const node1 = <ColorDiv />;
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const colorDecorator = /*#__PURE__*/ styled({ backgroundColor: 'red' });
+      const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
+      const decorator = colorDecorator(paddingDecorator());
+      const ColorDiv = /*#__PURE__*/ styled(styled.Div, decorator());
+      const node1 = <div className=\\"a b\\" data-glitzname=\\"ColorDiv\\"/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{padding-top:10px}"`);
   });
 });
 
