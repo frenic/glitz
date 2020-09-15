@@ -911,17 +911,18 @@ function getCssData(
   return style;
 }
 
-function anyValuesAreFunctions(style: EvaluatedStyle, level = 0): boolean | FunctionWithTsNode {
-  if (level > 10) {
-    console.log('Possibly infinite recursion detected in:', style);
-    return false;
-  }
+function anyValuesAreFunctions(style: EvaluatedStyle): boolean | FunctionWithTsNode {
   if (style && typeof style === 'object') {
     for (const key in style) {
       if (typeof style[key] === 'function') {
         return (style[key] as unknown) as FunctionWithTsNode;
-      } else if (style[key] && typeof style[key] === 'object' && !Array.isArray(style[key])) {
-        const func = anyValuesAreFunctions(style[key] as EvaluatedStyle, level + 1);
+      } else if (
+        style[key] &&
+        !isRequiresRuntimeResult(style[key]) &&
+        typeof style[key] === 'object' &&
+        !Array.isArray(style[key])
+      ) {
+        const func = anyValuesAreFunctions(style[key] as EvaluatedStyle);
         if (func !== false) {
           return func;
         }

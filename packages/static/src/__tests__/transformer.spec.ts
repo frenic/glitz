@@ -914,6 +914,30 @@ const node1 = <styled.Div css={colorDecorator()} />;
   });
 });
 
+test('bails on loop variable in css prop', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+const node = [{x: 0}, {x: 1}, {x: 2}].map(i =>
+  <styled.Span css={{ gridRow: { start: \`span \${i.x + 1}\`, end: 'auto' } }}>
+    hello
+  </styled.Span>
+);
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const node = [{ x: 0 }, { x: 1 }, { x: 2 }].map(i => <styled.Span css={{ gridRow: { start: \`span \${i.x + 1}\`, end: 'auto' } }}>
+          hello
+        </styled.Span>);
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+  });
+});
+
 test('can import a styled component', () => {
   const code = {
     'file1.tsx': `

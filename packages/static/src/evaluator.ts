@@ -377,7 +377,7 @@ function evaluateInternal(
       return scope.get(symbol);
     }
     if (!hasEvaluated) {
-      evaluationResult = requiresRuntimeResult('Not implemented: ' + expr.text + ', ' + expr.kind, expr);
+      evaluationResult = requiresRuntimeResult('Could not determine a static value for: ' + expr.text, expr);
     }
     if (fileNameToCacheFor) {
       if (!(fileNameToCacheFor in evaluationCache)) {
