@@ -28,14 +28,16 @@ exports[`typings 5`] = `"packages/react/src/__tests__/__fixtures__/typings.tsx 2
 exports[`typings 6`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 238:20 - No overload matches this call.
   The last overload gave the following error.
-    Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style'."
+    Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
 `;
 
 exports[`typings 7`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 240:9 - No overload matches this call.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 240:7 - No overload matches this call.
   The last overload gave the following error.
-    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+    Argument of type '{ color: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
+      Types of property 'color' are incompatible.
+        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
 
 exports[`typings 8`] = `
@@ -52,14 +54,16 @@ exports[`typings 9`] = `
 exports[`typings 10`] = `
 "packages/react/src/__tests__/__fixtures__/typings.tsx 246:51 - No overload matches this call.
   The last overload gave the following error.
-    Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style'."
+    Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
 `;
 
 exports[`typings 11`] = `
-"packages/react/src/__tests__/__fixtures__/typings.tsx 248:40 - No overload matches this call.
+"packages/react/src/__tests__/__fixtures__/typings.tsx 248:38 - No overload matches this call.
   The last overload gave the following error.
-    Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+    Argument of type '{ color: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
+      Types of property 'color' are incompatible.
+        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
 `;
 
 exports[`typings 12`] = `

@@ -143,7 +143,7 @@ describe('react styled', () => {
   it('decorates style', () => {
     const styleDecoratorA = styled({ color: 'red' });
     const styleDecoratorB = styleDecoratorA({ backgroundColor: 'green' });
-    const styleDecoratorC = styleDecoratorB(styled({ borderLeftColor: 'blue' }));
+    const styleDecoratorC = styleDecoratorB(styled({ borderLeftColor: 'blue' })());
     expect(styleDecoratorC()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }, { borderLeftColor: 'blue' }]);
     const StyledComponentA = styled(() => {
       return React.createElement(styled.Div, {

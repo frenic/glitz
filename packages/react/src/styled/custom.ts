@@ -14,37 +14,39 @@ import createComponent, { WithoutRefProp } from './create';
 import createDecorator, { StyledDecorator, isStyle } from './decorator';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
+export type Styles = Style | Style[];
+
 export interface Styled {
-  <TProps = {}>(component: FunctionComponent<TProps>, style?: Style): StyledComponent<WithoutRefProp<TProps>>;
-  <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Style): StyledComponentWithRef<
+  <TProps = {}>(component: FunctionComponent<TProps>, style?: Styles): StyledComponent<WithoutRefProp<TProps>>;
+  <TProps, TInstance>(component: StyledComponentWithRef<TProps, TInstance>, style?: Styles): StyledComponentWithRef<
     TProps,
     TInstance
   >;
-  <TProps>(component: StyledComponent<TProps>, style?: Style): StyledComponent<TProps>;
+  <TProps>(component: StyledComponent<TProps>, style?: Styles): StyledComponent<TProps>;
   <TProps extends StyledElementProps>(
     component: StyledElementLike<FunctionComponent<TProps>>,
-    style?: Style,
+    style?: Styles,
   ): StyledComponent<WithoutRefProp<TProps>>;
   <TProps extends StyledElementProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledElementLike<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
-    style?: Style,
+    style?: Styles,
   ): StyledComponentWithRef<TProps, TInstance>;
   <TProps, TInstance>(
     component: ForwardRefExoticComponent<TProps & RefAttributes<TInstance>>,
-    style?: Style,
+    style?: Styles,
   ): StyledComponentWithRef<TProps, TInstance>;
   <TProps, TInstance extends Component<TProps, ComponentState>>(
     component: ClassType<TProps, TInstance, ComponentClass<TProps>>,
-    style?: Style,
+    style?: Styles,
   ): StyledComponentWithRef<TProps, TInstance>;
 
   // This overload prevents errors on `component` when `style` is incorrect
   // and enables usage of generic parameter to provide prop type
-  (component: StyledElementLike<ComponentType<StyledElementProps>> | ComponentType, style?: Style): StyledComponent<
+  (component: StyledElementLike<ComponentType<StyledElementProps>> | ComponentType, style?: Styles): StyledComponent<
     any
   >;
 
-  (style?: Style): StyledDecorator;
+  (style?: Styles): StyledDecorator;
 }
 
 function creator<TProps>(
@@ -53,10 +55,10 @@ function creator<TProps>(
     | StyledComponentWithRef<any, any>
     | StyledComponent<any>
     | ComponentType,
-  arg2?: Style,
+  arg2?: Styles,
 ): StyledComponent<TProps>;
 
-function creator<TProps>(arg1?: Style): StyledDecorator;
+function creator<TProps>(arg1?: Styles): StyledDecorator;
 
 function creator<TProps>(
   arg1?:
@@ -64,8 +66,8 @@ function creator<TProps>(
     | StyledComponentWithRef<TProps, any>
     | StyledComponent<TProps>
     | ComponentType<TProps>
-    | Style,
-  arg2?: Style,
+    | Styles,
+  arg2?: Styles,
 ): StyledComponent<TProps> | StyledDecorator {
   return typeof arg1 === 'undefined' || isStyle(arg1) ? createDecorator(arg1) : createComponent<TProps>(arg1, arg2);
 }

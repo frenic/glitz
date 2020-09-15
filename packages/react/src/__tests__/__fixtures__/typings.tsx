@@ -118,7 +118,7 @@ const StyledStyledClassComponentWithRequiredProps = styled(StyledClassComponentW
 
 const styledDecoratorA = styled({});
 const styledDecoratorB = styled({});
-const styledDecoratorAB = styledDecoratorA(styledDecoratorB({}));
+const styledDecoratorAB = styledDecoratorA(styledDecoratorB({})());
 const StyledFunctionComponentWithDecorator = styledDecoratorAB(() => <styled.Div css={{}} />);
 <StyledFunctionComponentWithDecorator css={{}} />;
 

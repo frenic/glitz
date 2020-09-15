@@ -3,7 +3,7 @@ import { Style } from '@glitz/type';
 import { StyledElementLike } from './apply-class-name';
 import { SECRET_DECORATOR } from './constants';
 import createComponent, { isStyledComponent } from './create';
-import { Styled } from './custom';
+import { Styled, Styles } from './custom';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 import { flattenStyle, DirtyStyle } from './use-glitz';
 import { isType } from './predefined';
@@ -11,7 +11,6 @@ import { isValidElementType } from 'react-is';
 
 export interface StyledDecorator extends Styled {
   [SECRET_DECORATOR]: true;
-  (decorator: StyledDecorator): StyledDecorator;
   (): Style[];
 }
 
@@ -22,10 +21,10 @@ export default function createDecorator(style?: DirtyStyle): StyledDecorator {
       | StyledComponentWithRef<any, any>
       | StyledComponent<any>
       | ComponentType,
-    arg2?: Style,
+    arg2?: Styles,
   ): StyledComponent<TProps>;
 
-  function decorator<TProps>(arg1?: Style | StyledDecorator): StyledDecorator;
+  function decorator<TProps>(arg1?: Styles): StyledDecorator;
 
   function decorator<TProps>(): Style[];
 
@@ -35,12 +34,11 @@ export default function createDecorator(style?: DirtyStyle): StyledDecorator {
       | StyledComponentWithRef<TProps, any>
       | StyledComponent<TProps>
       | ComponentType<TProps>
-      | Style
-      | StyledDecorator,
-    arg2?: Style,
+      | Styles,
+    arg2?: Styles,
   ) {
     if (arg1) {
-      if (isStyle(arg1) || isDecorator(arg1)) {
+      if (isStyle(arg1)) {
         return createDecorator([style, arg1]);
       }
 
@@ -53,12 +51,6 @@ export default function createDecorator(style?: DirtyStyle): StyledDecorator {
   return Object.assign(decorator, { [SECRET_DECORATOR]: true } as const);
 }
 
-function isDecorator(
-  value: StyledElementLike<ComponentType<any>> | StyledComponent<any> | ComponentType<any> | DirtyStyle,
-): value is StyledDecorator {
-  return typeof value === 'function' && SECRET_DECORATOR in value;
-}
-
-export function isStyle(arg: any): arg is Style {
+export function isStyle(arg: any): arg is Styles {
   return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg) && !isValidElementType(arg);
 }
