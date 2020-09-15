@@ -412,7 +412,8 @@ function visitNode(
       ts.isJsxSelfClosingElement(node) &&
       ts.isPropertyAccessExpression(node.tagName) &&
       ts.isIdentifier(node.tagName.expression) &&
-      node.tagName.expression.escapedText.toString() === styledName
+      node.tagName.expression.escapedText.toString() === styledName &&
+      !hasSpreadWithoutCssPropOrAfterCssProp(node.attributes.properties)
     ) {
       // We now know that: node == `<styled.[element name] />`
       const elementName = node.tagName.name.escapedText.toString().toLowerCase();
@@ -452,7 +453,8 @@ function visitNode(
       if (
         ts.isPropertyAccessExpression(openingElement.tagName) &&
         ts.isIdentifier(openingElement.tagName.expression) &&
-        openingElement.tagName.expression.escapedText.toString() === styledName
+        openingElement.tagName.expression.escapedText.toString() === styledName &&
+        !hasSpreadWithoutCssPropOrAfterCssProp(openingElement.attributes.properties)
       ) {
         // We now know that: node == `<styled.[element name]>[zero or more children]</styled.[element name]>`
         if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
@@ -498,7 +500,8 @@ function visitNode(
         if (
           jsxTagSymbol &&
           staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
-          !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
+          !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
+          !hasSpreadWithoutCssPropOrAfterCssProp(node.openingElement.attributes.properties)
         ) {
           // We now know that: node == `<[styled component name] [zero or more props]>[zero or more children]</[styled component name]>`
           // and we also know that the JSX points to a component that is 100% static
@@ -561,7 +564,8 @@ function visitNode(
     if (
       jsxTagSymbol &&
       staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
-      !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)
+      !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
+      !hasSpreadWithoutCssPropOrAfterCssProp(node.attributes.properties)
     ) {
       // We now know that: node == `<[styled component name] [zero or more props] />`
       // and we also know that the JSX points to a component that is 100% static
@@ -997,6 +1001,18 @@ function passThroughProps(props: ts.NodeArray<ts.JsxAttributeLike>) {
     }
     return true;
   });
+}
+
+function hasSpreadWithoutCssPropOrAfterCssProp(props: ts.NodeArray<ts.JsxAttributeLike>) {
+  const spreadPropIndex = props.findIndex(p => ts.isJsxSpreadAttribute(p));
+  if (spreadPropIndex === -1) {
+    return false;
+  }
+  const cssPropIndex = props.findIndex(p => ts.isJsxAttribute(p) && ts.isIdentifier(p.name) && p.name.text === 'css');
+  if (cssPropIndex === -1) {
+    return true;
+  }
+  return cssPropIndex < spreadPropIndex;
 }
 
 function isComponentName(name: string) {

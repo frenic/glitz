@@ -1043,7 +1043,15 @@ test('bails on spread after css prop', () => {
     'file1.tsx': `
 import { styled } from '@glitz/react';
 const obj: any = {};
-const node = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
+const Styled = styled.div({
+  color: 'red',
+})
+const node1 = <styled.Div css={{ backgroundColor: 'green' }} {...obj} />;
+const node2 = <styled.Div {...obj} />;
+const node3 = <styled.Div {...obj} css={{ backgroundColor: 'green' }} />;
+const node4 = <Styled {...obj} />;
+const node5 = <Styled css={{ backgroundColor: 'green' }} {...obj} />;
+const node6 = <Styled {...obj} css={{ backgroundColor: 'green' }} />;
 `,
   };
 
@@ -1051,10 +1059,18 @@ const node = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       const obj = {};
-      const node = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
+      const Styled = /*#__PURE__*/ styled.div({
+          color: 'red',
+      });
+      const node1 = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
+      const node2 = <styled.Div {...obj}/>;
+      const node3 = <div {...obj} className=\\"b\\" data-glitzname=\\"styled.Div\\"/>;
+      const node4 = <Styled {...obj}/>;
+      const node5 = <Styled css={{ backgroundColor: 'green' }} {...obj}/>;
+      const node6 = <div {...obj} className=\\"a b\\" data-glitzname=\\"Styled\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:green}"`);
   });
 });
 
