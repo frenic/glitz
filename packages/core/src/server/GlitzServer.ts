@@ -27,7 +27,7 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
 
     super(getInjector, options.transformer);
 
-    this.hydrate = createHydrate(getInjector, incrementClassNameHash, incrementKeyframesHash);
+    this.hydrate = createHydrate(getInjector);
 
     const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
 

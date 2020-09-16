@@ -11,8 +11,6 @@ const MEDIA_SELECTOR = /@media (.+)/;
 
 export function createHydrate<TInjector extends InjectorClient | InjectorServer>(
   getInjector: (media?: string | undefined) => TInjector,
-  incrementClassNameHash: () => string,
-  incrementKeyframesHash: () => string,
 ) {
   return function hydrate(
     css: string,
@@ -58,10 +56,8 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
 
           let match: RegExpExecArray | null;
           if ((match = PLAIN_SELECTOR.exec(selector))) {
-            incrementClassNameHash();
             currentInjector.hydrateClassName(body, match[1], match[2]);
           } else if ((match = KEYFRAMES_SELECTOR.exec(selector))) {
-            incrementKeyframesHash();
             currentInjector.hydrateKeyframes(body, match[1]);
           } else if (selector === '@font-face') {
             currentInjector.hydrateFontFace(body);

@@ -25,4 +25,10 @@ describe('hash', () => {
     const counter = createHashCounter('x');
     expect(counter()).toBe('xa');
   });
+  it('resets', () => {
+    const counter = createHashCounter();
+    expect(counter()).toBe('a');
+    counter.reset();
+    expect(counter()).toBe('a');
+  });
 });
