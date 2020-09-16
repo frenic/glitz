@@ -53,7 +53,7 @@ export default class GlitzClient<TStyle = Style> extends Base<TStyle> {
       }
     };
 
-    super(getInjector, options.transformer, options.atomic);
+    super(getInjector, options.transformer);
 
     const hydrate = (this.hydrate = createHydrate(getInjector, incrementClassNameHash, incrementKeyframesHash));
 

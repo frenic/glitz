@@ -29,7 +29,7 @@ export interface ResolvedDeclarationList {
   [identifier: string]: ResolvedDeclarations;
 }
 
-export type CommonValue = string | number | undefined | Array<string | number | undefined>;
+export type CommonValue = string | number | undefined | Array<string | number>;
 
 export type CommonStyle = {
   [key: string]: CommonStyle | CommonValue | ((theme: Theme) => CommonValue);

@@ -37,10 +37,10 @@ describe('client', () => {
     ).toBe('a b c d');
 
     expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {padding-left: 10px;}"`);
-    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {padding-right: 10px;}"`);
-    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c {padding-top: 10px;}"`);
-    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d {padding-bottom: 10px;}"`);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {padding-bottom: 10px;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {padding-top: 10px;}"`);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c {padding-right: 10px;}"`);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d {padding-left: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -58,8 +58,8 @@ describe('client', () => {
     ).toBe('f g');
 
     expect(sheet.cssRules).toHaveLength(7);
-    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".f {margin-left: 10px;}"`);
-    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`".g {margin-right: 10px;}"`);
+    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".f {margin-right: 10px;}"`);
+    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`".g {margin-left: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -68,8 +68,8 @@ describe('client', () => {
     ).toBe('h i');
 
     expect(sheet.cssRules).toHaveLength(9);
-    expect(sheet.cssRules[7].cssText).toMatchInlineSnapshot(`".h {margin-top: 10px;}"`);
-    expect(sheet.cssRules[8].cssText).toMatchInlineSnapshot(`".i {margin-bottom: 10px;}"`);
+    expect(sheet.cssRules[7].cssText).toMatchInlineSnapshot(`".h {margin-bottom: 10px;}"`);
+    expect(sheet.cssRules[8].cssText).toMatchInlineSnapshot(`".i {margin-top: 10px;}"`);
 
     expect(
       client.injectStyle({
@@ -78,10 +78,10 @@ describe('client', () => {
     ).toBe('j k l m');
 
     expect(sheet.cssRules).toHaveLength(13);
-    expect(sheet.cssRules[9].cssText).toMatchInlineSnapshot(`".j {margin-left: 20px;}"`);
-    expect(sheet.cssRules[10].cssText).toMatchInlineSnapshot(`".k {margin-right: 20px;}"`);
-    expect(sheet.cssRules[11].cssText).toMatchInlineSnapshot(`".l {margin-top: 20px;}"`);
-    expect(sheet.cssRules[12].cssText).toMatchInlineSnapshot(`".m {margin-bottom: 20px;}"`);
+    expect(sheet.cssRules[9].cssText).toMatchInlineSnapshot(`".j {margin-bottom: 20px;}"`);
+    expect(sheet.cssRules[10].cssText).toMatchInlineSnapshot(`".k {margin-top: 20px;}"`);
+    expect(sheet.cssRules[11].cssText).toMatchInlineSnapshot(`".l {margin-right: 20px;}"`);
+    expect(sheet.cssRules[12].cssText).toMatchInlineSnapshot(`".m {margin-left: 20px;}"`);
 
     expect(
       client.injectStyle({
@@ -124,14 +124,14 @@ describe('client', () => {
     ).toBe('q r s t u v w x');
 
     expect(sheet.cssRules).toHaveLength(26);
-    expect(sheet.cssRules[18].cssText).toMatchInlineSnapshot(`".q {border-left-width: 0;}"`);
-    expect(sheet.cssRules[19].cssText).toMatchInlineSnapshot(`".r {border-right-width: 0;}"`);
-    expect(sheet.cssRules[20].cssText).toMatchInlineSnapshot(`".s {border-top-width: 0;}"`);
-    expect(sheet.cssRules[21].cssText).toMatchInlineSnapshot(`".t {border-bottom-width: 0;}"`);
-    expect(sheet.cssRules[22].cssText).toMatchInlineSnapshot(`".u {border-left-color: red;}"`);
-    expect(sheet.cssRules[23].cssText).toMatchInlineSnapshot(`".v {border-right-color: red;}"`);
-    expect(sheet.cssRules[24].cssText).toMatchInlineSnapshot(`".w {border-top-color: green;}"`);
-    expect(sheet.cssRules[25].cssText).toMatchInlineSnapshot(`".x {border-bottom-color: green;}"`);
+    expect(sheet.cssRules[18].cssText).toMatchInlineSnapshot(`".q {border-bottom-color: green;}"`);
+    expect(sheet.cssRules[19].cssText).toMatchInlineSnapshot(`".r {border-top-color: green;}"`);
+    expect(sheet.cssRules[20].cssText).toMatchInlineSnapshot(`".s {border-right-color: red;}"`);
+    expect(sheet.cssRules[21].cssText).toMatchInlineSnapshot(`".t {border-left-color: red;}"`);
+    expect(sheet.cssRules[22].cssText).toMatchInlineSnapshot(`".u {border-bottom-width: 0;}"`);
+    expect(sheet.cssRules[23].cssText).toMatchInlineSnapshot(`".v {border-top-width: 0;}"`);
+    expect(sheet.cssRules[24].cssText).toMatchInlineSnapshot(`".w {border-right-width: 0;}"`);
+    expect(sheet.cssRules[25].cssText).toMatchInlineSnapshot(`".x {border-left-width: 0;}"`);
 
     expect(
       client.injectStyle({
@@ -140,10 +140,10 @@ describe('client', () => {
     ).toBe('y z a0 a1');
 
     expect(sheet.cssRules).toHaveLength(30);
-    expect(sheet.cssRules[26].cssText).toMatchInlineSnapshot(`".y {border-top-left-radius: 0;}"`);
-    expect(sheet.cssRules[27].cssText).toMatchInlineSnapshot(`".z {border-top-right-radius: 0;}"`);
-    expect(sheet.cssRules[28].cssText).toMatchInlineSnapshot(`".a0 {border-bottom-left-radius: 0;}"`);
-    expect(sheet.cssRules[29].cssText).toMatchInlineSnapshot(`".a1 {border-bottom-right-radius: 0;}"`);
+    expect(sheet.cssRules[26].cssText).toMatchInlineSnapshot(`".y {border-bottom-right-radius: 0;}"`);
+    expect(sheet.cssRules[27].cssText).toMatchInlineSnapshot(`".z {border-bottom-left-radius: 0;}"`);
+    expect(sheet.cssRules[28].cssText).toMatchInlineSnapshot(`".a0 {border-top-right-radius: 0;}"`);
+    expect(sheet.cssRules[29].cssText).toMatchInlineSnapshot(`".a1 {border-top-left-radius: 0;}"`);
 
     expect(
       client.injectStyle({
@@ -152,8 +152,8 @@ describe('client', () => {
     ).toBe('a2 a3');
 
     expect(sheet.cssRules).toHaveLength(32);
-    expect(sheet.cssRules[30].cssText).toMatchInlineSnapshot(`".a2 {border-right-width: 10px;}"`);
-    expect(sheet.cssRules[31].cssText).toMatchInlineSnapshot(`".a3 {border-left-width: 20px;}"`);
+    expect(sheet.cssRules[30].cssText).toMatchInlineSnapshot(`".a2 {border-left-width: 20px;}"`);
+    expect(sheet.cssRules[31].cssText).toMatchInlineSnapshot(`".a3 {border-right-width: 10px;}"`);
   });
   it('injects pseudo selector', () => {
     const style = createStyle();
@@ -307,58 +307,20 @@ describe('client', () => {
     ).toBe('a b c d e f g h i j k l');
 
     expect(sheet.cssRules).toHaveLength(6);
-    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
-    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b {background-color: green;}"`);
-    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c {border-left-color: blue;}"`);
-    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d:hover {color: red;}"`);
-    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".e:hover {background-color: green;}"`);
-    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".f:hover {border-left-color: blue;}"`);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".g:hover {border-left-color: blue;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".h:hover {background-color: green;}"`);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".i:hover {color: red;}"`);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".j {border-left-color: blue;}"`);
+    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".k {background-color: green;}"`);
+    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".l {color: red;}"`);
 
     expect(mediaSheet.cssRules).toHaveLength(6);
-    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".g {color: red;}"`);
-    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".h {background-color: green;}"`);
-    expect(mediaSheet.cssRules[2].cssText).toMatchInlineSnapshot(`".i {border-left-color: blue;}"`);
-    expect(mediaSheet.cssRules[3].cssText).toMatchInlineSnapshot(`".j:hover {color: red;}"`);
-    expect(mediaSheet.cssRules[4].cssText).toMatchInlineSnapshot(`".k:hover {background-color: green;}"`);
-    expect(mediaSheet.cssRules[5].cssText).toMatchInlineSnapshot(`".l:hover {border-left-color: blue;}"`);
-  });
-  it('injects non-atomic rules', () => {
-    const style = createStyle();
-    const media = createStyle('(min-width: 768px)');
-    const client = new GlitzClient<TestStyle>({ atomic: false });
-    const sheet = style.sheet as CSSStyleSheet;
-    const mediaSheet = media.sheet as CSSStyleSheet;
-
-    expect(
-      client.injectStyle({
-        color: 'red',
-        background: { color: 'green' },
-        borderLeftColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
-        '@media (min-width: 768px)': {
-          color: 'red',
-          background: { color: 'green' },
-          borderLeftColor: 'blue',
-          ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
-        },
-      }),
-    ).toBe('a b c d');
-
-    expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
-      `".a {color: red; background-color: green; border-left-color: blue;}"`,
-    );
-    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(
-      `".b:hover {color: red; background-color: green; border-left-color: blue;}"`,
-    );
-
-    expect(mediaSheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(
-      `".c {color: red; background-color: green; border-left-color: blue;}"`,
-    );
-    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(
-      `".d:hover {color: red; background-color: green; border-left-color: blue;}"`,
-    );
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a:hover {border-left-color: blue;}"`);
+    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".b:hover {background-color: green;}"`);
+    expect(mediaSheet.cssRules[2].cssText).toMatchInlineSnapshot(`".c:hover {color: red;}"`);
+    expect(mediaSheet.cssRules[3].cssText).toMatchInlineSnapshot(`".d {border-left-color: blue;}"`);
+    expect(mediaSheet.cssRules[4].cssText).toMatchInlineSnapshot(`".e {background-color: green;}"`);
+    expect(mediaSheet.cssRules[5].cssText).toMatchInlineSnapshot(`".f {color: red;}"`);
   });
   it('injects keyframes rule', () => {
     const style = createStyle();
@@ -508,7 +470,7 @@ describe('client', () => {
     const sheet1 = style1.sheet as CSSStyleSheet;
 
     expect(sheet1.cssRules).toHaveLength(1);
-    expect(sheet1.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: red;}"`);
+    expect(sheet1.cssRules[0].cssText).toMatchInlineSnapshot(`".c {color: red;}"`);
 
     const sheet2 = style2.sheet as CSSStyleSheet;
 
@@ -518,7 +480,7 @@ describe('client', () => {
     const sheet3 = style3.sheet as CSSStyleSheet;
 
     expect(sheet3.cssRules).toHaveLength(1);
-    expect(sheet3.cssRules[0].cssText).toMatchInlineSnapshot(`".c {color: blue;}"`);
+    expect(sheet3.cssRules[0].cssText).toMatchInlineSnapshot(`".a {color: blue;}"`);
   });
   it('injects rule deeply', () => {
     const style = createStyle();
@@ -648,56 +610,6 @@ describe('client', () => {
     expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".i {color: red;}"`);
     expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".j:hover {color: red;}"`);
   });
-  it('preserves order', () => {
-    const style1 = createStyle();
-    const atomic = new GlitzClient<TestStyle>();
-
-    const sheet1 = style1.sheet as CSSStyleSheet;
-
-    expect(
-      atomic.injectStyle({
-        padding: { left: '20px', right: '20px', top: '20px' },
-        color: 'red',
-        paddingRight: '30px',
-        ':hover': {
-          color: 'green',
-        },
-        paddingLeft: '30px',
-      }),
-    ).toBe('a b c d e');
-
-    expect(sheet1.cssRules).toHaveLength(5);
-    expect(sheet1.cssRules[0].cssText).toMatchInlineSnapshot(`".a {padding-top: 20px;}"`);
-    expect(sheet1.cssRules[1].cssText).toMatchInlineSnapshot(`".b {color: red;}"`);
-    expect(sheet1.cssRules[2].cssText).toMatchInlineSnapshot(`".c {padding-right: 30px;}"`);
-    expect(sheet1.cssRules[3].cssText).toMatchInlineSnapshot(`".d:hover {color: green;}"`);
-    expect(sheet1.cssRules[4].cssText).toMatchInlineSnapshot(`".e {padding-left: 30px;}"`);
-
-    style1.remove();
-
-    const style2 = createStyle();
-    const nonAtomic = new GlitzClient<TestStyle>({ atomic: false });
-
-    const sheet2 = style2.sheet as CSSStyleSheet;
-
-    expect(
-      nonAtomic.injectStyle({
-        padding: { left: '20px', right: '20px', top: '20px' },
-        color: 'red',
-        paddingRight: '30px',
-        ':hover': {
-          color: 'green',
-        },
-        paddingLeft: '30px',
-      }),
-    ).toBe('a b');
-
-    expect(sheet2.cssRules).toHaveLength(2);
-    expect(sheet2.cssRules[0].cssText).toMatchInlineSnapshot(
-      `".a {padding-top: 20px; color: red; padding-right: 30px; padding-left: 30px;}"`,
-    );
-    expect(sheet2.cssRules[1].cssText).toMatchInlineSnapshot(`".b:hover {color: green;}"`);
-  });
   it('deletes properties', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();
@@ -741,7 +653,7 @@ describe('client', () => {
     const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'blue', ':hover': { color: 'white' } } })).toBe(
-      'c d',
+      'd c',
     );
   });
   it('hydrates keyframes rule', () => {
@@ -836,7 +748,7 @@ describe('client', () => {
         '@media (min-width: 768px)': { color: 'green' },
         '@media (min-width: 992px)': { color: 'blue' },
       }),
-    ).toBe('a b c');
+    ).toBe('c b a');
   });
   it('hydrates transformed properties', () => {
     function transformer(style: FeaturedProperties) {
@@ -856,9 +768,9 @@ describe('client', () => {
   it('hydrates static style', () => {
     const client = new GlitzClient<TestStyle>();
     client.hydrate('.a{color:red}.b:hover{color:green}@media (min-width: 768px){.c{color:blue}.d:hover{color:white}}');
-    expect(client.injectStyle({ color: 'red', ':hover': { color: 'green' } })).toBe('a b');
+    expect(client.injectStyle({ color: 'red', ':hover': { color: 'green' } })).toBe('b a');
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'blue', ':hover': { color: 'white' } } })).toBe(
-      'c d',
+      'd c',
     );
   });
   it('applies transformer', () => {
@@ -887,8 +799,8 @@ describe('client', () => {
         from {-moz-appearance: none; appearance: none;} 
       }"
     `);
-    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {-moz-appearance: none; appearance: none;}"`);
-    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".b {animation-name: a;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {animation-name: a;}"`);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".b {-moz-appearance: none; appearance: none;}"`);
   });
   it('errors with invalid value type', () => {
     const client = new GlitzClient<TestStyle>();

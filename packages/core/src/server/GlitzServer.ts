@@ -25,7 +25,7 @@ export default class GlitzServer<TStyle = Style> extends Base<TStyle> {
         ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(incrementClassNameHash, incrementKeyframesHash))
         : (plain = plain || new InjectorServer(incrementClassNameHash, incrementKeyframesHash));
 
-    super(getInjector, options.transformer, options.atomic);
+    super(getInjector, options.transformer);
 
     this.hydrate = createHydrate(getInjector, incrementClassNameHash, incrementKeyframesHash);
 

@@ -118,7 +118,7 @@ describe('react styled', () => {
     const StyledComponentB = styleDecoratorB(
       () => {
         return React.createElement(styled.Div, {
-          ref: (el: HTMLDivElement) => expect(el.className).toBe('b c'),
+          ref: (el: HTMLDivElement) => expect(el.className).toBe('c a'),
         });
       },
       { color: 'green' },

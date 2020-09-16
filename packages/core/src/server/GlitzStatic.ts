@@ -22,7 +22,7 @@ export default class GlitzStatic<TStyle = Style> extends Base<TStyle> {
         ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(incrementClassNameHash, incrementKeyframesHash))
         : (plain = plain || new InjectorServer(incrementClassNameHash, incrementKeyframesHash));
 
-    super(injector, options.transformer, options.atomic);
+    super(injector, options.transformer);
 
     this.getStyle = () => {
       let css = '';

@@ -323,7 +323,7 @@ const x = func() + otherFunc();
   };
   expect(evaluate('x', code)).toBe(1 + 2 + 1);
   expect('cached-file1.ts' in cacheHits).toBeTruthy();
-  expect(cacheHits['cached-file1.ts']['func']).toBe(1);
+  expect(cacheHits['cached-file1.ts'].func).toBe(1);
 });
 
 test('can inject variables', () => {

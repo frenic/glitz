@@ -1,4 +1,4 @@
-import { ResolvedDeclarations, ResolvedValue, Style } from '@glitz/type';
+import { ResolvedDeclarations, CommonValue, Style } from '@glitz/type';
 import GlitzStatic from './GlitzStatic';
 
 interface TestStyle extends Style {
@@ -87,7 +87,7 @@ describe('server', () => {
     ).toBe('a2 a3');
 
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `"@font-face{font-family:x}@keyframes a{from{padding-left:20px}}.a{padding-left:10px}.b{padding-right:10px}.c{padding-top:10px}.d{padding-bottom:10px}.e{grid-column-gap:10px}.f{margin-left:10px}.g{margin-right:10px}.h{margin-top:10px}.i{margin-bottom:10px}.j{margin-left:20px}.k{margin-right:20px}.l{margin-top:20px}.m{margin-bottom:20px}.n{padding-left:30px}.o{animation-name:a}.p{font-family:x}.q{border-left-width:0}.r{border-right-width:0}.s{border-top-width:0}.t{border-bottom-width:0}.u{border-left-color:red}.v{border-right-color:red}.w{border-top-color:green}.x{border-bottom-color:green}.y{border-top-left-radius:0}.z{border-top-right-radius:0}.a0{border-bottom-left-radius:0}.a1{border-bottom-right-radius:0}.a2{border-right-width:10px}.a3{border-left-width:20px}"`,
+      `"@font-face{font-family:x}@keyframes a{from{padding-left:20px}}.a{padding-bottom:10px}.b{padding-top:10px}.c{padding-right:10px}.d{padding-left:10px}.e{grid-column-gap:10px}.f{margin-right:10px}.g{margin-left:10px}.h{margin-bottom:10px}.i{margin-top:10px}.j{margin-bottom:20px}.k{margin-top:20px}.l{margin-right:20px}.m{margin-left:20px}.n{padding-left:30px}.o{animation-name:a}.p{font-family:x}.q{border-bottom-color:green}.r{border-top-color:green}.s{border-right-color:red}.t{border-left-color:red}.u{border-bottom-width:0}.v{border-top-width:0}.w{border-right-width:0}.x{border-left-width:0}.y{border-bottom-right-radius:0}.z{border-bottom-left-radius:0}.a0{border-top-right-radius:0}.a1{border-top-left-radius:0}.a2{border-left-width:20px}.a3{border-right-width:10px}"`,
     );
   });
   it('injects pseudo selector', () => {
@@ -163,24 +163,7 @@ describe('server', () => {
     ).toBe('a b c d e f g h i');
 
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `".a{color:red}.b{background-color:green}.c{border-left-color:blue}.d:hover{color:red}.e:hover{background-color:green}.f:hover{border-left-color:blue}@media (min-width: 768px){.g{color:red}.h{background-color:green}.i{border-left-color:blue}}"`,
-    );
-  });
-  it('injects non-atomic rules', () => {
-    const server = new GlitzStatic<TestStyle>({ atomic: false });
-
-    expect(
-      server.injectStyle({
-        color: 'red',
-        background: { color: 'green' },
-        borderLeftColor: 'blue',
-        ':hover': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
-        '@media (min-width: 768px)': { color: 'red', background: { color: 'green' }, borderLeftColor: 'blue' },
-      }),
-    ).toBe('a b c');
-
-    expect(server.getStyle()).toMatchInlineSnapshot(
-      `".a{color:red;background-color:green;border-left-color:blue}.b:hover{color:red;background-color:green;border-left-color:blue}@media (min-width: 768px){.c{color:red;background-color:green;border-left-color:blue}}"`,
+      `".g{border-left-color:blue}.h{background-color:green}.i{color:red}.d:hover{border-left-color:blue}.e:hover{background-color:green}.f:hover{color:red}@media (min-width: 768px){.a{border-left-color:blue}.b{background-color:green}.c{color:red}}"`,
     );
   });
   it('injects keyframes rule', () => {
@@ -284,7 +267,7 @@ describe('server', () => {
       }),
     ).toBe('a b c');
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `".a{color:red}@media (min-width: 768px){.b{color:green}}@media (min-width: 992px){.c{color:blue}}"`,
+      `".c{color:red}@media (min-width: 992px){.a{color:blue}}@media (min-width: 768px){.b{color:green}}"`,
     );
   });
   it('injects rule deeply', () => {
@@ -374,43 +357,6 @@ describe('server', () => {
       `"@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:z}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:y}.h{font-family:z}.c:hover{color:red}.d:first-child:hover{color:red}@media (min-width: 768px){.i{color:red}.j:hover{color:red}}"`,
     );
   });
-  it('preserves order', () => {
-    const atomic = new GlitzStatic<TestStyle>();
-
-    expect(
-      atomic.injectStyle({
-        padding: { left: '20px', right: '20px', top: '20px' },
-        color: 'red',
-        paddingRight: '30px',
-        ':hover': {
-          color: 'green',
-        },
-        paddingLeft: '30px',
-      }),
-    ).toBe('a b c d e');
-
-    expect(atomic.getStyle()).toMatchInlineSnapshot(
-      `".a{padding-top:20px}.b{color:red}.c{padding-right:30px}.e{padding-left:30px}.d:hover{color:green}"`,
-    );
-
-    const nonAtomic = new GlitzStatic<TestStyle>({ atomic: false });
-
-    expect(
-      nonAtomic.injectStyle({
-        padding: { left: '20px', right: '20px', top: '20px' },
-        color: 'red',
-        paddingRight: '30px',
-        ':hover': {
-          color: 'green',
-        },
-        paddingLeft: '30px',
-      }),
-    ).toBe('a b');
-
-    expect(nonAtomic.getStyle()).toMatchInlineSnapshot(
-      `".a{padding-top:20px;color:red;padding-right:30px;padding-left:30px}.b:hover{color:green}"`,
-    );
-  });
   it('deletes properties', () => {
     const server = new GlitzStatic<TestStyle>();
 
@@ -443,7 +389,7 @@ describe('server', () => {
       transformer: properties => {
         const prefixed: ResolvedDeclarations = {};
         for (const property in properties) {
-          const value: ResolvedValue = properties[property];
+          const value: CommonValue = properties[property];
           if (property === 'appearance' && value === 'none') {
             prefixed.MozAppearance = value;
           }
@@ -455,7 +401,7 @@ describe('server', () => {
 
     expect(server.injectStyle({ appearance: 'none', animationName: { from: { appearance: 'none' } } })).toBe('a b');
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `"@keyframes a{from{-moz-appearance:none;appearance:none}}.a{-moz-appearance:none;appearance:none}.b{animation-name:a}"`,
+      `"@keyframes a{from{-moz-appearance:none;appearance:none}}.a{animation-name:a}.b{-moz-appearance:none;appearance:none}"`,
     );
   });
   it('passes theme', () => {
