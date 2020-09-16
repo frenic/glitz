@@ -26,9 +26,10 @@ describe('hash', () => {
     expect(counter()).toBe('xa');
   });
   it('resets', () => {
-    const counter = createHashCounter();
-    expect(counter()).toBe('a');
-    counter.reset();
-    expect(counter()).toBe('a');
+    const counterA = createHashCounter();
+    expect(counterA()).toBe('a');
+    const counterB = counterA.clone();
+    expect(counterA()).toBe('b');
+    expect(counterB()).toBe('b');
   });
 });

@@ -92,69 +92,64 @@ describe('server', () => {
   it('resets plain rule', () => {
     const classNameHash = createHashCounter();
     const keyframesHash = createHashCounter();
-    const injector = new InjectorServer(classNameHash, keyframesHash);
+    const injectorA = new InjectorServer(classNameHash, keyframesHash);
 
-    injector.hydrateClassName('color:red', 'a');
-    injector.hydrateClassName('color:green', 'b');
-    expect(injector.injectClassName({ color: 'red' })).toBe('a');
-    expect(injector.injectClassName({ color: 'blue' })).toBe('c');
-    classNameHash.reset();
-    keyframesHash.reset();
-    injector.reset();
-    expect(injector.injectClassName({ color: 'red' })).toBe('a');
-    expect(injector.injectClassName({ color: 'blue' })).toBe('c');
+    injectorA.hydrateClassName('color:red', 'a');
+    injectorA.hydrateClassName('color:green', 'b');
+    const injectorB = injectorA.clone(classNameHash.clone(), keyframesHash.clone());
+    expect(injectorA.injectClassName({ color: 'red' })).toBe('a');
+    expect(injectorA.injectClassName({ color: 'blue' })).toBe('c');
+    expect(injectorB.injectClassName({ color: 'red' })).toBe('a');
+    expect(injectorB.injectClassName({ color: 'blue' })).toBe('c');
   });
   it('resets pseudo rule', () => {
     const classNameHash = createHashCounter();
     const keyframesHash = createHashCounter();
-    const injector = new InjectorServer(classNameHash, keyframesHash);
+    const injectorA = new InjectorServer(classNameHash, keyframesHash);
 
-    injector.hydrateClassName('color:red', 'a', ':hover');
-    injector.hydrateClassName('color:green', 'b', ':hover');
-    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassName({ color: 'blue' }, ':hover')).toBe('c');
-    classNameHash.reset();
-    keyframesHash.reset();
-    injector.reset();
-    expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.injectClassName({ color: 'blue' }, ':hover')).toBe('c');
+    injectorA.hydrateClassName('color:red', 'a', ':hover');
+    injectorA.hydrateClassName('color:green', 'b', ':hover');
+    const injectorB = injectorA.clone(classNameHash.clone(), keyframesHash.clone());
+    expect(injectorA.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injectorA.injectClassName({ color: 'blue' }, ':hover')).toBe('c');
+    expect(injectorB.injectClassName({ color: 'red' }, ':hover')).toBe('a');
+    expect(injectorB.injectClassName({ color: 'blue' }, ':hover')).toBe('c');
   });
   it('resets attribute rule', () => {
     const classNameHash = createHashCounter();
     const keyframesHash = createHashCounter();
-    const injector = new InjectorServer(classNameHash, keyframesHash);
+    const injectorA = new InjectorServer(classNameHash, keyframesHash);
 
-    injector.hydrateClassName('color:red', 'a', '[disabled]');
-    injector.hydrateClassName('color:green', 'b', '[disabled]');
-    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
-    expect(injector.injectClassName({ color: 'blue' }, '[disabled]')).toBe('c');
-    classNameHash.reset();
-    keyframesHash.reset();
-    injector.reset();
-    expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
-    expect(injector.injectClassName({ color: 'blue' }, '[disabled]')).toBe('c');
+    injectorA.hydrateClassName('color:red', 'a', '[disabled]');
+    injectorA.hydrateClassName('color:green', 'b', '[disabled]');
+    const injectorB = injectorA.clone(classNameHash.clone(), keyframesHash.clone());
+    expect(injectorA.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
+    expect(injectorA.injectClassName({ color: 'blue' }, '[disabled]')).toBe('c');
+    expect(injectorB.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
+    expect(injectorB.injectClassName({ color: 'blue' }, '[disabled]')).toBe('c');
   });
   it('resets keyframes rule', () => {
     const classNameHash = createHashCounter();
     const keyframesHash = createHashCounter();
-    const injector = new InjectorServer(classNameHash, keyframesHash);
+    const injectorA = new InjectorServer(classNameHash, keyframesHash);
 
-    injector.hydrateKeyframes('from{color:red}to{color:green}', 'a');
-    injector.hydrateKeyframes('from{color:green}to{color:blue}', 'b');
-    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
-    expect(injector.injectKeyframes({ from: { color: 'blue' }, to: { color: 'white' } })).toBe('c');
-    classNameHash.reset();
-    keyframesHash.reset();
-    injector.reset();
-    expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
-    expect(injector.injectKeyframes({ from: { color: 'blue' }, to: { color: 'white' } })).toBe('c');
+    injectorA.hydrateKeyframes('from{color:red}to{color:green}', 'a');
+    injectorA.hydrateKeyframes('from{color:green}to{color:blue}', 'b');
+    const injectorB = injectorA.clone(classNameHash.clone(), keyframesHash.clone());
+    expect(injectorA.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injectorA.injectKeyframes({ from: { color: 'blue' }, to: { color: 'white' } })).toBe('c');
+    expect(injectorB.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
+    expect(injectorB.injectKeyframes({ from: { color: 'blue' }, to: { color: 'white' } })).toBe('c');
   });
-  it('throws when hydrating after injection', () => {
-    const injector = createInjector();
+  it('throws when hydrating and cloning after injection', () => {
+    const classNameHash = createHashCounter();
+    const keyframesHash = createHashCounter();
+    const injector = new InjectorServer(classNameHash, keyframesHash);
 
     injector.hydrateClassName('color:red', 'a');
     injector.injectClassName({ color: 'red' });
     expect(() => injector.hydrateClassName('color:green', 'b')).toThrowError();
+    expect(() => injector.clone(classNameHash.clone(), keyframesHash.clone())).toThrowError();
   });
 });
 

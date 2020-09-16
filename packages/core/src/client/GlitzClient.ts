@@ -11,8 +11,8 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
   public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
-    const incrementClassNameHash = createHashCounter(prefix);
-    const incrementKeyframesHash = createHashCounter(prefix);
+    const classNameHash = createHashCounter(prefix);
+    const keyframesHash = createHashCounter(prefix);
 
     const mediaOrderOption = options.mediaOrder;
     const mediaSheets: { [media: string]: HTMLStyleElement } = {};
@@ -42,7 +42,7 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
 
         insertStyleElement(element, insertBefore);
 
-        return (mediaInjectors[media] = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash));
+        return (mediaInjectors[media] = new InjectorClient(element, classNameHash, keyframesHash));
       } else {
         if (plain) {
           return plain;
@@ -50,7 +50,7 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
 
         const element = insertStyleElement(createStyleElement(media, identifier), initialMediaSheet);
 
-        return (plain = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash));
+        return (plain = new InjectorClient(element, classNameHash, keyframesHash));
       }
     };
 
@@ -72,13 +72,9 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
             initialMediaSheet = element;
           }
           mediaSheets[media] = element;
-          injector = mediaInjectors[media] = new InjectorClient(
-            element,
-            incrementClassNameHash,
-            incrementKeyframesHash,
-          );
+          injector = mediaInjectors[media] = new InjectorClient(element, classNameHash, keyframesHash);
         } else {
-          injector = plain = new InjectorClient(element, incrementClassNameHash, incrementKeyframesHash);
+          injector = plain = new InjectorClient(element, classNameHash, keyframesHash);
         }
 
         hydrate(element.textContent!, injector);

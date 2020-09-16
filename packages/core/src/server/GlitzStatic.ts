@@ -10,8 +10,8 @@ export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
   public getStyle: () => string;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
-    const incrementClassNameHash = createHashCounter(prefix);
-    const incrementKeyframesHash = createHashCounter(prefix);
+    const classNameHash = createHashCounter(prefix);
+    const keyframesHash = createHashCounter(prefix);
 
     let plain: InjectorServer;
     const mediaIndex: {
@@ -20,8 +20,8 @@ export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
 
     const injector = (media?: string) =>
       media
-        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(incrementClassNameHash, incrementKeyframesHash))
-        : (plain = plain || new InjectorServer(incrementClassNameHash, incrementKeyframesHash));
+        ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classNameHash, keyframesHash))
+        : (plain = plain || new InjectorServer(classNameHash, keyframesHash));
 
     this.injectStyle = createInjectStyle(injector, options.transformer);
 

@@ -11,22 +11,19 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
   public hydrate: (css: string) => void;
   public getStyleMarkup: () => string;
   public getStyleStream: () => [string, { [name: string]: string }, string] | undefined;
-  public reset: (preserveHydration?: boolean) => void;
-  constructor(options: Options = {}) {
-    const prefix = options.prefix;
-    const incrementClassNameHash = createHashCounter(prefix);
-    const incrementKeyframesHash = createHashCounter(prefix);
-
-    let plain: InjectorServer | undefined;
-    const mediaInjectors: {
-      [media: string]: InjectorServer;
-    } = {};
-
+  public clone: () => GlitzServer<TStyle>;
+  constructor(options?: Options);
+  constructor(
+    options: Options = {},
+    classNameHash = createHashCounter(options.prefix),
+    keyframesHash = createHashCounter(options.prefix),
+    plainInjector?: InjectorServer,
+    mediaInjectors: Record<string, InjectorServer> = {},
+  ) {
     const getInjector = (media?: string) =>
       media
-        ? (mediaInjectors[media] =
-            mediaInjectors[media] || new InjectorServer(incrementClassNameHash, incrementKeyframesHash))
-        : (plain = plain || new InjectorServer(incrementClassNameHash, incrementKeyframesHash));
+        ? (mediaInjectors[media] = mediaInjectors[media] || new InjectorServer(classNameHash, keyframesHash))
+        : (plainInjector = plainInjector || new InjectorServer(classNameHash, keyframesHash));
 
     this.injectStyle = createInjectStyle(getInjector, options.transformer);
 
@@ -36,8 +33,8 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
 
     this.getStyleMarkup = () => {
       let markup = '';
-      if (plain) {
-        markup += `<style data-${identifier}>${plain.getStyleResult()}</style>`;
+      if (plainInjector) {
+        markup += `<style data-${identifier}>${plainInjector.getStyleResult()}</style>`;
       }
       const medias = options.mediaOrder
         ? Object.keys(mediaInjectors).sort(options.mediaOrder)
@@ -50,8 +47,8 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
 
     this.getStyleStream = () => {
       let css = '';
-      if (plain) {
-        css += plain.getStyleStream();
+      if (plainInjector) {
+        css += plainInjector.getStyleStream();
       }
       const medias = options.mediaOrder
         ? Object.keys(mediaInjectors).sort(options.mediaOrder)
@@ -65,21 +62,22 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
       return undefined;
     };
 
-    this.reset = (preserveHydration = true) => {
-      this.injectStyle = createInjectStyle(getInjector, options.transformer);
+    this.clone = () => {
+      const classNameHashClone = classNameHash.clone();
+      const keyframesHashClone = keyframesHash.clone();
 
-      incrementClassNameHash.reset();
-      incrementKeyframesHash.reset();
-
-      if (!preserveHydration || (plain && plain.reset())) {
-        plain = undefined;
-      }
-
+      const mediaInjectorsClone: Record<string, InjectorServer> = {};
       for (const media in mediaInjectors) {
-        if (!preserveHydration || mediaInjectors[media].reset()) {
-          delete mediaInjectors[media];
-        }
+        mediaInjectorsClone[media] = mediaInjectors[media].clone(classNameHashClone, keyframesHashClone);
       }
+
+      return new (GlitzServer as any)(
+        options,
+        classNameHashClone,
+        keyframesHashClone,
+        plainInjector?.clone(classNameHashClone, keyframesHashClone),
+        mediaInjectorsClone,
+      );
     };
   }
 }
