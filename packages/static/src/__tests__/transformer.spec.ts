@@ -964,6 +964,36 @@ const node = [{x: 0}, {x: 1}, {x: 2}].map(i =>
   });
 });
 
+test('can use useStyle()', () => {
+  const code = {
+    'file1.tsx': `
+import { styled, useStyle } from '@glitz/react';
+const className1 = useStyle({
+  color: 'red',
+});
+export const decorator = styled({
+  backgroundColor: 'red',
+});
+const className2 = useStyle([decorator(), { fontWeight: 'bold' }, undefined, [undefined]]);
+const className3 = useStyle((window as any).someStyle);
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled, useStyle } from '@glitz/react';
+      const className1 = \\"a\\";
+      export const decorator = /*#__PURE__*/ styled({
+          backgroundColor: 'red',
+      });
+      const className2 = \\"b c\\";
+      const className3 = /*#__PURE__*/ useStyle(window.someStyle);
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:red}.c{font-weight:bold}"`);
+  });
+});
+
 test('can import a styled component', () => {
   const code = {
     'file1.tsx': `

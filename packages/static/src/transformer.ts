@@ -11,6 +11,7 @@ import {
 
 export const moduleName = '@glitz/react';
 export const styledName = 'styled';
+export const useStyleName = 'useStyle';
 
 export type FunctionWithTsNode = {
   (...args: any[]): any;
@@ -292,7 +293,7 @@ function visitNode(
     }
   }
 
-  if (isFirstPass && ts.isCallExpression(node) && isStyledCall(node)) {
+  if (isFirstPass && ts.isCallExpression(node) && (isStyledCall(node) || isUseStyle(node))) {
     ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
   }
 
@@ -393,6 +394,52 @@ function visitNode(
                     node,
                     diagnosticsReporter,
                   );
+                }
+              }
+            } else if (isUseStyle(declaration.initializer)) {
+              const styles = evaluate(declaration.initializer, program);
+              if (Array.isArray(styles)) {
+                if (styles.every(isEvaluableStyle)) {
+                  const className = glitz.injectStyle(styles);
+                  return ts.createVariableStatement(
+                    node.modifiers,
+                    ts.createVariableDeclarationList(
+                      [
+                        ts.createVariableDeclaration(
+                          declaration.name,
+                          declaration.type,
+                          ts.createStringLiteral(className),
+                        ),
+                      ],
+                      node.declarationList.flags,
+                    ),
+                  );
+                } else {
+                  for (const style of styles.map(stripUnevaluableProperties)) {
+                    glitz.injectStyle(style);
+                  }
+
+                  if (hasJSDocTag(node, 'glitz-static') || allShouldBeStatic) {
+                    if (diagnosticsReporter) {
+                      reportRequiresRuntimeResult(
+                        'useStyle() call marked with @glitz-static could not be statically evaluated',
+                        'error',
+                        styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
+                        node,
+                        diagnosticsReporter,
+                      );
+                    }
+                  } else {
+                    if (diagnosticsReporter) {
+                      reportRequiresRuntimeResult(
+                        'useStyle() call could not be statically evaluated',
+                        'info',
+                        styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
+                        node,
+                        diagnosticsReporter,
+                      );
+                    }
+                  }
                 }
               }
             }
@@ -977,6 +1024,9 @@ function getCssDataFromCssProp(
 
 function isEvaluableStyle(object: EvaluatedStyle | RequiresRuntimeResult): object is EvaluatedStyle {
   if (!isRequiresRuntimeResult(object)) {
+    if (typeof object === 'function') {
+      return false;
+    }
     for (const key in object) {
       const value = object[key];
       if (isRequiresRuntimeResult(value)) {
@@ -1078,6 +1128,14 @@ function stripUnevaluableProperties(obj: { [key: string]: any }): EvaluatedStyle
   return style;
 }
 
+function isUseStyle(node: ts.CallExpression) {
+  if (ts.isIdentifier(node.expression) && node.expression.text === useStyleName) {
+    return true;
+  }
+  return false;
+}
+
+// This determines if the call expression is either `styled()` or `styled.xyz()`
 function isStyledCall(node: ts.CallExpression) {
   if (ts.isIdentifier(node.expression) && node.expression.text === styledName) {
     return true;

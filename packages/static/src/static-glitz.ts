@@ -37,6 +37,18 @@ function createStaticComponent(elementName: string, styles?: Style[]): StaticCom
   return Object.assign(Component, { styles: styles ?? [], elementName });
 }
 
+type UseStyle = Style | StaticDecorator | UseStyle[] | undefined;
+
+export function useStyle(style: UseStyle): Style[] {
+  return style === undefined
+    ? []
+    : isStaticComponent(style)
+    ? style.styles
+    : Array.isArray(style)
+    ? (style.reduce((acc, cur) => [...(acc as Style[]), ...useStyle(cur)], []) as Style[])
+    : [style];
+}
+
 export const styled = Object.assign(
   createStaticStyled([]),
   {
