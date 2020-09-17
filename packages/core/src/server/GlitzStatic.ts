@@ -1,5 +1,5 @@
 import { Style, Theme } from '@glitz/type';
-import { Base, createInjectStyle } from '../core/Base';
+import { Base, createInjectStyle } from '../core/create-inject-style';
 import { Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';

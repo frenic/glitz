@@ -1,5 +1,5 @@
 import { Style, Theme } from '@glitz/type';
-import { Base, createInjectStyle } from '../core/Base';
+import { Base, createInjectStyle } from '../core/create-inject-style';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
