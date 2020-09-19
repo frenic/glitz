@@ -143,7 +143,7 @@ const Styled = styled.div({
     },
     [
       {
-        message: 'Component marked with @glitz-static could not be statically evaluated',
+        message: 'Styled component could not be statically evaluated',
         severity: 'error',
         file: 'file1.tsx',
         line: 4,
@@ -260,7 +260,7 @@ const Styled2 = styled.div({
     },
     [
       {
-        message: 'Component marked with @glitz-static could not be statically evaluated',
+        message: 'Styled component could not be statically evaluated',
         severity: 'error',
         file: 'file1.tsx',
         line: 5,
@@ -277,7 +277,7 @@ const Styled2 = styled.div({
         },
       },
       {
-        message: 'Component marked with @glitz-static could not be statically evaluated',
+        message: 'Styled component could not be statically evaluated',
         severity: 'error',
         file: 'file1.tsx',
         line: 10,
