@@ -1104,6 +1104,84 @@ const node6 = <Styled {...obj} css={{ backgroundColor: 'green' }} />;
   });
 });
 
+test('can compile prop funcs for static themes', () => {
+  const code = {
+    'themes.ts': `
+export const themes = [{
+  id: 'red',
+  isDark: false,
+  color: 'red',
+  backgroundColor: 'pink',
+}, {
+  id: 'blue',
+  isDark: false,
+  color: 'blue',
+  backgroundColor: 'lightblue',
+}, {
+  id: 'black',
+  isDark: true,
+  color: 'black',
+  backgroundColor: 'black',
+}];
+`,
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+const Styled1 = styled.div({
+  color: theme => theme.color,
+});
+const Styled2 = styled.div({
+  color: theme => theme.color,
+  fontWeight: 'bold',
+});
+const Styled3 = styled.div({
+  color: theme => theme.isDark ? 'black' : 'white',
+});
+function MyComponent(props: any) {
+  return (
+    <>
+      <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }} />
+      <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark ? 'black' : 'white' }} />
+    </>
+  );
+}
+
+const node1 = <Styled1 />;
+const node2 = <Styled2 />;
+const node3 = <Styled3 />;
+`,
+  };
+
+  expectEqual(compile(code, 'themes.ts'), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const Styled1 = /*#__PURE__*/ styled.div({
+          color: theme => theme.color,
+      });
+      const Styled2 = /*#__PURE__*/ styled.div({
+          color: theme => theme.color,
+          fontWeight: 'bold',
+      });
+      const Styled3 = /*#__PURE__*/ styled.div({
+          color: theme => theme.isDark ? 'black' : 'white',
+      });
+      function MyComponent(props) {
+          return (<>
+            <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }}/>
+            <div className={styled.byTheme({ \\"red\\": \\"b f\\", \\"blue\\": \\"c f\\", \\"black\\": \\"d g\\" })} data-glitzname=\\"styled.Div\\"/>
+          </>);
+      }
+      const node1 = <div className={styled.byTheme({ \\"red\\": \\"b\\", \\"blue\\": \\"c\\", \\"black\\": \\"d\\" })} data-glitzname=\\"Styled1\\"/>;
+      const node2 = <div className={\\"a\\" + styled.byTheme({ \\"red\\": \\"b\\", \\"blue\\": \\"c\\", \\"black\\": \\"d\\" })} data-glitzname=\\"Styled2\\"/>;
+      const node3 = <div className={styled.byTheme({ \\"red\\": \\"e\\", \\"blue\\": \\"e\\", \\"black\\": \\"d\\" })} data-glitzname=\\"Styled3\\"/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".a{font-weight:bold}.b{color:red}.c{color:blue}.d{color:black}.e{color:white}.f{background-color:white}.g{background-color:black}"`,
+    );
+  });
+});
+
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,

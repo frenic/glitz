@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { moduleName, FunctionWithTsNode } from './transformer';
 
 export function evaluate(
-  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
+  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration,
   program: ts.Program,
   scope?: Map<ts.Symbol, any>,
   globals?: { [name: string]: any },
@@ -44,7 +44,7 @@ globalGlobals.Boolean = Boolean;
 globalGlobals.RegExp = RegExp;
 
 function evaluateInternal(
-  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration,
+  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration,
   program: ts.Program,
   scope?: Map<ts.Symbol, any>,
   globals?: { [name: string]: any },
@@ -257,7 +257,11 @@ function evaluateInternal(
             }
           }
         }
-        return evaluate(bodyExpression, program, parameterScope, globals);
+        const result = evaluate(bodyExpression, program, parameterScope, globals);
+        if (isRequiresRuntimeResult(result)) {
+          throw result;
+        }
+        return result;
       },
       { tsNode: expr },
     ) as FunctionWithTsNode;

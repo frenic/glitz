@@ -1,12 +1,12 @@
 import * as path from 'path';
 import * as ts from 'typescript';
-import { transformer, styledName, Diagnostic } from '../transformer';
+import { transformer, styledName, Diagnostic, TransformerOptions } from '../transformer';
 import { GlitzStatic } from '@glitz/core';
 
 export type TransformerDiagnostics = Diagnostic[];
 export type Code = { [fileName: string]: string };
 
-export default function compile(files: { [fileName: string]: string }) {
+export default function compile(files: { [fileName: string]: string }, staticThemesFile?: string) {
   const outputs: Code = {};
 
   const compilerOptions: ts.CompilerOptions = {
@@ -82,8 +82,12 @@ export default function compile(files: { [fileName: string]: string }) {
   const glitz = new GlitzStatic();
 
   const transformerDiagnostics: TransformerDiagnostics = [];
+  const options: TransformerOptions = {
+    mode: 'development',
+    staticThemesFile,
+  };
   const transformers: ts.CustomTransformers = {
-    before: [transformer(program, glitz, diagnostic => transformerDiagnostics.push(diagnostic), 'development')],
+    before: [transformer(program, glitz, diagnostic => transformerDiagnostics.push(diagnostic), options)],
     after: [],
   };
 
