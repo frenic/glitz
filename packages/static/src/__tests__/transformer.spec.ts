@@ -1177,18 +1177,24 @@ const node = <Styled1 />;
         const Styled3 = /*#__PURE__*/ styled.div({
             color: theme => theme.isDark ? 'black' : 'white',
         });
-        function MyComponent(props) { var __glitzThemeId = useGlitzTheme().id; return (<>
+        function MyComponent(props) {
+            const __glitzThemeId = useGlitzTheme().id;
+            return (<>
               <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }}/>
               <div className={__glitzThemeId === \\"black\\" ? \\"e f\\" : __glitzThemeId === \\"blue\\" ? \\"b d\\" : __glitzThemeId === \\"red\\" ? \\"b c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"styled.Div\\"/>
-            </>); }
+            </>);
+        }
         function MyOtherComponent() {
-            var __glitzThemeId = useGlitzTheme().id;
+            const __glitzThemeId = useGlitzTheme().id;
             const node1 = <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled1\\"/>;
             const node2 = <div className={\\"a \\" + (__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })())} data-glitzname=\\"Styled2\\"/>;
-            const node3 = <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"g\\" : __glitzThemeId === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled3\\"/>;
+            const node3 = <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" || __glitzThemeId === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled3\\"/>;
             return undefined;
         }
-        const MyArrowFunction = () => { var __glitzThemeId = useGlitzTheme().id; return <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled1\\"/>; };
+        const MyArrowFunction = () => {
+            const __glitzThemeId = useGlitzTheme().id;
+            return <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled1\\"/>;
+        };
         // This should not get transformed as it's a styled component with themes declared outside of a component
         const node = <Styled1 />;
         "
@@ -1228,6 +1234,90 @@ const node = <Styled1 />;
       },
     ],
   );
+});
+
+test('generates as terse ternary expressions as possible', () => {
+  const code = {
+    'themes.ts': `
+export const themes = [{
+  id: 'black1',
+  color: 'black',
+  gray: '#ccc',
+  primary: 'red',
+}, {
+  id: 'black2',
+  color: 'black',
+  gray: '#ccc',
+  primary: 'blue',
+}, {
+  id: 'black3',
+  color: 'black',
+  gray: '#ddd',
+  primary: 'green',
+}, {
+  id: 'black4',
+  color: 'black',
+  gray: '#ddd',
+  primary: 'yellow',
+}, {
+  id: 'black5',
+  color: 'black',
+  gray: '#ddd',
+  primary: 'yellow',
+}];
+`,
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+const Styled1 = styled.div({
+  color: theme => theme.color,
+});
+const Styled2 = styled.div({
+  color: theme => theme.gray,
+});
+const Styled3 = styled.div({
+  color: theme => theme.primary,
+});
+
+function MyOtherComponent() {
+  return (
+    <>
+      <Styled1 />
+      <Styled2 />
+      <Styled3 />
+    </>
+  );
+}
+`,
+  };
+
+  expectEqual(compile(code, { staticThemesFile: 'themes.ts', mode: 'production' }), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+      const Styled1 = /*#__PURE__*/ styled.div({
+          color: theme => theme.color,
+      });
+      const Styled2 = /*#__PURE__*/ styled.div({
+          color: theme => theme.gray,
+      });
+      const Styled3 = /*#__PURE__*/ styled.div({
+          color: theme => theme.primary,
+      });
+      function MyOtherComponent() {
+          const __glitzThemeId = useGlitzTheme().id;
+          return (<>
+            <div className=\\"a\\"/>
+            <div className={__glitzThemeId === \\"black2\\" || __glitzThemeId === \\"black1\\" ? \\"b\\" : \\"c\\"}/>
+            <div className={__glitzThemeId === \\"black3\\" ? \\"f\\" : __glitzThemeId === \\"black2\\" ? \\"e\\" : __glitzThemeId === \\"black1\\" ? \\"d\\" : \\"g\\"}/>
+          </>);
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".a{color:black}.b{color:#ccc}.c{color:#ddd}.d{color:red}.e{color:blue}.f{color:green}.g{color:yellow}"`,
+    );
+  });
 });
 
 test('compiles correctly for production mode', () => {
@@ -1271,10 +1361,10 @@ function MyComponent(props: any) {
 }
 
 function MyOtherComponent() {
-  return <>
+  return (<>
     <Styled1 />
     <Styled2 />
-  </>;
+  </>);
 }
 
 const MyArrowFunction = () => <Styled1 />;
@@ -1291,15 +1381,24 @@ const MyArrowFunction = () => <Styled1 />;
       const Styled2 = /*#__PURE__*/ styled.div({
           margin: { top: '10px', left: '20px' },
       });
-      function MyComponent(props) { var __glitzThemeId = useGlitzTheme().id; return (<>
+      function MyComponent(props) {
+          const __glitzThemeId = useGlitzTheme().id;
+          return (<>
             <div className=\\"a\\">hello</div>
-            <div className={__glitzThemeId === \\"black\\" ? \\"e a\\" : __glitzThemeId === \\"blue\\" ? \\"b d\\" : \\"b c\\"}/>
-          </>); }
-      function MyOtherComponent() { var __glitzThemeId = useGlitzTheme().id; return <>
+            <div className={__glitzThemeId === \\"black\\" ? \\"a e\\" : __glitzThemeId === \\"blue\\" ? \\"b d\\" : \\"b c\\"}/>
+          </>);
+      }
+      function MyOtherComponent() {
+          const __glitzThemeId = useGlitzTheme().id;
+          return (<>
           <div className={__glitzThemeId === \\"black\\" ? \\"a\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : \\"c\\"}/>
           <div className=\\"f g\\"/>
-        </>; }
-      const MyArrowFunction = () => { var __glitzThemeId = useGlitzTheme().id; return <div className={__glitzThemeId === \\"black\\" ? \\"a\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : \\"c\\"}/>; };
+        </>);
+      }
+      const MyArrowFunction = () => {
+          const __glitzThemeId = useGlitzTheme().id;
+          return <div className={__glitzThemeId === \\"black\\" ? \\"a\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : \\"c\\"}/>;
+      };
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(

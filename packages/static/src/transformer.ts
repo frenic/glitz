@@ -1172,6 +1172,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         try {
           const className = transformerContext.glitz.injectStyle(style, transformerContext.staticThemes[themeId]);
           const classNames = className.split(' ');
+          classNames.sort();
           for (const c of classNames) {
             if (!(c in classUses)) {
               classUses[c] = 0;
@@ -1191,26 +1192,48 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
             classesUsedInAllThemes.push(c);
             for (const themeId in classNamesByThemeId) {
               classNamesByThemeId[themeId].splice(classNamesByThemeId[themeId].indexOf(c), 1);
+              if (!classNamesByThemeId[themeId].length) {
+                delete classNamesByThemeId[themeId];
+              }
             }
           }
         }
       }
 
+      const themeIdsByClassNames: { [classNames: string]: string[] } = {};
+      for (const themeId in classNamesByThemeId) {
+        const classNames = classNamesByThemeId[themeId].join(' ');
+        if (!themeIdsByClassNames[classNames]) {
+          themeIdsByClassNames[classNames] = [];
+        }
+        themeIdsByClassNames[classNames].push(themeId);
+      }
+
+      type ThemeIdAndClassNamesTuple = { className: string; themeIds: string[] };
+      const themeIdsAndClassNames = Object.keys(themeIdsByClassNames).reduce(
+        (acc, className) => [...acc, { className: className, themeIds: themeIdsByClassNames[className] }],
+        [] as Array<ThemeIdAndClassNamesTuple>,
+      );
+      themeIdsAndClassNames.sort((a, b) => b.themeIds.length - a.themeIds.length);
+
       const componentNode = getComponentNode(transformerContext.currentNode);
       if (componentNode) {
         const useGlitzStmt = factory.createVariableStatement(
           undefined,
-          factory.createVariableDeclarationList([
-            factory.createVariableDeclaration(
-              factory.createIdentifier(themeIdIdentifierName),
-              undefined,
-              undefined,
-              factory.createPropertyAccessExpression(
-                factory.createCallExpression(factory.createIdentifier(useGlitzThemeName), undefined, undefined),
-                factory.createIdentifier(themeIdPropertyName),
+          factory.createVariableDeclarationList(
+            [
+              factory.createVariableDeclaration(
+                factory.createIdentifier(themeIdIdentifierName),
+                undefined,
+                undefined,
+                factory.createPropertyAccessExpression(
+                  factory.createCallExpression(factory.createIdentifier(useGlitzThemeName), undefined, undefined),
+                  factory.createIdentifier(themeIdPropertyName),
+                ),
               ),
-            ),
-          ]),
+            ],
+            ts.NodeFlags.Const,
+          ),
         );
         let transformedComponentNode = componentNode;
         if (ts.isArrowFunction(componentNode) && !ts.isBlock(componentNode.body)) {
@@ -1220,7 +1243,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
             componentNode.parameters,
             componentNode.type,
             componentNode.equalsGreaterThanToken,
-            factory.createBlock([useGlitzStmt, factory.createReturnStatement(componentNode.body)]),
+            factory.createBlock([useGlitzStmt, factory.createReturnStatement(componentNode.body)], true),
           );
         } else if (ts.isFunctionDeclaration(componentNode)) {
           transformedComponentNode = factory.createFunctionDeclaration(
@@ -1231,7 +1254,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
             componentNode.typeParameters,
             componentNode.parameters,
             componentNode.type,
-            factory.createBlock([useGlitzStmt, ...componentNode.body!.statements]),
+            factory.createBlock([useGlitzStmt, ...componentNode.body!.statements], true),
           );
         } else if (ts.isFunctionExpression(componentNode)) {
           transformedComponentNode = factory.createFunctionExpression(
@@ -1241,21 +1264,32 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
             componentNode.typeParameters,
             componentNode.parameters,
             componentNode.type,
-            factory.createBlock([useGlitzStmt, ...componentNode.body!.statements]),
+            factory.createBlock([useGlitzStmt, ...componentNode.body!.statements], true),
           );
         }
         transformerContext.transformationCache.set(ts.getOriginalNode(componentNode), transformedComponentNode);
 
         let ternaryExrp: ts.Expression | undefined = undefined;
-        const themeIds = Object.keys(classNamesByThemeId);
-        for (const themeId of themeIds) {
+        for (const t of themeIdsAndClassNames) {
+          const themeIds = t.themeIds;
+          const classNames = t.className;
+
+          let condition: ts.BinaryExpression | undefined = undefined;
+          for (const themeId of themeIds) {
+            const themeCondition = factory.createBinaryExpression(
+              factory.createIdentifier(themeIdIdentifierName),
+              ts.SyntaxKind.EqualsEqualsEqualsToken,
+              factory.createStringLiteral(themeId),
+            );
+            if (condition === undefined) {
+              condition = themeCondition;
+            } else {
+              condition = factory.createBinaryExpression(themeCondition, ts.SyntaxKind.BarBarToken, condition);
+            }
+          }
+
           if (ternaryExrp === undefined) {
             if (transformerContext.mode === 'development') {
-              const condition = factory.createBinaryExpression(
-                factory.createIdentifier(themeIdIdentifierName),
-                ts.SyntaxKind.EqualsEqualsEqualsToken,
-                factory.createStringLiteral(themeId),
-              );
               const errorMsg = 'Unexpected theme, this theme did not exist during compile time: ';
               const throwExpr = transformerContext.tsContext.factory.createCallExpression(
                 factory.createArrowFunction(
@@ -1283,31 +1317,29 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
                 [],
               );
               ternaryExrp = factory.createConditionalExpression(
-                condition,
+                condition!,
                 undefined,
-                factory.createStringLiteral(classNamesByThemeId[themeId].join(' ')),
+                factory.createStringLiteral(classNames),
                 undefined,
                 throwExpr,
               );
             } else {
-              ternaryExrp = factory.createStringLiteral(classNamesByThemeId[themeId].join(' '));
+              ternaryExrp = factory.createStringLiteral(classNames);
             }
           } else {
-            const condition = factory.createBinaryExpression(
-              factory.createIdentifier(themeIdIdentifierName),
-              ts.SyntaxKind.EqualsEqualsEqualsToken,
-              factory.createStringLiteral(themeId),
-            );
             ternaryExrp = factory.createConditionalExpression(
-              condition,
+              condition!,
               undefined,
-              factory.createStringLiteral(classNamesByThemeId[themeId].join(' ')),
+              factory.createStringLiteral(classNames),
               undefined,
               ternaryExrp,
             );
           }
         }
 
+        if (!ternaryExrp) {
+          return factory.createStringLiteral(classesUsedInAllThemes.join(' '));
+        }
         if (classesUsedInAllThemes.length) {
           return factory.createJsxExpression(
             undefined,
