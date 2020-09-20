@@ -6,7 +6,10 @@ import { GlitzStatic } from '@glitz/core';
 export type TransformerDiagnostics = Diagnostic[];
 export type Code = { [fileName: string]: string };
 
-export default function compile(files: { [fileName: string]: string }, staticThemesFile?: string) {
+export default function compile(
+  files: { [fileName: string]: string },
+  transformerArgs?: Partial<TransformerArguments>,
+) {
   const outputs: Code = {};
 
   const compilerOptions: ts.CompilerOptions = {
@@ -84,10 +87,10 @@ export default function compile(files: { [fileName: string]: string }, staticThe
   const transformerDiagnostics: TransformerDiagnostics = [];
   const options: TransformerArguments = {
     mode: 'development',
-    staticThemesFile,
     glitz,
     program,
     diagnosticsReporter: diagnostic => transformerDiagnostics.push(diagnostic),
+    ...(transformerArgs ?? {}),
   };
   const transformers: ts.CustomTransformers = {
     before: [transformer(options)],

@@ -752,7 +752,7 @@ function MyComponent(props: {}) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function StyledWrapper(props) {
-            return <styled.Div css={{ backgroundColor: 'green' }}><div className=\\"a\\" data-glitzname=\\"styled.Div\\"/></styled.Div>;
+            return <styled.Div css={{ backgroundColor: 'green' }}><div className=\\"b\\" data-glitzname=\\"styled.Div\\"/></styled.Div>;
         }
         const Styled = /*#__PURE__*/ styled(StyledWrapper, { color: 'red' });
         function MyComponent(props) {
@@ -760,7 +760,7 @@ function MyComponent(props: {}) {
         }
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}.b{background-color:red}"`);
     },
     [
       {
@@ -796,7 +796,7 @@ function MyComponent(props: {}) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function StyledWrapper(props) {
-            return <div><styled.Div css={{ backgroundColor: 'green' }}><div className=\\"a\\" data-glitzname=\\"styled.Div\\"/></styled.Div></div>;
+            return <div><styled.Div css={{ backgroundColor: 'green' }}><div className=\\"b\\" data-glitzname=\\"styled.Div\\"/></styled.Div></div>;
         }
         const Styled = /*#__PURE__*/ styled(StyledWrapper, { color: 'red' });
         function MyComponent(props) {
@@ -804,7 +804,7 @@ function MyComponent(props: {}) {
         }
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}.b{background-color:red}"`);
     },
     [
       {
@@ -1146,38 +1146,164 @@ function MyComponent(props: any) {
   );
 }
 
-const node1 = <Styled1 />;
-const node2 = <Styled2 />;
-const node3 = <Styled3 />;
+function MyOtherComponent() {
+  const node1 = <Styled1 />;
+  const node2 = <Styled2 />;
+  const node3 = <Styled3 />;
+  return undefined;
+}
+
+const MyArrowFunction = () => <Styled1 />;
+
+// This should not get transformed as it's a styled component with themes declared outside of a component
+const node = <Styled1 />;
 `,
   };
 
-  expectEqual(compile(code, 'themes.ts'), result => {
+  expectEqual(
+    compile(code, { staticThemesFile: 'themes.ts' }),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import(\\"./themes\\");
+        const Styled1 = /*#__PURE__*/ styled.div({
+            color: theme => theme.color,
+        });
+        const Styled2 = /*#__PURE__*/ styled.div({
+            color: theme => theme.color,
+            fontWeight: 'bold',
+        });
+        const Styled3 = /*#__PURE__*/ styled.div({
+            color: theme => theme.isDark ? 'black' : 'white',
+        });
+        function MyComponent(props) { var __glitzThemeId = useGlitzTheme().id; return (<>
+              <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }}/>
+              <div className={__glitzThemeId === \\"black\\" ? \\"e f\\" : __glitzThemeId === \\"blue\\" ? \\"b d\\" : __glitzThemeId === \\"red\\" ? \\"b c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"styled.Div\\"/>
+            </>); }
+        function MyOtherComponent() {
+            var __glitzThemeId = useGlitzTheme().id;
+            const node1 = <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled1\\"/>;
+            const node2 = <div className={\\"a \\" + (__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })())} data-glitzname=\\"Styled2\\"/>;
+            const node3 = <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"g\\" : __glitzThemeId === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled3\\"/>;
+            return undefined;
+        }
+        const MyArrowFunction = () => { var __glitzThemeId = useGlitzTheme().id; return <div className={__glitzThemeId === \\"black\\" ? \\"f\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : __glitzThemeId === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzThemeId); })()} data-glitzname=\\"Styled1\\"/>; };
+        // This should not get transformed as it's a styled component with themes declared outside of a component
+        const node = <Styled1 />;
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{font-weight:bold}.b{background-color:white}.c{color:red}.d{color:blue}.e{background-color:black}.f{color:black}.g{color:white}"`,
+      );
+    },
+    [
+      {
+        message: 'Evaluation of theme function requires runtime',
+        severity: 'info',
+        file: 'file1.tsx',
+        line: 16,
+        source: `<styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }} />`,
+        innerDiagnostic: {
+          file: 'file1.tsx',
+          line: 16,
+          message: 'Could not determine a static value for: props',
+          severity: 'info',
+          source: 'props',
+        },
+      },
+      {
+        message: 'Evaluation of theme function requires runtime',
+        severity: 'info',
+        file: 'file1.tsx',
+        line: 32,
+        source: `<Styled1 />`,
+        innerDiagnostic: {
+          file: 'file1.tsx',
+          line: 32,
+          message: 'JSX expression outside of a component declaration cannot be statically evaluated',
+          severity: 'info',
+          source: '<Styled1 />',
+        },
+      },
+    ],
+  );
+});
+
+test('compiles correctly for production mode', () => {
+  const code = {
+    'themes.ts': `
+const allThemes = [{
+  id: 'red',
+  isDark: false,
+  color: 'red',
+  backgroundColor: 'pink',
+}, {
+  id: 'blue',
+  isDark: false,
+  color: 'blue',
+  backgroundColor: 'lightblue',
+}, {
+  id: 'black',
+  isDark: true,
+  color: 'black',
+  backgroundColor: 'black',
+}];
+
+export const themes = allThemes.map(t => t);
+`,
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+const Styled1 = styled.div({
+  color: theme => theme.color,
+});
+const Styled2 = styled.div({
+  margin: {top: '10px', left: '20px'},
+});
+function MyComponent(props: any) {
+  return (
+    <>
+      <styled.Div css={{ color: 'black' }}>hello</styled.Div>
+      <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark ? 'black' : 'white' }} />
+    </>
+  );
+}
+
+function MyOtherComponent() {
+  return <>
+    <Styled1 />
+    <Styled2 />
+  </>;
+}
+
+const MyArrowFunction = () => <Styled1 />;
+`,
+  };
+
+  expectEqual(compile(code, { staticThemesFile: 'themes.ts', mode: 'production' }), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
+      import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
       const Styled1 = /*#__PURE__*/ styled.div({
           color: theme => theme.color,
       });
       const Styled2 = /*#__PURE__*/ styled.div({
-          color: theme => theme.color,
-          fontWeight: 'bold',
+          margin: { top: '10px', left: '20px' },
       });
-      const Styled3 = /*#__PURE__*/ styled.div({
-          color: theme => theme.isDark ? 'black' : 'white',
-      });
-      function MyComponent(props) {
-          return (<>
-            <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }}/>
-            <div className={styled.byTheme({ \\"red\\": \\"b f\\", \\"blue\\": \\"c f\\", \\"black\\": \\"d g\\" })} data-glitzname=\\"styled.Div\\"/>
-          </>);
-      }
-      const node1 = <div className={styled.byTheme({ \\"red\\": \\"b\\", \\"blue\\": \\"c\\", \\"black\\": \\"d\\" })} data-glitzname=\\"Styled1\\"/>;
-      const node2 = <div className={\\"a\\" + styled.byTheme({ \\"red\\": \\"b\\", \\"blue\\": \\"c\\", \\"black\\": \\"d\\" })} data-glitzname=\\"Styled2\\"/>;
-      const node3 = <div className={styled.byTheme({ \\"red\\": \\"e\\", \\"blue\\": \\"e\\", \\"black\\": \\"d\\" })} data-glitzname=\\"Styled3\\"/>;
+      function MyComponent(props) { var __glitzThemeId = useGlitzTheme().id; return (<>
+            <div className=\\"a\\">hello</div>
+            <div className={__glitzThemeId === \\"black\\" ? \\"e a\\" : __glitzThemeId === \\"blue\\" ? \\"b d\\" : \\"b c\\"}/>
+          </>); }
+      function MyOtherComponent() { var __glitzThemeId = useGlitzTheme().id; return <>
+          <div className={__glitzThemeId === \\"black\\" ? \\"a\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : \\"c\\"}/>
+          <div className=\\"f g\\"/>
+        </>; }
+      const MyArrowFunction = () => { var __glitzThemeId = useGlitzTheme().id; return <div className={__glitzThemeId === \\"black\\" ? \\"a\\" : __glitzThemeId === \\"blue\\" ? \\"d\\" : \\"c\\"}/>; };
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(
-      `".a{font-weight:bold}.b{color:red}.c{color:blue}.d{color:black}.e{color:white}.f{background-color:white}.g{background-color:black}"`,
+      `".a{color:black}.b{background-color:white}.c{color:red}.d{color:blue}.e{background-color:black}.f{margin-left:20px}.g{margin-top:10px}"`,
     );
   });
 });
