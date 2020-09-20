@@ -14,7 +14,7 @@ export const moduleName = '@glitz/react';
 export const styledName = 'styled';
 export const useStyleName = 'useStyle';
 const staticThemesName = 'staticThemes';
-const themeIdIdentifierName = '__glitzThemeId';
+const themeIdentifierName = '__glitzTheme';
 const useGlitzThemeName = 'useGlitzTheme';
 const useThemeName = 'useTheme';
 const themeIdPropertyName = 'id';
@@ -1223,13 +1223,10 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
           factory.createVariableDeclarationList(
             [
               factory.createVariableDeclaration(
-                factory.createIdentifier(themeIdIdentifierName),
+                factory.createIdentifier(themeIdentifierName),
                 undefined,
                 undefined,
-                factory.createPropertyAccessExpression(
-                  factory.createCallExpression(factory.createIdentifier(useGlitzThemeName), undefined, undefined),
-                  factory.createIdentifier(themeIdPropertyName),
-                ),
+                factory.createCallExpression(factory.createIdentifier(useGlitzThemeName), undefined, undefined),
               ),
             ],
             ts.NodeFlags.Const,
@@ -1270,23 +1267,20 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         transformerContext.transformationCache.set(ts.getOriginalNode(componentNode), transformedComponentNode);
 
         let ternaryExrp: ts.Expression | undefined = undefined;
+
+        let themeIdsLeft = Object.keys(classNamesByThemeId);
         for (const t of themeIdsAndClassNames) {
           const themeIds = t.themeIds;
+          const allThemes = Object.values(transformerContext.staticThemes);
+          const otherThemeIds = themeIdsLeft.filter(t => themeIds.indexOf(t) === -1);
           const classNames = t.className;
 
-          let condition: ts.BinaryExpression | undefined = undefined;
-          for (const themeId of themeIds) {
-            const themeCondition = factory.createBinaryExpression(
-              factory.createIdentifier(themeIdIdentifierName),
-              ts.SyntaxKind.EqualsEqualsEqualsToken,
-              factory.createStringLiteral(themeId),
-            );
-            if (condition === undefined) {
-              condition = themeCondition;
-            } else {
-              condition = factory.createBinaryExpression(themeCondition, ts.SyntaxKind.BarBarToken, condition);
-            }
-          }
+          const condition = createConditionFor(
+            allThemes.filter(t => themeIds.indexOf(t.id) !== -1),
+            allThemes.filter(t => otherThemeIds.indexOf(t.id) !== -1),
+            factory,
+          );
+          themeIdsLeft = themeIdsLeft.filter(t => themeIds.indexOf(t) === -1);
 
           if (ternaryExrp === undefined) {
             if (transformerContext.mode === 'development') {
@@ -1305,7 +1299,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
                           factory.createBinaryExpression(
                             factory.createStringLiteral(errorMsg),
                             ts.SyntaxKind.PlusToken,
-                            factory.createIdentifier(themeIdIdentifierName),
+                            factory.createIdentifier(themeIdentifierName),
                           ),
                         ]),
                       ),
@@ -1358,6 +1352,74 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         );
       }
     }
+  }
+}
+
+function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticTheme[], factory: ts.NodeFactory) {
+  if (wantedThemes.length > 1) {
+    let commonPropertyName: string | undefined = undefined;
+    for (const property in wantedThemes[0]) {
+      commonPropertyName = property;
+      const value = wantedThemes[0][property];
+      for (const theme of wantedThemes) {
+        if (theme[property] !== value) {
+          commonPropertyName = undefined;
+        }
+      }
+    }
+    if (commonPropertyName) {
+      for (const otherTheme of otherThemes) {
+        if (otherTheme[commonPropertyName] === wantedThemes[0][commonPropertyName]) {
+          commonPropertyName = undefined;
+          break;
+        }
+      }
+    }
+    if (commonPropertyName) {
+      const commonValue = wantedThemes[0][commonPropertyName];
+      const literal = createLiteral(commonValue, factory);
+      if (literal) {
+        const themeCondition = factory.createBinaryExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier(themeIdentifierName),
+            factory.createIdentifier(commonPropertyName),
+          ),
+          ts.SyntaxKind.EqualsEqualsEqualsToken,
+          literal,
+        );
+        return themeCondition;
+      }
+    }
+  }
+  let condition: ts.BinaryExpression | undefined = undefined;
+  for (const theme of wantedThemes) {
+    const themeId = theme.id;
+    const themeCondition = factory.createBinaryExpression(
+      factory.createPropertyAccessExpression(
+        factory.createIdentifier(themeIdentifierName),
+        factory.createIdentifier(themeIdPropertyName),
+      ),
+      ts.SyntaxKind.EqualsEqualsEqualsToken,
+      factory.createStringLiteral(themeId),
+    );
+    if (condition === undefined) {
+      condition = themeCondition;
+    } else {
+      condition = factory.createBinaryExpression(themeCondition, ts.SyntaxKind.BarBarToken, condition);
+    }
+  }
+  return condition;
+}
+
+function createLiteral(value: any, factory: ts.NodeFactory) {
+  if (typeof value === 'string') {
+    return factory.createStringLiteral(value);
+  } else if (typeof value === 'number') {
+    return factory.createNumericLiteral(value);
+  } else if (typeof value === 'boolean') {
+    return value ? factory.createTrue() : factory.createFalse();
+  } else {
+    return undefined;
   }
 }
 
