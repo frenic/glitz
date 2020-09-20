@@ -1,7 +1,8 @@
 import { Style } from '@glitz/type';
 import { useContext, useRef, useEffect } from 'react';
-import { GlitzContext, ThemeContext } from '../components/context';
+import { GlitzContext } from '../components/context';
 import { StyledDecorator } from './decorator';
+import useTheme from './use-theme';
 
 export type DirtyStyle = Style | StyledDecorator | DirtyStyle[] | undefined;
 
@@ -14,7 +15,7 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
     );
   }
 
-  const theme = useContext(ThemeContext);
+  const theme = useTheme();
 
   const finalStyles = flattenStyle([dirtyStyle]);
   const lastGlitzRef = useRef(glitz);
