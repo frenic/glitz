@@ -1107,7 +1107,7 @@ const node6 = <Styled {...obj} css={{ backgroundColor: 'green' }} />;
 test('can compile prop funcs for static themes', () => {
   const code = {
     'themes.ts': `
-export const themes = [{
+export const staticThemes = [{
   id: 'red',
   isDark: false,
   color: 'red',
@@ -1239,7 +1239,7 @@ const node = <Styled1 />;
 test('generates as terse ternary expressions as possible', () => {
   const code = {
     'themes.ts': `
-export const themes = [{
+export const staticThemes = [{
   id: 'black1',
   color: 'black',
   gray: '#ccc',
@@ -1340,7 +1340,7 @@ const allThemes = [{
   backgroundColor: 'black',
 }];
 
-export const themes = allThemes.map(t => t);
+export const staticThemes = allThemes.map(t => t);
 `,
     'file1.tsx': `
 import { styled } from '@glitz/react';

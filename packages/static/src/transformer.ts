@@ -13,7 +13,7 @@ import {
 export const moduleName = '@glitz/react';
 export const styledName = 'styled';
 export const useStyleName = 'useStyle';
-const staticThemesName = 'themes';
+const staticThemesName = 'staticThemes';
 const themeIdIdentifierName = '__glitzThemeId';
 const useGlitzThemeName = 'useGlitzTheme';
 const useThemeName = 'useTheme';
