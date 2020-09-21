@@ -95,12 +95,24 @@ type TransformerContext = {
   currentFileUsesGlitzThemes: boolean;
   currentFileHasImportedUseTheme: boolean;
   /**
-   * Since we make multiple passes this can be used to store transformations that
-   * are convenient to make in an early pass but that can't be safely used in
-   * that pass. Storing it here will mean that we'll automatically use it in
-   * a later pass if it hasn't been removed.
+   * Instead of directly returning a different node in the visitor function we keep
+   * a map of nodes that should be transformed. This allows any function that has
+   * access to the transformer context to create transformations at any level
+   * instead of being limited to only transforming the current node.
+   *
+   * Note that we don't return transformations in this map on the first pass of the file.
+   * This to make it possible to remove nodes from the map if we later determine that
+   * a transformation is not safe to do.
+   *
+   * Since a node is used as key, it's really important to use `ts.getOriginalNode(node)`
+   * instead of just `node` since it's not certain that the node passed in is the same object.
    */
-  transformationCache: Map<ts.Node, ts.Node>;
+  transformations: Map<ts.Node, ts.Node>;
+  /**
+   * This can be used as a way of setting flags to make sure that we don't run the same
+   * transformations multiple times.
+   */
+  nodeFlags: Map<ts.Node, string[]>;
 };
 
 export function transformer(args: TransformerArguments): ts.TransformerFactory<ts.SourceFile> {
@@ -143,7 +155,8 @@ export function transformer(args: TransformerArguments): ts.TransformerFactory<t
           tsContext: context,
           currentFileUsesGlitzThemes: false,
           currentFileHasImportedUseTheme: false,
-          transformationCache: new Map<ts.Node, ts.Node>(),
+          transformations: new Map<ts.Node, ts.Node>(),
+          nodeFlags: new Map<ts.Node, string[]>(),
         },
         args,
       );
@@ -509,12 +522,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
             ]),
           );
           ts.setOriginalNode(jsxElement, node);
-          transformerContext.transformationCache.set(originalNode, jsxElement);
+          transformerContext.transformations.set(originalNode, jsxElement);
           result = node;
         }
       } else {
-        if (transformerContext.transformationCache.has(originalNode)) {
-          transformerContext.transformationCache.delete(originalNode);
+        if (transformerContext.transformations.has(originalNode)) {
+          transformerContext.transformations.delete(originalNode);
         }
         reportTopLevelJsxInComposedComponent(node, transformerContext);
       }
@@ -567,12 +580,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
 
             const jsxElement = factory.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
             ts.setOriginalNode(jsxElement, node);
-            transformerContext.transformationCache.set(originalNode, jsxElement);
+            transformerContext.transformations.set(originalNode, jsxElement);
           }
         }
       } else {
-        if (transformerContext.transformationCache.has(originalNode)) {
-          transformerContext.transformationCache.delete(originalNode);
+        if (transformerContext.transformations.has(originalNode)) {
+          transformerContext.transformations.delete(originalNode);
         }
         reportTopLevelJsxInComposedComponent(node, transformerContext);
       }
@@ -634,12 +647,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
 
               const jsxElement = factory.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
               ts.setOriginalNode(jsxElement, node);
-              transformerContext.transformationCache.set(originalNode, jsxElement);
+              transformerContext.transformations.set(originalNode, jsxElement);
             }
           }
         } else {
-          if (transformerContext.transformationCache.has(originalNode)) {
-            transformerContext.transformationCache.delete(originalNode);
+          if (transformerContext.transformations.has(originalNode)) {
+            transformerContext.transformations.delete(originalNode);
           }
           reportTopLevelJsxInComposedComponent(node, transformerContext);
         }
@@ -695,21 +708,21 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
               ]),
             );
             ts.setOriginalNode(jsxElement, node);
-            transformerContext.transformationCache.set(originalNode, jsxElement);
+            transformerContext.transformations.set(originalNode, jsxElement);
           }
         }
       } else {
-        if (transformerContext.transformationCache.has(originalNode)) {
-          transformerContext.transformationCache.delete(originalNode);
+        if (transformerContext.transformations.has(originalNode)) {
+          transformerContext.transformations.delete(originalNode);
         }
         reportTopLevelJsxInComposedComponent(node, transformerContext);
       }
     }
   }
 
-  if (!isFirstPass && transformerContext.transformationCache.has(originalNode)) {
-    const previouslyTransformed = transformerContext.transformationCache.get(originalNode);
-    transformerContext.transformationCache.delete(originalNode);
+  if (!isFirstPass && transformerContext.transformations.has(originalNode)) {
+    const previouslyTransformed = transformerContext.transformations.get(originalNode);
+    transformerContext.transformations.delete(originalNode);
     return previouslyTransformed;
   }
 
@@ -938,7 +951,7 @@ function reportRequiresRuntimeResult(
       if (propFunc) {
         if (propFunc) {
           requiresRuntime = requiresRuntimeResult(
-            'Functions in style objects requires runtime',
+            'Functions in style objects requires runtime or statically declared themes',
             (propFunc as FunctionWithTsNode).tsNode ?? node,
           );
         }
@@ -1019,7 +1032,7 @@ function getCssData(
     if (propFunc) {
       transformerContext.currentFileUsesGlitzThemes = true;
       return requiresRuntimeResult(
-        'Functions in style objects requires runtime',
+        'Functions in style objects requires runtime or statically declared themes',
         (propFunc as FunctionWithTsNode).tsNode ?? node,
       );
     }
@@ -1086,6 +1099,18 @@ function getCssDataFromCssProp(
   return undefined;
 }
 
+// This takes the file that contains static themes and trys to evaluate
+// an exported array of themes.
+// It's very important for the static themes to contain all variations
+// so if a theme contains for example a boolean that is determined at runtime
+// the static themes must be faked to contain both the false variant and the true
+// variant. For example:
+// const themes = [{id: 'red', color: 'red'}, {id: 'blue', color: 'blue'}];
+// export const staticThemes = themes.reduce((acc, theme) => [
+//   ...acc,
+//   Object.assign({}, theme, {isCompact: false, id: theme.id + 'desktop'}),
+//   Object.assign({}, theme, {isCompact: true, id: theme.id + 'mobile'}),
+// ], []);
 function getStaticThemes(staticThemesFile: string, program: ts.Program) {
   const tsStaticThemesFile = program.getSourceFile(staticThemesFile);
   if (tsStaticThemesFile) {
@@ -1143,12 +1168,17 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
   }
 }
 
+// This function is used to generate the ts.Node that will be placed in the className JSX attribute.
+// It can either be a string literal if we know that it's a static class name, or an expression
+// for when themes are used and we must generate a conditional such as:
+// className={__glitzTheme.isCompact ? 'a' : 'b'}
 function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transformerContext: TransformerContext) {
   const factory = transformerContext.tsContext.factory;
   const propFunc = anyValuesAreFunctions(style);
   if (propFunc) {
     transformerContext.currentFileUsesGlitzThemes = true;
   }
+
   if (!transformerContext.staticThemes) {
     if (propFunc) {
       return requiresRuntimeResult(
@@ -1161,13 +1191,23 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
     }
   } else {
     if (!propFunc) {
+      // No functions found, just evaluate to a static class
       const classNames = transformerContext.glitz.injectStyle(style);
       return factory.createStringLiteral(classNames);
     } else {
+      // Theme functions found, we must now evaluate the functions for all static
+      // themes and generate the smallest possible conditional/ternary to match
+      // a theme with a class name.
       const classNamesByThemeId: { [themeId: string]: string[] } = {};
       const classUses: { [className: string]: number } = {};
       const themeCount = Object.keys(transformerContext.staticThemes).length;
       const classesUsedInAllThemes: string[] = [];
+
+      // We first need to evaluate the style object against all static themes
+      // and save the class names that each theme generates. Note that we
+      // don't care at all about the complexity of the expression inside the
+      // theme functions, we instead generate conditions later on independently
+      // of how the theme function looks.
       for (const themeId in transformerContext.staticThemes) {
         try {
           const className = transformerContext.glitz.injectStyle(style, transformerContext.staticThemes[themeId]);
@@ -1187,14 +1227,20 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
             throw e;
           }
         }
-        for (const c in classUses) {
-          if (classUses[c] === themeCount) {
-            classesUsedInAllThemes.push(c);
-            for (const themeId in classNamesByThemeId) {
-              classNamesByThemeId[themeId].splice(classNamesByThemeId[themeId].indexOf(c), 1);
-              if (!classNamesByThemeId[themeId].length) {
-                delete classNamesByThemeId[themeId];
-              }
+      }
+
+      // We count the number of uses each class has to know which classes
+      // are common and used in all themes. By extracting classes used
+      // in all themes we can even end up in a situation where a theme function
+      // returns the same value for all themes, in which case we can safely generate
+      // a static class.
+      for (const c in classUses) {
+        if (classUses[c] === themeCount) {
+          classesUsedInAllThemes.push(c);
+          for (const themeId in classNamesByThemeId) {
+            classNamesByThemeId[themeId].splice(classNamesByThemeId[themeId].indexOf(c), 1);
+            if (!classNamesByThemeId[themeId].length) {
+              delete classNamesByThemeId[themeId];
             }
           }
         }
@@ -1209,6 +1255,17 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         themeIdsByClassNames[classNames].push(themeId);
       }
 
+      // We convert { [classNames: string]: themeIds[] } to:
+      // Array<{ className: string; themeIds: string[] }> here
+      // because we want to sort this structure based on theme number
+      // of themes with the same classes.
+      // The reason for this is that the class name with most themes
+      // will probably have the longest/most complex expression
+      // and we'll only actually include that in development mode.
+      // So if we have:
+      // className={t.id === 'theme1' ? 'a' : t.id === 'theme2' || t.id === 'theme3' || t.id === 'theme4' ? 'b' : throw new Error('Unknown theme')}
+      // this will in production instead be:
+      // className={t.id === 'theme1' ? 'a' : 'b'}
       type ThemeIdAndClassNamesTuple = { className: string; themeIds: string[] };
       const themeIdsAndClassNames = Object.keys(themeIdsByClassNames).reduce(
         (acc, className) => [...acc, { className: className, themeIds: themeIdsByClassNames[className] }],
@@ -1216,56 +1273,8 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
       );
       themeIdsAndClassNames.sort((a, b) => b.themeIds.length - a.themeIds.length);
 
-      const componentNode = getComponentNode(transformerContext.currentNode);
+      const componentNode = injectUseGlitzThemeVariable(transformerContext, factory);
       if (componentNode) {
-        const useGlitzStmt = factory.createVariableStatement(
-          undefined,
-          factory.createVariableDeclarationList(
-            [
-              factory.createVariableDeclaration(
-                factory.createIdentifier(themeIdentifierName),
-                undefined,
-                undefined,
-                factory.createCallExpression(factory.createIdentifier(useGlitzThemeName), undefined, undefined),
-              ),
-            ],
-            ts.NodeFlags.Const,
-          ),
-        );
-        let transformedComponentNode = componentNode;
-        if (ts.isArrowFunction(componentNode) && !ts.isBlock(componentNode.body)) {
-          transformedComponentNode = factory.createArrowFunction(
-            componentNode.modifiers,
-            componentNode.typeParameters,
-            componentNode.parameters,
-            componentNode.type,
-            componentNode.equalsGreaterThanToken,
-            factory.createBlock([useGlitzStmt, factory.createReturnStatement(componentNode.body)], true),
-          );
-        } else if (ts.isFunctionDeclaration(componentNode)) {
-          transformedComponentNode = factory.createFunctionDeclaration(
-            componentNode.decorators,
-            componentNode.modifiers,
-            componentNode.asteriskToken,
-            componentNode.name,
-            componentNode.typeParameters,
-            componentNode.parameters,
-            componentNode.type,
-            factory.createBlock([useGlitzStmt, ...componentNode.body!.statements], true),
-          );
-        } else if (ts.isFunctionExpression(componentNode)) {
-          transformedComponentNode = factory.createFunctionExpression(
-            componentNode.modifiers,
-            componentNode.asteriskToken,
-            componentNode.name,
-            componentNode.typeParameters,
-            componentNode.parameters,
-            componentNode.type,
-            factory.createBlock([useGlitzStmt, ...componentNode.body!.statements], true),
-          );
-        }
-        transformerContext.transformationCache.set(ts.getOriginalNode(componentNode), transformedComponentNode);
-
         let ternaryExrp: ts.Expression | undefined = undefined;
 
         let allThemeIds = Object.keys(classNamesByThemeId);
@@ -1275,7 +1284,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
           const otherThemeIds = allThemeIds.filter(t => themeIds.indexOf(t) === -1);
           const classNames = t.className;
 
-          const condition = createConditionFor(
+          const condition = createThemeConditionFor(
             allThemes.filter(t => themeIds.indexOf(t.id) !== -1),
             allThemes.filter(t => otherThemeIds.indexOf(t.id) !== -1),
             factory,
@@ -1354,7 +1363,15 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
   }
 }
 
-function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticTheme[], factory: ts.NodeFactory) {
+// This is used to create a condition to be used in a ternary to render
+// different class names based on values on the runtime theme.
+// wantedThemes are the themes that the condition should match, and
+// otherThemes are the themes that the condition must not match.
+// We want to generate as terse/small condition as possible, since
+// this condition might be printed multiple times for a common styled
+// component, which is why we try to look for a property that has the
+// same value in all wanted themes, and a different value in all other themese.
+function createThemeConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticTheme[], factory: ts.NodeFactory) {
   if (wantedThemes.length > 0 && otherThemes.length > 0) {
     let commonPropertyName: string | undefined = undefined;
     for (const property in wantedThemes[0]) {
@@ -1384,6 +1401,8 @@ function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticThem
       }
     }
 
+    // We've found a property that has the same value in all wanted themes,
+    // and a different value in the other themes.
     if (commonPropertyName) {
       const commonValue = wantedThemes[0][commonPropertyName];
       const literal = createLiteral(commonValue, factory);
@@ -1400,6 +1419,9 @@ function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticThem
       }
     }
   }
+
+  // No property found that can fulfill our condition so we fall back to creating a bigger
+  // expression based on the theme ids of the wanted themes.
   let condition: ts.BinaryExpression | undefined = undefined;
   for (const theme of wantedThemes) {
     const themeId = theme.id;
@@ -1418,6 +1440,88 @@ function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticThem
     }
   }
   return condition;
+}
+
+const useGlitzIsInjectedFlag = 'useGlitzIsInjected';
+
+// This takes the current transformation node (most likely a JSX expression) and finds the function
+// it's placed in. It then injects `const __glitzTheme = useGlitzTheme();` as the first statement.
+// If the current transformation node is not placed inside a function (ie it's a top level JSX expression)
+// we return undefined to signal that we can't reliably transform it.
+function injectUseGlitzThemeVariable(transformerContext: TransformerContext, factory: ts.NodeFactory) {
+  const componentNode = getComponentNode(transformerContext.currentNode);
+  if (componentNode) {
+    const originalComponentNode = ts.getOriginalNode(componentNode);
+    if (!transformerContext.nodeFlags.has(originalComponentNode)) {
+      transformerContext.nodeFlags.set(originalComponentNode, []);
+    }
+    const flags = transformerContext.nodeFlags.get(originalComponentNode)!;
+    if (flags.indexOf(useGlitzIsInjectedFlag) !== -1) {
+      // This prevents us from making the same transformation multiple times
+      // if a component contains multiple uses of theme functions
+      return componentNode;
+    } else {
+      flags.push(useGlitzIsInjectedFlag);
+    }
+
+    const useGlitzCall = factory.createCallExpression(
+      factory.createIdentifier(useGlitzThemeName),
+      undefined,
+      undefined,
+    );
+    // At this point we're not quite sure if the theme will be used or if all theme functions can be determined
+    // to return the same class, or if any functions will require runtime so we inject /* #__PURE__ */ to tell
+    // the minifier that it's safe to remove this call if the theme is unused.
+    ts.addSyntheticLeadingComment(useGlitzCall, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
+    const useGlitzStmt = factory.createVariableStatement(
+      undefined,
+      factory.createVariableDeclarationList(
+        [
+          factory.createVariableDeclaration(
+            factory.createIdentifier(themeIdentifierName),
+            undefined,
+            undefined,
+            useGlitzCall,
+          ),
+        ],
+        ts.NodeFlags.Const,
+      ),
+    );
+    let transformedComponentNode = componentNode;
+    if (ts.isArrowFunction(componentNode) && !ts.isBlock(componentNode.body)) {
+      transformedComponentNode = factory.createArrowFunction(
+        componentNode.modifiers,
+        componentNode.typeParameters,
+        componentNode.parameters,
+        componentNode.type,
+        componentNode.equalsGreaterThanToken,
+        factory.createBlock([useGlitzStmt, factory.createReturnStatement(componentNode.body)], true),
+      );
+    } else if (ts.isFunctionDeclaration(componentNode)) {
+      transformedComponentNode = factory.createFunctionDeclaration(
+        componentNode.decorators,
+        componentNode.modifiers,
+        componentNode.asteriskToken,
+        componentNode.name,
+        componentNode.typeParameters,
+        componentNode.parameters,
+        componentNode.type,
+        factory.createBlock([useGlitzStmt, ...componentNode.body!.statements], true),
+      );
+    } else if (ts.isFunctionExpression(componentNode)) {
+      transformedComponentNode = factory.createFunctionExpression(
+        componentNode.modifiers,
+        componentNode.asteriskToken,
+        componentNode.name,
+        componentNode.typeParameters,
+        componentNode.parameters,
+        componentNode.type,
+        factory.createBlock([useGlitzStmt, ...componentNode.body!.statements], true),
+      );
+    }
+    transformerContext.transformations.set(originalComponentNode, transformedComponentNode);
+  }
+  return componentNode;
 }
 
 function createLiteral(value: any, factory: ts.NodeFactory) {
