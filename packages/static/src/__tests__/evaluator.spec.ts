@@ -301,6 +301,58 @@ const y = window.innerHeight + 100;
   expect(evaluate('y', code, { window: { innerHeight: 100 } })).toBe(200);
 });
 
+test('can evaluate enums', () => {
+  const code = {
+    'entry.ts': `
+enum MyEnum {
+  Option1,
+  Option2,
+}
+`,
+  };
+  expect(evaluate('MyEnum[0]', code)).toBe('Option1');
+  expect(evaluate('MyEnum.Option1', code)).toBe(0);
+  expect(evaluate('MyEnum[1]', code)).toBe('Option2');
+  expect(evaluate('MyEnum.Option2', code)).toBe(1);
+});
+
+test('can evaluate complex expression', () => {
+  const code = {
+    'entry.ts': `
+const themes = [{id: 'red', color: 'red'}, {id: 'blue', color: 'blue'}];
+const staticThemes = themes.reduce((acc, theme) => [
+   ...acc,
+   Object.assign({}, theme, {isCompact: false, id: theme.id + 'desktop'}),
+   Object.assign({}, theme, {isCompact: true, id: theme.id + 'mobile'}),
+ ], []);
+`,
+  };
+  expect(evaluate('staticThemes', code)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "color": "red",
+        "id": "reddesktop",
+        "isCompact": false,
+      },
+      Object {
+        "color": "red",
+        "id": "redmobile",
+        "isCompact": true,
+      },
+      Object {
+        "color": "blue",
+        "id": "bluedesktop",
+        "isCompact": false,
+      },
+      Object {
+        "color": "blue",
+        "id": "bluemobile",
+        "isCompact": true,
+      },
+    ]
+  `);
+});
+
 test('exported values are cached', () => {
   const code = {
     'cached-file1.ts': `
