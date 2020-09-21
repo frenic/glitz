@@ -1117,9 +1117,9 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
 
           const staticThemesMap: StaticThemes = {};
           for (const theme of staticThemes) {
-            if (!theme || !theme.id) {
+            if (!theme || !theme.id || theme.id in staticThemesMap) {
               throw new Error(
-                `The exported variable '${staticThemesName}' in the file '${staticThemesFile}' must be an array of theme objects, and the theme objects must have a property called 'id'`,
+                `The exported variable '${staticThemesName}' in the file '${staticThemesFile}' must be an array of theme objects, and the theme objects must have a property called 'id' which must have a unique value`,
               );
             }
             staticThemesMap[theme.id] = theme;
@@ -1268,11 +1268,11 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
 
         let ternaryExrp: ts.Expression | undefined = undefined;
 
-        let themeIdsLeft = Object.keys(classNamesByThemeId);
+        let allThemeIds = Object.keys(classNamesByThemeId);
+        const allThemes = Object.values(transformerContext.staticThemes);
         for (const t of themeIdsAndClassNames) {
           const themeIds = t.themeIds;
-          const allThemes = Object.values(transformerContext.staticThemes);
-          const otherThemeIds = themeIdsLeft.filter(t => themeIds.indexOf(t) === -1);
+          const otherThemeIds = allThemeIds.filter(t => themeIds.indexOf(t) === -1);
           const classNames = t.className;
 
           const condition = createConditionFor(
@@ -1280,7 +1280,6 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
             allThemes.filter(t => otherThemeIds.indexOf(t.id) !== -1),
             factory,
           );
-          themeIdsLeft = themeIdsLeft.filter(t => themeIds.indexOf(t) === -1);
 
           if (ternaryExrp === undefined) {
             if (transformerContext.mode === 'development') {
@@ -1356,9 +1355,13 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
 }
 
 function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticTheme[], factory: ts.NodeFactory) {
-  if (wantedThemes.length > 1) {
+  if (wantedThemes.length > 0 && otherThemes.length > 0) {
     let commonPropertyName: string | undefined = undefined;
     for (const property in wantedThemes[0]) {
+      if (property === themeIdPropertyName) {
+        continue;
+      }
+
       commonPropertyName = property;
       const value = wantedThemes[0][property];
       for (const theme of wantedThemes) {
@@ -1366,15 +1369,21 @@ function createConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticThem
           commonPropertyName = undefined;
         }
       }
-    }
-    if (commonPropertyName) {
-      for (const otherTheme of otherThemes) {
-        if (otherTheme[commonPropertyName] === wantedThemes[0][commonPropertyName]) {
-          commonPropertyName = undefined;
-          break;
+
+      if (commonPropertyName) {
+        for (const otherTheme of otherThemes) {
+          if (otherTheme[commonPropertyName] === wantedThemes[0][commonPropertyName]) {
+            commonPropertyName = undefined;
+            break;
+          }
         }
       }
+
+      if (commonPropertyName) {
+        break;
+      }
     }
+
     if (commonPropertyName) {
       const commonValue = wantedThemes[0][commonPropertyName];
       const literal = createLiteral(commonValue, factory);
