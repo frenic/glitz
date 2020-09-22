@@ -373,7 +373,16 @@ function evaluateInternal(
       hasEvaluated = true;
     }
     if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
-      evaluationResult = evaluate(symbol.valueDeclaration, program, scope, globals);
+      let valueDeclaration = symbol.valueDeclaration;
+      if (!valueDeclaration.body) {
+        const declarationWithBody = symbol.declarations.find(
+          d => !!(d as ts.FunctionDeclaration).body,
+        ) as ts.FunctionDeclaration;
+        if (declarationWithBody) {
+          valueDeclaration = declarationWithBody;
+        }
+      }
+      evaluationResult = evaluate(valueDeclaration, program, scope, globals);
       hasEvaluated = true;
     }
     if (ts.isEnumDeclaration(symbol.valueDeclaration)) {

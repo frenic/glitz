@@ -173,6 +173,20 @@ const y = window.innerHeight + 100;
   expect(evaluate('y', code, { window: { innerHeight: 100 } })).toBe(200);
 });
 
+test('correctly deals with function overloads', () => {
+  const code = {
+    'entry.ts': `
+function add(a: string, b: string): string;
+function add(a: number, b: number): number;
+function add(a: any, b: any) {
+  return a + b;
+}
+`,
+  };
+  expect(evaluate('add(1, 2)', code)).toBe(3);
+  expect(evaluate('add("a", "b")', code)).toBe('ab');
+});
+
 test('can use rest args', () => {
   const code = {
     'entry.ts': `
