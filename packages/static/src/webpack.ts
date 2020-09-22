@@ -1,24 +1,31 @@
 import { GlitzStatic } from '@glitz/core';
 
+type Output = ((output: string) => Promise<unknown> | void) | string;
+
 export class GlitzStaticPlugin {
   private glitz: GlitzStatic;
-  private filename: string;
-  constructor(glitz: GlitzStatic, filename: string) {
+  private output: Output;
+  constructor(glitz: GlitzStatic, output: Output) {
     this.glitz = glitz;
-    this.filename = filename;
+    this.output = output;
   }
   apply(compiler: any) {
-    compiler.hooks.emit.tapAsync('GlitzStaticPlugin', (compilation: any, callback: () => void) => {
+    compiler.hooks.emit.tapAsync('GlitzStaticPlugin', async (compilation: any, callback: () => void) => {
       const css = this.glitz.getStyle();
+      const output = this.output;
 
-      compilation.assets[this.filename] = {
-        source() {
-          return css;
-        },
-        size() {
-          return css.length;
-        },
-      };
+      if (typeof output === 'string') {
+        compilation.assets[output] = {
+          source() {
+            return css;
+          },
+          size() {
+            return css.length;
+          },
+        };
+      } else {
+        await output(css);
+      }
 
       callback();
     });
