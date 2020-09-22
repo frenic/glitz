@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as ts from 'typescript';
-import { transformer, styledName, Diagnostic, TransformerArguments } from '../transformer';
+import { transformer, styledName, Diagnostic, TransformerOptions } from '../transformer';
 import { GlitzStatic } from '@glitz/core';
 
 export type TransformerDiagnostics = Diagnostic[];
@@ -8,7 +8,7 @@ export type Code = { [fileName: string]: string };
 
 export default function compile(
   files: { [fileName: string]: string },
-  transformerArgs?: Partial<TransformerArguments>,
+  transformerOptions?: Partial<TransformerOptions>,
 ) {
   const outputs: Code = {};
 
@@ -85,13 +85,14 @@ export default function compile(
   const glitz = new GlitzStatic();
 
   const transformerDiagnostics: TransformerDiagnostics = [];
-  const transformerOptions: TransformerArguments = {
-    mode: 'development',
-    diagnosticsReporter: diagnostic => transformerDiagnostics.push(diagnostic),
-    ...(transformerArgs ?? {}),
-  };
   const transformers: ts.CustomTransformers = {
-    before: [transformer(program, glitz, transformerOptions)],
+    before: [
+      transformer(program, glitz, {
+        mode: 'development',
+        diagnosticsReporter: diagnostic => transformerDiagnostics.push(diagnostic),
+        ...(transformerOptions ?? {}),
+      }),
+    ],
     after: [],
   };
 

@@ -63,7 +63,7 @@ type StaticStyledComponents = {
   composedComponentSymbols: ts.Symbol[];
 };
 
-export type TransformerArguments = {
+export type TransformerOptions = {
   mode?: 'development' | 'production';
   staticThemesFile?: string;
   allStylesShouldBeStatic?: boolean;
@@ -116,16 +116,16 @@ type TransformerContext = {
 export function transformer(
   program: ts.Program,
   glitz: GlitzStatic,
-  args: TransformerArguments,
+  options: TransformerOptions = {},
 ): ts.TransformerFactory<ts.SourceFile> {
   let staticThemes: StaticThemes;
-  if (args.staticThemesFile) {
-    staticThemes = getStaticThemes(args.staticThemesFile, program);
+  if (options.staticThemesFile) {
+    staticThemes = getStaticThemes(options.staticThemesFile, program);
   }
 
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
-    if (file.fileName === args.staticThemesFile) {
-      staticThemes = getStaticThemes(args.staticThemesFile, program);
+    if (file.fileName === options.staticThemesFile) {
+      staticThemes = getStaticThemes(options.staticThemesFile, program);
     }
     if (file.fileName.endsWith('.tsx')) {
       if (file.fileName in evaluationCache) {
@@ -160,7 +160,7 @@ export function transformer(
           transformations: new Map<ts.Node, ts.Node>(),
           nodeFlags: new Map<ts.Node, string[]>(),
         },
-        args,
+        options,
       );
 
       // We first make a first pass to gather information about the file and populate `staticStyledComponents`.
