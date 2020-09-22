@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 import * as path from 'path';
+import * as fs from 'fs';
 import { GlitzStatic } from '@glitz/core';
 import { isStaticElement, isStaticComponent } from './shared';
 import {
@@ -11,9 +12,9 @@ import {
   FunctionWithTsNode,
   staticModuleOverloads,
 } from './evaluator';
-import { getStaticGlitzExports } from './static-modules';
+import { getStaticExports } from './static-module-overloads';
 
-export const moduleName = '@glitz/react';
+export const glitzModuleName = '@glitz/react';
 export const styledName = 'styled';
 export const useStyleName = 'useStyle';
 const staticThemesName = 'staticThemes';
@@ -22,7 +23,12 @@ const useGlitzThemeName = 'useGlitzTheme';
 const useThemeName = 'useTheme';
 const themeIdPropertyName = 'id';
 
-staticModuleOverloads[moduleName] = getStaticGlitzExports;
+staticModuleOverloads[glitzModuleName] = () => {
+  const files: { [moduleName: string]: string } = {};
+  files[glitzModuleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
+  files['shared.ts'] = fs.readFileSync(path.join(__dirname, 'shared.ts')).toString();
+  return getStaticExports(glitzModuleName, files);
+};
 
 type StaticStyledComponent = {
   componentName: string;
@@ -285,7 +291,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       undefined,
       undefined,
       importClause,
-      factory.createStringLiteral(moduleName),
+      factory.createStringLiteral(glitzModuleName),
     );
     transformerContext.currentFileHasImportedUseTheme = true;
     result = [node, importDecl];

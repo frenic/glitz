@@ -1,12 +1,9 @@
 import * as ts from 'typescript';
-import * as path from 'path';
-import * as fs from 'fs';
-import { moduleName } from './transformer';
 
-let cachedStaticGlitzProgram: ts.Program | undefined;
-function getStaticGlitzProgram() {
-  if (cachedStaticGlitzProgram) {
-    return cachedStaticGlitzProgram;
+let cachedStaticPrograms: { [name: string]: ts.Program } = {};
+function getStaticProgram(name: string, files: { [moduleName: string]: string }) {
+  if (name in cachedStaticPrograms) {
+    return cachedStaticPrograms[name];
   }
   const compilerOptions: ts.CompilerOptions = {
     noEmitOnError: true,
@@ -16,10 +13,6 @@ function getStaticGlitzProgram() {
     types: [],
     jsx: ts.JsxEmit.Preserve,
   };
-
-  const files: { [moduleName: string]: string } = {};
-  files[moduleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
-  files['shared.ts'] = fs.readFileSync(path.join(__dirname, 'shared.ts')).toString();
 
   const compilerHost = ts.createCompilerHost(compilerOptions);
 
@@ -72,22 +65,23 @@ function getStaticGlitzProgram() {
     },
   };
 
-  cachedStaticGlitzProgram = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
-  return cachedStaticGlitzProgram;
+  cachedStaticPrograms[name] = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
+  return cachedStaticPrograms[name];
 }
 
-let cachedStaticGlitzExports: { [name: string]: ts.Symbol } | undefined;
-export function getStaticGlitzExports() {
-  if (cachedStaticGlitzExports) {
-    return [cachedStaticGlitzExports, cachedStaticGlitzProgram as ts.Program] as const;
+type Exports = { [name: string]: ts.Symbol };
+let cachedStaticExports: { [name: string]: Exports } = {};
+export function getStaticExports(name: string, files: { [moduleName: string]: string }) {
+  const program = getStaticProgram(name, files);
+  if (name in cachedStaticExports) {
+    return [cachedStaticExports[name], program] as const;
   }
-  cachedStaticGlitzExports = {};
+  cachedStaticExports[name] = {};
 
-  const program = getStaticGlitzProgram();
   const typeChecker = program.getTypeChecker();
-  const staticSource = program.getSourceFile(moduleName + '.ts');
+  const staticSource = program.getSourceFile(name + '.ts');
   if (!staticSource) {
-    throw new Error('Cannot find static Glitz file');
+    throw new Error('Cannot find static entry file for module ' + name);
   }
 
   for (const stmt of staticSource.statements) {
@@ -97,7 +91,7 @@ export function getStaticGlitzExports() {
       stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)
     ) {
       for (const decl of stmt.declarationList.declarations) {
-        cachedStaticGlitzExports[decl.name.getText()] = typeChecker.getSymbolAtLocation(decl.name)!;
+        cachedStaticExports[name][decl.name.getText()] = typeChecker.getSymbolAtLocation(decl.name)!;
       }
     }
 
@@ -107,8 +101,8 @@ export function getStaticGlitzExports() {
       stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword) &&
       stmt.name
     ) {
-      cachedStaticGlitzExports[stmt.name.getText()] = typeChecker.getSymbolAtLocation(stmt.name)!;
+      cachedStaticExports[name][stmt.name.getText()] = typeChecker.getSymbolAtLocation(stmt.name)!;
     }
   }
-  return [cachedStaticGlitzExports, cachedStaticGlitzProgram as ts.Program] as const;
+  return [cachedStaticExports[name], program] as const;
 }

@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as ts from 'typescript';
-import { transformer, styledName, Diagnostic, TransformerOptions } from '../transformer';
+import { transformer, styledName, Diagnostic, TransformerOptions, glitzModuleName } from '../transformer';
 import { GlitzStatic } from '@glitz/core';
 
 export type TransformerDiagnostics = Diagnostic[];
@@ -28,7 +28,7 @@ export default function compile(
     resolveModuleNames(moduleNames, containingFile, _, __, options) {
       const resolvedModules: ts.ResolvedModule[] = [];
       for (const moduleName of moduleNames) {
-        if (moduleName === '@glitz/react') {
+        if (moduleName === glitzModuleName) {
           resolvedModules.push({
             resolvedFileName: path.join(__dirname, '..', 'static-glitz.ts'),
           });
