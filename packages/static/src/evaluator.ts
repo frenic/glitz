@@ -12,9 +12,12 @@ export function evaluate(
   try {
     return evaluateInternal(expr, program, scope, globals);
   } catch (e) {
-    if (!(e instanceof EvaluationError)) {
+    if (isRequiresRuntimeResult(e)) {
+      return e;
+    } else if (!(e instanceof EvaluationError)) {
       console.log('Error evaluating expression:', expr.getText());
       console.log('Expression exists in file:', expr.getSourceFile().fileName);
+      console.error(e);
       throw new EvaluationError(e);
     } else {
       throw e;
