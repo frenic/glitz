@@ -8,7 +8,10 @@ import {
   RequiresRuntimeResult,
   requiresRuntimeResult,
   evaluationCache,
+  FunctionWithTsNode,
+  staticModuleOverloads,
 } from './evaluator';
+import { getStaticGlitzExports } from './static-modules';
 
 export const moduleName = '@glitz/react';
 export const styledName = 'styled';
@@ -19,10 +22,7 @@ const useGlitzThemeName = 'useGlitzTheme';
 const useThemeName = 'useTheme';
 const themeIdPropertyName = 'id';
 
-export type FunctionWithTsNode = {
-  (...args: any[]): any;
-  tsNode?: ts.Node;
-};
+staticModuleOverloads[moduleName] = getStaticGlitzExports;
 
 type StaticStyledComponent = {
   componentName: string;
