@@ -64,8 +64,6 @@ type StaticStyledComponents = {
 };
 
 export type TransformerArguments = {
-  program: ts.Program;
-  glitz: GlitzStatic;
   mode?: 'development' | 'production';
   staticThemesFile?: string;
   allStylesShouldBeStatic?: boolean;
@@ -115,15 +113,19 @@ type TransformerContext = {
   nodeFlags: Map<ts.Node, string[]>;
 };
 
-export function transformer(args: TransformerArguments): ts.TransformerFactory<ts.SourceFile> {
-  let staticThemes: StaticThemes = undefined;
+export function transformer(
+  program: ts.Program,
+  glitz: GlitzStatic,
+  args: TransformerArguments,
+): ts.TransformerFactory<ts.SourceFile> {
+  let staticThemes: StaticThemes;
   if (args.staticThemesFile) {
-    staticThemes = getStaticThemes(args.staticThemesFile, args.program);
+    staticThemes = getStaticThemes(args.staticThemesFile, program);
   }
 
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName === args.staticThemesFile) {
-      staticThemes = getStaticThemes(args.staticThemesFile, args.program);
+      staticThemes = getStaticThemes(args.staticThemesFile, program);
     }
     if (file.fileName.endsWith('.tsx')) {
       if (file.fileName in evaluationCache) {
@@ -144,8 +146,8 @@ export function transformer(args: TransformerArguments): ts.TransformerFactory<t
 
       const transformerContext: TransformerContext = Object.assign(
         {
-          program: args.program,
-          glitz: args.glitz,
+          program,
+          glitz,
           staticThemes,
           passNumber: 1,
           staticStyledComponents,
@@ -1125,9 +1127,8 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
           const staticThemes = evaluate(declarationNode.initializer, program);
           const requiresRuntimeResults = getAllRequiresRuntimeResult(staticThemes);
           if (requiresRuntimeResults.length) {
-            const requiresRuntimeResult = requiresRuntimeResults[0];
-            let message = requiresRuntimeResult.message;
-            const diagnostics = requiresRuntimeResult.getDiagnostics();
+            let message = requiresRuntimeResults[0].message;
+            const diagnostics = requiresRuntimeResults[0].getDiagnostics();
             if (diagnostics) {
               message += ` in ${diagnostics.file}:${diagnostics.line}`;
             }
@@ -1268,21 +1269,21 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
       // className={t.id === 'theme1' ? 'a' : 'b'}
       type ThemeIdAndClassNamesTuple = { className: string; themeIds: string[] };
       const themeIdsAndClassNames = Object.keys(themeIdsByClassNames).reduce(
-        (acc, className) => [...acc, { className: className, themeIds: themeIdsByClassNames[className] }],
-        [] as Array<ThemeIdAndClassNamesTuple>,
+        (acc, className) => [...acc, { className, themeIds: themeIdsByClassNames[className] }],
+        [] as ThemeIdAndClassNamesTuple[],
       );
       themeIdsAndClassNames.sort((a, b) => b.themeIds.length - a.themeIds.length);
 
       const componentNode = injectUseGlitzThemeVariable(transformerContext, factory);
       if (componentNode) {
-        let ternaryExrp: ts.Expression | undefined = undefined;
+        let ternaryExrp: ts.Expression | undefined;
 
-        let allThemeIds = Object.keys(classNamesByThemeId);
+        const allThemeIds = Object.keys(classNamesByThemeId);
         const allThemes = Object.values(transformerContext.staticThemes);
-        for (const t of themeIdsAndClassNames) {
-          const themeIds = t.themeIds;
+        for (const theme of themeIdsAndClassNames) {
+          const themeIds = theme.themeIds;
           const otherThemeIds = allThemeIds.filter(t => themeIds.indexOf(t) === -1);
-          const classNames = t.className;
+          const classNames = theme.className;
 
           const condition = createThemeConditionFor(
             allThemes.filter(t => themeIds.indexOf(t.id) !== -1),
@@ -1373,7 +1374,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
 // same value in all wanted themes, and a different value in all other themese.
 function createThemeConditionFor(wantedThemes: StaticTheme[], otherThemes: StaticTheme[], factory: ts.NodeFactory) {
   if (wantedThemes.length > 0 && otherThemes.length > 0) {
-    let commonPropertyName: string | undefined = undefined;
+    let commonPropertyName: string | undefined;
     for (const property in wantedThemes[0]) {
       if (property === themeIdPropertyName) {
         continue;
@@ -1422,7 +1423,7 @@ function createThemeConditionFor(wantedThemes: StaticTheme[], otherThemes: Stati
 
   // No property found that can fulfill our condition so we fall back to creating a bigger
   // expression based on the theme ids of the wanted themes.
-  let condition: ts.BinaryExpression | undefined = undefined;
+  let condition: ts.BinaryExpression | undefined;
   for (const theme of wantedThemes) {
     const themeId = theme.id;
     const themeCondition = factory.createBinaryExpression(

@@ -85,15 +85,13 @@ export default function compile(
   const glitz = new GlitzStatic();
 
   const transformerDiagnostics: TransformerDiagnostics = [];
-  const options: TransformerArguments = {
+  const transformerOptions: TransformerArguments = {
     mode: 'development',
-    glitz,
-    program,
     diagnosticsReporter: diagnostic => transformerDiagnostics.push(diagnostic),
     ...(transformerArgs ?? {}),
   };
   const transformers: ts.CustomTransformers = {
-    before: [transformer(options)],
+    before: [transformer(program, glitz, transformerOptions)],
     after: [],
   };
 
