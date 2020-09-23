@@ -1515,6 +1515,37 @@ function Component() {
   });
 });
 
+test('can compile build-in styled components', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+export default function Header() {
+  return <Base />;
+}
+
+/** @glitz-static */
+const Base = styled(styled.Header, {
+  paddingLeft: '10px',
+});
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      export default function Header() {
+          return <header className=\\"a\\" data-glitzname=\\"Base\\"/>;
+      }
+      /** @glitz-static */
+      const Base = /*#__PURE__*/ styled(styled.Header, {
+          paddingLeft: '10px',
+      });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{padding-left:10px}"`);
+  });
+});
+
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,
