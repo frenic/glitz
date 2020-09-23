@@ -222,9 +222,9 @@ function evaluateInternal(
       (...args: any[]) => {
         const parameterScope = new Map<ts.Symbol, any>();
         if (scope) {
-          for (const [k, v] of scope.entries()) {
+          scope.forEach((v, k) => {
             parameterScope.set(k, v);
-          }
+          });
         }
         for (let i = 0; i < parameters.length; i++) {
           if (parameters[i].isDotDotDot) {
