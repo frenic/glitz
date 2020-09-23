@@ -1478,8 +1478,40 @@ function Component() {
   };
 
   expectEqual(compile(code), result => {
-    expect(result['file1.jsx']).toMatchInlineSnapshot();
-    expect(result['style.css']).toMatchInlineSnapshot();
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      export var Theme;
+      (function (Theme) {
+          Theme[Theme[\\"Test\\"] = 0] = \\"Test\\";
+      })(Theme || (Theme = {}));
+      const testTheme = {
+          background: 'red',
+          text: 'green',
+          padding: '10px',
+      };
+      function theme(value, type = Theme.Test) {
+          switch (type) {
+              case Theme.Test:
+                  return value(testTheme);
+          }
+      }
+      function createThemeDecorator(type) {
+          return /*#__PURE__*/ styled({
+              backgroundColor: theme(t => t.background, type),
+              color: theme(t => t.text, type),
+          });
+      }
+      const Base = /*#__PURE__*/ createThemeDecorator(Theme.Test)(styled.Header, {
+          padding: { xy: theme(t => t.padding) },
+      });
+      function Component() {
+          return <header className=\\"c d e f a b\\" data-glitzname=\\"Base\\"/>;
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".a{color:green}.b{background-color:red}.c{padding-bottom:10px}.d{padding-top:10px}.e{padding-right:10px}.f{padding-left:10px}"`,
+    );
   });
 });
 

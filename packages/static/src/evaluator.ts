@@ -5,11 +5,12 @@ export type FunctionWithTsNode = {
   tsNode?: ts.Node;
 };
 
+type SupportedExpressions = ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration;
 type Exports = { [exportName: string]: ts.Symbol };
 export const staticModuleOverloads: { [moduleName: string]: () => readonly [Exports, ts.Program] } = {};
 
 export function evaluate(
-  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration,
+  expr: SupportedExpressions,
   program: ts.Program,
   scope?: Map<ts.Symbol, any>,
   globals?: { [name: string]: any },
@@ -52,7 +53,7 @@ globalGlobals.Boolean = Boolean;
 globalGlobals.RegExp = RegExp;
 
 function evaluateInternal(
-  expr: ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration,
+  expr: SupportedExpressions,
   program: ts.Program,
   scope?: Map<ts.Symbol, any>,
   globals?: { [name: string]: any },
@@ -196,31 +197,6 @@ function evaluateInternal(
     }
     return s;
   } else if (ts.isArrowFunction(expr) || ts.isFunctionExpression(expr) || ts.isFunctionDeclaration(expr)) {
-    let bodyExpression: ts.Expression | undefined;
-    if (expr.body) {
-      if (ts.isBlock(expr.body)) {
-        const returnStatements = expr.body.statements.filter(s => ts.isReturnStatement(s)) as ts.ReturnStatement[];
-        if (returnStatements.length === 1) {
-          bodyExpression = returnStatements[0].expression;
-        } else if (returnStatements.length < 1) {
-          return requiresRuntimeResult('Static expressions does not support functions with multiple returns', expr);
-        }
-
-        const ifStatements = expr.body.statements.filter(s => ts.isIfStatement(s));
-        if (ifStatements.length) {
-          return requiresRuntimeResult('Static expressions does not support functions with if statements', expr);
-        }
-
-        const loopStatements = expr.body.statements.filter(
-          s => ts.isForInStatement(s) || ts.isForOfStatement(s) || ts.isWhileStatement(s) || ts.isDoStatement(s),
-        );
-        if (loopStatements.length) {
-          return requiresRuntimeResult('Static expressions does not support functions with loops', expr);
-        }
-      } else {
-        bodyExpression = expr.body;
-      }
-    }
     const parameters: { name: string; symbol: ts.Symbol; isDotDotDot: boolean; defaultValue: any }[] = [];
     for (const parameter of expr.parameters) {
       if (ts.isIdentifier(parameter.name)) {
@@ -244,10 +220,6 @@ function evaluateInternal(
 
     return Object.assign(
       (...args: any[]) => {
-        if (bodyExpression === undefined) {
-          return undefined;
-        }
-
         const parameterScope = new Map<ts.Symbol, any>();
         if (scope) {
           for (const [k, v] of scope.entries()) {
@@ -265,7 +237,17 @@ function evaluateInternal(
             }
           }
         }
-        const result = evaluate(bodyExpression, program, parameterScope, globals);
+        if (!expr.body) {
+          return undefined;
+        }
+
+        let result: RequiresRuntimeResult | unknown;
+        if (!ts.isBlock(expr.body)) {
+          result = evaluate(expr.body, program, parameterScope, globals);
+        } else {
+          result = evaluateStatements(expr.body.statements, expr, program, parameterScope, globals);
+        }
+
         if (isRequiresRuntimeResult(result)) {
           throw result;
         }
@@ -582,6 +564,121 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
     }
   }
   return [symbol, program, fileName] as const;
+}
+
+function evaluateStatements(
+  statements: ts.NodeArray<ts.Statement>,
+  parentExpression: SupportedExpressions,
+  program: ts.Program,
+  scope?: Map<ts.Symbol, any>,
+  globals?: { [name: string]: any },
+): any {
+  const switchStatements = statements.filter(s => ts.isSwitchStatement(s)) as ts.SwitchStatement[];
+  const ifStatements = statements.filter(s => ts.isIfStatement(s)) as ts.IfStatement[];
+
+  let singleReturn: ts.Expression | undefined;
+  let singleSwitch: ts.SwitchStatement | undefined;
+  let singleIf: ts.IfStatement | undefined;
+
+  if (statements.every(s => ts.isVariableStatement(s) || ts.isSwitchStatement(s)) && switchStatements.length === 1) {
+    singleSwitch = switchStatements[0];
+  } else if (statements.every(s => ts.isVariableStatement(s) || ts.isIfStatement(s)) && ifStatements.length === 1) {
+    singleIf = ifStatements[0];
+  } else {
+    const returnStatements = statements.filter(s => ts.isReturnStatement(s)) as ts.ReturnStatement[];
+    if (returnStatements.length === 1) {
+      singleReturn = returnStatements[0].expression;
+    } else if (returnStatements.length < 1) {
+      return requiresRuntimeResult('Static expressions does not support bodys with multiple returns', parentExpression);
+    }
+
+    if (ifStatements.length) {
+      return requiresRuntimeResult(
+        'Static expressions does not support bodys with if statements unless the function only contains variable declarations and one if/else with returns',
+        parentExpression,
+      );
+    }
+
+    if (switchStatements.length) {
+      return requiresRuntimeResult(
+        'Static expressions does not support bodys with switch statements unless the function only contains variable declarations and one switch with returns',
+        parentExpression,
+      );
+    }
+
+    const loopStatements = statements.filter(
+      s => ts.isForInStatement(s) || ts.isForOfStatement(s) || ts.isWhileStatement(s) || ts.isDoStatement(s),
+    );
+    if (loopStatements.length) {
+      return requiresRuntimeResult('Static expressions does not support bodys with loops', parentExpression);
+    }
+  }
+
+  if (singleReturn) {
+    return evaluate(singleReturn, program, scope, globals);
+  } else if (singleSwitch) {
+    const switchValue = evaluate(singleSwitch.expression, program, scope, globals);
+    if (isRequiresRuntimeResult(switchValue)) {
+      return switchValue;
+    }
+    for (const clause of singleSwitch.caseBlock.clauses) {
+      if (ts.isCaseClause(clause)) {
+        const clauseValue = evaluate(clause.expression, program, scope, globals);
+        if (isRequiresRuntimeResult(switchValue)) {
+          return switchValue;
+        }
+        if (clauseValue == switchValue) {
+          return evaluateStatements(clause.statements, parentExpression, program, scope, globals);
+        }
+      } else if (ts.isDefaultClause(clause)) {
+        return evaluateStatements(clause.statements, parentExpression, program, scope, globals);
+      }
+    }
+    return requiresRuntimeResult('Unable to statically evaluate body', parentExpression);
+  } else if (singleIf) {
+    return evaluateIfStatement(singleIf, parentExpression, program, scope, globals);
+  } else {
+    return requiresRuntimeResult('Unable to statically evaluate body', parentExpression);
+  }
+}
+
+function evaluateIfStatement(
+  ifStatement: ts.IfStatement,
+  parentExpression: SupportedExpressions,
+  program: ts.Program,
+  scope?: Map<ts.Symbol, any>,
+  globals?: { [name: string]: any },
+): any {
+  const expression = evaluate(ifStatement.expression, program, scope, globals);
+  if (isRequiresRuntimeResult(expression)) {
+    return expression;
+  }
+  if (expression) {
+    if (ts.isBlock(ifStatement.thenStatement)) {
+      return evaluateStatements(ifStatement.thenStatement.statements, parentExpression, program, scope, globals);
+    } else if (ts.isReturnStatement(ifStatement.thenStatement)) {
+      if (!ifStatement.thenStatement.expression) {
+        return undefined;
+      }
+      return evaluate(ifStatement.thenStatement.expression, program, scope, globals);
+    } else {
+      return requiresRuntimeResult('Unable to statically then statement', ifStatement.thenStatement);
+    }
+  } else if (ifStatement.elseStatement) {
+    if (ts.isIfStatement(ifStatement.elseStatement)) {
+      return evaluateIfStatement(ifStatement.elseStatement, parentExpression, program, scope, globals);
+    } else if (ts.isBlock(ifStatement.elseStatement)) {
+      return evaluateStatements(ifStatement.elseStatement.statements, parentExpression, program, scope, globals);
+    } else if (ts.isReturnStatement(ifStatement.elseStatement)) {
+      if (!ifStatement.elseStatement.expression) {
+        return undefined;
+      }
+      return evaluate(ifStatement.elseStatement.expression, program, scope, globals);
+    } else {
+      return requiresRuntimeResult('Unable to statically evaluate else statement', ifStatement.elseStatement);
+    }
+  }
+  return requiresRuntimeResult('Unable to statically evaluate if statement', parentExpression);
 }
 
 export type RequiresRuntimeResult = {

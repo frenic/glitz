@@ -136,6 +136,26 @@ function isTwo(x: number) {
   expect(evaluate('isTwo(3)', code)).toBe(false);
 });
 
+test('can evaluate a single if statement', () => {
+  const code = {
+    'entry.ts': `
+function isTwo(x: number) {
+  const y = x + 1 - 1;
+  if (y === 1) {
+    return false;
+  } else if (y === 2) {
+    return true;
+  } else {
+    return false;
+  }
+}
+`,
+  };
+  expect(evaluate('isTwo(1)', code)).toBe(false);
+  expect(evaluate('isTwo(2)', code)).toBe(true);
+  expect(evaluate('isTwo(3)', code)).toBe(false);
+});
+
 test('can evaluate a function in a different file', () => {
   const code = {
     'shared1.ts': `
