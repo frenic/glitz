@@ -1433,6 +1433,56 @@ const MyArrowFunction = () => <Styled1 />;
   });
 });
 
+test('can compile static theme with switch', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+export enum Theme {
+  Test,
+}
+
+const testTheme = {
+  background: 'red',
+  text: 'green',
+  padding: '10px',
+};
+
+type ThemeType = typeof testTheme;
+
+function theme<TValue>(
+  value: (values: ThemeType) => TValue,
+  type = Theme.Test
+): TValue {
+  switch (type) {
+    case Theme.Test:
+      return value(testTheme);
+  }
+}
+
+function createThemeDecorator(type: Theme) {
+  return styled({
+    backgroundColor: theme(t => t.background, type),
+    color: theme(t => t.text, type),
+  });
+}
+
+const Base = createThemeDecorator(Theme.Test)(styled.Header, {
+  padding: { xy: theme(t => t.padding) },
+});
+
+function Component() {
+  return <Base />;
+}
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot();
+    expect(result['style.css']).toMatchInlineSnapshot();
+  });
+});
+
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,

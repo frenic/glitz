@@ -116,6 +116,26 @@ function doSomething(z: number) {
   expect(evaluate('doSomething(100)', code)).toBe(2);
 });
 
+test('can evaluate a switch', () => {
+  const code = {
+    'entry.ts': `
+function isTwo(x: number) {
+  switch (x) {
+    case 1:
+      return false;
+    case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+`,
+  };
+  expect(evaluate('isTwo(1)', code)).toBe(false);
+  expect(evaluate('isTwo(2)', code)).toBe(true);
+  expect(evaluate('isTwo(3)', code)).toBe(false);
+});
+
 test('can evaluate a function in a different file', () => {
   const code = {
     'shared1.ts': `
