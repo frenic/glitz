@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-let cachedStaticPrograms: { [name: string]: ts.Program } = {};
+const cachedStaticPrograms: { [name: string]: ts.Program } = {};
 function getStaticProgram(name: string, files: { [moduleName: string]: string }) {
   if (name in cachedStaticPrograms) {
     return cachedStaticPrograms[name];
@@ -20,20 +20,20 @@ function getStaticProgram(name: string, files: { [moduleName: string]: string })
     ...compilerHost,
     resolveModuleNames(moduleNames, containingFile, _, __, options) {
       const resolvedModules: ts.ResolvedModule[] = [];
-      for (const name of moduleNames) {
-        const localTsFileName = `${name.slice(2)}.ts`;
+      for (const module of moduleNames) {
+        const localTsFileName = `${module.slice(2)}.ts`;
         if (localTsFileName in files) {
           resolvedModules.push({ resolvedFileName: localTsFileName });
           continue;
         }
 
-        const localTsxFileName = `${name.slice(2)}.tsx`;
+        const localTsxFileName = `${module.slice(2)}.tsx`;
         if (localTsxFileName in files) {
           resolvedModules.push({ resolvedFileName: localTsxFileName });
           continue;
         }
 
-        const result = ts.resolveModuleName(name, containingFile, options, {
+        const result = ts.resolveModuleName(module, containingFile, options, {
           fileExists(fileName) {
             return ts.sys.fileExists(fileName);
           },
@@ -70,7 +70,7 @@ function getStaticProgram(name: string, files: { [moduleName: string]: string })
 }
 
 type Exports = { [name: string]: ts.Symbol };
-let cachedStaticExports: { [name: string]: Exports } = {};
+const cachedStaticExports: { [name: string]: Exports } = {};
 export function getStaticExports(name: string, files: { [moduleName: string]: string }) {
   const program = getStaticProgram(name, files);
   if (name in cachedStaticExports) {

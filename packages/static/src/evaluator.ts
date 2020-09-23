@@ -627,7 +627,7 @@ function evaluateStatements(
         if (isRequiresRuntimeResult(switchValue)) {
           return switchValue;
         }
-        if (clauseValue == switchValue) {
+        if (clauseValue === switchValue) {
           return evaluateStatements(clause.statements, parentExpression, program, scope, globals);
         }
       } else if (ts.isDefaultClause(clause)) {
