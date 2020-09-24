@@ -169,6 +169,15 @@ export function transformer(
         options,
       );
 
+      const { diagnosticsReporter } = transformerContext;
+      transformerContext.diagnosticsReporter = diagnostic => {
+        glitz.diagnostics.push(diagnostic);
+
+        if (diagnosticsReporter) {
+          diagnosticsReporter(diagnostic);
+        }
+      };
+
       // We first make a first pass to gather information about the file and populate `staticStyledComponents`.
       // The reason why we can't do this in a single pass is because we visit the file from top to bottom, and there
       // might be declarations at the bottom of the file that affects the top of the file.

@@ -41,6 +41,32 @@ export class GlitzStaticPlugin {
       } else {
         await output(css);
       }
+
+      const { diagnostics } = this.glitz;
+      const logger = compilation.getLogger(PLUGIN_NAME);
+
+      function message(diagnostic: typeof diagnostics extends (infer U)[] ? U : never, level = 0): string {
+        return (
+          `${'    '.repeat(level)}${diagnostic.message}\n` +
+          `${'    '.repeat(level)}  in ${diagnostic.file}:${diagnostic.line}` +
+          (diagnostic.innerDiagnostic ? `\n${message(diagnostic.innerDiagnostic, ++level)}` : '')
+        );
+      }
+
+      for (const diagnostic of this.glitz.diagnostics) {
+        const { severity } = diagnostic;
+        switch (severity) {
+          case 'error':
+            compilation.errors.push(message(diagnostic));
+            break;
+          case 'warning':
+            compilation.warnings.push(message(diagnostic));
+            break;
+          case 'info':
+            logger.info(message(diagnostic));
+            break;
+        }
+      }
     });
   }
 }

@@ -5,9 +5,18 @@ import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 import { formatMediaRule } from '../utils/format';
 
+export type Diagnostic = {
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  file: string;
+  line: number;
+  innerDiagnostic?: Diagnostic;
+};
+
 export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
   public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
   public getStyle: () => string;
+  public diagnostics: Diagnostic[] = [];
   constructor(options: Options = {}) {
     const prefix = options.prefix;
     const classNameHash = createHashCounter(prefix);
