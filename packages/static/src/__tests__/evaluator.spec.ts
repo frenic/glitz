@@ -297,20 +297,37 @@ const x = () => {
   expect(evaluate('y() + x()', code)).toBe(2 + 3);
 });
 
-test('bails if functions have if statements', () => {
+test('handles semi complex functions', () => {
   const code = {
     'entry.ts': `
 const y = () => {
   let local = 1;
   if (local === 1) {
     local = 2;
+    let innerLocal = local + 2;
+
+    function returnSameThing(x: number) {
+      return x + 1 - 1;
+    }
+
+    if (false || true) {
+      switch (innerLocal) {
+        case 1:
+          local = returnSameThing(1);
+          break;
+        case 4:
+          local = returnSameThing(4);
+          break;
+        default:
+          local = returnSameThing(-1);
+      }
+    }
   }
   return local + 1;
 };
 `,
   };
-  const res = evaluate('y()', code);
-  expect(isRequiresRuntimeResult(res)).toBe(true);
+  expect(evaluate('y()', code)).toBe(5);
 });
 
 test('bails if functions have loop statements', () => {

@@ -12,7 +12,7 @@ export const staticModuleOverloads: { [moduleName: string]: () => readonly [Expo
 export function evaluate(
   expr: SupportedExpressions,
   program: ts.Program,
-  scope?: Map<ts.Symbol, any>,
+  scope?: Scope,
   globals?: { [name: string]: any },
 ): any {
   try {
@@ -55,9 +55,12 @@ globalGlobals.RegExp = RegExp;
 function evaluateInternal(
   expr: SupportedExpressions,
   program: ts.Program,
-  scope?: Map<ts.Symbol, any>,
+  scope?: Scope,
   globals?: { [name: string]: any },
 ): any {
+  if (!scope) {
+    scope = createScope();
+  }
   const typeChecker = program.getTypeChecker();
 
   if (ts.isBinaryExpression(expr)) {
@@ -92,6 +95,18 @@ function evaluateInternal(
       return left * right;
     } else if (expr.operatorToken.kind === ts.SyntaxKind.SlashToken) {
       return left / right;
+    } else if (expr.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+      if (ts.isIdentifier(expr.left)) {
+        const leftSymbol = typeChecker.getSymbolAtLocation(expr.left);
+        if (leftSymbol) {
+          scope.set(leftSymbol, right);
+          return right;
+        } else {
+          return requiresRuntimeResult('Unable to find symbol for variable ' + expr.left.getText(), expr);
+        }
+      } else {
+        return requiresRuntimeResult('Assignment only supported in variables and not objects or arrays', expr.left);
+      }
     } else if (expr.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken) {
       return left === right;
     } else if (expr.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken) {
@@ -220,20 +235,16 @@ function evaluateInternal(
 
     return Object.assign(
       (...args: any[]) => {
-        const parameterScope = new Map<ts.Symbol, any>();
-        if (scope) {
-          scope.forEach((v, k) => {
-            parameterScope.set(k, v);
-          });
-        }
+        const parameterScope = createScope(scope);
+
         for (let i = 0; i < parameters.length; i++) {
           if (parameters[i].isDotDotDot) {
-            parameterScope.set(parameters[i].symbol, args.slice(i));
+            parameterScope.current.set(parameters[i].symbol, args.slice(i));
           } else {
             if (args.length > i) {
-              parameterScope.set(parameters[i].symbol, args[i]);
+              parameterScope.current.set(parameters[i].symbol, args[i]);
             } else {
-              parameterScope.set(parameters[i].symbol, parameters[i].defaultValue);
+              parameterScope.current.set(parameters[i].symbol, parameters[i].defaultValue);
             }
           }
         }
@@ -245,7 +256,7 @@ function evaluateInternal(
         if (!ts.isBlock(expr.body)) {
           result = evaluate(expr.body, program, parameterScope, globals);
         } else {
-          result = evaluateStatements(expr.body.statements, expr, program, parameterScope, globals);
+          result = evaluateStatements(expr.body.statements, program, parameterScope, globals);
         }
 
         if (isRequiresRuntimeResult(result)) {
@@ -566,87 +577,124 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
   return [symbol, program, fileName] as const;
 }
 
+const StatementsDidNotReturn = {};
+
 function evaluateStatements(
   statements: ts.NodeArray<ts.Statement>,
-  parentExpression: SupportedExpressions,
   program: ts.Program,
-  scope?: Map<ts.Symbol, any>,
+  scope?: Scope,
   globals?: { [name: string]: any },
 ): any {
-  const switchStatements = statements.filter(s => ts.isSwitchStatement(s)) as ts.SwitchStatement[];
-  const ifStatements = statements.filter(s => ts.isIfStatement(s)) as ts.IfStatement[];
+  const typeChecker = program.getTypeChecker();
+  const newScope = createScope(scope);
+  for (const statement of statements) {
+    if (ts.isExpressionStatement(statement)) {
+      evaluate(statement.expression, program, newScope, globals);
+    } else if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name)) {
+          const symbol = typeChecker.getSymbolAtLocation(declaration.name);
+          if (!symbol) {
+            return requiresRuntimeResult(
+              'Unable to find symbol for variable ' + declaration.name.getText(),
+              declaration,
+            );
+          }
 
-  let singleReturn: ts.Expression | undefined;
-  let singleSwitch: ts.SwitchStatement | undefined;
-  let singleIf: ts.IfStatement | undefined;
-
-  if (statements.every(s => ts.isVariableStatement(s) || ts.isSwitchStatement(s)) && switchStatements.length === 1) {
-    singleSwitch = switchStatements[0];
-  } else if (statements.every(s => ts.isVariableStatement(s) || ts.isIfStatement(s)) && ifStatements.length === 1) {
-    singleIf = ifStatements[0];
-  } else {
-    const returnStatements = statements.filter(s => ts.isReturnStatement(s)) as ts.ReturnStatement[];
-    if (returnStatements.length === 1) {
-      singleReturn = returnStatements[0].expression;
-    } else if (returnStatements.length < 1) {
-      return requiresRuntimeResult('Static expressions does not support bodys with multiple returns', parentExpression);
-    }
-
-    if (ifStatements.length) {
-      return requiresRuntimeResult(
-        'Static expressions does not support bodys with if statements unless the function only contains variable declarations and one if/else with returns',
-        parentExpression,
-      );
-    }
-
-    if (switchStatements.length) {
-      return requiresRuntimeResult(
-        'Static expressions does not support bodys with switch statements unless the function only contains variable declarations and one switch with returns',
-        parentExpression,
-      );
-    }
-
-    const loopStatements = statements.filter(
-      s => ts.isForInStatement(s) || ts.isForOfStatement(s) || ts.isWhileStatement(s) || ts.isDoStatement(s),
-    );
-    if (loopStatements.length) {
-      return requiresRuntimeResult('Static expressions does not support bodys with loops', parentExpression);
+          let value: any = undefined;
+          if (declaration.initializer) {
+            value = evaluate(declaration.initializer, program, newScope, globals);
+            if (isRequiresRuntimeResult(value)) {
+              return value;
+            }
+          }
+          newScope.set(symbol, value);
+        } else {
+          return requiresRuntimeResult(
+            'Unable to statically determine value for ' + declaration.name.getText(),
+            declaration,
+          );
+        }
+      }
+    } else if (ts.isIfStatement(statement)) {
+      const result = evaluateIfStatement(statement, program, newScope, globals);
+      if (isRequiresRuntimeResult(result) || result !== StatementsDidNotReturn) {
+        return result;
+      }
+    } else if (ts.isFunctionDeclaration(statement)) {
+      if (statement.name) {
+        const symbol = typeChecker.getSymbolAtLocation(statement.name);
+        if (symbol) {
+          const func = evaluate(statement, program, newScope, globals);
+          if (isRequiresRuntimeResult(func)) {
+            return func;
+          }
+          newScope.set(symbol, func);
+        } else {
+          return requiresRuntimeResult(
+            'Unable to statically determine value for ' + statement.name.getText(),
+            statement,
+          );
+        }
+      }
+    } else if (ts.isSwitchStatement(statement)) {
+      const result = evaluateSwitchStatement(statement, program, newScope, globals);
+      if (isRequiresRuntimeResult(result) || result !== StatementsDidNotReturn) {
+        return result;
+      }
+    } else if (ts.isReturnStatement(statement)) {
+      if (!statement.expression) {
+        return undefined;
+      }
+      return evaluate(statement.expression, program, newScope, globals);
+    } else if (ts.isBreakStatement(statement)) {
+      return StatementsDidNotReturn;
+    } else {
+      return requiresRuntimeResult('Unsupported statement type', statement);
     }
   }
+  return StatementsDidNotReturn;
+}
 
-  if (singleReturn) {
-    return evaluate(singleReturn, program, scope, globals);
-  } else if (singleSwitch) {
-    const switchValue = evaluate(singleSwitch.expression, program, scope, globals);
-    if (isRequiresRuntimeResult(switchValue)) {
-      return switchValue;
-    }
-    for (const clause of singleSwitch.caseBlock.clauses) {
-      if (ts.isCaseClause(clause)) {
-        const clauseValue = evaluate(clause.expression, program, scope, globals);
-        if (isRequiresRuntimeResult(switchValue)) {
-          return switchValue;
+function evaluateSwitchStatement(
+  switchStatement: ts.SwitchStatement,
+  program: ts.Program,
+  scope?: Scope,
+  globals?: { [name: string]: any },
+) {
+  const switchValue = evaluate(switchStatement.expression, program, scope, globals);
+  if (isRequiresRuntimeResult(switchValue)) {
+    return switchValue;
+  }
+  for (const clause of switchStatement.caseBlock.clauses) {
+    if (ts.isCaseClause(clause)) {
+      const clauseValue = evaluate(clause.expression, program, scope, globals);
+      if (isRequiresRuntimeResult(switchValue)) {
+        return switchValue;
+      }
+      if (clauseValue == switchValue) {
+        const result = evaluateStatements(clause.statements, program, scope, globals);
+        if (result !== StatementsDidNotReturn) {
+          return result;
         }
-        if (clauseValue === switchValue) {
-          return evaluateStatements(clause.statements, parentExpression, program, scope, globals);
+        if (clause.statements.some(s => ts.isBreakStatement(s))) {
+          break;
         }
-      } else if (ts.isDefaultClause(clause)) {
-        return evaluateStatements(clause.statements, parentExpression, program, scope, globals);
+      }
+    } else if (ts.isDefaultClause(clause)) {
+      const result = evaluateStatements(clause.statements, program, scope, globals);
+      if (result !== StatementsDidNotReturn) {
+        return result;
       }
     }
-    return requiresRuntimeResult('Unable to statically evaluate body', parentExpression);
-  } else if (singleIf) {
-    return evaluateIfStatement(singleIf, parentExpression, program, scope, globals);
-  } else {
-    return requiresRuntimeResult('Unable to statically evaluate body', parentExpression);
   }
+  return StatementsDidNotReturn;
 }
 
 function evaluateIfStatement(
   ifStatement: ts.IfStatement,
-  parentExpression: SupportedExpressions,
   program: ts.Program,
-  scope?: Map<ts.Symbol, any>,
+  scope?: Scope,
   globals?: { [name: string]: any },
 ): any {
   const expression = evaluate(ifStatement.expression, program, scope, globals);
@@ -655,7 +703,10 @@ function evaluateIfStatement(
   }
   if (expression) {
     if (ts.isBlock(ifStatement.thenStatement)) {
-      return evaluateStatements(ifStatement.thenStatement.statements, parentExpression, program, scope, globals);
+      const result = evaluateStatements(ifStatement.thenStatement.statements, program, scope, globals);
+      if (result !== StatementsDidNotReturn) {
+        return result;
+      }
     } else if (ts.isReturnStatement(ifStatement.thenStatement)) {
       if (!ifStatement.thenStatement.expression) {
         return undefined;
@@ -666,9 +717,12 @@ function evaluateIfStatement(
     }
   } else if (ifStatement.elseStatement) {
     if (ts.isIfStatement(ifStatement.elseStatement)) {
-      return evaluateIfStatement(ifStatement.elseStatement, parentExpression, program, scope, globals);
+      return evaluateIfStatement(ifStatement.elseStatement, program, scope, globals);
     } else if (ts.isBlock(ifStatement.elseStatement)) {
-      return evaluateStatements(ifStatement.elseStatement.statements, parentExpression, program, scope, globals);
+      const result = evaluateStatements(ifStatement.elseStatement.statements, program, scope, globals);
+      if (result !== StatementsDidNotReturn) {
+        return result;
+      }
     } else if (ts.isReturnStatement(ifStatement.elseStatement)) {
       if (!ifStatement.elseStatement.expression) {
         return undefined;
@@ -678,7 +732,7 @@ function evaluateIfStatement(
       return requiresRuntimeResult('Unable to statically evaluate else statement', ifStatement.elseStatement);
     }
   }
-  return requiresRuntimeResult('Unable to statically evaluate if statement', parentExpression);
+  return StatementsDidNotReturn;
 }
 
 export type RequiresRuntimeResult = {
@@ -718,4 +772,54 @@ export function isRequiresRuntimeResult(o: unknown): o is RequiresRuntimeResult 
   }
   const res = o as RequiresRuntimeResult;
   return res.__requiresRuntime === true;
+}
+
+type Scope = {
+  current: Map<ts.Symbol, any>;
+  parent?: Scope;
+  has(symbol: ts.Symbol): boolean;
+  get(symbol: ts.Symbol): boolean;
+  set(symbol: ts.Symbol, value: any): void;
+};
+
+function createScope(parent?: Scope): Scope {
+  const current = new Map<ts.Symbol, any>();
+  return {
+    current,
+    parent,
+    has(symbol: ts.Symbol) {
+      if (current.has(symbol)) {
+        return true;
+      }
+      if (parent) {
+        return parent.has(symbol);
+      }
+      return false;
+    },
+    get(symbol: ts.Symbol) {
+      if (current.has(symbol)) {
+        return current.get(symbol);
+      }
+      if (parent) {
+        return parent.get(symbol);
+      }
+      return undefined;
+    },
+    set(symbol: ts.Symbol, value: any) {
+      let currentScope: Scope | undefined = this;
+      let valueSet = false;
+      while (currentScope) {
+        if (currentScope.current.has(symbol)) {
+          currentScope.current.set(symbol, value);
+          valueSet = true;
+          break;
+        }
+        currentScope = currentScope.parent;
+      }
+
+      if (!valueSet) {
+        current.set(symbol, value);
+      }
+    },
+  };
 }
