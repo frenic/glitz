@@ -672,8 +672,7 @@ function evaluateSwitchStatement(
       if (isRequiresRuntimeResult(switchValue)) {
         return switchValue;
       }
-      // tslint:disable-next-line: triple-equals
-      if (clauseValue == switchValue) {
+      if (clauseValue === switchValue) {
         const result = evaluateStatements(clause.statements, program, scope, globals);
         if (result !== StatementsDidNotReturn) {
           return result;
