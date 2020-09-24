@@ -2,10 +2,10 @@ import { Style } from '@glitz/type';
 import { useCallback, ReactElement } from 'react';
 import { flattenStyle } from '../styled/use-glitz';
 import { useAbsorb } from '../styled/compose';
-import { StyledDecorator } from '../styled/decorator';
+import { Styles } from '../styled/custom';
 
 type PropType = {
-  children(compose: (additional?: Style | StyledDecorator) => Style[]): ReactElement;
+  children(compose: (additional?: Styles) => Style[]): ReactElement;
 };
 
 export function StyleAbsorber(props: PropType) {

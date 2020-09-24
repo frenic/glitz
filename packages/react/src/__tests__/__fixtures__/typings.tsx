@@ -184,10 +184,10 @@ function connect<TProps>(Component: React.ComponentType<TProps>): React.Function
 const R = connect(StyledFunctionComponentWithoutStyle);
 <R css={{}} />;
 
-styled(() => <styled.Div css={styledDecoratorA} />);
-styled(() => <styled.Div css={styledDecoratorA({})} />);
-<styled.Div css={styledDecoratorA} />;
-<styled.Div css={styledDecoratorA({})} />;
+styled(() => <styled.Div css={styledDecoratorA()} />);
+styled(() => <styled.Div css={styledDecoratorA({})()} />);
+<styled.Div css={styledDecoratorA()} />;
+<styled.Div css={styledDecoratorA({})()} />;
 
 const StyledForwardRefComponentWithRequiredProps = styled(
   React.forwardRef(({}: { x: string }, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),

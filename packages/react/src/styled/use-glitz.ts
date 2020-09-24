@@ -1,10 +1,9 @@
 import { Style } from '@glitz/type';
 import { useContext, useRef, useEffect } from 'react';
 import { GlitzContext } from '../components/context';
-import { StyledDecorator } from './decorator';
 import useTheme from './use-theme';
 
-export type DirtyStyle = Style | StyledDecorator | DirtyStyle[] | undefined;
+export type DirtyStyle = Style | DirtyStyle[] | undefined;
 
 export default function useGlitz(dirtyStyle: DirtyStyle) {
   const glitz = useContext(GlitzContext);
@@ -17,28 +16,36 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
 
   const theme = useTheme();
 
-  const finalStyles = flattenStyle([dirtyStyle]);
   const lastGlitzRef = useRef(glitz);
   const lastThemeRef = useRef(theme);
-  const lastFinalStylesRef = useRef<Style[]>(finalStyles);
+  const lastDirtyStylesRef = useRef<DirtyStyle>(dirtyStyle);
+  const lastFinalStylesRef = useRef<Style[]>();
   const lastClassNamesRef = useRef<string>();
-  const isValid =
-    lastGlitzRef.current === glitz &&
-    lastThemeRef.current === theme &&
-    shallowEquals(lastFinalStylesRef.current, finalStyles) &&
-    typeof lastClassNamesRef.current === 'string';
+  const isCached = lastGlitzRef.current === glitz && lastThemeRef.current === theme && !!lastClassNamesRef.current;
+
+  let isValid = isCached && lastDirtyStylesRef.current === dirtyStyle;
+  let finalStyles: Style[];
+
+  if (!isValid) {
+    finalStyles = flattenStyle([dirtyStyle]);
+
+    if (lastFinalStylesRef.current) {
+      isValid = isCached && shallowEquals(lastFinalStylesRef.current, finalStyles);
+    }
+
+    lastFinalStylesRef.current = finalStyles;
+  }
+
+  lastGlitzRef.current = glitz;
+  lastThemeRef.current = theme;
+  lastDirtyStylesRef.current = dirtyStyle;
 
   if (process.env.NODE_ENV !== 'production') {
     const hasWarnedCacheInvalidationsRef = useRef(false);
     const totalCacheInvalidationsRef = useRef(0);
 
     useEffect(() => {
-      if (
-        finalStyles.length > 0 &&
-        !isValid &&
-        typeof requestAnimationFrame === 'function' &&
-        !hasWarnedCacheInvalidationsRef.current
-      ) {
+      if (!isValid && typeof requestAnimationFrame === 'function' && !hasWarnedCacheInvalidationsRef.current) {
         totalCacheInvalidationsRef.current++;
         const currentCacheInvalidations = totalCacheInvalidationsRef.current;
 
@@ -62,19 +69,15 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
     });
   }
 
-  if (finalStyles.length === 0) {
-    return void 0;
-  }
-
   if (isValid) {
     return lastClassNamesRef.current || void 0;
   }
 
-  lastGlitzRef.current = glitz;
-  lastThemeRef.current = theme;
-  lastFinalStylesRef.current = finalStyles;
+  if (finalStyles!.length === 0) {
+    return void 0;
+  }
 
-  return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
+  return (lastClassNamesRef.current = glitz.injectStyle(finalStyles!, theme)) || void 0;
 }
 
 export function flattenStyle(dirtyStyles: DirtyStyle[]): Style[] {
@@ -84,9 +87,7 @@ export function flattenStyle(dirtyStyles: DirtyStyle[]): Style[] {
     if (!style) {
       continue;
     }
-    if (typeof style === 'function') {
-      styles.push(...style());
-    } else if (Array.isArray(style)) {
+    if (Array.isArray(style)) {
       styles.push(...flattenStyle(style));
     } else {
       styles.push(style);

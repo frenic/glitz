@@ -601,7 +601,7 @@ function evaluateStatements(
             );
           }
 
-          let value: any = undefined;
+          let value: any;
           if (declaration.initializer) {
             value = evaluate(declaration.initializer, program, newScope, globals);
             if (isRequiresRuntimeResult(value)) {

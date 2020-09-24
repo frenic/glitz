@@ -147,7 +147,7 @@ describe('react styled', () => {
     expect(styleDecoratorC()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }, { borderLeftColor: 'blue' }]);
     const StyledComponentA = styled(() => {
       return React.createElement(styled.Div, {
-        css: styleDecoratorC,
+        css: styleDecoratorC(),
         ref: (el: HTMLDivElement) => {
           expect(el.className).toBe('a b c');
           const declaration = getComputedStyle(el);
@@ -161,7 +161,7 @@ describe('react styled', () => {
 
     const StyledComponentB = styled(() => {
       return React.createElement(styled.Div, {
-        css: styleDecoratorB({ color: 'blue' }),
+        css: styleDecoratorB({ color: 'blue' })(),
         ref: (el: HTMLDivElement) => {
           expect(el.className).toBe('a b');
           const declaration = getComputedStyle(el);
@@ -172,12 +172,12 @@ describe('react styled', () => {
     });
     mountWithGlitz(React.createElement(StyledComponentB));
 
-    const treeA = mountWithGlitz(React.createElement(styled.Div, { css: styleDecoratorB }));
+    const treeA = mountWithGlitz(React.createElement(styled.Div, { css: styleDecoratorB() }));
     const declarationA = getComputedStyle(treeA.getDOMNode());
     expect(declarationA.getPropertyValue('color')).toBe('red');
     expect(declarationA.getPropertyValue('background-color')).toBe('green');
 
-    const treeB = mountWithGlitz(React.createElement(styled.Div, { css: styleDecoratorB({ color: 'blue' }) }));
+    const treeB = mountWithGlitz(React.createElement(styled.Div, { css: styleDecoratorB({ color: 'blue' })() }));
     const declarationB = getComputedStyle(treeB.getDOMNode());
     expect(declarationB.getPropertyValue('background-color')).toBe('green');
     expect(declarationB.getPropertyValue('color')).toBe('blue');
