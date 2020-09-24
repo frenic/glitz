@@ -7,6 +7,10 @@ const HASH_REGEX = /\[contenthash(?::(\d+))?\]/i;
 
 type Output = ((output: string) => Promise<unknown> | void) | string;
 
+type Diagnostic = Omit<import('./transformer').Diagnostic, 'source' | 'innerDiagnostic'> & {
+  innerDiagnostic?: Diagnostic;
+};
+
 export class GlitzStaticPlugin {
   private glitz: GlitzStatic;
   private output: Output;
@@ -24,6 +28,7 @@ export class GlitzStaticPlugin {
   apply(compiler: webpack.Compiler) {
     const output = this.output;
 
+    const loggedDiagnostics: Diagnostic[] = [];
     compiler.hooks.emit.tapPromise(PLUGIN_NAME, async compilation => {
       const css = this.glitz.getStyle();
       if (typeof output === 'string') {
@@ -45,7 +50,7 @@ export class GlitzStaticPlugin {
       const { diagnostics } = this.glitz;
       const logger = compilation.getLogger(PLUGIN_NAME);
 
-      function message(diagnostic: typeof diagnostics extends (infer U)[] ? U : never, level = 0): string {
+      function message(diagnostic: Diagnostic, level = 0): string {
         return (
           `${'    '.repeat(level)}${diagnostic.message}\n` +
           `${'    '.repeat(level)}  in ${diagnostic.file}:${diagnostic.line}` +
@@ -53,7 +58,25 @@ export class GlitzStaticPlugin {
         );
       }
 
-      for (const diagnostic of this.glitz.diagnostics) {
+      const uniqueDiagnostics: Diagnostic[] = [];
+      for (const diagnostic of diagnostics) {
+        if (loggedDiagnostics.includes(diagnostic)) {
+          continue;
+        }
+
+        if (
+          !uniqueDiagnostics.every(
+            uniqueDiagnostic =>
+              uniqueDiagnostic.file !== diagnostic.file ||
+              uniqueDiagnostic.line !== diagnostic.line ||
+              uniqueDiagnostic.message !== diagnostic.message ||
+              uniqueDiagnostic.severity !== diagnostic.severity,
+          )
+        ) {
+          loggedDiagnostics.push(diagnostic);
+          continue;
+        }
+
         const { severity } = diagnostic;
         switch (severity) {
           case 'error':
@@ -66,6 +89,9 @@ export class GlitzStaticPlugin {
             logger.info(message(diagnostic));
             break;
         }
+
+        loggedDiagnostics.push(diagnostic);
+        uniqueDiagnostics.push(diagnostic);
       }
     });
   }
