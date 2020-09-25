@@ -28,6 +28,10 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
   const isValidTheme = lastThemeRef.current === theme;
   const isValidStyle = shallowEquals(lastFinalStylesRef.current, finalStyles);
 
+  lastGlitzRef.current = glitz;
+  lastThemeRef.current = theme;
+  lastFinalStylesRef.current = finalStyles;
+
   if (!applyRef.current || !isValidGlitz || !isValidTheme || !isValidStyle) {
     applyRef.current = () => {
       if (!finalStyles) {
@@ -61,10 +65,6 @@ export default function useGlitz(inputStyles?: StyleOrStyleArray | StyledDecorat
           });
         }
       }
-
-      lastGlitzRef.current = glitz;
-      lastThemeRef.current = theme;
-      lastFinalStylesRef.current = finalStyles;
 
       return (lastClassNamesRef.current = glitz.injectStyle(finalStyles, theme)) || void 0;
     };
