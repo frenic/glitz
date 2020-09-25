@@ -5,17 +5,17 @@ test('typings', () => {
   const errors = typescriptDiagnostics(resolve(__dirname, '__fixtures__/typings.tsx'));
   expect(errors.length).toBe(16);
   expect(errors[0]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 228:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & { a: boolean; b?: undefined; } & { css?: Style | StyledDecorator | Style[] | undefined; } & { children?: ReactNode; }) | (IntrinsicAttributes & ... 2 more ... & { ...; })'.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 228:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & { a: boolean; b?: undefined; } & { css?: Style | Style[] | undefined; } & { children?: ReactNode; }) | (IntrinsicAttributes & { ...; } & { ...; } & { ...; })'.
       Type '{ a: true; b: true; }' is not assignable to type '{ a?: undefined; b: boolean; }'.
         Types of property 'a' are incompatible.
           Type 'true' is not assignable to type 'undefined'."
   `);
   expect(errors[1]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 230:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | Style[]'."
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 230:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | Style[] | undefined'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[]'."
   `);
   expect(errors[2]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 232:12 - Type '{ color: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 232:12 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | undefined'.
       Types of property 'color' are incompatible.
         Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
@@ -40,11 +40,11 @@ test('typings', () => {
             Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[7]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 242:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | Style[]'."
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 242:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'Style | Style[] | undefined'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[]'."
   `);
   expect(errors[8]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 244:25 - Type '{ color: number; }' is not assignable to type 'Style | StyledDecorator | Style[] | undefined'.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 244:25 - Type '{ color: number; }' is not assignable to type 'Style | Style[] | undefined'.
       Types of property 'color' are incompatible.
         Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
