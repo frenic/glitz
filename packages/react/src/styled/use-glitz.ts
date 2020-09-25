@@ -10,35 +10,32 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
 
   if (!glitz) {
     throw new Error(
-      "The `<GlitzProvider>` doesn't seem to be used correctly because the core instance couldn't be found",
+      "The `<GlitzProvider>` doesn't seem to be used correctly because the core instance wasn't provided",
     );
   }
 
   const theme = useTheme();
 
-  const lastGlitzRef = useRef(glitz);
-  const lastThemeRef = useRef(theme);
-  const lastDirtyStylesRef = useRef<DirtyStyle>(dirtyStyle);
-  const lastFinalStylesRef = useRef<Style[]>();
-  const lastClassNamesRef = useRef<string>();
-  const isCached = lastGlitzRef.current === glitz && lastThemeRef.current === theme && !!lastClassNamesRef.current;
+  const previousRef = useRef<[typeof glitz, typeof theme, typeof dirtyStyle?, Style[]?, string?]>([glitz, theme]);
 
-  let isValid = isCached && lastDirtyStylesRef.current === dirtyStyle;
+  const isCached = previousRef.current[0] === glitz && previousRef.current[1] === theme;
+  let isValid = isCached && previousRef.current[2] === dirtyStyle;
+
+  previousRef.current[0] = glitz;
+  previousRef.current[1] = theme;
+  previousRef.current[2] = dirtyStyle;
+
   let finalStyles: Style[];
 
   if (!isValid) {
     finalStyles = flattenStyle([dirtyStyle]);
 
-    if (lastFinalStylesRef.current) {
-      isValid = isCached && shallowEquals(lastFinalStylesRef.current, finalStyles);
+    if (previousRef.current[3]) {
+      isValid = isCached && shallowEquals(previousRef.current[3], finalStyles);
     }
 
-    lastFinalStylesRef.current = finalStyles;
+    previousRef.current[3] = finalStyles;
   }
-
-  lastGlitzRef.current = glitz;
-  lastThemeRef.current = theme;
-  lastDirtyStylesRef.current = dirtyStyle;
 
   if (process.env.NODE_ENV !== 'production') {
     const hasWarnedCacheInvalidationsRef = useRef(false);
@@ -70,27 +67,26 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   }
 
   if (isValid) {
-    return lastClassNamesRef.current || void 0;
+    return previousRef.current[4];
   }
 
   if (finalStyles!.length === 0) {
     return void 0;
   }
 
-  return (lastClassNamesRef.current = glitz.injectStyle(finalStyles!, theme)) || void 0;
+  return (previousRef.current[4] = glitz.injectStyle(finalStyles!, theme)) || void 0;
 }
 
 export function flattenStyle(dirtyStyles: DirtyStyle[]): Style[] {
   const styles: Style[] = [];
 
   for (const style of dirtyStyles) {
-    if (!style) {
-      continue;
-    }
-    if (Array.isArray(style)) {
-      styles.push(...flattenStyle(style));
-    } else {
-      styles.push(style);
+    if (style) {
+      if (Array.isArray(style)) {
+        styles.push(...flattenStyle(style));
+      } else {
+        styles.push(style);
+      }
     }
   }
 
