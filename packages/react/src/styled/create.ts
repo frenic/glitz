@@ -55,41 +55,28 @@ export function factory<TProps, TInstance>(
     | ComponentType<WithRefProp<TProps, TInstance>>,
   statics: DirtyStyle,
 ): StyledComponentWithRef<TProps, TInstance> {
-  const Component = isElementType(type)
-    ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-        useAbsorb(absorbed => {
-          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
+  const Component =
+    isElementType(type) || isElementLikeType<TProps, TInstance>(type)
+      ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
+          useAbsorb(absorbed => {
+            const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
 
-          return useStream(
-            createElement<any>(type.value, {
-              ...restProps,
-              className,
-              ref,
-            }),
-          );
-        }),
-      )
-    : isElementLikeType<TProps, TInstance>(type)
-    ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-        useAbsorb(absorbed => {
-          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
-
-          return useStream(
-            createElement<any>(type.value, {
-              ...restProps,
-              className,
-              ref,
-            }),
-          );
-        }),
-      )
-    : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-        useForward(
-          statics,
-          dynamic,
-          createElement<any>(type, { ...restProps, ref }),
-        ),
-      );
+            return useStream(
+              createElement<any>(type.value, {
+                ...restProps,
+                className,
+                ref,
+              }),
+            );
+          }),
+        )
+      : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
+          useForward(
+            statics,
+            dynamic,
+            createElement<any>(type, { ...restProps, ref }),
+          ),
+        );
 
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
     [SECRET_COMPOSE](additionals?: DirtyStyle) {
