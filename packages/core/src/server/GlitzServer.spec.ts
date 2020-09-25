@@ -396,15 +396,15 @@ describe('server', () => {
   });
   it('applies transformer', () => {
     const server = new GlitzServer<TestStyle>({
-      transformer: properties => {
+      transformer: (properties: any) => {
         const prefixed: Properties = {};
-        let property: keyof Properties;
+        let property: string;
         for (property in properties) {
           const value = properties[property];
           if (property === 'appearance' && value === 'none') {
             prefixed.MozAppearance = value;
           }
-          (prefixed as any)[property] = properties[property] as Properties[typeof property];
+          (prefixed as any)[property] = properties[property];
         }
         return prefixed;
       },

@@ -239,7 +239,6 @@ interface OffsetProperty {
   inlineStart?: WithThemeFunction<UntransformedProperties['offsetInlineStart']>;
   distance?: WithThemeFunction<UntransformedProperties['offsetDistance']>;
   path?: WithThemeFunction<UntransformedProperties['offsetPath']>;
-  position?: WithThemeFunction<UntransformedProperties['offsetPosition']>;
   rotate?: WithThemeFunction<UntransformedProperties['offsetRotate']>;
 }
 

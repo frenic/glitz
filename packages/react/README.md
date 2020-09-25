@@ -382,7 +382,7 @@ const Link = styled.a({
   color: theme => theme.linkColor,
 });
 
-export default function() {
+export default function () {
   return (
     <ThemeProvider theme={theme1}>
       <Link>Link is maroon</Link>
