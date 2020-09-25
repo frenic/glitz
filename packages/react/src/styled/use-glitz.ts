@@ -3,7 +3,7 @@ import { useContext, useRef, useEffect } from 'react';
 import { GlitzContext } from '../components/context';
 import useTheme from './use-theme';
 
-export type DirtyStyle = Style | DirtyStyle[] | undefined;
+export type DirtyStyle = Style | DirtyStyle[] | false | undefined;
 
 export default function useGlitz(dirtyStyle: DirtyStyle) {
   const glitz = useContext(GlitzContext);

@@ -23,7 +23,7 @@ export type WithoutRefProp<TProps> = TProps extends PropsWithRef<TProps> ? Props
 // Conditionally omit `StyledProps` enables support for union props
 export type ExternalProps<TProps> = PropsWithChildren<
   TProps & {
-    css?: Style[] | Style;
+    css?: Style[] | Style | false;
   }
 >;
 

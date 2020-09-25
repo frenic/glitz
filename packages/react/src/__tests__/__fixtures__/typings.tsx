@@ -224,6 +224,8 @@ const StyledFunctionComponentWithUnionProps = styled((props: { a: boolean; b?: n
   return null;
 });
 
+<styled.Div css={false && {}} />;
+
 <StyledFunctionComponentWithUnionProps a />;
 <StyledFunctionComponentWithUnionProps b />;
 <StyledFunctionComponentWithUnionProps a b />;
