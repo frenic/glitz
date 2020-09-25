@@ -2,7 +2,7 @@ import * as CSS from 'csstype';
 
 export interface Style extends FeaturedProperties, PseudoMap {}
 
-export interface Properties extends CSS.PropertiesFallback<string | 0> {}
+export interface Properties extends CSS.PropertiesFallback {}
 
 // To provide proper type errors for `Style` we create an interface of `Style[]`
 // and makes sure it's first in order
@@ -280,7 +280,8 @@ export type AnimationNameProperty = WithThemeFunction<
   FeaturedPropertiesList | UntransformedProperties['animationName']
 >;
 
-export interface FontFace extends Pick<CSS.FontFaceFallback, Exclude<keyof CSS.FontFaceFallback, 'fontFamily'>> {}
+export interface FontFace
+  extends Pick<CSS.AtRule.FontFaceFallback, Exclude<keyof CSS.AtRule.FontFaceFallback, 'fontFamily'>> {}
 
 export interface FeaturedFontFace extends FontFace {
   font?: {
