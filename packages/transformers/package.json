@@ -1,6 +1,6 @@
 {
   "name": "@glitz/transformers",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,11 +12,11 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/core": "^2.1.4",
-    "@glitz/devtool-transformer": "^2.0.5",
-    "@glitz/length-transformer": "^2.0.6",
-    "@glitz/prefixer-transformer": "^2.0.6",
-    "@glitz/type": "^2.0.4"
+    "@glitz/core": "^2.1.5",
+    "@glitz/devtool-transformer": "^2.0.6",
+    "@glitz/length-transformer": "^2.0.7",
+    "@glitz/prefixer-transformer": "^2.0.7",
+    "@glitz/type": "^2.0.5"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
