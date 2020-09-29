@@ -10,7 +10,7 @@ import {
   PropsWithRef,
 } from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
-import { SECRET_COMPOSE } from './constants';
+import { SECRET_GLITZ_PROPERTY } from './constants';
 import { isElementType, StyledElement } from './predefined';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 import useGlitz, { DirtyStyle } from './use-glitz';
@@ -45,7 +45,7 @@ export default function createComponent<TProps, TInstance>(
     | ComponentType<WithRefProp<TProps, TInstance>>,
   statics: DirtyStyle,
 ): StyledComponentWithRef<TProps, TInstance> {
-  return isStyledComponent<TProps, TInstance>(type) ? type[SECRET_COMPOSE](statics) : factory(type, statics);
+  return isStyledComponent<TProps, TInstance>(type) ? type[SECRET_GLITZ_PROPERTY](statics) : factory(type, statics);
 }
 
 export function factory<TProps, TInstance>(
@@ -79,7 +79,7 @@ export function factory<TProps, TInstance>(
         );
 
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
-    [SECRET_COMPOSE](additionals?: DirtyStyle) {
+    [SECRET_GLITZ_PROPERTY](additionals?: DirtyStyle) {
       const NewStyled = factory(type, [statics, additionals]);
 
       if (Component.defaultProps) {
@@ -113,5 +113,5 @@ function combineClassNames(a: string | undefined, b: string | undefined) {
 export function isStyledComponent<TProps, TInstance>(
   type: any,
 ): type is StyledComponent<TProps> | StyledComponentWithRef<TProps, TInstance> {
-  return SECRET_COMPOSE in type;
+  return SECRET_GLITZ_PROPERTY in type && typeof type[SECRET_GLITZ_PROPERTY] === 'function';
 }

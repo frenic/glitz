@@ -1,35 +1,26 @@
 import { Style } from '@glitz/type';
-import { SECRET_TYPE } from './constants';
+import { SECRET_GLITZ_PROPERTY, ELEMENT_TYPE, ELEMENT_LIKE_TYPE } from './constants';
 import { factory } from './create';
 import { StyledElementComponents, StyledElementFunctions } from './types';
 
-export enum Type {
-  Element,
-  ElementLike,
-}
-
 export interface StyledType {
-  [SECRET_TYPE]: Type;
-}
-
-export function isType(type: any): type is StyledType {
-  return SECRET_TYPE in type;
+  [SECRET_GLITZ_PROPERTY]: typeof ELEMENT_TYPE | typeof ELEMENT_LIKE_TYPE;
 }
 
 export interface StyledElement extends StyledType {
-  [SECRET_TYPE]: Type.Element;
+  [SECRET_GLITZ_PROPERTY]: typeof ELEMENT_TYPE;
   value: string;
 }
 
 function createElementType(tag: string): StyledElement {
   return {
-    [SECRET_TYPE]: Type.Element,
+    [SECRET_GLITZ_PROPERTY]: ELEMENT_TYPE,
     value: tag,
   };
 }
 
 export function isElementType(type: any): type is StyledElement {
-  return isType(type) && type[SECRET_TYPE] === Type.Element;
+  return SECRET_GLITZ_PROPERTY in type && type[SECRET_GLITZ_PROPERTY] === ELEMENT_TYPE;
 }
 
 function createPredefined(tag: string) {

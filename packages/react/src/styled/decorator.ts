@@ -1,16 +1,15 @@
 import { ComponentType } from 'react';
+import { isValidElementType } from 'react-is';
 import { Style } from '@glitz/type';
 import { StyledElementLike } from './apply-class-name';
-import { SECRET_DECORATOR } from './constants';
-import createComponent, { isStyledComponent } from './create';
+import { DECORATOR_TYPE, SECRET_GLITZ_PROPERTY } from './constants';
+import createComponent from './create';
 import { Styled, Styles } from './custom';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 import { flattenStyle, DirtyStyle } from './use-glitz';
-import { isType } from './predefined';
-import { isValidElementType } from 'react-is';
 
 export interface StyledDecorator extends Styled {
-  [SECRET_DECORATOR]: true;
+  [SECRET_GLITZ_PROPERTY]: typeof DECORATOR_TYPE;
   (): Style[];
 }
 
@@ -48,9 +47,9 @@ export default function createDecorator(style?: DirtyStyle): StyledDecorator {
     return flattenStyle([style]);
   }
 
-  return Object.assign(decorator, { [SECRET_DECORATOR]: true } as const);
+  return Object.assign(decorator, { [SECRET_GLITZ_PROPERTY]: DECORATOR_TYPE } as const);
 }
 
 export function isStyle(arg: any): arg is Styles {
-  return typeof arg === 'object' && !isType(arg) && !isStyledComponent(arg) && !isValidElementType(arg);
+  return typeof arg === 'object' && !isValidElementType(arg) && !(SECRET_GLITZ_PROPERTY in arg);
 }

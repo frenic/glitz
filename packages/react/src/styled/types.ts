@@ -54,26 +54,21 @@ import {
   VideoHTMLAttributes,
   WebViewHTMLAttributes,
 } from 'react';
-import { SECRET_COMPOSE } from './constants';
+import { SECRET_GLITZ_PROPERTY } from './constants';
 import { ExternalProps, WithRefProp } from './create';
 import { DirtyStyle } from './use-glitz';
-
-// To provide proper type errors for `Style` we create an interface of `Style[]`
-// and makes sure it's first in order
-// export interface StyleArray extends Array<Style> {}
-// export type StyleOrStyleArray = StyleArray | Style;
 
 export type StyledElementProps = {
   className?: string;
 };
 
 export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
-  [SECRET_COMPOSE](style?: DirtyStyle): StyledComponent<TProps>;
+  [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponent<TProps>;
 }
 
 export interface StyledComponentWithRef<TProps, TInstance>
   extends ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
-  [SECRET_COMPOSE](style?: DirtyStyle): StyledComponentWithRef<TProps, TInstance>;
+  [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponentWithRef<TProps, TInstance>;
 }
 
 export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponentWithRef<TProps, TInstance>;
