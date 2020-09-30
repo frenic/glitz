@@ -1546,6 +1546,42 @@ const Base = styled(styled.Header, {
   });
 });
 
+test('can compile decorators and multiple style arguments', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function Component() {
+  return <Styled />;
+}
+
+const someDecorator = styled({ color: 'red' });
+const anotherDecorator = styled({ backgroundColor: 'green' });
+const Styled = styled(
+  styled.Div,
+  someDecorator,
+  anotherDecorator,
+  { borderLeftColor: 'blue' }
+);
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function Component() {
+          return <div className=\\"c b a\\" data-glitzname=\\"Styled\\"/>;
+      }
+      const someDecorator = /*#__PURE__*/ styled({ color: 'red' });
+      const anotherDecorator = /*#__PURE__*/ styled({ backgroundColor: 'green' });
+      const Styled = /*#__PURE__*/ styled(styled.Div, someDecorator, anotherDecorator, { borderLeftColor: 'blue' });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".a{color:red}.b{background-color:green}.c{border-left-color:blue}"`,
+    );
+  });
+});
+
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,

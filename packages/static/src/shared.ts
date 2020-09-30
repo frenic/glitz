@@ -1,6 +1,22 @@
 export type Style = Record<string, any>;
 
-export type Styles = Style | Style[];
+export type Styles = Style | Style[] | StaticDecorator;
+
+export type DirtyStyle = Style | StaticDecorator | DirtyStyle[] | false | undefined;
+
+export type StaticDecorator = {
+  decorator: true;
+  (): Style[];
+  (style: Styles): StaticDecorator;
+  (component: StaticComponent | ReactFunctionComponent, style?: Styles): StaticComponent;
+};
+
+export type StaticStyled = {
+  (...style: Styles[]): StaticDecorator;
+  (component: StaticComponent | ReactFunctionComponent, ...styles: Styles[]): StaticComponent;
+};
+
+export type ReactFunctionComponent = (props?: any) => any;
 
 export type StaticComponent = ((props?: any) => StaticElement) & {
   styles: Style[];
