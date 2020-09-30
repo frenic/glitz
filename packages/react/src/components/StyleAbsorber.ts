@@ -5,7 +5,7 @@ import { useAbsorb } from '../styled/compose';
 import { Styles } from '../styled/custom';
 
 type PropType = {
-  children(compose: (additional?: Styles) => Style[]): ReactElement;
+  children(compose: (additional?: Styles) => readonly Style[]): ReactElement;
 };
 
 export function StyleAbsorber(props: PropType) {

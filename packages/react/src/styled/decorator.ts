@@ -154,7 +154,7 @@ export interface Decorator {
   (style: Styles, ...styles: Styles[]): Decorator;
 
   /** Apply decorator style */
-  (): Style[];
+  (): readonly Style[];
 
   // These last overloads prevents errors on `component` when `style` is
   // incorrect and enables usage of generic parameter to provide prop type

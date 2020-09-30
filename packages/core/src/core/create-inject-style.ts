@@ -33,7 +33,7 @@ const PSEUDO_IDENTIFIER = ':'.charCodeAt(0);
 const ATTRIBUTE_IDENTIFIER = '['.charCodeAt(0);
 
 export interface Base<TStyle extends Style> {
-  injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
+  injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
 }
 
 export function createInjectStyle<TStyle extends Style>(
@@ -312,7 +312,7 @@ export function createInjectStyle<TStyle extends Style>(
   const resolveStyle = createResolver(false);
   const injectStyle = createResolver(true);
 
-  return (styles: TStyle | TStyle[], theme: Theme = {}) => {
+  return (styles: TStyle | readonly TStyle[], theme: Theme = {}) => {
     styles = Array.isArray(styles) ? styles : [styles];
     const index: ResolvedStyle = {};
     let classNames = '';

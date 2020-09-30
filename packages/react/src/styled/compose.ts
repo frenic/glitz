@@ -1,11 +1,11 @@
 import { createContext, useContext, createElement, ReactNode, useMemo, ReactElement } from 'react';
 import { DirtyStyle } from './use-glitz';
 
-const ComposeContext = createContext<DirtyStyle[] | undefined>(void 0);
+const ComposeContext = createContext<readonly DirtyStyle[] | undefined>(void 0);
 
 const empty = { value: void 0 };
 
-export function useAbsorb(factory: (dynamics: DirtyStyle[] | undefined) => ReactElement) {
+export function useAbsorb(factory: (dynamics: readonly DirtyStyle[] | undefined) => ReactElement) {
   const absorbed = useContext(ComposeContext);
   return createElement(ComposeContext.Provider, empty, factory(absorbed));
 }

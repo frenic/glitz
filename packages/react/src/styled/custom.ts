@@ -15,7 +15,7 @@ import createComponent, { WithoutRefProp } from './create';
 import createDecorator, { Decorator, isStyle } from './decorator';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
-export type Styles = Style | Style[];
+export type Styles = Style | readonly Style[];
 
 export interface Styled {
   <TProps = {}>(component: FunctionComponent<TProps>, ...styles: Styles[]): StyledComponent<WithoutRefProp<TProps>>;

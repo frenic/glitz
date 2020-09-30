@@ -14,7 +14,7 @@ export type Diagnostic = {
 };
 
 export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
-  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
+  public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
   public getStyle: () => string;
   public diagnostics: Diagnostic[] = [];
   constructor(options: Options = {}) {

@@ -12,7 +12,7 @@ test('typings', () => {
   `);
   expect(errors[1]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 232:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | DirtyStyle[]'."
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly DirtyStyle[]'."
   `);
   expect(errors[2]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 234:12 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
@@ -39,7 +39,7 @@ test('typings', () => {
   `);
   expect(errors[7]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 244:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | DirtyStyle[]'."
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly DirtyStyle[]'."
   `);
   expect(errors[8]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 246:25 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.

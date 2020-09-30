@@ -7,7 +7,7 @@ import InjectorClient from './InjectorClient';
 import { createHydrate } from '../utils/hydrate';
 
 export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
-  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
+  public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
   public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;

@@ -7,7 +7,7 @@ import { createHydrate } from '../utils/hydrate';
 import { formatMediaRule } from '../utils/format';
 
 export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
-  public injectStyle: (styles: TStyle | TStyle[], theme?: Theme) => string;
+  public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
   public hydrate: (css: string) => void;
   public getStyleMarkup: () => string;
   public getStyleStream: () => [string, { [name: string]: string }, string] | undefined;

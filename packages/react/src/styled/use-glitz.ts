@@ -3,7 +3,7 @@ import { useContext, useRef, useEffect } from 'react';
 import { GlitzContext } from '../components/context';
 import useTheme from './use-theme';
 
-export type DirtyStyle = Style | DirtyStyle[] | false | undefined;
+export type DirtyStyle = Style | readonly DirtyStyle[] | false | undefined;
 
 export default function useGlitz(dirtyStyle: DirtyStyle) {
   const glitz = useContext(GlitzContext);
@@ -16,7 +16,10 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
 
   const theme = useTheme();
 
-  const previousRef = useRef<[typeof glitz, typeof theme, typeof dirtyStyle?, Style[]?, string?]>([glitz, theme]);
+  const previousRef = useRef<[typeof glitz, typeof theme, typeof dirtyStyle?, (readonly Style[])?, string?]>([
+    glitz,
+    theme,
+  ]);
 
   const isCached = previousRef.current[0] === glitz && previousRef.current[1] === theme;
   let isValid = isCached && previousRef.current[2] === dirtyStyle;
@@ -25,7 +28,7 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   previousRef.current[1] = theme;
   previousRef.current[2] = dirtyStyle;
 
-  let finalStyles: Style[];
+  let finalStyles: readonly Style[];
 
   if (!isValid) {
     finalStyles = flattenStyle([dirtyStyle]);
@@ -77,12 +80,13 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   return (previousRef.current[4] = glitz.injectStyle(finalStyles!, theme)) || void 0;
 }
 
-export function flattenStyle(dirtyStyles: DirtyStyle[]): Style[] {
+export function flattenStyle(dirtyStyles: readonly DirtyStyle[]): readonly Style[] {
   const styles: Style[] = [];
 
   for (const style of dirtyStyles) {
     if (style) {
-      if (Array.isArray(style)) {
+      // TODO: Remove hack in TS4.1 (https://github.com/microsoft/TypeScript/pull/39258)
+      if ((Array.isArray as (arg: any) => arg is readonly any[])(style)) {
         styles.push(...flattenStyle(style));
       } else {
         styles.push(style);
@@ -93,7 +97,7 @@ export function flattenStyle(dirtyStyles: DirtyStyle[]): Style[] {
   return styles;
 }
 
-function shallowEquals(a: Style[], b: Style[]) {
+function shallowEquals(a: readonly Style[], b: readonly Style[]) {
   if (a.length !== b.length) {
     return false;
   }
