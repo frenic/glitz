@@ -7,14 +7,23 @@ import {
   createElement,
   Ref,
   PropsWithRef,
+  ForwardRefExoticComponent,
 } from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_GLITZ_PROPERTY } from './constants';
-import { isElementType, StyledElement } from './predefined';
-import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
+import { isElementType, StyledElement, StyledElementProps } from './predefined';
 import useGlitz, { DirtyStyle } from './use-glitz';
 import { useAbsorb, useForward } from './compose';
 import { useStream } from './stream';
+
+export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
+  [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponent<TProps>;
+}
+
+export interface StyledComponentWithRef<TProps, TInstance>
+  extends ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
+  [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponentWithRef<TProps, TInstance>;
+}
 
 export type WithRefProp<TProps, TInstance> = PropsWithoutRef<TProps> & RefAttributes<TInstance>;
 export type WithoutRefProp<TProps> = TProps extends PropsWithRef<TProps> ? PropsWithoutRef<TProps> : TProps;

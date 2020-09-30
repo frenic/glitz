@@ -1,8 +1,7 @@
 import { FunctionComponent, ComponentClass, ClassType, Component, ComponentState, ComponentType } from 'react';
 import { SECRET_GLITZ_PROPERTY, ELEMENT_LIKE_TYPE } from './constants';
 import { WithRefProp } from './create';
-import { StyledType } from './predefined';
-import { StyledElementProps } from './types';
+import { StyledElementProps, StyledType } from './predefined';
 
 export interface StyledElementLike<TComponent> extends StyledType {
   [SECRET_GLITZ_PROPERTY]: typeof ELEMENT_LIKE_TYPE;

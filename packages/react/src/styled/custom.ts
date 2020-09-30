@@ -11,9 +11,9 @@ import {
   ComponentType,
 } from 'react';
 import { StyledElementLike } from './apply-class-name';
-import createComponent, { WithoutRefProp } from './create';
+import createComponent, { StyledComponent, StyledComponentWithRef, WithoutRefProp } from './create';
 import createDecorator, { StyledDecorator, isStyle } from './decorator';
-import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
+import { StyledElementProps } from './predefined';
 
 export type Styles = Style | readonly Style[] | StyledDecorator;
 

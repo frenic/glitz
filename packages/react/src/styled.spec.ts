@@ -7,9 +7,9 @@ import { GlitzProvider } from './';
 import useGlitz from './styled/use-glitz';
 import { styled } from './styled';
 import { applyClassName } from './styled/apply-class-name';
-import { StyledElementProps } from './styled/types';
 import { ThemeProvider } from './components/ThemeProvider';
 import { WithRefProp } from './styled/create';
+import { StyledElementProps } from './styled/predefined';
 
 describe('react styled', () => {
   const warn = console.warn;

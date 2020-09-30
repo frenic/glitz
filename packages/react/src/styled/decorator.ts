@@ -12,11 +12,10 @@ import {
 import { isValidElementType } from 'react-is';
 import { Style } from '@glitz/type';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
-import createComponent, { WithoutRefProp } from './create';
+import createComponent, { StyledComponent, StyledComponentWithRef, WithoutRefProp } from './create';
 import { Styles } from './custom';
-import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 import { pureStyle, DirtyStyle } from './use-glitz';
-import { isElementType } from './predefined';
+import { isElementType, StyledElementProps } from './predefined';
 import { DECORATOR_TYPE, SECRET_GLITZ_PROPERTY } from './constants';
 
 export interface StyledDecorator {
