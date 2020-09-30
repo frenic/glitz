@@ -20,7 +20,7 @@ function createElementType(tag: string): StyledElement {
 }
 
 export function isElementType(type: any): type is StyledElement {
-  return SECRET_GLITZ_PROPERTY in type && type[SECRET_GLITZ_PROPERTY] === ELEMENT_TYPE;
+  return type[SECRET_GLITZ_PROPERTY] === ELEMENT_TYPE;
 }
 
 function createPredefined(tag: string) {

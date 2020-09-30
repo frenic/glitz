@@ -1,9 +1,10 @@
 import { Style } from '@glitz/type';
 import { useContext, useRef, useEffect } from 'react';
 import { GlitzContext } from '../components/context';
+import { StyledDecorator } from './decorator';
 import useTheme from './use-theme';
 
-export type DirtyStyle = Style | readonly DirtyStyle[] | false | undefined;
+export type DirtyStyle = Style | readonly DirtyStyle[] | StyledDecorator | false | undefined;
 
 export default function useGlitz(dirtyStyle: DirtyStyle) {
   const glitz = useContext(GlitzContext);
@@ -31,7 +32,7 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   let finalStyles: readonly Style[];
 
   if (!isValid) {
-    finalStyles = flattenStyle([dirtyStyle]);
+    finalStyles = pureStyle(dirtyStyle);
 
     if (previousRef.current[3]) {
       isValid = isCached && shallowEquals(previousRef.current[3], finalStyles);
@@ -80,18 +81,28 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   return (previousRef.current[4] = glitz.injectStyle(finalStyles!, theme)) || void 0;
 }
 
-export function flattenStyle(dirtyStyles: readonly DirtyStyle[]): readonly Style[] {
+export function pureStyle(dirtyStyle: DirtyStyle): readonly Style[] {
+  if (typeof dirtyStyle === 'function') {
+    return dirtyStyle();
+  }
+
+  // TODO: Remove hack in TS4.1 (https://github.com/microsoft/TypeScript/pull/39258)
+  if ((Array.isArray as (arg: any) => arg is readonly any[])(dirtyStyle)) {
+    return flattenStyle(dirtyStyle);
+  }
+
+  if (dirtyStyle) {
+    return [dirtyStyle];
+  }
+
+  return [];
+}
+
+function flattenStyle(dirtyStyles: readonly DirtyStyle[]): readonly Style[] {
   const styles: Style[] = [];
 
   for (const style of dirtyStyles) {
-    if (style) {
-      // TODO: Remove hack in TS4.1 (https://github.com/microsoft/TypeScript/pull/39258)
-      if ((Array.isArray as (arg: any) => arg is readonly any[])(style)) {
-        styles.push(...flattenStyle(style));
-      } else {
-        styles.push(style);
-      }
-    }
+    styles.push(...pureStyle(style));
   }
 
   return styles;

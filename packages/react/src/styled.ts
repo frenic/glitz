@@ -1,7 +1,7 @@
 import { createStyled } from './styled/custom';
 import { assignPredefined } from './styled/predefined';
 
-export type { Decorator } from './styled/decorator';
+export type { StyledDecorator } from './styled/decorator';
 export { default as useStyle } from './styled/use-glitz';
 export { default as useTheme } from './styled/use-theme';
 export * from './styled/apply-class-name';

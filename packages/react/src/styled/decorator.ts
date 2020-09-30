@@ -15,10 +15,13 @@ import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import createComponent, { WithoutRefProp } from './create';
 import { Styles } from './custom';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
-import { flattenStyle, DirtyStyle } from './use-glitz';
+import { pureStyle, DirtyStyle } from './use-glitz';
 import { isElementType } from './predefined';
+import { DECORATOR_TYPE, SECRET_GLITZ_PROPERTY } from './constants';
 
-export interface Decorator {
+export interface StyledDecorator {
+  [SECRET_GLITZ_PROPERTY]: typeof DECORATOR_TYPE;
+
   /**
    * @deprecated
    * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
@@ -151,7 +154,7 @@ export interface Decorator {
    * );
    * ```
    */
-  (style: Styles, ...styles: Styles[]): Decorator;
+  (style: Styles, ...styles: Styles[]): StyledDecorator;
 
   /** Apply decorator style */
   (): readonly Style[];
@@ -189,11 +192,11 @@ export interface Decorator {
    * );
    * ```
    */
-  (style: Styles): Decorator;
+  (style: Styles): StyledDecorator;
 }
 
-export default function createDecorator(dirtyStyle?: DirtyStyle): Decorator {
-  const style = flattenStyle([dirtyStyle]);
+export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorator {
+  const style = pureStyle(dirtyStyle);
 
   function decorator<TProps>(
     arg1:
@@ -204,7 +207,7 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): Decorator {
     ...arg2: Styles[]
   ): StyledComponent<TProps>;
 
-  function decorator<TProps>(...styles: Styles[]): Decorator;
+  function decorator<TProps>(...styles: Styles[]): StyledDecorator;
 
   function decorator<TProps>(): Style[];
 
@@ -228,9 +231,12 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): Decorator {
     return createComponent<TProps>(arg1, [style, arg2]);
   }
 
-  return decorator;
+  return Object.assign(decorator, { [SECRET_GLITZ_PROPERTY]: DECORATOR_TYPE });
 }
 
 export function isStyle(arg: any): arg is Styles {
-  return typeof arg === 'object' && !isElementType(arg) && !isElementLikeType(arg) && !isValidElementType(arg);
+  return (
+    arg[SECRET_GLITZ_PROPERTY] === DECORATOR_TYPE ||
+    (typeof arg === 'object' && !isElementType(arg) && !isElementLikeType(arg) && !isValidElementType(arg))
+  );
 }

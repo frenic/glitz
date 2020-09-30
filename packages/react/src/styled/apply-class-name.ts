@@ -29,5 +29,5 @@ export function applyClassName<TProps extends StyledElementProps>(
 export function isElementLikeType<TProps extends StyledElementProps, TInstance>(
   type: any,
 ): type is StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>> {
-  return SECRET_GLITZ_PROPERTY in type && type[SECRET_GLITZ_PROPERTY] === ELEMENT_LIKE_TYPE;
+  return type[SECRET_GLITZ_PROPERTY] === ELEMENT_LIKE_TYPE;
 }

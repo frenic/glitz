@@ -111,5 +111,5 @@ function combineClassNames(a: string | undefined, b: string | undefined) {
 export function isStyledComponent<TProps, TInstance>(
   type: any,
 ): type is StyledComponent<TProps> | StyledComponentWithRef<TProps, TInstance> {
-  return SECRET_GLITZ_PROPERTY in type && typeof type[SECRET_GLITZ_PROPERTY] === 'function';
+  return typeof type[SECRET_GLITZ_PROPERTY] === 'function';
 }

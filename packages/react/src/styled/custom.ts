@@ -12,10 +12,10 @@ import {
 } from 'react';
 import { StyledElementLike } from './apply-class-name';
 import createComponent, { WithoutRefProp } from './create';
-import createDecorator, { Decorator, isStyle } from './decorator';
+import createDecorator, { StyledDecorator, isStyle } from './decorator';
 import { StyledComponent, StyledComponentWithRef, StyledElementProps } from './types';
 
-export type Styles = Style | readonly Style[];
+export type Styles = Style | readonly Style[] | StyledDecorator;
 
 export interface Styled {
   <TProps = {}>(component: FunctionComponent<TProps>, ...styles: Styles[]): StyledComponent<WithoutRefProp<TProps>>;
@@ -40,8 +40,8 @@ export interface Styled {
     component: ClassType<TProps, TInstance, ComponentClass<TProps>>,
     ...styles: Styles[]
   ): StyledComponentWithRef<TProps, TInstance>;
-  (...styles: Styles[]): Decorator;
-  (): Decorator;
+  (...styles: Styles[]): StyledDecorator;
+  (): StyledDecorator;
 
   // These last overloads prevents errors on `component` when `style` is
   // incorrect and enables usage of generic parameter to provide prop type
@@ -49,7 +49,7 @@ export interface Styled {
     component: StyledElementLike<ComponentType<StyledElementProps>> | ComponentType,
     ...styles: Styles[]
   ): StyledComponent<any>;
-  (style: Styles): Decorator;
+  (style: Styles): StyledDecorator;
 }
 
 function creator<TProps>(
@@ -61,9 +61,9 @@ function creator<TProps>(
   ...arg2: Styles[]
 ): StyledComponent<TProps>;
 
-function creator<TProps>(...styles: Styles[]): Decorator;
+function creator<TProps>(...styles: Styles[]): StyledDecorator;
 
-function creator<TProps>(): Decorator;
+function creator<TProps>(): StyledDecorator;
 
 function creator<TProps>(
   arg1?:
@@ -73,7 +73,7 @@ function creator<TProps>(
     | ComponentType<TProps>
     | Styles,
   ...arg2: Styles[]
-): StyledComponent<TProps> | Decorator {
+): StyledComponent<TProps> | StyledDecorator {
   return typeof arg1 === 'undefined' || isStyle(arg1)
     ? createDecorator([arg1, arg2])
     : createComponent<TProps>(arg1, arg2);

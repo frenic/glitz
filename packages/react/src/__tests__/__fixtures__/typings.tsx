@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledComponent } from '../..';
 import { GlitzClient, GlitzServer } from '../../../../core/src';
-import { Decorator } from '../../styled/decorator';
 
 const client = new GlitzClient();
 <GlitzProvider glitz={client} />;
