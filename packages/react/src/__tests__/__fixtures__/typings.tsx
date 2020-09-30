@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledComponent } from '../..';
 import { GlitzClient, GlitzServer } from '../../../../core/src';
-import { StyledDecorator } from '../../styled/decorator';
+import { Decorator } from '../../styled/decorator';
 
 const client = new GlitzClient();
 <GlitzProvider glitz={client} />;
@@ -116,13 +116,13 @@ const StyledStyledClassComponentWithRequiredProps = styled(StyledClassComponentW
   }}
 />;
 
-const styledDecoratorA = styled({});
-const styledDecoratorB = styled({});
-const styledDecoratorAB = styledDecoratorA(styledDecoratorB({})());
-const StyledFunctionComponentWithDecorator = styledDecoratorAB(() => <styled.Div css={{}} />);
+const aDecorator = styled({});
+const bDecorator = styled({});
+const cDecorator = styled(aDecorator(), bDecorator(), {});
+const StyledFunctionComponentWithDecorator = styled(() => <styled.Div css={{}} />, cDecorator());
 <StyledFunctionComponentWithDecorator css={{}} />;
 
-const StyledClassComponentWithDecorator = styledDecoratorAB(ClassComponentWithoutProps);
+const StyledClassComponentWithDecorator = styled(ClassComponentWithoutProps, cDecorator());
 <StyledClassComponentWithDecorator
   css={{}}
   ref={ref => {
@@ -184,10 +184,10 @@ function connect<TProps>(Component: React.ComponentType<TProps>): React.Function
 const R = connect(StyledFunctionComponentWithoutStyle);
 <R css={{}} />;
 
-styled(() => <styled.Div css={styledDecoratorA()} />);
-styled(() => <styled.Div css={styledDecoratorA({})()} />);
-<styled.Div css={styledDecoratorA()} />;
-<styled.Div css={styledDecoratorA({})()} />;
+styled(() => <styled.Div css={aDecorator()} />);
+styled(() => <styled.Div css={[aDecorator(), {}]} />);
+<styled.Div css={aDecorator()} />;
+<styled.Div css={[aDecorator(), {}]} />;
 
 const StyledForwardRefComponentWithRequiredProps = styled(
   React.forwardRef(({}: { x: string }, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
@@ -281,5 +281,6 @@ export function createStyledComponent<TProps>(Component: StyledComponent<TProps>
   styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...((restProps as unknown) as TProps)} />);
 }
 
-let decorator: StyledDecorator = styled();
-decorator = decorator({});
+styled({})(props => <div />);
+cDecorator(props => <div />);
+cDecorator({});

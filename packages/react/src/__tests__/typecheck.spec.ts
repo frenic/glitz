@@ -5,17 +5,17 @@ test('typings', () => {
   const errors = typescriptDiagnostics(resolve(__dirname, '__fixtures__/typings.tsx'));
   expect(errors.length).toBe(16);
   expect(errors[0]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 230:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & { a: boolean; b?: undefined; } & { css?: false | Style | Style[] | undefined; } & { children?: ReactNode; }) | (IntrinsicAttributes & { ...; } & { ...; } & { ...; })'.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 230:1 - Type '{ a: true; b: true; }' is not assignable to type '(IntrinsicAttributes & { a: boolean; b?: undefined; } & { css?: DirtyStyle; } & { children?: ReactNode; }) | (IntrinsicAttributes & { ...; } & { ...; } & { ...; })'.
       Type '{ a: true; b: true; }' is not assignable to type '{ a?: undefined; b: boolean; }'.
         Types of property 'a' are incompatible.
           Type 'true' is not assignable to type 'undefined'."
   `);
   expect(errors[1]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 232:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'false | Style | Style[] | undefined'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[]'."
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 232:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | DirtyStyle[]'."
   `);
   expect(errors[2]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 234:12 - Type '{ color: number; }' is not assignable to type 'false | Style | Style[] | undefined'.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 234:12 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
       Types of property 'color' are incompatible.
         Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
@@ -29,37 +29,33 @@ test('typings', () => {
   expect(errors[5]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 240:20 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
+        Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
           Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
   `);
   expect(errors[6]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 242:7 - No overload matches this call.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 242:9 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '{ color: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
-          Types of property 'color' are incompatible.
-            Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[7]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 244:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'false | Style | Style[] | undefined'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | Style[]'."
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 244:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | DirtyStyle[]'."
   `);
   expect(errors[8]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 246:25 - Type '{ color: number; }' is not assignable to type 'false | Style | Style[] | undefined'.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 246:25 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
       Types of property 'color' are incompatible.
         Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[9]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 248:51 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
+        Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
           Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
   `);
   expect(errors[10]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 250:38 - No overload matches this call.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 250:40 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '{ color: number; }' is not assignable to parameter of type 'Style | Style[] | undefined'.
-          Types of property 'color' are incompatible.
-            Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[11]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 252:7 - No overload matches this call.

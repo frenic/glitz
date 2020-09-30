@@ -1,4 +1,3 @@
-import { Style } from '@glitz/type';
 import {
   PropsWithoutRef,
   RefAttributes,
@@ -20,10 +19,9 @@ import { useStream } from './stream';
 export type WithRefProp<TProps, TInstance> = PropsWithoutRef<TProps> & RefAttributes<TInstance>;
 export type WithoutRefProp<TProps> = TProps extends PropsWithRef<TProps> ? PropsWithoutRef<TProps> : TProps;
 
-// Conditionally omit `StyledProps` enables support for union props
 export type ExternalProps<TProps> = PropsWithChildren<
   TProps & {
-    css?: Style[] | Style | false;
+    css?: DirtyStyle;
   }
 >;
 
