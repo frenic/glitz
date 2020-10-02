@@ -11,6 +11,8 @@ export default function () {
     Components.push(
       styled.div({
         backgroundColor: 'red' + Math.random(),
+        color: 'red' + Math.random(),
+        marginTop: Math.random() + 'px',
       }),
     );
   }
