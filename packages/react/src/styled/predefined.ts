@@ -1,4 +1,3 @@
-import { Style } from '@glitz/type';
 import {
   AnchorHTMLAttributes,
   AreaHTMLAttributes,
@@ -55,6 +54,7 @@ import {
 } from 'react';
 import { factory, StyledComponentWithRef } from './create';
 import { SECRET_GLITZ_PROPERTY, ELEMENT_TYPE, ELEMENT_LIKE_TYPE } from './constants';
+import { Styles } from './custom';
 
 export interface StyledType {
   [SECRET_GLITZ_PROPERTY]: typeof ELEMENT_TYPE | typeof ELEMENT_LIKE_TYPE;
@@ -77,7 +77,7 @@ export function isElementType(type: any): type is StyledElement {
 }
 
 function createPredefined(tag: string) {
-  return (style: Style) => factory(createElementType(tag), [style]);
+  return (...styles: Styles[]) => factory(createElementType(tag), styles);
 }
 
 export function assignPredefined<TTarget>(target: TTarget) {
@@ -270,7 +270,7 @@ export type StyledElementProps = {
   className?: string;
 };
 
-export type StyledFunction<TProps, TInstance> = (style: Style) => StyledComponentWithRef<TProps, TInstance>;
+export type StyledFunction<TProps, TInstance> = (...styles: Styles[]) => StyledComponentWithRef<TProps, TInstance>;
 
 export interface StyledElementComponents {
   // HTML

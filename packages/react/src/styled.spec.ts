@@ -161,7 +161,7 @@ describe('react styled', () => {
 
     const StyledComponentB = styled(() => {
       return React.createElement(styled.Div, {
-        css: [styleDecoratorB(), { color: 'blue' }],
+        css: styled(styleDecoratorB(), { color: 'blue' }),
         ref: (el: HTMLDivElement) => {
           expect(el.className).toBe('a b');
           const declaration = getComputedStyle(el);
@@ -177,10 +177,17 @@ describe('react styled', () => {
     expect(declarationA.getPropertyValue('color')).toBe('red');
     expect(declarationA.getPropertyValue('background-color')).toBe('green');
 
-    const treeB = mountWithGlitz(React.createElement(styled.Div, { css: [styleDecoratorB(), { color: 'blue' }] }));
+    const treeB = mountWithGlitz(
+      React.createElement(styled.Div, { css: styled(styleDecoratorB(), { color: 'blue' }) }),
+    );
     const declarationB = getComputedStyle(treeB.getDOMNode());
     expect(declarationB.getPropertyValue('background-color')).toBe('green');
     expect(declarationB.getPropertyValue('color')).toBe('blue');
+
+    const treeC = mountWithGlitz(React.createElement(styled.div(styleDecoratorB(), { color: 'blue' })));
+    const declarationC = getComputedStyle(treeC.getDOMNode());
+    expect(declarationC.getPropertyValue('background-color')).toBe('green');
+    expect(declarationC.getPropertyValue('color')).toBe('blue');
   });
   it('applies class names to element-like components', () => {
     const StyledComponent = styled(
