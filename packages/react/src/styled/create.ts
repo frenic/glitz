@@ -1,20 +1,23 @@
 import {
-  PropsWithoutRef,
-  RefAttributes,
-  PropsWithChildren,
   ComponentType,
-  forwardRef,
   createElement,
-  Ref,
-  PropsWithRef,
+  forwardRef,
   ForwardRefExoticComponent,
+  Fragment,
+  PropsWithChildren,
+  PropsWithoutRef,
+  PropsWithRef,
+  Ref,
+  RefAttributes,
+  useContext,
+  useMemo,
 } from 'react';
+import { GlitzServer } from '@glitz/core';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_GLITZ_PROPERTY } from './constants';
 import { isElementType, StyledElement, StyledElementProps } from './predefined';
 import useGlitz, { DirtyStyle } from './use-glitz';
-import { useAbsorb, useForward } from './compose';
-import { useStream } from './stream';
+import { ComposeContext, emptyComposeContext, GlitzContext, StreamContext } from '../components/context';
 
 export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
   [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponent<TProps>;
@@ -64,26 +67,54 @@ export function factory<TProps, TInstance>(
 ): StyledComponentWithRef<TProps, TInstance> {
   const Component =
     isElementType(type) || isElementLikeType<TProps, TInstance>(type)
-      ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-          useAbsorb(absorbed => {
-            const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, absorbed]));
+      ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) => {
+          const composed = useContext(ComposeContext);
+          const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, composed]));
 
-            return useStream(
-              createElement<any>(type.value, {
-                ...restProps,
-                className,
-                ref,
-              }),
-            );
-          }),
-        )
-      : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) =>
-          useForward(
-            statics,
-            dynamic,
+          let node = createElement<any>(type.value, {
+            ...restProps,
+            className,
+            ref,
+          });
+
+          if (composed) {
+            // Reset ComposeContext
+            node = createElement(ComposeContext.Provider, emptyComposeContext, node);
+          }
+
+          const stream = useContext(StreamContext);
+          const glitz = useContext(GlitzContext);
+
+          if (stream && glitz instanceof GlitzServer) {
+            // React stream rendering
+            const style = glitz.getStyleStream();
+
+            if (style) {
+              // tslint:disable-next-line: variable-name
+              const [tag, props, __html] = style;
+              node = createElement(
+                Fragment,
+                null,
+                createElement(tag, {
+                  ...props,
+                  dangerouslySetInnerHTML: { __html },
+                }),
+                node,
+              );
+            }
+          }
+
+          return node;
+        })
+      : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) => {
+          const forwarded = useContext(ComposeContext);
+          const context = useMemo(() => ({ value: [statics, forwarded, dynamic] }), [statics, forwarded, dynamic]);
+          return createElement(
+            ComposeContext.Provider,
+            context,
             createElement<any>(type, { ...restProps, ref }),
-          ),
-        );
+          );
+        });
 
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
     [SECRET_GLITZ_PROPERTY](additionals?: DirtyStyle) {

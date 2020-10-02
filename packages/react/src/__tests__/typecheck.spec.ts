@@ -12,7 +12,7 @@ test('typings', () => {
   `);
   expect(errors[1]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 231:30 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly DirtyStyle[] | StyledDecorator'."
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | readonly DirtyStyle[]'."
   `);
   expect(errors[2]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 233:12 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
@@ -20,8 +20,8 @@ test('typings', () => {
         Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[3]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 235:24 - Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Style'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style'."
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 235:24 - Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
   `);
   expect(errors[4]).toMatchInlineSnapshot(
     `"packages/react/src/__tests__/__fixtures__/typings.tsx 237:13 - Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."`,
@@ -39,7 +39,7 @@ test('typings', () => {
   `);
   expect(errors[7]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 243:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly DirtyStyle[] | StyledDecorator'."
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | StyledDecorator | readonly DirtyStyle[]'."
   `);
   expect(errors[8]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 245:25 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
@@ -60,14 +60,14 @@ test('typings', () => {
   expect(errors[11]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 251:7 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'FunctionComponent<{}> | StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any>'.
+        Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any> | FunctionComponent<{}>'.
           Type '() => Promise<unknown>' is not assignable to type 'FunctionComponent<{}>'.
             Type 'Promise<unknown>' is missing the following properties from type 'ReactElement<any, any>': type, props, key"
   `);
   expect(errors[12]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 253:7 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'FunctionComponent<{}> | StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any>'.
+        Argument of type '() => Promise<unknown>' is not assignable to parameter of type 'StyledElementLike<ComponentType<StyledElementProps>> | ComponentClass<{}, any> | FunctionComponent<{}>'.
           Type '() => Promise<unknown>' is not assignable to type 'FunctionComponent<{}>'.
             Type 'Promise<unknown>' is not assignable to type 'ReactElement<any, any>'."
   `);
