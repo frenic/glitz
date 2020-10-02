@@ -5,16 +5,16 @@ import { styled } from '../../../react/src';
 
 const glitz = new GlitzClient();
 
-const Components: any[] = [];
-for (let i = 0; i < 100; i++) {
-  Components.push(
-    styled.div({
-      backgroundColor: 'red',
-    }),
-  );
-}
-
 export default function () {
+  const Components: any[] = [];
+  for (let i = 0; i < 100; i++) {
+    Components.push(
+      styled.div({
+        backgroundColor: 'red' + Math.random(),
+      }),
+    );
+  }
+
   return (
     <GlitzProvider glitz={glitz}>
       {Components.map((Component, i) => (

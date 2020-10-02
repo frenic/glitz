@@ -6,13 +6,13 @@ import { styled } from '../../../react/src';
 const glitz = new GlitzClient();
 
 export default function () {
+  const Component = styled.div({
+    backgroundColor: 'red',
+  });
+
   return (
     <GlitzProvider glitz={glitz}>
       <Component />
     </GlitzProvider>
   );
 }
-
-const Component = styled.div({
-  backgroundColor: 'red',
-});
