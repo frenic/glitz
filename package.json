@@ -40,6 +40,7 @@
     "test:types": "jest --testMatch \"**/src/**/typecheck.spec.(ts|tsx)\"",
     "test": "jest --testMatch \"**/src/**/*.spec.(ts|tsx)\"",
     "lazy": "tsc && npm run lint && npm run test",
-    "example": "lerna --scope glitz-example run start --"
+    "example": "lerna --scope glitz-example run start --",
+    "benchmark": "lerna --scope glitz-benchmark run benchmark --loglevel=silent --"
   }
 }

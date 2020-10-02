@@ -10,11 +10,13 @@
   "dependencies": {
     "@glitz/core": "^3.0.0-alpha.5",
     "@glitz/react": "^4.0.0-alpha.12",
-    "@glitz/transformers": "^3.0.0-alpha.5",
     "@types/react": "*",
     "@types/react-dom": "*",
     "react": "^16.13.1",
     "react-benchmark": "^3.0.0",
     "react-dom": "^16.13.1"
+  },
+  "scripts": {
+    "benchmark": "react-benchmark"
   }
 }

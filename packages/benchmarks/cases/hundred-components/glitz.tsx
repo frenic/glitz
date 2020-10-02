@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { GlitzClient } from '../../../core/src';
-import { GlitzProvider } from '../../../react/src';
-import { styled } from '../../../react/src';
+import { GlitzClient } from '@glitz/core';
+import { GlitzProvider, styled } from '@glitz/react';
 
 const glitz = new GlitzClient();
 

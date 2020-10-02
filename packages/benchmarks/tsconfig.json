@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
-
   "compilerOptions": {
     "jsx": "react",
-    "target": "ES5"
+    "target": "es5"
   }
 }
