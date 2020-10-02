@@ -1030,6 +1030,31 @@
     tslib "^1.8.1"
     uuid "^3.1.0"
 
+"@glitz/core-stable@npm:@glitz/core@^2.1.5", "@glitz/core@^2.1.5":
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/@glitz/core/-/core-2.1.5.tgz#118ac206c7494677b2dd9f653ee6fd698d98d7af"
+  integrity sha512-I//YXXAE6WIBflimA+3w5XMs0R+5CvUHFsTNXAb7glw1cOBorKDVk2Lemo1iWU7Wf/QW7IkBfWz84gUqSqvegA==
+  dependencies:
+    "@glitz/type" "^2.0.5"
+
+"@glitz/react-stable@npm:@glitz/react@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/@glitz/react/-/react-3.1.6.tgz#62246ab0bc88c701f8813d4f96ee0555e5ad45cf"
+  integrity sha512-dIvqIw+PgseNqf2K7r0dtmBGrrLaP8zPJNDvxlYoMrn/XsJetQRqdHZ11m3kY+8PCugXwL85xjxXYPCRilqPzg==
+  dependencies:
+    "@glitz/core" "^2.1.5"
+    "@glitz/type" "^2.0.5"
+    "@types/react" "*"
+    "@types/react-is" "*"
+    react-is "^16.13.1"
+
+"@glitz/type@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@glitz/type/-/type-2.0.5.tgz#d9297e8a2a4276d803151b73a19023634ce947de"
+  integrity sha512-cEZ+YeVClGOOfKZIRgI6eQP8LvnrDzErKjefB9jkDT5lvsWRsw96W+GqCfDgc+eVtDNOT5vt4CB+Nzs/UncGxw==
+  dependencies:
+    csstype "^3.0.2"
+
 "@iarna/toml@^2.2.0":
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
