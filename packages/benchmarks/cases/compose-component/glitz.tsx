@@ -5,7 +5,7 @@ import { GlitzProvider, styled } from '@glitz/react';
 const glitz = new GlitzClient();
 
 export default function () {
-  const Component = styled.div({
+  const Component = styled(() => <styled.Div />, {
     color: 'red',
   });
 
