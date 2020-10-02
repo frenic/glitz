@@ -4,19 +4,14 @@ import { GlitzProvider, styled } from '@glitz/react-stable';
 
 const glitz = new GlitzClient();
 
-function randomRGB() {
-  const random = () => Math.round(Math.random() * 255);
-  return `rgb(${random()}, ${random()}, ${random()})`;
-}
-
 export default function () {
   const components: any[] = [];
   for (let i = 0; i < 100; i++) {
     components.push(
-      styled.div({
-        backgroundColor: randomRGB(),
-        color: randomRGB(),
-        marginTop: `${Math.random()}px`,
+      styled(() => <styled.Div />, {
+        backgroundColor: `rgb(${i}, ${i}, ${i})`,
+        color: `rgb(${i}, ${i}, ${i})`,
+        marginTop: `${i}px`,
       }),
     );
   }
