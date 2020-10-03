@@ -11,6 +11,7 @@ import {
   evaluationCache,
   FunctionWithTsNode,
   staticModuleOverloads,
+  EvaluationStats,
 } from './evaluator';
 import { getStaticExports } from './static-module-overloads';
 
@@ -372,7 +373,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   }
 
   if (isFirstPass && ts.isCallExpression(node) && (isStyledCall(node) || isUseStyle(node))) {
-    ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
+    declarePure(node);
   }
 
   // This is where we either collect or replace/transform a styled component declaration
@@ -397,24 +398,19 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
               // we look at the variable name to see if it's a variable with Pascal case
               // and in that case try to evaluate it to a styled component.
               if (isComponentName(componentName)) {
-                const object = evaluate(declaration.initializer, transformerContext.program);
+                const stats: EvaluationStats = {
+                  usedVariables: new Map<ts.VariableDeclaration, any>(),
+                };
+                const object = evaluate(declaration.initializer, transformerContext.program, undefined, stats);
                 if (isStaticElement(object) || isStaticComponent(object)) {
-                  const type = typeChecker.getTypeAtLocation(declaration.initializer.expression);
-                  // We can't know which variables are decorators like we can with calls to the styled
-                  // function, so we need to determine that by the type name. Note that the type name
-                  // in the tests is called StaticDecorator but in the "real" world it's StyledDecorator.
-                  if (
-                    type.aliasSymbol &&
-                    (type.aliasSymbol.escapedName === 'StaticDecorator' ||
-                      type.aliasSymbol.escapedName === 'StyledDecorator')
-                  ) {
-                    ts.addSyntheticLeadingComment(
-                      declaration.initializer,
-                      ts.SyntaxKind.MultiLineCommentTrivia,
-                      '#__PURE__',
-                      false,
-                    );
-                  }
+                  stats.usedVariables.forEach((_, k) => {
+                    if (k.getSourceFile().fileName === transformerContext.currentFile.fileName) {
+                      if (k.initializer && ts.isCallExpression(k.initializer)) {
+                        declarePure(k.initializer);
+                      }
+                    }
+                  });
+                  declarePure(declaration.initializer);
 
                   if (object.styles.every(canEvalStyle)) {
                     const component = {
@@ -1488,7 +1484,7 @@ function injectUseGlitzThemeVariable(transformerContext: TransformerContext, fac
     // At this point we're not quite sure if the theme will be used or if all theme functions can be determined
     // to return the same class, or if any functions will require runtime so we inject /* #__PURE__ */ to tell
     // the minifier that it's safe to remove this call if the theme is unused.
-    ts.addSyntheticLeadingComment(useGlitzCall, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
+    declarePure(useGlitzCall);
     const useGlitzStmt = factory.createVariableStatement(
       undefined,
       factory.createVariableDeclarationList(
@@ -1701,4 +1697,13 @@ function getSeverity(node: ts.Node, transformerContext: TransformerContext): Sev
     node = node.parent;
   }
   return severity;
+}
+
+function declarePure(node: ts.CallExpression) {
+  const existingComments = ts.getSyntheticLeadingComments(node);
+  if (existingComments && existingComments.find(c => c.text === '#__PURE__')) {
+    return;
+  }
+
+  ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
 }

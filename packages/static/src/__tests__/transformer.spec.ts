@@ -931,7 +931,7 @@ const node1 = <ColorDiv />;
       "import { styled } from '@glitz/react';
       const colorDecorator = /*#__PURE__*/ styled({ backgroundColor: 'red' });
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
-      const decorator = colorDecorator(paddingDecorator());
+      const decorator = /*#__PURE__*/ colorDecorator(paddingDecorator());
       const ColorDiv = /*#__PURE__*/ styled(styled.Div, decorator());
       const node1 = <div className=\\"b a\\" data-glitzname=\\"ColorDiv\\"/>;
       "
