@@ -1031,49 +1031,6 @@ function hasJSDocTag(node: ts.Node, jsDocTag: string) {
   return false;
 }
 
-function getCssData(
-  tsStyle: ts.Expression,
-  node: ts.Node,
-  transformerContext: TransformerContext,
-  parentComponent: StaticStyledComponent,
-): (EvaluatedStyle | RequiresRuntimeResult)[];
-function getCssData(
-  tsStyle: ts.Expression,
-  node: ts.Node,
-  transformerContext: TransformerContext,
-): EvaluatedStyle | RequiresRuntimeResult;
-function getCssData(
-  tsStyle: ts.Expression,
-  node: ts.Node,
-  transformerContext: TransformerContext,
-  parentComponent?: StaticStyledComponent,
-): (EvaluatedStyle | RequiresRuntimeResult)[] | EvaluatedStyle | RequiresRuntimeResult {
-  const style = evaluate(tsStyle, transformerContext.program) as EvaluatedStyle | RequiresRuntimeResult;
-  if (!transformerContext.staticThemes) {
-    transformerContext.glitz.injectStyle(stripUnevaluableProperties(style));
-  }
-  const requiresRuntime = getAllRequiresRuntimeResult(style);
-  if (requiresRuntime.length) {
-    return requiresRuntime;
-  }
-  if (!transformerContext.staticThemes) {
-    const propFunc = anyValuesAreFunctions(style as EvaluatedStyle);
-    if (propFunc) {
-      transformerContext.currentFileUsesGlitzThemes = true;
-      return requiresRuntimeResult(
-        'Functions in style objects requires runtime or statically declared themes',
-        (propFunc as FunctionWithTsNode).tsNode ?? node,
-      );
-    }
-  }
-
-  if (parentComponent) {
-    return [...parentComponent.styles, style];
-  }
-
-  return style;
-}
-
 function anyValuesAreFunctions(style: EvaluatedStyle | EvaluatedStyle[]): boolean | FunctionWithTsNode {
   if (style && typeof style === 'object') {
     if (Array.isArray(style)) {
@@ -1118,7 +1075,25 @@ function getCssDataFromCssProp(
     ts.isJsxExpression(cssJsxAttr.initializer) &&
     cssJsxAttr.initializer.expression
   ) {
-    const cssData = getCssData(cssJsxAttr.initializer.expression, node, transformerContext);
+    let cssData = evaluate(cssJsxAttr.initializer.expression, transformerContext.program) as
+      | EvaluatedStyle
+      | RequiresRuntimeResult;
+    if (!transformerContext.staticThemes) {
+      transformerContext.glitz.injectStyle(stripUnevaluableProperties(cssData));
+    }
+    const requiresRuntime = getAllRequiresRuntimeResult(cssData);
+    if (requiresRuntime.length) {
+      cssData = requiresRuntime[0];
+    } else if (!transformerContext.staticThemes) {
+      const propFunc = anyValuesAreFunctions(cssData as EvaluatedStyle);
+      if (propFunc) {
+        transformerContext.currentFileUsesGlitzThemes = true;
+        cssData = requiresRuntimeResult(
+          'Functions in style objects requires runtime or statically declared themes',
+          (propFunc as FunctionWithTsNode).tsNode ?? node,
+        );
+      }
+    }
     if (isEvaluableStyle(cssData, !!transformerContext.staticThemes)) {
       return cssData;
     } else {
