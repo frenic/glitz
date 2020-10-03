@@ -57,8 +57,8 @@ function evaluateInternal(
         } else {
           result = partiallyEvaluateExpression(
             node.initializer,
-            program,
             shouldEvaluate,
+            program,
             createScope(undefined, globals),
           );
         }

@@ -5,6 +5,7 @@ import { GlitzStatic } from '@glitz/core';
 import { isStaticElement, isStaticComponent } from './shared';
 import {
   evaluate,
+  partiallyEvaluate,
   isRequiresRuntimeResult,
   RequiresRuntimeResult,
   requiresRuntimeResult,
@@ -1047,6 +1048,7 @@ function anyValuesAreFunctions(style: EvaluatedStyle | EvaluatedStyle[]): boolea
         } else if (
           style[key] &&
           !isRequiresRuntimeResult(style[key]) &&
+          !ts.isConditionalExpression(style[key] as any) &&
           typeof style[key] === 'object' &&
           !Array.isArray(style[key])
         ) {
@@ -1075,7 +1077,28 @@ function getCssDataFromCssProp(
     ts.isJsxExpression(cssJsxAttr.initializer) &&
     cssJsxAttr.initializer.expression
   ) {
-    let cssData = evaluate(cssJsxAttr.initializer.expression, transformerContext.program) as
+    const shouldEvaluate = (node: ts.Node) => {
+      if (!ts.isConditionalExpression(node)) {
+        return true;
+      }
+
+      if (!node.parent || !ts.isPropertyAssignment(node.parent)) {
+        return true;
+      }
+
+      // We want to allow ternaries on the first level of an object literal, but not on nested object literals
+      if (
+        node.parent &&
+        node.parent.parent &&
+        node.parent.parent.parent &&
+        ts.isPropertyAssignment(node.parent.parent.parent)
+      ) {
+        return true;
+      }
+
+      return false;
+    };
+    let cssData = partiallyEvaluate(cssJsxAttr.initializer.expression, shouldEvaluate, transformerContext.program) as
       | EvaluatedStyle
       | RequiresRuntimeResult;
     if (!transformerContext.staticThemes) {
@@ -1094,7 +1117,7 @@ function getCssDataFromCssProp(
         );
       }
     }
-    if (isEvaluableStyle(cssData, !!transformerContext.staticThemes)) {
+    if (isEvaluableStyle(cssData, !!transformerContext.staticThemes, true)) {
       return cssData;
     } else {
       reportRequiresRuntimeResult('css prop could not be statically evaluated', cssData, node, transformerContext);
@@ -1180,6 +1203,99 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
   const propFunc = anyValuesAreFunctions(style);
   if (propFunc) {
     transformerContext.currentFileUsesGlitzThemes = true;
+  }
+
+  const allStyles = Array.isArray(style) ? style : [style];
+  const allTernaryStyles: string[] = [];
+  const stylesPerTernary: {
+    [ternary: string]: {
+      ternary: ts.ConditionalExpression;
+      classNamesWhenTrue: string[];
+      classNamesWhenFalse: string[];
+    };
+  } = {};
+  let conditionalFound = false;
+  for (const styleObject of allStyles) {
+    for (const key in styleObject) {
+      const value = styleObject[key] as any;
+      if (ts.isConditionalExpression(value)) {
+        if (propFunc) {
+          return requiresRuntimeResult(
+            'Functions in style objects cannot be combined with ternaries',
+            (propFunc as FunctionWithTsNode).tsNode,
+          );
+        }
+        conditionalFound = true;
+
+        const whenTrue = evaluate(value.whenTrue, transformerContext.program);
+        if (isRequiresRuntimeResult(whenTrue)) {
+          return whenTrue;
+        }
+        const whenFalse = evaluate(value.whenFalse, transformerContext.program);
+        if (isRequiresRuntimeResult(whenFalse)) {
+          return whenFalse;
+        }
+
+        const ternaryString = value.getText();
+        if (!(ternaryString in stylesPerTernary)) {
+          stylesPerTernary[ternaryString] = {
+            ternary: value,
+            classNamesWhenTrue: [],
+            classNamesWhenFalse: [],
+          };
+        }
+
+        stylesPerTernary[ternaryString].classNamesWhenTrue.push(
+          ...transformerContext.glitz.injectStyle({ [key]: whenTrue }).split(' '),
+        );
+        stylesPerTernary[ternaryString].classNamesWhenFalse.push(
+          ...transformerContext.glitz.injectStyle({ [key]: whenFalse }).split(' '),
+        );
+        delete styleObject[key];
+      }
+    }
+
+    if (Object.keys(styleObject).length) {
+      const classNames = transformerContext.glitz.injectStyle(styleObject);
+      for (const className of classNames.split(' ')) {
+        if (allTernaryStyles.indexOf(className) === -1) {
+          allTernaryStyles.push(className);
+        }
+      }
+    }
+  }
+
+  if (conditionalFound) {
+    let ternaryClassNameExpression: ts.Expression | undefined = undefined;
+    if (allTernaryStyles.length) {
+      ternaryClassNameExpression = factory.createStringLiteral(allTernaryStyles.join(' '));
+    } else {
+      const firstTernaryKey = Object.keys(stylesPerTernary)[0];
+      ternaryClassNameExpression = factory.createConditionalExpression(
+        stylesPerTernary[firstTernaryKey].ternary.condition,
+        undefined,
+        factory.createStringLiteral(stylesPerTernary[firstTernaryKey].classNamesWhenTrue.join(' ')),
+        undefined,
+        factory.createStringLiteral(stylesPerTernary[firstTernaryKey].classNamesWhenFalse.join(' ')),
+      );
+      delete stylesPerTernary[firstTernaryKey];
+    }
+    for (const ternaryString in stylesPerTernary) {
+      const right = factory.createConditionalExpression(
+        stylesPerTernary[ternaryString].ternary.condition,
+        undefined,
+        factory.createStringLiteral(stylesPerTernary[ternaryString].classNamesWhenTrue.join(' ')),
+        undefined,
+        factory.createStringLiteral(stylesPerTernary[ternaryString].classNamesWhenFalse.join(' ')),
+      );
+      ternaryClassNameExpression = factory.createBinaryExpression(
+        ternaryClassNameExpression,
+        ts.SyntaxKind.PlusToken,
+        right,
+      );
+    }
+
+    return ts.createJsxExpression(undefined, ternaryClassNameExpression);
   }
 
   if (!transformerContext.staticThemes) {
@@ -1550,7 +1666,7 @@ function getAllRequiresRuntimeResult(obj: any) {
           const res = getAllRequiresRuntimeResult(elem);
           result.push(...res);
         }
-      } else {
+      } else if (!ts.isConditionalExpression(obj)) {
         for (const key in obj) {
           const res = getAllRequiresRuntimeResult(obj[key]);
           result.push(...res);
@@ -1564,6 +1680,7 @@ function getAllRequiresRuntimeResult(obj: any) {
 function isEvaluableStyle(
   object: EvaluatedStyle | RequiresRuntimeResult,
   hasStaticThemes: boolean,
+  allowTernaries = false,
 ): object is EvaluatedStyle {
   if (!isRequiresRuntimeResult(object)) {
     if (typeof object === 'function') {
@@ -1571,13 +1688,21 @@ function isEvaluableStyle(
     }
     for (const key in object) {
       const value = object[key];
+      if (ts.isConditionalExpression(value as any)) {
+        return allowTernaries;
+      }
       if (isRequiresRuntimeResult(value)) {
         return false;
       }
       if (!hasStaticThemes && typeof value === 'function') {
         return false;
       }
-      if (value && typeof value === 'object' && !Array.isArray(value) && !isEvaluableStyle(value, hasStaticThemes)) {
+      if (
+        value &&
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        !isEvaluableStyle(value, hasStaticThemes, allowTernaries)
+      ) {
         return false;
       }
     }
@@ -1642,7 +1767,7 @@ function stripUnevaluableProperties(obj: { [key: string]: any }): EvaluatedStyle
   }
   const style: EvaluatedStyle = {};
   for (const key in obj) {
-    if (!isRequiresRuntimeResult(obj[key]) && typeof obj[key] !== 'function') {
+    if (!isRequiresRuntimeResult(obj[key]) && !ts.isConditionalExpression(obj[key]) && typeof obj[key] !== 'function') {
       if (obj[key] && typeof obj[key] === 'object') {
         Object.assign(obj[key], stripUnevaluableProperties(obj[key]));
       } else {

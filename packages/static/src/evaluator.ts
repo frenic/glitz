@@ -37,8 +37,8 @@ export function evaluate(expr: SupportedExpressions, program: ts.Program, scope?
 
 export function partiallyEvaluate(
   expr: SupportedExpressions,
-  program: ts.Program,
   shouldEvaluate: (node: ts.Node) => boolean,
+  program: ts.Program,
   scope?: Scope,
   stats?: EvaluationStats,
 ) {

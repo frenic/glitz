@@ -33,34 +33,63 @@ const Styled = styled.div(styleObject);
   });
 });
 
-// TODO: Implement this
-test.skip('can handle simple ternaries in the css prop', () => {
+test('can handle simple ternaries in the css prop', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
 
-function Component(props: { isStyled: boolean }) {
+function Component(props: { isStyled: boolean; isLarge: boolean }) {
   return (
     <div>
       <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue' }}>What color am I?</styled.Div>
+      <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue', color: 'red' }}>What color am I?</styled.Div>
+      <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue', color: 'red', marginTop: props.isLarge ? '10px' : '1px' }}>What color am I?</styled.Div>
+      <styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>What color am I?</styled.Div>
     </div>
   );
 }
 `,
   };
 
-  expectEqual(compile(code), result => {
-    expect(result['file1.jsx']).toMatchInlineSnapshot(`
-      "import { styled } from '@glitz/react';
-      function Component(props) {
-          return (<div>
-            <div className={props.isStyled ? 'a' : 'b'}>What color am I?</div>
-          </div>);
-      }
-      "
-    `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:green}.b{color:blue}"`);
-  });
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+              "import { styled } from '@glitz/react';
+              function Component(props) {
+                  return (<div>
+                    <div className={props.isStyled ? \\"a\\" : \\"b\\"} data-glitzname=\\"styled.Div\\">What color am I?</div>
+                    <div className={\\"c\\" + (props.isStyled ? \\"a\\" : \\"b\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
+                    <div className={\\"c\\" + (props.isStyled ? \\"a\\" : \\"b\\") + (props.isLarge ? \\"d\\" : \\"e\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
+                    <styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>What color am I?</styled.Div>
+                  </div>);
+              }
+              "
+          `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{background-color:green}.b{background-color:blue}.c{color:red}.d{margin-top:10px}.e{margin-top:1px}"`,
+      );
+    },
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 9,
+              "message": "Could not determine a static value for: props",
+              "severity": "info",
+              "source": "props",
+            },
+            "line": 9,
+            "message": "css prop could not be statically evaluated",
+            "severity": "info",
+            "source": "<styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>",
+          },
+        ]
+      `),
+  );
 });
 
 test('bails if it finds a comment that it should skip', () => {
@@ -1039,10 +1068,10 @@ const node1 = <styled.Div css={decorator()} />;
       const colorDecorator = /*#__PURE__*/ styled({ backgroundColor: 'red' });
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
       const decorator = colorDecorator(paddingDecorator());
-      const node1 = <div className=\\"a b\\" data-glitzname=\\"styled.Div\\"/>;
+      const node1 = <div className=\\"b a\\" data-glitzname=\\"styled.Div\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{padding-top:10px}.b{background-color:red}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{padding-top:10px}"`);
   });
 });
 
@@ -1118,11 +1147,11 @@ const className3 = useStyle((window as any).someStyle);
       export const decorator = /*#__PURE__*/ styled({
           backgroundColor: 'red',
       });
-      const className2 = \\"b c\\";
+      const className2 = \\"c b\\";
       const className3 = /*#__PURE__*/ useStyle(window.someStyle);
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{font-weight:bold}.c{background-color:red}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:red}.c{font-weight:bold}"`);
   });
 });
 
