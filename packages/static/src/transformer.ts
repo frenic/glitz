@@ -1266,33 +1266,33 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
   }
 
   if (conditionalFound) {
+    const stylesPerTernaryKeys = Object.keys(stylesPerTernary);
     let ternaryClassNameExpression: ts.Expression | undefined = undefined;
     if (allTernaryStyles.length) {
-      ternaryClassNameExpression = factory.createStringLiteral(allTernaryStyles.join(' '));
-    } else {
-      const firstTernaryKey = Object.keys(stylesPerTernary)[0];
-      ternaryClassNameExpression = factory.createConditionalExpression(
-        stylesPerTernary[firstTernaryKey].ternary.condition,
-        undefined,
-        factory.createStringLiteral(stylesPerTernary[firstTernaryKey].classNamesWhenTrue.join(' ')),
-        undefined,
-        factory.createStringLiteral(stylesPerTernary[firstTernaryKey].classNamesWhenFalse.join(' ')),
-      );
-      delete stylesPerTernary[firstTernaryKey];
+      ternaryClassNameExpression = factory.createStringLiteral(allTernaryStyles.join(' ') + ' ');
     }
-    for (const ternaryString in stylesPerTernary) {
-      const right = factory.createConditionalExpression(
-        stylesPerTernary[ternaryString].ternary.condition,
+
+    for (let i = 0; i < stylesPerTernaryKeys.length; i++) {
+      const current = stylesPerTernary[stylesPerTernaryKeys[i]];
+      let right: ts.Expression = factory.createConditionalExpression(
+        current.ternary.condition,
         undefined,
-        factory.createStringLiteral(stylesPerTernary[ternaryString].classNamesWhenTrue.join(' ')),
+        factory.createStringLiteral(current.classNamesWhenTrue.join(' ')),
         undefined,
-        factory.createStringLiteral(stylesPerTernary[ternaryString].classNamesWhenFalse.join(' ')),
+        factory.createStringLiteral(current.classNamesWhenFalse.join(' ')),
       );
-      ternaryClassNameExpression = factory.createBinaryExpression(
-        ternaryClassNameExpression,
-        ts.SyntaxKind.PlusToken,
-        right,
-      );
+      if (i !== stylesPerTernaryKeys.length - 1) {
+        right = factory.createBinaryExpression(right, ts.SyntaxKind.PlusToken, factory.createStringLiteral(' '));
+      }
+      if (!ternaryClassNameExpression) {
+        ternaryClassNameExpression = right;
+      } else {
+        ternaryClassNameExpression = factory.createBinaryExpression(
+          ternaryClassNameExpression,
+          ts.SyntaxKind.PlusToken,
+          right,
+        );
+      }
     }
 
     return ts.createJsxExpression(undefined, ternaryClassNameExpression);
