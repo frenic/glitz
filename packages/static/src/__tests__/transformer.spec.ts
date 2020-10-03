@@ -33,6 +33,36 @@ const Styled = styled.div(styleObject);
   });
 });
 
+// TODO: Implement this
+test.skip('can handle simple ternaries in the css prop', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+function Component(props: { isStyled: boolean }) {
+  return (
+    <div>
+      <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue' }}>What color am I?</styled.Div>
+    </div>
+  );
+}
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      function Component(props) {
+          return (<div>
+            <div className={props.isStyled ? 'a' : 'b'}>What color am I?</div>
+          </div>);
+      }
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:green}.b{color:blue}"`);
+  });
+});
+
 test('bails if it finds a comment that it should skip', () => {
   const code = {
     'file1.tsx': `
