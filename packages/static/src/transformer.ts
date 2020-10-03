@@ -23,6 +23,7 @@ const themeIdentifierName = '__glitzTheme';
 const useGlitzThemeName = 'useGlitzTheme';
 const useThemeName = 'useTheme';
 const themeIdPropertyName = 'id';
+const diagnosticsReportedFlag = 'diagnosticsReported';
 
 staticModuleOverloads[glitzModuleName] = () => {
   const files: { [moduleName: string]: string } = {};
@@ -61,10 +62,7 @@ type StaticStyledComponents = {
   symbolToComponent: Map<ts.Symbol, StaticStyledComponent>;
   // If a component has usage outside of JSX it will exist in this map. Usage outside
   // of JSX is things like `TheComponent.displayName = 'Xyz';` or `doSomething(TheComponent);`
-  symbolsWithReferencesOutsideJsx: Map<
-    ts.Symbol,
-    { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: boolean }
-  >;
+  symbolsWithReferencesOutsideJsx: Map<ts.Symbol, { component: StaticStyledComponent; references: ts.Node[] }>;
   // This is a list of symbols pointing to all components that has been composed
   // using const OtherComp = styled(ThisComponentWillBeInComposedComponentSymbols, {});
   composedComponentSymbols: ts.Symbol[];
@@ -273,7 +271,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         staticStyledComponents.symbolsWithReferencesOutsideJsx.set(symbol, {
           component,
           references: [],
-          hasBeenReported: false,
         });
       }
       staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
@@ -390,7 +387,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
           const componentName = declaration.name.getText();
 
           if (!isFirstPass) {
-            reportUsageOutsideOfJsxIfNeeded(componentSymbol, componentName, transformerContext);
+            reportUsageOutsideOfJsxIfNeeded(componentSymbol, node, componentName, transformerContext);
           } else {
             if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
               // Since some declarations of styled components are complex and look like:
@@ -808,9 +805,15 @@ function isInsideInlineStyledComponent(node: ts.Node) {
 
 function reportUsageOutsideOfJsxIfNeeded(
   componentSymbol: ts.Symbol,
+  node: ts.Node,
   componentName: string,
   transformerContext: TransformerContext,
 ) {
+  if (hasNodeFlag(transformerContext, node, diagnosticsReportedFlag)) {
+    return;
+  }
+  setNodeFlag(transformerContext, node, diagnosticsReportedFlag);
+
   if (
     transformerContext.diagnosticsReporter &&
     transformerContext.staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)
@@ -818,22 +821,19 @@ function reportUsageOutsideOfJsxIfNeeded(
     const outsideJsxUsage = transformerContext.staticStyledComponents.symbolsWithReferencesOutsideJsx.get(
       componentSymbol,
     )!;
-    if (!outsideJsxUsage.hasBeenReported) {
-      const references = outsideJsxUsage.references;
+    const references = outsideJsxUsage.references;
 
-      for (const reference of references) {
-        const sourceFile = reference.getSourceFile();
-        const stmt = getStatement(reference);
+    for (const reference of references) {
+      const sourceFile = reference.getSourceFile();
+      const stmt = getStatement(reference);
 
-        transformerContext.diagnosticsReporter({
-          file: sourceFile.fileName,
-          message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
-          source: stmt.getText(),
-          severity: getSeverity(componentSymbol.valueDeclaration, transformerContext),
-          line: sourceFile.getLineAndCharacterOfPosition(reference.pos).line,
-        });
-      }
-      outsideJsxUsage.hasBeenReported = true;
+      transformerContext.diagnosticsReporter({
+        file: sourceFile.fileName,
+        message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
+        source: stmt.getText(),
+        severity: getSeverity(componentSymbol.valueDeclaration, transformerContext),
+        line: sourceFile.getLineAndCharacterOfPosition(reference.pos).line,
+      });
     }
   }
 }
@@ -887,6 +887,11 @@ function isTopLevelJsxInComposedComponent(
 }
 
 function reportTopLevelJsxInComposedComponent(node: ts.Node, transformerContext: TransformerContext) {
+  if (hasNodeFlag(transformerContext, node, diagnosticsReportedFlag)) {
+    return;
+  }
+  setNodeFlag(transformerContext, node, diagnosticsReportedFlag);
+
   const sourceFile = node.getSourceFile();
   if (transformerContext.diagnosticsReporter) {
     transformerContext.diagnosticsReporter({
@@ -951,6 +956,11 @@ function reportRequiresRuntimeResult(
   node: ts.Node,
   transformerContext: TransformerContext,
 ) {
+  if (hasNodeFlag(transformerContext, node, diagnosticsReportedFlag)) {
+    return;
+  }
+  setNodeFlag(transformerContext, node, diagnosticsReportedFlag);
+
   if (!transformerContext.diagnosticsReporter) {
     return;
   }
@@ -1706,4 +1716,17 @@ function declarePure(node: ts.CallExpression) {
   }
 
   ts.addSyntheticLeadingComment(node, ts.SyntaxKind.MultiLineCommentTrivia, '#__PURE__', false);
+}
+
+function hasNodeFlag(transformerContext: TransformerContext, node: ts.Node, flag: string) {
+  return transformerContext.nodeFlags.get(node)?.find(f => f === flag);
+}
+
+function setNodeFlag(transformerContext: TransformerContext, node: ts.Node, flag: string) {
+  if (!transformerContext.nodeFlags.has(node)) {
+    transformerContext.nodeFlags.set(node, []);
+  }
+  if (!hasNodeFlag(transformerContext, node, flag)) {
+    transformerContext.nodeFlags.get(node)!.push(flag);
+  }
 }

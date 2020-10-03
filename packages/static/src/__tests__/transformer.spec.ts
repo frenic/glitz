@@ -141,25 +141,28 @@ const Styled = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
     },
-    [
-      {
-        message: 'Styled component could not be statically evaluated',
-        severity: 'error',
-        file: 'file1.tsx',
-        line: 4,
-        source: `const Styled = styled.div({
-    width: (window as any).theWidth,
-    height: '100%'
-});`,
-        innerDiagnostic: {
-          file: 'file1.tsx',
-          line: 8,
-          message: "Unable to resolve identifier 'window'",
-          severity: 'error',
-          source: 'window',
-        },
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 8,
+              "message": "Unable to resolve identifier 'window'",
+              "severity": "error",
+              "source": "window",
+            },
+            "line": 4,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "error",
+            "source": "const Styled = styled.div({
+            width: (window as any).theWidth,
+            height: '100%'
+        });",
+          },
+        ]
+      `),
   );
 });
 
@@ -194,25 +197,28 @@ const Styled = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
     },
-    [
-      {
-        message: 'Styled component could not be statically evaluated',
-        severity: 'info',
-        file: 'file1.tsx',
-        line: 4,
-        source: `const Styled = styled.div({
-    width: (theme) => theme.theWidth,
-    height: '100%'
-});`,
-        innerDiagnostic: {
-          file: 'file1.tsx',
-          line: 7,
-          message: 'Functions in style objects requires runtime or statically declared themes',
-          severity: 'info',
-          source: '(theme) => theme.theWidth',
-        },
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 7,
+              "message": "Functions in style objects requires runtime or statically declared themes",
+              "severity": "info",
+              "source": "(theme) => theme.theWidth",
+            },
+            "line": 4,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "info",
+            "source": "const Styled = styled.div({
+            width: (theme) => theme.theWidth,
+            height: '100%'
+        });",
+          },
+        ]
+      `),
   );
 });
 
@@ -258,42 +264,45 @@ const Styled2 = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
     },
-    [
-      {
-        message: 'Styled component could not be statically evaluated',
-        severity: 'error',
-        file: 'file1.tsx',
-        line: 5,
-        source: `const Styled1 = styled.div({
-    width: (window as any).theWidth,
-    height: '100%'
-});`,
-        innerDiagnostic: {
-          file: 'file1.tsx',
-          line: 8,
-          message: "Unable to resolve identifier 'window'",
-          severity: 'error',
-          source: 'window',
-        },
-      },
-      {
-        message: 'Styled component could not be statically evaluated',
-        severity: 'error',
-        file: 'file1.tsx',
-        line: 10,
-        source: `const Styled2 = styled.div({
-    width: '100%',
-    height: (window as any).theHeight
-});`,
-        innerDiagnostic: {
-          file: 'file1.tsx',
-          line: 14,
-          message: "Unable to resolve identifier 'window'",
-          severity: 'error',
-          source: 'window',
-        },
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 8,
+              "message": "Unable to resolve identifier 'window'",
+              "severity": "error",
+              "source": "window",
+            },
+            "line": 5,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "error",
+            "source": "const Styled1 = styled.div({
+            width: (window as any).theWidth,
+            height: '100%'
+        });",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 14,
+              "message": "Unable to resolve identifier 'window'",
+              "severity": "error",
+              "source": "window",
+            },
+            "line": 10,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "error",
+            "source": "const Styled2 = styled.div({
+            width: '100%',
+            height: (window as any).theHeight
+        });",
+          },
+        ]
+      `),
   );
 });
 
@@ -610,29 +619,32 @@ const Styled4 = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{height:75%}.c{height:50%}.d{height:25%}"`);
     },
-    [
-      {
-        file: 'file1.tsx',
-        message: "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
-        source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
-        severity: 'info',
-        line: 4,
-      },
-      {
-        file: 'file1.tsx',
-        message: "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
-        source: "Styled2.displayName = 'Styled2';",
-        severity: 'error',
-        line: 13,
-      },
-      {
-        file: 'file1.tsx',
-        message: "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
-        source: '(window as any).exposeComponent = { x: Styled1, y: Styled3 };',
-        severity: 'info',
-        line: 4,
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 4,
+            "message": "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
+            "severity": "info",
+            "source": "(window as any).exposeComponent = { x: Styled1, y: Styled3 };",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 13,
+            "message": "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
+            "severity": "error",
+            "source": "Styled2.displayName = 'Styled2';",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 4,
+            "message": "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
+            "severity": "info",
+            "source": "(window as any).exposeComponent = { x: Styled1, y: Styled3 };",
+          },
+        ]
+      `),
   );
 });
 
@@ -762,17 +774,18 @@ function MyComponent(props: {}) {
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}.b{background-color:red}"`);
     },
-    [
-      {
-        message:
-          'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
-        file: 'file1.tsx',
-        line: 3,
-        severity: 'info',
-        source:
-          "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 3,
+            "message": "Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components",
+            "severity": "info",
+            "source": "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+          },
+        ]
+      `),
   );
 });
 
@@ -806,17 +819,18 @@ function MyComponent(props: {}) {
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}.b{background-color:red}"`);
     },
-    [
-      {
-        message:
-          'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
-        file: 'file1.tsx',
-        line: 3,
-        severity: 'info',
-        source:
-          "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 3,
+            "message": "Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components",
+            "severity": "info",
+            "source": "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+          },
+        ]
+      `),
   );
 });
 
@@ -1203,36 +1217,39 @@ const node = <Styled1 />;
         `".a{font-weight:bold}.b{background-color:white}.c{color:red}.d{color:blue}.e{background-color:black}.f{color:black}.g{color:white}"`,
       );
     },
-    [
-      {
-        message: 'Evaluation of theme function requires runtime',
-        severity: 'info',
-        file: 'file1.tsx',
-        line: 16,
-        source: `<styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }} />`,
-        innerDiagnostic: {
-          file: 'file1.tsx',
-          line: 16,
-          message: 'Could not determine a static value for: props',
-          severity: 'info',
-          source: 'props',
-        },
-      },
-      {
-        message: 'Evaluation of theme function requires runtime',
-        severity: 'info',
-        file: 'file1.tsx',
-        line: 32,
-        source: `<Styled1 />`,
-        innerDiagnostic: {
-          file: 'file1.tsx',
-          line: 32,
-          message: 'JSX expression outside of a component declaration cannot be statically evaluated',
-          severity: 'info',
-          source: '<Styled1 />',
-        },
-      },
-    ],
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 16,
+              "message": "Could not determine a static value for: props",
+              "severity": "info",
+              "source": "props",
+            },
+            "line": 16,
+            "message": "Evaluation of theme function requires runtime",
+            "severity": "info",
+            "source": "<styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }} />",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 32,
+              "message": "JSX expression outside of a component declaration cannot be statically evaluated",
+              "severity": "info",
+              "source": "<Styled1 />",
+            },
+            "line": 32,
+            "message": "Evaluation of theme function requires runtime",
+            "severity": "info",
+            "source": "<Styled1 />",
+          },
+        ]
+      `),
   );
 });
 
@@ -1585,21 +1602,16 @@ const Styled = styled(
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,
-  expectedDiagnostics: TransformerDiagnostics = [],
+  testDiagnostics?: (diagnostics: TransformerDiagnostics) => void,
 ) {
   const [compiled, diagnostics] = results;
   test(
     Object.keys(compiled).reduce<Code>((result, fileName) => {
-      if (!fileName.endsWith('fake-glitz.js')) {
-        result[fileName] = compiled[fileName];
-      }
+      result[fileName] = compiled[fileName];
       return result;
     }, {}),
   );
-  for (let i = 0; i < expectedDiagnostics.length; i++) {
-    const expectedDiagnostic = expectedDiagnostics[i];
-    const diagnostic = diagnostics[i];
-
-    expect(diagnostic).toEqual(expectedDiagnostic);
+  if (testDiagnostics) {
+    testDiagnostics(diagnostics);
   }
 }
