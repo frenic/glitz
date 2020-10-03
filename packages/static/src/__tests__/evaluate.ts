@@ -1,7 +1,29 @@
 import * as ts from 'typescript';
-import { evaluate, createScope } from '../evaluator';
+import {
+  evaluate as evaluateExpression,
+  partiallyEvaluate as partiallyEvaluateExpression,
+  createScope,
+} from '../evaluator';
 
-export default function (expression: string, files: { [fileName: string]: string } = {}, globals = {}) {
+export function evaluate(expression: string, files: { [fileName: string]: string } = {}, globals = {}) {
+  return evaluateInternal(undefined, expression, files, globals);
+}
+
+export function partiallyEvaluate(
+  expression: string,
+  shouldEvaluate: (node: ts.Node) => boolean,
+  files: { [fileName: string]: string } = {},
+  globals = {},
+) {
+  return evaluateInternal(shouldEvaluate, expression, files, globals);
+}
+
+function evaluateInternal(
+  shouldEvaluate: ((node: ts.Node) => boolean) | undefined,
+  expression: string,
+  files: { [fileName: string]: string } = {},
+  globals = {},
+) {
   const outputs: { [fileName: string]: string } = {};
   const rand = Math.random()
     .toString()
@@ -30,7 +52,16 @@ export default function (expression: string, files: { [fileName: string]: string
   function visitNode(node: ts.Node, program: ts.Program): any /* TODO */ {
     if (ts.isVariableDeclaration(node)) {
       if (ts.isIdentifier(node.name) && node.initializer && node.name.text === 'expressionToBeEvaluated' + rand) {
-        result = evaluate(node.initializer, program, createScope(undefined, globals));
+        if (shouldEvaluate === undefined) {
+          result = evaluateExpression(node.initializer, program, createScope(undefined, globals));
+        } else {
+          result = partiallyEvaluateExpression(
+            node.initializer,
+            program,
+            shouldEvaluate,
+            createScope(undefined, globals),
+          );
+        }
       }
     }
     return node;

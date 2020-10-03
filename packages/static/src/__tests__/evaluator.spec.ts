@@ -1,5 +1,6 @@
+import * as ts from 'typescript';
 import { isRequiresRuntimeResult, RequiresRuntimeResult, cacheHits } from '../evaluator';
-import evaluate from './evaluate';
+import { evaluate, partiallyEvaluate } from './evaluate';
 
 test('can evaluate a variable', () => {
   const code = {
@@ -38,6 +39,21 @@ const y = x - 100;
 `,
   };
   expect(evaluate('y', code)).toBe(100 - 100);
+});
+
+test('can partially evaluate', () => {
+  const code = {
+    'entry.ts': `
+const w = 1;
+const x = {
+  y: 1,
+  z: w ? 1 : 2,
+};
+`,
+  };
+  const x = partiallyEvaluate('x', node => !ts.isConditionalExpression(node), code);
+  expect(x.y).toBe(1);
+  expect(ts.isConditionalExpression(x.z)).toBeTruthy();
 });
 
 test('can evaluate multiplication', () => {

@@ -14,7 +14,42 @@ export const staticModuleOverloads: { [moduleName: string]: () => readonly [Expo
 
 export function evaluate(expr: SupportedExpressions, program: ts.Program, scope?: Scope, stats?: EvaluationStats): any {
   try {
-    return evaluateInternal(expr, program, scope, stats);
+    const context: EvaluationContext = {
+      program,
+      scope: scope ?? createScope(),
+      shouldEvaluate: () => true,
+      stats,
+    };
+    return evaluateInternal(expr, context);
+  } catch (e) {
+    if (isRequiresRuntimeResult(e)) {
+      return e;
+    } else if (!(e instanceof EvaluationError)) {
+      console.log('Error evaluating expression:', expr.getText());
+      console.log('Expression exists in file:', expr.getSourceFile().fileName);
+      console.error(e);
+      throw new EvaluationError(e);
+    } else {
+      throw e;
+    }
+  }
+}
+
+export function partiallyEvaluate(
+  expr: SupportedExpressions,
+  program: ts.Program,
+  shouldEvaluate: (node: ts.Node) => boolean,
+  scope?: Scope,
+  stats?: EvaluationStats,
+) {
+  try {
+    const context: EvaluationContext = {
+      program,
+      scope: scope ?? createScope(),
+      shouldEvaluate,
+      stats,
+    };
+    return evaluateInternal(expr, context);
   } catch (e) {
     if (isRequiresRuntimeResult(e)) {
       return e;
@@ -38,6 +73,13 @@ class EvaluationError extends Error {
   }
 }
 
+type EvaluationContext = {
+  program: ts.Program;
+  shouldEvaluate: (node: ts.Node) => boolean;
+  scope: Scope;
+  stats?: EvaluationStats;
+};
+
 export const evaluationCache: {
   [fileName: string]: Map<ts.Symbol, { valueDeclaration: ts.Declaration; result: any }>;
 } = {};
@@ -52,21 +94,22 @@ globalGlobals.Number = Number;
 globalGlobals.Boolean = Boolean;
 globalGlobals.RegExp = RegExp;
 
-function evaluateInternal(
-  expr: SupportedExpressions,
-  program: ts.Program,
-  scope?: Scope,
-  stats?: EvaluationStats,
-): any {
+function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext): any {
+  const { program, shouldEvaluate, stats } = context;
+  let scope = context.scope;
   if (!scope) {
     scope = createScope();
   }
   const typeChecker = program.getTypeChecker();
 
+  if (!shouldEvaluate(expr)) {
+    return expr;
+  }
+
   if (ts.isBinaryExpression(expr)) {
     if (expr.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
       // tslint:disable-next-line: no-shadowed-variable
-      const left = evaluate(expr.left, program, scope, stats);
+      const left = evaluateInternal(expr.left, context);
       if (isRequiresRuntimeResult(left)) {
         return left;
       }
@@ -74,15 +117,15 @@ function evaluateInternal(
         return left;
       }
 
-      return evaluate(expr.right, program, scope, stats);
+      return evaluateInternal(expr.right, context);
     }
 
-    const left = evaluate(expr.left, program, scope, stats);
+    const left = evaluateInternal(expr.left, context);
     if (isRequiresRuntimeResult(left)) {
       return left;
     }
 
-    const right = evaluate(expr.right, program, scope, stats);
+    const right = evaluateInternal(expr.right, context);
     if (isRequiresRuntimeResult(right)) {
       return right;
     }
@@ -145,18 +188,18 @@ function evaluateInternal(
       return false;
     }
   } else if (ts.isParenthesizedExpression(expr)) {
-    return evaluate(expr.expression, program, scope, stats);
+    return evaluateInternal(expr.expression, context);
   } else if (ts.isConditionalExpression(expr)) {
-    const condition = evaluate(expr.condition, program, scope, stats);
+    const condition = evaluateInternal(expr.condition, context);
     if (isRequiresRuntimeResult(condition)) {
       return condition;
     }
-    return condition ? evaluate(expr.whenTrue, program, scope, stats) : evaluate(expr.whenFalse, program, scope, stats);
+    return condition ? evaluateInternal(expr.whenTrue, context) : evaluateInternal(expr.whenFalse, context);
   } else if (ts.isPrefixUnaryExpression(expr)) {
     if (expr.operator === ts.SyntaxKind.PlusPlusToken || expr.operator === ts.SyntaxKind.MinusMinusToken) {
       return requiresRuntimeResult('-- or ++ expressions are not supported', expr);
     }
-    const value = evaluate(expr.operand, program, scope, stats);
+    const value = evaluateInternal(expr.operand, context);
     if (isRequiresRuntimeResult(value)) {
       return value;
     }
@@ -174,7 +217,7 @@ function evaluateInternal(
       return !value;
     }
   } else if (ts.isPropertyAccessExpression(expr)) {
-    const obj = evaluate(expr.expression, program, scope, stats);
+    const obj = evaluateInternal(expr.expression, context);
     if (isRequiresRuntimeResult(obj)) {
       return obj;
     }
@@ -184,14 +227,14 @@ function evaluateInternal(
     const property = expr.name.escapedText.toString();
     return obj[property];
   } else if (ts.isElementAccessExpression(expr)) {
-    const obj = evaluate(expr.expression, program, scope, stats);
+    const obj = evaluateInternal(expr.expression, context);
     if (isRequiresRuntimeResult(obj)) {
       return obj;
     }
     if (!obj && expr.questionDotToken) {
       return undefined;
     }
-    const property = evaluate(expr.argumentExpression, program, scope, stats);
+    const property = evaluateInternal(expr.argumentExpression, context);
     if (isRequiresRuntimeResult(property)) {
       return property;
     }
@@ -201,7 +244,7 @@ function evaluateInternal(
   } else if (ts.isTemplateExpression(expr)) {
     let s = expr.head.text;
     for (const span of expr.templateSpans) {
-      const value = evaluate(span.expression, program, scope, stats);
+      const value = evaluateInternal(span.expression, context);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -213,7 +256,7 @@ function evaluateInternal(
     const parameters: { name: string; symbol: ts.Symbol; isDotDotDot: boolean; defaultValue: any }[] = [];
     for (const parameter of expr.parameters) {
       if (ts.isIdentifier(parameter.name)) {
-        const defaultValue = parameter.initializer ? evaluate(parameter.initializer, program, scope, stats) : undefined;
+        const defaultValue = parameter.initializer ? evaluateInternal(parameter.initializer, context) : undefined;
         const symbol = typeChecker.getSymbolAtLocation(parameter.name);
         if (!symbol) {
           return requiresRuntimeResult('Static expressions requires TS symbols', expr);
@@ -232,6 +275,10 @@ function evaluateInternal(
     return Object.assign(
       (...args: any[]) => {
         const parameterScope = createScope(scope);
+        const parameterContext = {
+          ...context,
+          scope: parameterScope,
+        };
 
         for (let i = 0; i < parameters.length; i++) {
           if (parameters[i].isDotDotDot) {
@@ -250,9 +297,9 @@ function evaluateInternal(
 
         let result: RequiresRuntimeResult | unknown;
         if (!ts.isBlock(expr.body)) {
-          result = evaluate(expr.body, program, parameterScope, stats);
+          result = evaluateInternal(expr.body, parameterContext);
         } else {
-          result = evaluateStatements(expr.body.statements, program, parameterScope, stats);
+          result = evaluateStatements(expr.body.statements, parameterContext);
         }
 
         if (isRequiresRuntimeResult(result)) {
@@ -267,7 +314,7 @@ function evaluateInternal(
     let callable: Function;
     let callableContext: any = null;
     if (ts.isPropertyAccessExpression(expr.expression)) {
-      callableContext = evaluate(expr.expression.expression, program, scope, stats);
+      callableContext = evaluateInternal(expr.expression.expression, context);
       if (isRequiresRuntimeResult(callableContext)) {
         return callableContext;
       }
@@ -275,7 +322,7 @@ function evaluateInternal(
       callable = callableContext[name];
     } else {
       // tslint:disable-next-line: ban-types
-      callable = evaluate(expr.expression, program, scope, stats) as Function;
+      callable = evaluateInternal(expr.expression, context) as Function;
     }
     if (isRequiresRuntimeResult(callable)) {
       return callable;
@@ -285,7 +332,7 @@ function evaluateInternal(
     }
     const args = [];
     for (const arg of expr.arguments) {
-      const value = evaluate(arg, program, scope, stats);
+      const value = evaluateInternal(arg, context);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -302,7 +349,7 @@ function evaluateInternal(
     }
     return callable.apply(callableContext, args);
   } else if (ts.isTypeOfExpression(expr)) {
-    const value = evaluate(expr.expression, program, scope, stats);
+    const value = evaluateInternal(expr.expression, context);
     if (isRequiresRuntimeResult(value)) {
       return value;
     }
@@ -330,7 +377,12 @@ function evaluateInternal(
     let evaluationResult: any;
     let hasEvaluated = false;
     if (!symbol.valueDeclaration) {
-      [symbol, program, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, program);
+      let program;
+      [symbol, program, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, context.program);
+      context = {
+        ...context,
+        program,
+      };
       if (symbol && fileNameToCacheFor) {
         if (fileNameToCacheFor in evaluationCache) {
           const cache = evaluationCache[fileNameToCacheFor];
@@ -365,7 +417,7 @@ function evaluateInternal(
       if (!symbol.valueDeclaration.initializer) {
         return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
       }
-      evaluationResult = evaluate(symbol.valueDeclaration.initializer, program, scope, stats);
+      evaluationResult = evaluateInternal(symbol.valueDeclaration.initializer, context);
       hasEvaluated = true;
     }
     if (ts.isFunctionDeclaration(valueDeclaration)) {
@@ -377,11 +429,11 @@ function evaluateInternal(
           valueDeclaration = declarationWithBody;
         }
       }
-      evaluationResult = evaluate(valueDeclaration, program, scope, stats);
+      evaluationResult = evaluateInternal(valueDeclaration, context);
       hasEvaluated = true;
     }
     if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-      evaluationResult = evaluate(symbol.valueDeclaration, program, scope, stats);
+      evaluationResult = evaluateInternal(symbol.valueDeclaration, context);
       hasEvaluated = true;
     }
     if (hasEvaluated && stats) {
@@ -418,7 +470,7 @@ function evaluateInternal(
     const obj: any = {};
     for (const property of expr.properties) {
       if (ts.isSpreadAssignment(property)) {
-        const spreadObject = evaluate(property.expression, program, scope, stats);
+        const spreadObject = evaluateInternal(property.expression, context);
         if (isRequiresRuntimeResult(spreadObject)) {
           return spreadObject;
         }
@@ -430,7 +482,7 @@ function evaluateInternal(
         }
         if (property.name && ts.isComputedPropertyName(property.name)) {
           // tslint:disable-next-line: no-shadowed-variable
-          const value = evaluate(property.name.expression, program, scope, stats);
+          const value = evaluateInternal(property.name.expression, context);
           if (isRequiresRuntimeResult(value)) {
             return value;
           }
@@ -441,10 +493,10 @@ function evaluateInternal(
         }
         let value: any;
         if (ts.isPropertyAssignment(property)) {
-          value = evaluate(property.initializer, program, scope, stats);
+          value = evaluateInternal(property.initializer, context);
         }
         if (ts.isShorthandPropertyAssignment(property)) {
-          value = evaluate(property.name, program, scope, stats);
+          value = evaluateInternal(property.name, context);
         }
 
         obj[propertyName] = value;
@@ -454,7 +506,7 @@ function evaluateInternal(
   } else if (ts.isArrayLiteralExpression(expr)) {
     const array: any[] = [];
     for (const element of expr.elements) {
-      const value = evaluate(element, program, scope, stats);
+      const value = evaluateInternal(element, context);
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
@@ -478,7 +530,7 @@ function evaluateInternal(
       if (ts.isIdentifier(member.name) || ts.isStringLiteral(member.name) || ts.isNumericLiteral(member.name)) {
         memberName = member.name.text;
       } else if (ts.isComputedPropertyName(member.name)) {
-        const value = evaluate(member.name.expression, program, scope, stats);
+        const value = evaluateInternal(member.name.expression, context);
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -490,7 +542,7 @@ function evaluateInternal(
         enm[memberName] = i;
         enm[i] = memberName;
       } else {
-        const value = evaluate(member.initializer, program, scope, stats);
+        const value = evaluateInternal(member.initializer, context);
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -500,9 +552,9 @@ function evaluateInternal(
     }
     return enm;
   } else if (ts.isSpreadElement(expr)) {
-    return evaluate(expr.expression, program, scope, stats);
+    return evaluateInternal(expr.expression, context);
   } else if (ts.isAsExpression(expr)) {
-    return evaluate(expr.expression, program, scope, stats);
+    return evaluateInternal(expr.expression, context);
   }
   return requiresRuntimeResult('Unable to evaluate expression, unsupported expression token kind: ' + expr.kind, expr);
 }
@@ -579,17 +631,16 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
 
 const StatementsDidNotReturn = {};
 
-function evaluateStatements(
-  statements: ts.NodeArray<ts.Statement>,
-  program: ts.Program,
-  scope?: Scope,
-  stats?: EvaluationStats,
-): any {
-  const typeChecker = program.getTypeChecker();
-  const newScope = createScope(scope);
+function evaluateStatements(statements: ts.NodeArray<ts.Statement>, context: EvaluationContext): any {
+  const typeChecker = context.program.getTypeChecker();
+  const newScope = createScope(context.scope);
+  const newContext = {
+    ...context,
+    scope: newScope,
+  };
   for (const statement of statements) {
     if (ts.isExpressionStatement(statement)) {
-      evaluate(statement.expression, program, newScope, stats);
+      evaluateInternal(statement.expression, newContext);
     } else if (ts.isVariableStatement(statement)) {
       for (const declaration of statement.declarationList.declarations) {
         if (ts.isIdentifier(declaration.name)) {
@@ -603,7 +654,7 @@ function evaluateStatements(
 
           let value: any;
           if (declaration.initializer) {
-            value = evaluate(declaration.initializer, program, newScope, stats);
+            value = evaluateInternal(declaration.initializer, newContext);
             if (isRequiresRuntimeResult(value)) {
               return value;
             }
@@ -617,7 +668,7 @@ function evaluateStatements(
         }
       }
     } else if (ts.isIfStatement(statement)) {
-      const result = evaluateIfStatement(statement, program, newScope, stats);
+      const result = evaluateIfStatement(statement, newContext);
       if (isRequiresRuntimeResult(result) || result !== StatementsDidNotReturn) {
         return result;
       }
@@ -625,7 +676,7 @@ function evaluateStatements(
       if (statement.name) {
         const symbol = typeChecker.getSymbolAtLocation(statement.name);
         if (symbol) {
-          const func = evaluate(statement, program, newScope, stats);
+          const func = evaluateInternal(statement, newContext);
           if (isRequiresRuntimeResult(func)) {
             return func;
           }
@@ -638,7 +689,7 @@ function evaluateStatements(
         }
       }
     } else if (ts.isSwitchStatement(statement)) {
-      const result = evaluateSwitchStatement(statement, program, newScope, stats);
+      const result = evaluateSwitchStatement(statement, newContext);
       if (isRequiresRuntimeResult(result) || result !== StatementsDidNotReturn) {
         return result;
       }
@@ -646,7 +697,7 @@ function evaluateStatements(
       if (!statement.expression) {
         return undefined;
       }
-      return evaluate(statement.expression, program, newScope, stats);
+      return evaluateInternal(statement.expression, newContext);
     } else if (ts.isBreakStatement(statement)) {
       return StatementsDidNotReturn;
     } else {
@@ -656,24 +707,19 @@ function evaluateStatements(
   return StatementsDidNotReturn;
 }
 
-function evaluateSwitchStatement(
-  switchStatement: ts.SwitchStatement,
-  program: ts.Program,
-  scope?: Scope,
-  stats?: EvaluationStats,
-) {
-  const switchValue = evaluate(switchStatement.expression, program, scope, stats);
+function evaluateSwitchStatement(switchStatement: ts.SwitchStatement, context: EvaluationContext) {
+  const switchValue = evaluateInternal(switchStatement.expression, context);
   if (isRequiresRuntimeResult(switchValue)) {
     return switchValue;
   }
   for (const clause of switchStatement.caseBlock.clauses) {
     if (ts.isCaseClause(clause)) {
-      const clauseValue = evaluate(clause.expression, program, scope, stats);
+      const clauseValue = evaluateInternal(clause.expression, context);
       if (isRequiresRuntimeResult(switchValue)) {
         return switchValue;
       }
       if (clauseValue === switchValue) {
-        const result = evaluateStatements(clause.statements, program, scope, stats);
+        const result = evaluateStatements(clause.statements, context);
         if (result !== StatementsDidNotReturn) {
           return result;
         }
@@ -682,7 +728,7 @@ function evaluateSwitchStatement(
         }
       }
     } else if (ts.isDefaultClause(clause)) {
-      const result = evaluateStatements(clause.statements, program, scope, stats);
+      const result = evaluateStatements(clause.statements, context);
       if (result !== StatementsDidNotReturn) {
         return result;
       }
@@ -691,19 +737,14 @@ function evaluateSwitchStatement(
   return StatementsDidNotReturn;
 }
 
-function evaluateIfStatement(
-  ifStatement: ts.IfStatement,
-  program: ts.Program,
-  scope?: Scope,
-  stats?: EvaluationStats,
-): any {
-  const expression = evaluate(ifStatement.expression, program, scope, stats);
+function evaluateIfStatement(ifStatement: ts.IfStatement, context: EvaluationContext): any {
+  const expression = evaluateInternal(ifStatement.expression, context);
   if (isRequiresRuntimeResult(expression)) {
     return expression;
   }
   if (expression) {
     if (ts.isBlock(ifStatement.thenStatement)) {
-      const result = evaluateStatements(ifStatement.thenStatement.statements, program, scope, stats);
+      const result = evaluateStatements(ifStatement.thenStatement.statements, context);
       if (result !== StatementsDidNotReturn) {
         return result;
       }
@@ -711,15 +752,15 @@ function evaluateIfStatement(
       if (!ifStatement.thenStatement.expression) {
         return undefined;
       }
-      return evaluate(ifStatement.thenStatement.expression, program, scope, stats);
+      return evaluateInternal(ifStatement.thenStatement.expression, context);
     } else {
       return requiresRuntimeResult('Unable to statically then statement', ifStatement.thenStatement);
     }
   } else if (ifStatement.elseStatement) {
     if (ts.isIfStatement(ifStatement.elseStatement)) {
-      return evaluateIfStatement(ifStatement.elseStatement, program, scope, stats);
+      return evaluateIfStatement(ifStatement.elseStatement, context);
     } else if (ts.isBlock(ifStatement.elseStatement)) {
-      const result = evaluateStatements(ifStatement.elseStatement.statements, program, scope, stats);
+      const result = evaluateStatements(ifStatement.elseStatement.statements, context);
       if (result !== StatementsDidNotReturn) {
         return result;
       }
@@ -727,7 +768,7 @@ function evaluateIfStatement(
       if (!ifStatement.elseStatement.expression) {
         return undefined;
       }
-      return evaluate(ifStatement.elseStatement.expression, program, scope, stats);
+      return evaluateInternal(ifStatement.elseStatement.expression, context);
     } else {
       return requiresRuntimeResult('Unable to statically evaluate else statement', ifStatement.elseStatement);
     }
