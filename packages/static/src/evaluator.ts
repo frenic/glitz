@@ -7,7 +7,9 @@ export type FunctionWithTsNode = {
 
 type SupportedExpressions = ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration;
 type Exports = { [exportName: string]: ts.Symbol };
-export type EvaluationStats = { usedVariables: Map<ts.VariableDeclaration, any> };
+export type EvaluationStats = {
+  usedVariables: Map<ts.Declaration, any>;
+};
 export const staticModuleOverloads: { [moduleName: string]: () => readonly [Exports, ts.Program] } = {};
 
 export function evaluate(expr: SupportedExpressions, program: ts.Program, scope?: Scope, stats?: EvaluationStats): any {
@@ -36,7 +38,9 @@ class EvaluationError extends Error {
   }
 }
 
-export const evaluationCache: { [fileName: string]: Map<ts.Symbol, any> } = {};
+export const evaluationCache: {
+  [fileName: string]: Map<ts.Symbol, { valueDeclaration: ts.Declaration; result: any }>;
+} = {};
 export const cacheHits: { [fileName: string]: { [variableName: string]: number } } = {};
 
 const globalGlobals: { [name: string]: any } = {};
@@ -95,9 +99,6 @@ function evaluateInternal(
       if (ts.isIdentifier(expr.left)) {
         const leftSymbol = typeChecker.getSymbolAtLocation(expr.left);
         if (leftSymbol) {
-          if (stats && ts.isVariableDeclaration(leftSymbol.valueDeclaration)) {
-            stats.usedVariables.set(leftSymbol.valueDeclaration, right);
-          }
           scope.set(leftSymbol, right);
           return right;
         } else {
@@ -341,7 +342,11 @@ function evaluateInternal(
               cacheHits[fileNameToCacheFor][symbol.escapedName.toString()] = 0;
             }
             cacheHits[fileNameToCacheFor][symbol.escapedName.toString()]++;
-            return cache.get(symbol);
+            const cacheEntry = cache.get(symbol)!;
+            if (stats) {
+              stats.usedVariables.set(cacheEntry.valueDeclaration, cacheEntry.result);
+            }
+            return cacheEntry.result;
           }
         }
       }
@@ -355,18 +360,15 @@ function evaluateInternal(
     if (!symbol) {
       return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
     }
+    let valueDeclaration = symbol.valueDeclaration;
     if (ts.isVariableDeclaration(symbol.valueDeclaration)) {
       if (!symbol.valueDeclaration.initializer) {
         return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
       }
       evaluationResult = evaluate(symbol.valueDeclaration.initializer, program, scope, stats);
       hasEvaluated = true;
-      if (stats) {
-        stats.usedVariables.set(symbol.valueDeclaration, evaluationResult);
-      }
     }
-    if (ts.isFunctionDeclaration(symbol.valueDeclaration)) {
-      let valueDeclaration = symbol.valueDeclaration;
+    if (ts.isFunctionDeclaration(valueDeclaration)) {
       if (!valueDeclaration.body) {
         const declarationWithBody = symbol.declarations.find(
           d => !!(d as ts.FunctionDeclaration).body,
@@ -382,6 +384,9 @@ function evaluateInternal(
       evaluationResult = evaluate(symbol.valueDeclaration, program, scope, stats);
       hasEvaluated = true;
     }
+    if (hasEvaluated && stats) {
+      stats.usedVariables.set(valueDeclaration, evaluationResult);
+    }
     if (scope && scope.has(symbol)) {
       return scope.get(symbol);
     }
@@ -392,7 +397,7 @@ function evaluateInternal(
       if (!(fileNameToCacheFor in evaluationCache)) {
         evaluationCache[fileNameToCacheFor] = new Map<ts.Symbol, any>();
       }
-      evaluationCache[fileNameToCacheFor].set(symbol, evaluationResult);
+      evaluationCache[fileNameToCacheFor].set(symbol, { result: evaluationResult, valueDeclaration });
     }
     return evaluationResult;
   } else if (ts.isNoSubstitutionTemplateLiteral(expr)) {

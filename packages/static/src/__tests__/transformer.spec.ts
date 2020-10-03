@@ -222,6 +222,66 @@ const Styled = styled.div({
   );
 });
 
+test('adds info diagnostics when it does not evaluate to a static component but will still be a runtime styled component', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled id="some-id">hello</Styled>;
+}
+
+function createStyledComponent() {
+  return styled(() => <styled.Div />, {
+      width: (window as any).theWidth,
+      height: '100%'
+  });
+}
+
+const Styled = createStyledComponent();
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            return <Styled id=\\"some-id\\">hello</Styled>;
+        }
+        function createStyledComponent() {
+            return /*#__PURE__*/ styled(() => <styled.Div />, {
+                width: window.theWidth,
+                height: '100%'
+            });
+        }
+        const Styled = createStyledComponent();
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    },
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 11,
+              "message": "Styled component expression requires runtime",
+              "severity": "info",
+              "source": "const Styled = createStyledComponent();",
+            },
+            "line": 11,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "info",
+            "source": "const Styled = createStyledComponent();",
+          },
+        ]
+      `),
+  );
+});
+
 test('warns when a component cannot be extracted but a comment says all should', () => {
   const code = {
     'file1.tsx': `
@@ -779,6 +839,20 @@ function MyComponent(props: {}) {
         Array [
           Object {
             "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 4,
+              "message": "Styled component expression requires runtime",
+              "severity": "info",
+              "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
+            },
+            "line": 4,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "info",
+            "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
+          },
+          Object {
+            "file": "file1.tsx",
             "line": 3,
             "message": "Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components",
             "severity": "info",
@@ -822,6 +896,20 @@ function MyComponent(props: {}) {
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
         Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 4,
+              "message": "Styled component expression requires runtime",
+              "severity": "info",
+              "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
+            },
+            "line": 4,
+            "message": "Styled component could not be statically evaluated",
+            "severity": "info",
+            "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
+          },
           Object {
             "file": "file1.tsx",
             "line": 3,

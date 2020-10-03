@@ -396,12 +396,15 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
               // and in that case try to evaluate it to a styled component.
               if (isComponentName(componentName)) {
                 const stats: EvaluationStats = {
-                  usedVariables: new Map<ts.VariableDeclaration, any>(),
+                  usedVariables: new Map<ts.Declaration, any>(),
                 };
                 const object = evaluate(declaration.initializer, transformerContext.program, undefined, stats);
                 if (isStaticElement(object) || isStaticComponent(object)) {
                   stats.usedVariables.forEach((_, k) => {
-                    if (k.getSourceFile().fileName === transformerContext.currentFile.fileName) {
+                    if (
+                      ts.isVariableDeclaration(k) &&
+                      k.getSourceFile().fileName === transformerContext.currentFile.fileName
+                    ) {
                       if (k.initializer && ts.isCallExpression(k.initializer)) {
                         declarePure(k.initializer);
                       }
@@ -432,10 +435,13 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                       transformerContext,
                     );
                   }
-                } else if (requiresRuntimeResult(object) && isStyledCall(declaration.initializer)) {
+                } else if (staticGlitzUsed(stats)) {
+                  const requiresRuntime = isRequiresRuntimeResult(object)
+                    ? object
+                    : requiresRuntimeResult('Styled component expression requires runtime', node);
                   reportRequiresRuntimeResult(
                     'Styled component could not be statically evaluated',
-                    object,
+                    requiresRuntime,
                     node,
                     transformerContext,
                   );
@@ -1729,4 +1735,14 @@ function setNodeFlag(transformerContext: TransformerContext, node: ts.Node, flag
   if (!hasNodeFlag(transformerContext, node, flag)) {
     transformerContext.nodeFlags.get(node)!.push(flag);
   }
+}
+
+function staticGlitzUsed(stats: EvaluationStats) {
+  let staticGlitzUsed = false;
+  stats.usedVariables.forEach((_, k) => {
+    if (k.getSourceFile().fileName.indexOf(glitzModuleName) !== -1) {
+      staticGlitzUsed = true;
+    }
+  });
+  return staticGlitzUsed;
 }
