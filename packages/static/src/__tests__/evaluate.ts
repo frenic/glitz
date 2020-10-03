@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { evaluate } from '../evaluator';
+import { evaluate, createScope } from '../evaluator';
 
 export default function (expression: string, files: { [fileName: string]: string } = {}, globals = {}) {
   const outputs: { [fileName: string]: string } = {};
@@ -30,7 +30,7 @@ export default function (expression: string, files: { [fileName: string]: string
   function visitNode(node: ts.Node, program: ts.Program): any /* TODO */ {
     if (ts.isVariableDeclaration(node)) {
       if (ts.isIdentifier(node.name) && node.initializer && node.name.text === 'expressionToBeEvaluated' + rand) {
-        result = evaluate(node.initializer, program, undefined, globals);
+        result = evaluate(node.initializer, program, createScope(undefined, globals));
       }
     }
     return node;
