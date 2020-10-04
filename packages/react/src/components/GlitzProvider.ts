@@ -1,4 +1,4 @@
-import { GlitzClient, GlitzServer } from '@glitz/core';
+import type { GlitzClient, GlitzServer } from '@glitz/core';
 import { PropsWithChildren, createElement } from 'react';
 import { GlitzContext, StreamContext } from './context';
 

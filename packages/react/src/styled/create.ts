@@ -13,7 +13,6 @@ import {
   useContext,
   useMemo,
 } from 'react';
-import { GlitzServer } from '@glitz/core';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_GLITZ_PROPERTY } from './constants';
 import { isElementType, StyledElement, StyledElementProps } from './predefined';
@@ -90,7 +89,7 @@ export function factory<TProps, TInstance>(
           const stream = useContext(StreamContext);
           const glitz = useContext(GlitzContext);
 
-          if (stream && glitz instanceof GlitzServer) {
+          if (stream && glitz && 'getStyleStream' in glitz) {
             // React stream rendering
             const style = glitz.getStyleStream();
 

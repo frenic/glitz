@@ -9,7 +9,7 @@ import {
   ComponentType,
 } from 'react';
 import { isValidElementType } from 'react-is';
-import { Style } from '@glitz/type';
+import type { Style } from '@glitz/type';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import createComponent, { StyledComponent, StyledComponentWithRef, WithoutRefProp } from './create';
 import { Styles } from './custom';
