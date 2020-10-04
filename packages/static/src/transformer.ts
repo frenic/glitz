@@ -401,7 +401,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                 };
                 const object = evaluate(declaration.initializer, transformerContext.program, undefined, stats);
                 if (isStaticElement(object) || isStaticComponent(object)) {
-                  stats.usedVariables.forEach((_, k) => {
+                  stats.usedVariables!.forEach((_, k) => {
                     if (
                       ts.isVariableDeclaration(k) &&
                       k.getSourceFile().fileName === transformerContext.currentFile.fileName
@@ -1077,30 +1077,29 @@ function getCssDataFromCssProp(
     ts.isJsxExpression(cssJsxAttr.initializer) &&
     cssJsxAttr.initializer.expression
   ) {
-    const shouldEvaluate = (node: ts.Node) => {
+    const stats: EvaluationStats = {
+      evaluationStack: [],
+    };
+    const shouldEvaluate = (node: ts.Node, stats?: EvaluationStats) => {
       if (!ts.isConditionalExpression(node)) {
         return true;
       }
 
-      if (!node.parent || !ts.isPropertyAssignment(node.parent)) {
-        return true;
-      }
-
-      // We want to allow ternaries on the first level of an object literal, but not on nested object literals
-      if (
-        node.parent &&
-        node.parent.parent &&
-        node.parent.parent.parent &&
-        ts.isPropertyAssignment(node.parent.parent.parent)
-      ) {
+      // We only allow ternaries on the first level of a css prop object
+      const objectLiteralParents = stats!.evaluationStack!.filter(n => ts.isObjectLiteralExpression(n));
+      if (objectLiteralParents.length !== 1) {
         return true;
       }
 
       return false;
     };
-    let cssData = partiallyEvaluate(cssJsxAttr.initializer.expression, shouldEvaluate, transformerContext.program) as
-      | EvaluatedStyle
-      | RequiresRuntimeResult;
+    let cssData = partiallyEvaluate(
+      cssJsxAttr.initializer.expression,
+      shouldEvaluate,
+      transformerContext.program,
+      undefined,
+      stats,
+    ) as EvaluatedStyle | RequiresRuntimeResult;
     if (!transformerContext.staticThemes) {
       transformerContext.glitz.injectStyle(stripUnevaluableProperties(cssData));
     }
@@ -1839,7 +1838,7 @@ function setNodeFlag(transformerContext: TransformerContext, node: ts.Node, flag
 
 function staticGlitzUsed(stats: EvaluationStats) {
   let staticGlitzUsed = false;
-  stats.usedVariables.forEach((_, k) => {
+  stats.usedVariables!.forEach((_, k) => {
     if (k.getSourceFile().fileName.indexOf(glitzModuleName) !== -1) {
       staticGlitzUsed = true;
     }

@@ -8,7 +8,8 @@ export type FunctionWithTsNode = {
 type SupportedExpressions = ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration;
 type Exports = { [exportName: string]: ts.Symbol };
 export type EvaluationStats = {
-  usedVariables: Map<ts.Declaration, any>;
+  usedVariables?: Map<ts.Declaration, any>;
+  evaluationStack?: SupportedExpressions[];
 };
 export const staticModuleOverloads: { [moduleName: string]: () => readonly [Exports, ts.Program] } = {};
 
@@ -37,7 +38,7 @@ export function evaluate(expr: SupportedExpressions, program: ts.Program, scope?
 
 export function partiallyEvaluate(
   expr: SupportedExpressions,
-  shouldEvaluate: (node: ts.Node) => boolean,
+  shouldEvaluate: (node: ts.Node, stats?: EvaluationStats) => boolean,
   program: ts.Program,
   scope?: Scope,
   stats?: EvaluationStats,
@@ -75,7 +76,7 @@ class EvaluationError extends Error {
 
 type EvaluationContext = {
   program: ts.Program;
-  shouldEvaluate: (node: ts.Node) => boolean;
+  shouldEvaluate: (node: ts.Node, stats?: EvaluationStats) => boolean;
   scope: Scope;
   stats?: EvaluationStats;
 };
@@ -101,8 +102,9 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     scope = createScope();
   }
   const typeChecker = program.getTypeChecker();
+  stats?.evaluationStack?.push(expr);
 
-  if (!shouldEvaluate(expr)) {
+  if (!shouldEvaluate(expr, stats)) {
     return expr;
   }
 
@@ -395,9 +397,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
             }
             cacheHits[fileNameToCacheFor][symbol.escapedName.toString()]++;
             const cacheEntry = cache.get(symbol)!;
-            if (stats) {
-              stats.usedVariables.set(cacheEntry.valueDeclaration, cacheEntry.result);
-            }
+            stats?.usedVariables?.set(cacheEntry.valueDeclaration, cacheEntry.result);
             return cacheEntry.result;
           }
         }
@@ -436,8 +436,8 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       evaluationResult = evaluateInternal(symbol.valueDeclaration, context);
       hasEvaluated = true;
     }
-    if (hasEvaluated && stats) {
-      stats.usedVariables.set(valueDeclaration, evaluationResult);
+    if (hasEvaluated) {
+      stats?.usedVariables?.set(valueDeclaration, evaluationResult);
     }
     if (scope && scope.has(symbol)) {
       return scope.get(symbol);

@@ -39,8 +39,10 @@ test('can handle simple ternaries in the css prop', () => {
 import { styled } from '@glitz/react';
 
 function Component(props: { isStyled: boolean; isLarge: boolean }) {
+  const marginTop = props.isStyled ? '10px' : '20px';
   return (
     <div>
+      <styled.Div css={{ marginTop }}>What color am I?</styled.Div>
       <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue' }}>What color am I?</styled.Div>
       <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue', color: props.isStyled ? 'red' : 'black', marginTop: props.isLarge ? '10px' : '1px' }}>What color am I?</styled.Div>
       <styled.Div css={{ backgroundColor: props.isStyled ? 'green' : 'blue', color: 'red' }}>What color am I?</styled.Div>
@@ -58,18 +60,20 @@ function Component(props: { isStyled: boolean; isLarge: boolean }) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function Component(props) {
+            const marginTop = props.isStyled ? '10px' : '20px';
             return (<div>
               <div className={props.isStyled ? \\"a\\" : \\"b\\"} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={(props.isStyled ? \\"a\\" : \\"b\\") + \\" \\" + ((props.isStyled ? \\"c\\" : \\"d\\") + \\" \\") + (props.isLarge ? \\"e\\" : \\"f\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={\\"c \\" + (props.isStyled ? \\"a\\" : \\"b\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={\\"c \\" + ((props.isStyled ? \\"a\\" : \\"b\\") + \\" \\") + (props.isLarge ? \\"e\\" : \\"f\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
+              <div className={props.isStyled ? \\"c\\" : \\"d\\"} data-glitzname=\\"styled.Div\\">What color am I?</div>
+              <div className={(props.isStyled ? \\"c\\" : \\"d\\") + \\" \\" + ((props.isStyled ? \\"e\\" : \\"f\\") + \\" \\") + (props.isLarge ? \\"a\\" : \\"g\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
+              <div className={\\"e \\" + (props.isStyled ? \\"c\\" : \\"d\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
+              <div className={\\"e \\" + ((props.isStyled ? \\"c\\" : \\"d\\") + \\" \\") + (props.isLarge ? \\"a\\" : \\"g\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
               <styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>What color am I?</styled.Div>
             </div>);
         }
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{background-color:green}.b{background-color:blue}.c{color:red}.d{color:black}.e{margin-top:10px}.f{margin-top:1px}"`,
+        `".a{margin-top:10px}.b{margin-top:20px}.c{background-color:green}.d{background-color:blue}.e{color:red}.f{color:black}.g{margin-top:1px}"`,
       );
     },
     diagnostics =>
@@ -79,12 +83,12 @@ function Component(props: { isStyled: boolean; isLarge: boolean }) {
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 10,
+              "line": 12,
               "message": "Could not determine a static value for: props",
               "severity": "info",
               "source": "props",
             },
-            "line": 10,
+            "line": 12,
             "message": "css prop could not be statically evaluated",
             "severity": "info",
             "source": "<styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>",
