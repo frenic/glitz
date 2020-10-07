@@ -1063,6 +1063,28 @@ function anyValuesAreFunctions(style: EvaluatedStyle | EvaluatedStyle[]): boolea
   return false;
 }
 
+function shouldEvaluate(node: ts.Node) {
+  if (!ts.isConditionalExpression(node)) {
+    return true;
+  }
+
+  if (!node.parent || !ts.isPropertyAssignment(node.parent)) {
+    return true;
+  }
+
+  // We want to allow ternaries on the first level of an object literal, but not on nested object literals
+  if (
+    node.parent &&
+    node.parent.parent &&
+    node.parent.parent.parent &&
+    ts.isPropertyAssignment(node.parent.parent.parent)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 function getCssDataFromCssProp(
   node: ts.JsxSelfClosingElement | ts.JsxOpeningElement,
   transformerContext: TransformerContext,
@@ -1077,27 +1099,6 @@ function getCssDataFromCssProp(
     ts.isJsxExpression(cssJsxAttr.initializer) &&
     cssJsxAttr.initializer.expression
   ) {
-    const shouldEvaluate = (node: ts.Node) => {
-      if (!ts.isConditionalExpression(node)) {
-        return true;
-      }
-
-      if (!node.parent || !ts.isPropertyAssignment(node.parent)) {
-        return true;
-      }
-
-      // We want to allow ternaries on the first level of an object literal, but not on nested object literals
-      if (
-        node.parent &&
-        node.parent.parent &&
-        node.parent.parent.parent &&
-        ts.isPropertyAssignment(node.parent.parent.parent)
-      ) {
-        return true;
-      }
-
-      return false;
-    };
     let cssData = partiallyEvaluate(cssJsxAttr.initializer.expression, shouldEvaluate, transformerContext.program) as
       | EvaluatedStyle
       | RequiresRuntimeResult;
@@ -1267,7 +1268,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
 
   if (conditionalFound) {
     const stylesPerTernaryKeys = Object.keys(stylesPerTernary);
-    let ternaryClassNameExpression: ts.Expression | undefined = undefined;
+    let ternaryClassNameExpression: ts.Expression | undefined;
     if (allTernaryStyles.length) {
       ternaryClassNameExpression = factory.createStringLiteral(allTernaryStyles.join(' ') + ' ');
     }
@@ -1838,11 +1839,11 @@ function setNodeFlag(transformerContext: TransformerContext, node: ts.Node, flag
 }
 
 function staticGlitzUsed(stats: EvaluationStats) {
-  let staticGlitzUsed = false;
+  let isUsed = false;
   stats.usedVariables.forEach((_, k) => {
     if (k.getSourceFile().fileName.indexOf(glitzModuleName) !== -1) {
-      staticGlitzUsed = true;
+      isUsed = true;
     }
   });
-  return staticGlitzUsed;
+  return isUsed;
 }

@@ -377,11 +377,11 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     let evaluationResult: any;
     let hasEvaluated = false;
     if (!symbol.valueDeclaration) {
-      let program;
-      [symbol, program, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, context.program);
+      let symbolProgram;
+      [symbol, symbolProgram, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, context.program);
       context = {
         ...context,
-        program,
+        program: symbolProgram,
       };
       if (symbol && fileNameToCacheFor) {
         if (fileNameToCacheFor in evaluationCache) {
