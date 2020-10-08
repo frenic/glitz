@@ -1352,6 +1352,10 @@ const node = <Styled1 />;
         const Styled3 = /*#__PURE__*/ styled.div({
             color: theme => theme.isDark ? 'black' : 'white',
         });
+        const Styled4 = /*#__PURE__*/ styled.div({
+            paddingLeft: theme => theme.spacing.small,
+            paddingRight: theme => theme.spacing.large,
+        });
         function MyComponent(props) {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             return (<>
@@ -1364,6 +1368,7 @@ const node = <Styled1 />;
             const node1 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })()} data-glitzname=\\"Styled1\\"/>;
             const node2 = <div className={\\"a \\" + (__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })())} data-glitzname=\\"Styled2\\"/>;
             const node3 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.isDark === false ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })()} data-glitzname=\\"Styled3\\"/>;
+            const node4 = <div className=\\"h i\\" data-glitzname=\\"Styled4\\"/>;
             return undefined;
         }
         const MyArrowFunction = () => {
@@ -1375,7 +1380,7 @@ const node = <Styled1 />;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{font-weight:bold}.b{background-color:white}.c{color:red}.d{color:blue}.e{background-color:black}.f{color:black}.g{color:white}"`,
+        `".a{font-weight:bold}.b{background-color:white}.c{color:red}.d{color:blue}.e{background-color:black}.f{color:black}.g{color:white}.h{padding-right:20px}.i{padding-left:10px}"`,
       );
     },
     diagnostics =>
@@ -1385,12 +1390,12 @@ const node = <Styled1 />;
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 16,
+              "line": 20,
               "message": "Could not determine a static value for: props",
               "severity": "info",
               "source": "props",
             },
-            "line": 16,
+            "line": 20,
             "message": "Evaluation of theme function requires runtime",
             "severity": "info",
             "source": "<styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }} />",
@@ -1399,12 +1404,12 @@ const node = <Styled1 />;
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 32,
+              "line": 37,
               "message": "JSX expression outside of a component declaration cannot be statically evaluated",
               "severity": "info",
               "source": "<Styled1 />",
             },
-            "line": 32,
+            "line": 37,
             "message": "Evaluation of theme function requires runtime",
             "severity": "info",
             "source": "<Styled1 />",

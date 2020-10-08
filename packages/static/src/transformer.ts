@@ -1091,6 +1091,14 @@ function getCssDataFromCssProp(
         return true;
       }
 
+      // We don't to look for ternaries inside theme functions
+      const functionDeclAsParent = stats!.evaluationStack!.filter(
+        n => ts.isFunctionExpression(n) || ts.isFunctionDeclaration(n) || ts.isArrowFunction(n),
+      );
+      if (functionDeclAsParent.length) {
+        return true;
+      }
+
       return false;
     };
     let cssData = partiallyEvaluate(
@@ -1254,11 +1262,13 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
       }
     }
 
-    if (Object.keys(styleObject).length) {
-      const classNames = transformerContext.glitz.injectStyle(styleObject);
-      for (const className of classNames.split(' ')) {
-        if (allTernaryStyles.indexOf(className) === -1) {
-          allTernaryStyles.push(className);
+    if (conditionalFound) {
+      if (Object.keys(styleObject).length) {
+        const classNames = transformerContext.glitz.injectStyle(styleObject);
+        for (const className of classNames.split(' ')) {
+          if (allTernaryStyles.indexOf(className) === -1) {
+            allTernaryStyles.push(className);
+          }
         }
       }
     }
