@@ -1275,16 +1275,19 @@ export const staticThemes = [{
   isDark: false,
   color: 'red',
   backgroundColor: 'pink',
+  spacing: { small: '10px', large: '20px' },
 }, {
   id: 'blue',
   isDark: false,
   color: 'blue',
   backgroundColor: 'lightblue',
+  spacing: { small: '10px', large: '20px' },
 }, {
   id: 'black',
   isDark: true,
   color: 'black',
   backgroundColor: 'black',
+  spacing: { small: '10px', large: '20px' },
 }];
 `,
     'file1.tsx': `
@@ -1300,6 +1303,10 @@ const Styled2 = styled.div({
 const Styled3 = styled.div({
   color: theme => theme.isDark ? 'black' : 'white',
 });
+const Styled4 = styled.div({
+  paddingLeft: theme => theme.spacing.small,
+  paddingRight: theme => theme.spacing.large,
+});
 function MyComponent(props: any) {
   return (
     <>
@@ -1313,6 +1320,7 @@ function MyOtherComponent() {
   const node1 = <Styled1 />;
   const node2 = <Styled2 />;
   const node3 = <Styled3 />;
+  const node4 = <Styled4 />;
   return undefined;
 }
 
