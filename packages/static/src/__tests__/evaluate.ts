@@ -32,14 +32,12 @@ function evaluateInternal(
 
   let result: any;
 
-  // tslint:disable-next-line: no-shadowed-variable
   function transformer(program: ts.Program): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
       return visitNodeAndChildren(file, program, context);
     };
   }
 
-  // tslint:disable-next-line: no-shadowed-variable
   function visitNodeAndChildren(node: ts.Node, program: ts.Program, context: ts.TransformationContext): any {
     return ts.visitEachChild(
       visitNode(node, program),
@@ -48,7 +46,6 @@ function evaluateInternal(
     );
   }
 
-  // tslint:disable-next-line: no-shadowed-variable
   function visitNode(node: ts.Node, program: ts.Program): any /* TODO */ {
     if (ts.isVariableDeclaration(node)) {
       if (ts.isIdentifier(node.name) && node.initializer && node.name.text === 'expressionToBeEvaluated' + rand) {

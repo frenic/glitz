@@ -76,7 +76,6 @@ function resolvePath(relative, type) {
 }
 
 async function build(input, output, type, production) {
-  // @ts-ignore
   const bundle = await rollup({
     input,
     external: [
@@ -125,25 +124,21 @@ async function build(input, output, type, production) {
 }
 
 function write(code, filename) {
-  try {
-    const gzip = gzipSize.sync(code);
+  const gzip = gzipSize.sync(code);
 
-    const dir = path.dirname(filename);
+  const dir = path.dirname(filename);
 
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
-
-    fs.writeFileSync(filename, code, 'utf-8');
-
-    if (!fs.existsSync(filename)) {
-      throw new Error(`Rollup was not able to create bundle ${filename}`);
-    }
-
-    console.info(`Package: ${path.relative(__dirname, filename)} (${filesize(code.length, gzip)})`);
-  } catch (error) {
-    throw error;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
   }
+
+  fs.writeFileSync(filename, code, 'utf-8');
+
+  if (!fs.existsSync(filename)) {
+    throw new Error(`Rollup was not able to create bundle ${filename}`);
+  }
+
+  console.info(`Package: ${path.relative(__dirname, filename)} (${filesize(code.length, gzip)})`);
 }
 
 function filesize(origSize, gzipSize) {

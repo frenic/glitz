@@ -1,4 +1,3 @@
-/* tslint:disable unified-signatures */
 import {
   FunctionComponent,
   Component,
@@ -206,9 +205,9 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorato
     ...arg2: Styles[]
   ): StyledComponent<TProps>;
 
-  function decorator<TProps>(...styles: Styles[]): StyledDecorator;
+  function decorator(...styles: Styles[]): StyledDecorator;
 
-  function decorator<TProps>(): Style[];
+  function decorator(): Style[];
 
   function decorator<TProps>(
     arg1?:

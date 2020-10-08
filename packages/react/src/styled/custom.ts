@@ -1,4 +1,3 @@
-/* tslint:disable unified-signatures */
 import { Style } from '@glitz/type';
 import {
   FunctionComponent,
@@ -61,9 +60,9 @@ function creator<TProps>(
   ...arg2: Styles[]
 ): StyledComponent<TProps>;
 
-function creator<TProps>(...styles: Styles[]): StyledDecorator;
+function creator(...styles: Styles[]): StyledDecorator;
 
-function creator<TProps>(): StyledDecorator;
+function creator(): StyledDecorator;
 
 function creator<TProps>(
   arg1?:

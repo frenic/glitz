@@ -1074,10 +1074,10 @@ const node1 = <styled.Div css={decorator()} />;
       const colorDecorator = /*#__PURE__*/ styled({ backgroundColor: 'red' });
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
       const decorator = colorDecorator(paddingDecorator());
-      const node1 = <div className=\\"b a\\" data-glitzname=\\"styled.Div\\"/>;
+      const node1 = <div className=\\"a b\\" data-glitzname=\\"styled.Div\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{padding-top:10px}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{padding-top:10px}.b{background-color:red}"`);
   });
 });
 
@@ -1153,11 +1153,11 @@ const className3 = useStyle((window as any).someStyle);
       export const decorator = /*#__PURE__*/ styled({
           backgroundColor: 'red',
       });
-      const className2 = \\"c b\\";
+      const className2 = \\"b c\\";
       const className3 = /*#__PURE__*/ useStyle(window.someStyle);
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:red}.c{font-weight:bold}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{font-weight:bold}.c{background-color:red}"`);
   });
 });
 

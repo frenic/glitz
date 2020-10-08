@@ -1,5 +1,3 @@
-// tslint:disable max-classes-per-file
-
 import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';

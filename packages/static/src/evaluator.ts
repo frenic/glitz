@@ -110,7 +110,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
 
   if (ts.isBinaryExpression(expr)) {
     if (expr.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
-      // tslint:disable-next-line: no-shadowed-variable
       const left = evaluateInternal(expr.left, context);
       if (isRequiresRuntimeResult(left)) {
         return left;
@@ -155,12 +154,10 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     } else if (expr.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken) {
       return left === right;
     } else if (expr.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken) {
-      // tslint:disable-next-line: triple-equals
       return left == right;
     } else if (expr.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken) {
       return left !== right;
     } else if (expr.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) {
-      // tslint:disable-next-line: triple-equals
       return left != right;
     } else if (expr.operatorToken.kind === ts.SyntaxKind.GreaterThanToken) {
       return left > right;
@@ -212,7 +209,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       return -value;
     }
     if (expr.operator === ts.SyntaxKind.TildeToken) {
-      // tslint:disable-next-line: no-bitwise
       return ~value;
     }
     if (expr.operator === ts.SyntaxKind.ExclamationToken) {
@@ -312,7 +308,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       { tsNode: expr },
     ) as FunctionWithTsNode;
   } else if (ts.isCallExpression(expr)) {
-    // tslint:disable-next-line: ban-types
     let callable: Function;
     let callableContext: any = null;
     if (ts.isPropertyAccessExpression(expr.expression)) {
@@ -323,7 +318,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       const name = expr.expression.name.text;
       callable = callableContext[name];
     } else {
-      // tslint:disable-next-line: ban-types
       callable = evaluateInternal(expr.expression, context) as Function;
     }
     if (isRequiresRuntimeResult(callable)) {
@@ -481,7 +475,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
           propertyName = property.name.text;
         }
         if (property.name && ts.isComputedPropertyName(property.name)) {
-          // tslint:disable-next-line: no-shadowed-variable
           const value = evaluateInternal(property.name.expression, context);
           if (isRequiresRuntimeResult(value)) {
             return value;
@@ -856,6 +849,7 @@ export function createScope(parent?: Scope, globals?: { [name: string]: any }): 
       return undefined;
     },
     set(symbol: ts.Symbol, value: any) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       let currentScope: Scope | undefined = this;
       let valueSet = false;
       while (currentScope) {

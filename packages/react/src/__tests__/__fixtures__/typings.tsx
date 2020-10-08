@@ -1,4 +1,4 @@
-// tslint:disable no-unused-expression max-classes-per-file
+/* eslint-disable */
 
 import * as React from 'react';
 import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledComponent } from '../..';

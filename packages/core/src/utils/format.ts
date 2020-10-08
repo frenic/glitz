@@ -2,7 +2,7 @@ export function formatRule(identifier: string, block: string) {
   return `${identifier}{${block}}`;
 }
 
-export function formatClassRule(className: string, block: string, selector: string = '') {
+export function formatClassRule(className: string, block: string, selector = '') {
   return `.${formatRule(className + selector, block)}`;
 }
 

@@ -785,6 +785,7 @@ function getComponentNode(
 // Used to bail on top level static css inside such components.
 function isInsideInlineStyledComponent(node: ts.Node) {
   let func: ts.ArrowFunction | ts.FunctionExpression | undefined;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (ts.isArrowFunction(node)) {
       func = node;

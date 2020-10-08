@@ -1,5 +1,3 @@
-// tslint:disable no-conditional-assignment
-
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 
@@ -22,7 +20,6 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
     let media = '';
     let selector = '';
     let body = '';
-    // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < css.length; i++) {
       const character = css[i];
       const code = character.charCodeAt(0);

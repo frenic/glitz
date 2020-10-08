@@ -1,5 +1,3 @@
-// tslint:disable no-unused-expression
-
 import { ResolvedDeclarations } from '@glitz/type';
 import transformers from '../..';
 

@@ -1,5 +1,3 @@
-// tslint:disable no-unused-expression
-
 import numberToLength, { createNumberToLengthTransformer } from '../..';
 import { GlitzClient } from '../../../../core/src';
 

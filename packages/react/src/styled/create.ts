@@ -90,7 +90,6 @@ export function factory<TProps, TInstance>(
             const style = glitz.getStyleStream();
 
             if (style) {
-              // tslint:disable-next-line: variable-name
               const [tag, props, __html] = style;
               node = createElement(
                 Fragment,

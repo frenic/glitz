@@ -1,5 +1,3 @@
-// tslint:disable no-unused-expression
-
 import { ResolvedDeclarations } from '@glitz/type';
 import { compose, GlitzClient, GlitzServer, media, Options, selector } from '../..';
 
