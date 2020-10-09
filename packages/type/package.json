@@ -1,6 +1,6 @@
 {
   "name": "@glitz/type",
-  "version": "3.0.0-alpha.6",
+  "version": "3.0.0-alpha.7",
   "main": "",
   "types": "./index.d.ts",
   "license": "MIT",
