@@ -1739,11 +1739,14 @@ function Component() {
 
 const someDecorator = styled({ color: 'red' });
 const anotherDecorator = styled({ backgroundColor: 'green' });
-const Styled = styled(
-  styled.Div,
+function createDecorator() {
+  return styled({ borderLeftColor: 'blue' });
+}
+const Styled = styled.div(
   someDecorator,
   anotherDecorator,
-  { borderLeftColor: 'blue' }
+  createDecorator(),
+  { borderRightColor: 'yellow' }
 );
 `,
   };
@@ -1752,15 +1755,18 @@ const Styled = styled(
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function Component() {
-          return <div className=\\"c b a\\" data-glitzname=\\"Styled\\"/>;
+          return <div className=\\"d c b a\\" data-glitzname=\\"Styled\\"/>;
       }
       const someDecorator = /*#__PURE__*/ styled({ color: 'red' });
       const anotherDecorator = /*#__PURE__*/ styled({ backgroundColor: 'green' });
-      const Styled = /*#__PURE__*/ styled(styled.Div, someDecorator, anotherDecorator, { borderLeftColor: 'blue' });
+      function createDecorator() {
+          return /*#__PURE__*/ styled({ borderLeftColor: 'blue' });
+      }
+      const Styled = /*#__PURE__*/ styled.div(someDecorator, anotherDecorator, createDecorator(), { borderRightColor: 'yellow' });
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(
-      `".a{color:red}.b{background-color:green}.c{border-left-color:blue}"`,
+      `".a{color:red}.b{background-color:green}.c{border-left-color:blue}.d{border-right-color:yellow}"`,
     );
   });
 });
