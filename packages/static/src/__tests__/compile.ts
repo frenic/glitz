@@ -34,6 +34,12 @@ export default function compile(
           });
           continue;
         }
+        if (moduleName === 'react') {
+          resolvedModules.push({
+            resolvedFileName: path.join(__dirname, '..', 'static-react.ts'),
+          });
+          continue;
+        }
 
         const localTsFileName = `${moduleName.slice(2)}.ts`;
         if (localTsFileName in files) {

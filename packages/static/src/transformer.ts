@@ -33,6 +33,12 @@ staticModuleOverloads[glitzModuleName] = () => {
   return getStaticExports(glitzModuleName, files);
 };
 
+staticModuleOverloads['react'] = () => {
+  const files: { [moduleName: string]: string } = {};
+  files['react.ts'] = fs.readFileSync(path.join(__dirname, 'static-react.ts')).toString();
+  return getStaticExports('react', files);
+};
+
 type StaticStyledComponent = {
   componentName: string;
   elementName: string | undefined;

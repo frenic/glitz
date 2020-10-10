@@ -5,11 +5,13 @@ export type FunctionWithTsNode = {
   tsNode?: ts.Node;
 };
 
-type SupportedExpressions = ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration;
+type SymbolWithIdentifier = { symbol: ts.Symbol; identifier: ts.Identifier };
+type SupportedExpressionsNodes = ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration;
+type SupportedExpressions = SupportedExpressionsNodes | SymbolWithIdentifier;
 type Exports = { [exportName: string]: ts.Symbol };
 export type EvaluationStats = {
   usedVariables?: Map<ts.Declaration, any>;
-  evaluationStack?: SupportedExpressions[];
+  evaluationStack?: SupportedExpressionsNodes[];
 };
 export const staticModuleOverloads: { [moduleName: string]: () => readonly [Exports, ts.Program] } = {};
 
@@ -26,8 +28,9 @@ export function evaluate(expr: SupportedExpressions, program: ts.Program, scope?
     if (isRequiresRuntimeResult(e)) {
       return e;
     } else if (!(e instanceof EvaluationError)) {
-      console.log('Error evaluating expression:', expr.getText());
-      console.log('Expression exists in file:', expr.getSourceFile().fileName);
+      const node = isSymbolWithIdentifier(expr) ? expr.identifier : expr;
+      console.log('Error evaluating expression:', node.getText());
+      console.log('Expression exists in file:', node.getSourceFile().fileName);
       console.error(e);
       throw new EvaluationError(e);
     } else {
@@ -64,8 +67,9 @@ export function partiallyEvaluate(
       }
       return e;
     } else if (!(e instanceof EvaluationError)) {
-      console.log('Error evaluating expression:', expr.getText());
-      console.log('Expression exists in file:', expr.getSourceFile().fileName);
+      const node = isSymbolWithIdentifier(expr) ? expr.identifier : expr;
+      console.log('Error evaluating expression:', node.getText());
+      console.log('Expression exists in file:', node.getSourceFile().fileName);
       console.error(e);
       throw new EvaluationError(e);
     } else {
@@ -109,13 +113,114 @@ globalGlobals.Boolean = Boolean;
 globalGlobals.RegExp = RegExp;
 
 function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext): any {
-  const { program, shouldEvaluate, stats } = context;
+  const { shouldEvaluate, stats } = context;
   let scope = context.scope;
   if (!scope) {
     scope = createScope();
   }
-  const typeChecker = program.getTypeChecker();
-  stats?.evaluationStack?.push(expr);
+  const typeChecker = context.program.getTypeChecker();
+  stats?.evaluationStack?.push(isSymbolWithIdentifier(expr) ? expr.identifier : expr);
+
+  if (isSymbolWithIdentifier(expr)) {
+    let symbol: ts.Symbol | undefined = expr.symbol;
+    const identifier = expr.identifier;
+    if (scope && scope.has(symbol)) {
+      return scope.get(symbol);
+    }
+    let fileNameToCacheFor: string | undefined;
+    let evaluationResult: any;
+    let hasEvaluated = false;
+    if (!symbol.valueDeclaration) {
+      let symbolOrSymbols: ts.Symbol | ts.Symbol[] | undefined;
+      let program;
+      [symbolOrSymbols, program, fileNameToCacheFor] = resolveImportSymbol(identifier.text, symbol, context.program);
+      context = { ...context, program };
+      if (Array.isArray(symbolOrSymbols)) {
+        symbolOrSymbols[0].declarations[0];
+        const exportedNamespace: { [name: string]: any } = {};
+        for (const exportedSymbol of symbolOrSymbols) {
+          const exportedValue = evaluateInternal({ symbol: exportedSymbol, identifier }, context);
+
+          if (isRequiresRuntimeResult(exportedValue)) {
+            return exportedValue;
+          }
+          exportedNamespace[exportedSymbol.escapedName.toString()] = exportedValue;
+        }
+        return exportedNamespace;
+      } else {
+        symbol = symbolOrSymbols;
+      }
+      if (symbol && fileNameToCacheFor) {
+        if (fileNameToCacheFor in evaluationCache) {
+          const cache = evaluationCache[fileNameToCacheFor];
+          if (cache.has(symbol)) {
+            if (!(fileNameToCacheFor in cacheHits)) {
+              cacheHits[fileNameToCacheFor] = {};
+            }
+            if (!(symbol.escapedName.toString() in cacheHits[fileNameToCacheFor])) {
+              cacheHits[fileNameToCacheFor][symbol.escapedName.toString()] = 0;
+            }
+            cacheHits[fileNameToCacheFor][symbol.escapedName.toString()]++;
+            const cacheEntry = cache.get(symbol)!;
+            stats?.usedVariables?.set(cacheEntry.valueDeclaration, cacheEntry.result);
+            return cacheEntry.result;
+          }
+        }
+      }
+    }
+    if (!symbol || !symbol.valueDeclaration) {
+      return requiresRuntimeResult('Unable to find the value declaration of imported symbol', identifier);
+    }
+    if (ts.isShorthandPropertyAssignment(symbol.valueDeclaration)) {
+      symbol = typeChecker.getShorthandAssignmentValueSymbol(symbol.valueDeclaration);
+    }
+    if (!symbol) {
+      return requiresRuntimeResult(`Unable to resolve identifier '${identifier.text}'`, identifier);
+    }
+    let valueDeclaration = symbol.valueDeclaration;
+    if (ts.isVariableDeclaration(symbol.valueDeclaration)) {
+      if (!symbol.valueDeclaration.initializer) {
+        return requiresRuntimeResult(`Unable to resolve identifier '${identifier.text}'`, identifier);
+      }
+      evaluationResult = evaluateInternal(symbol.valueDeclaration.initializer, context);
+      hasEvaluated = true;
+    }
+    if (ts.isFunctionDeclaration(valueDeclaration)) {
+      if (!valueDeclaration.body) {
+        const declarationWithBody = symbol.declarations.find(
+          d => !!(d as ts.FunctionDeclaration).body,
+        ) as ts.FunctionDeclaration;
+        if (declarationWithBody) {
+          valueDeclaration = declarationWithBody;
+        }
+      }
+      evaluationResult = evaluateInternal(valueDeclaration, context);
+      hasEvaluated = true;
+    }
+    if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
+      evaluationResult = evaluateInternal(symbol.valueDeclaration, context);
+      hasEvaluated = true;
+    }
+    if (hasEvaluated) {
+      stats?.usedVariables?.set(valueDeclaration, evaluationResult);
+    }
+    if (scope && scope.has(symbol)) {
+      return scope.get(symbol);
+    }
+    if (!hasEvaluated) {
+      evaluationResult = requiresRuntimeResult(
+        `Could not determine a static value for: ${identifier.text}`,
+        identifier,
+      );
+    }
+    if (fileNameToCacheFor) {
+      if (!(fileNameToCacheFor in evaluationCache)) {
+        evaluationCache[fileNameToCacheFor] = new Map<ts.Symbol, any>();
+      }
+      evaluationCache[fileNameToCacheFor].set(symbol, { result: evaluationResult, valueDeclaration });
+    }
+    return evaluationResult;
+  }
 
   if (!shouldEvaluate(expr, stats)) {
     const stopEvaluationResult: StopEvaluationResult = expr as any;
@@ -377,90 +482,13 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     if (type.isStringLiteral()) {
       return type.value;
     }
-    let symbol = typeChecker.getSymbolAtLocation(expr);
+    const symbol = typeChecker.getSymbolAtLocation(expr);
     if (!symbol) {
       return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
     }
-    if (scope && scope.has(symbol)) {
-      return scope.get(symbol);
-    }
-    let fileNameToCacheFor: string | undefined;
-    let evaluationResult: any;
-    let hasEvaluated = false;
-    if (!symbol.valueDeclaration) {
-      let program;
-      [symbol, program, fileNameToCacheFor] = resolveImportSymbol(expr.text, symbol, context.program);
-      context = {
-        ...context,
-        program,
-      };
-      if (symbol && fileNameToCacheFor) {
-        if (fileNameToCacheFor in evaluationCache) {
-          const cache = evaluationCache[fileNameToCacheFor];
-          if (cache.has(symbol)) {
-            if (!(fileNameToCacheFor in cacheHits)) {
-              cacheHits[fileNameToCacheFor] = {};
-            }
-            if (!(symbol.escapedName.toString() in cacheHits[fileNameToCacheFor])) {
-              cacheHits[fileNameToCacheFor][symbol.escapedName.toString()] = 0;
-            }
-            cacheHits[fileNameToCacheFor][symbol.escapedName.toString()]++;
-            const cacheEntry = cache.get(symbol)!;
-            stats?.usedVariables?.set(cacheEntry.valueDeclaration, cacheEntry.result);
-            return cacheEntry.result;
-          }
-        }
-      }
-    }
-    if (!symbol || !symbol.valueDeclaration) {
-      return requiresRuntimeResult('Unable to find the value declaration of imported symbol', expr);
-    }
-    if (ts.isShorthandPropertyAssignment(symbol.valueDeclaration)) {
-      symbol = typeChecker.getShorthandAssignmentValueSymbol(symbol.valueDeclaration);
-    }
-    if (!symbol) {
-      return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
-    }
-    let valueDeclaration = symbol.valueDeclaration;
-    if (ts.isVariableDeclaration(symbol.valueDeclaration)) {
-      if (!symbol.valueDeclaration.initializer) {
-        return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
-      }
-      evaluationResult = evaluateInternal(symbol.valueDeclaration.initializer, context);
-      hasEvaluated = true;
-    }
-    if (ts.isFunctionDeclaration(valueDeclaration)) {
-      if (!valueDeclaration.body) {
-        const declarationWithBody = symbol.declarations.find(
-          d => !!(d as ts.FunctionDeclaration).body,
-        ) as ts.FunctionDeclaration;
-        if (declarationWithBody) {
-          valueDeclaration = declarationWithBody;
-        }
-      }
-      evaluationResult = evaluateInternal(valueDeclaration, context);
-      hasEvaluated = true;
-    }
-    if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-      evaluationResult = evaluateInternal(symbol.valueDeclaration, context);
-      hasEvaluated = true;
-    }
-    if (hasEvaluated) {
-      stats?.usedVariables?.set(valueDeclaration, evaluationResult);
-    }
-    if (scope && scope.has(symbol)) {
-      return scope.get(symbol);
-    }
-    if (!hasEvaluated) {
-      evaluationResult = requiresRuntimeResult('Could not determine a static value for: ' + expr.text, expr);
-    }
-    if (fileNameToCacheFor) {
-      if (!(fileNameToCacheFor in evaluationCache)) {
-        evaluationCache[fileNameToCacheFor] = new Map<ts.Symbol, any>();
-      }
-      evaluationCache[fileNameToCacheFor].set(symbol, { result: evaluationResult, valueDeclaration });
-    }
-    return evaluationResult;
+
+    const value = evaluateInternal({ identifier: expr, symbol }, context);
+    return value;
   } else if (ts.isNoSubstitutionTemplateLiteral(expr)) {
     return expr.text;
   } else if (ts.isStringLiteral(expr)) {
@@ -583,26 +611,44 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
   return requiresRuntimeResult('Unable to evaluate expression, unsupported expression token kind: ' + expr.kind, expr);
 }
 
-function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program) {
+type ResolveImportResults = readonly [ts.Symbol | ts.Symbol[] | undefined, ts.Program, string | undefined];
+
+function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program): ResolveImportResults {
   const typeChecker = program.getTypeChecker();
+  let symbolOrSymbols: ts.Symbol | ts.Symbol[] = symbol;
   let fileName: string | undefined;
   if (!symbol.valueDeclaration) {
-    const importSpecifier = symbol.declarations[0];
-    if (importSpecifier && ts.isImportSpecifier(importSpecifier)) {
-      if (importSpecifier.propertyName) {
-        variableName = importSpecifier.propertyName.text;
+    const importDecl = symbol.declarations[0];
+    if (importDecl && ts.isNamespaceImport(importDecl)) {
+      fileName = importDecl.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '');
+      if (fileName in staticModuleOverloads) {
+        const [staticExports, staticProgram] = staticModuleOverloads[fileName]();
+        symbolOrSymbols = Object.values(staticExports);
+        program = staticProgram;
+      } else {
+        const importSymbol = typeChecker.getSymbolAtLocation(importDecl.parent.parent.moduleSpecifier);
+        if (importSymbol) {
+          if (ts.isSourceFile(importSymbol.valueDeclaration)) {
+            fileName = importSymbol.valueDeclaration.fileName;
+          }
+          symbolOrSymbols = typeChecker.getExportsOfModule(importSymbol);
+        }
       }
-      fileName = importSpecifier.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '');
+    } else if (importDecl && ts.isImportSpecifier(importDecl)) {
+      if (importDecl.propertyName) {
+        variableName = importDecl.propertyName.text;
+      }
+      fileName = importDecl.parent.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '');
       if (fileName in staticModuleOverloads) {
         const [staticExports, staticProgram] = staticModuleOverloads[fileName]();
         if (variableName in staticExports) {
-          symbol = staticExports[variableName];
+          symbolOrSymbols = staticExports[variableName];
           program = staticProgram;
         } else {
-          return [undefined, program] as const;
+          return [undefined, program, undefined] as const;
         }
       } else {
-        const importSymbol = typeChecker.getSymbolAtLocation(importSpecifier.parent.parent.parent.moduleSpecifier);
+        const importSymbol = typeChecker.getSymbolAtLocation(importDecl.parent.parent.parent.moduleSpecifier);
         if (importSymbol) {
           if (ts.isSourceFile(importSymbol.valueDeclaration)) {
             fileName = importSymbol.valueDeclaration.fileName;
@@ -610,7 +656,7 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
           const exports = typeChecker.getExportsOfModule(importSymbol);
           for (const exp of exports) {
             if (exp.escapedName === variableName) {
-              symbol = exp;
+              symbolOrSymbols = exp;
               break;
             }
           }
@@ -618,8 +664,8 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
       }
     }
   }
-  if (!symbol.valueDeclaration) {
-    const exportSpecifier = symbol.declarations[0];
+  if (!Array.isArray(symbolOrSymbols) && !symbolOrSymbols.valueDeclaration) {
+    const exportSpecifier = symbolOrSymbols.declarations[0];
     if (ts.isExportSpecifier(exportSpecifier)) {
       const variableToLookFor = exportSpecifier.propertyName?.text ?? exportSpecifier.name.text;
       const moduleSpecifier = exportSpecifier.parent.parent.moduleSpecifier;
@@ -634,9 +680,9 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
                 if (!importResult[0]) {
                   return [undefined, program, undefined] as const;
                 }
-                [symbol, program, fileName] = importResult;
+                [symbolOrSymbols, program, fileName] = importResult;
               } else {
-                symbol = exp;
+                symbolOrSymbols = exp;
               }
               break;
             }
@@ -645,12 +691,12 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
       } else {
         const local = typeChecker.getExportSpecifierLocalTargetSymbol(exportSpecifier);
         if (local) {
-          symbol = local;
+          symbolOrSymbols = local;
         }
       }
     }
   }
-  return [symbol, program, fileName] as const;
+  return [symbolOrSymbols, program, fileName] as const;
 }
 
 const StatementsDidNotReturn = {};
@@ -916,4 +962,12 @@ export function createScope(parent?: Scope, globals?: { [name: string]: any }): 
       }
     },
   };
+}
+
+function isSymbolWithIdentifier(o: unknown): o is SymbolWithIdentifier {
+  if (!o || typeof o !== 'object') {
+    return false;
+  }
+  const symbolWithIdentifier = o as SymbolWithIdentifier;
+  return !!symbolWithIdentifier.identifier && !!symbolWithIdentifier.symbol;
 }

@@ -33,6 +33,50 @@ const Styled = styled.div(styleObject);
   });
 });
 
+test('can handle React.useMemo()', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+import * as React from 'react';
+
+function MyComponent(props: {}) {
+  const styleObject = React.useMemo(() => {
+    return {
+      width: '100%',
+      height: '100%',
+    };
+  }, []);
+  const Styled = styled.div(styleObject);
+
+  return <Styled id="some-id">hello</Styled>;
+}
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        import * as React from 'react';
+        function MyComponent(props) {
+            const styleObject = /*#__PURE__*/ React.useMemo(() => {
+                return {
+                    width: '100%',
+                    height: '100%',
+                };
+            }, []);
+            const Styled = /*#__PURE__*/ styled.div(styleObject);
+            return <div id=\\"some-id\\" className=\\"a b\\" data-glitzname=\\"Styled\\">hello</div>;
+        }
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
+});
+
 test('can handle simple ternaries in the css prop', () => {
   const code = {
     'file1.tsx': `
