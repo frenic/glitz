@@ -50,9 +50,18 @@ export function partiallyEvaluate(
       shouldEvaluate,
       stats,
     };
-    return evaluateInternal(expr, context);
+    const result = evaluateInternal(expr, context);
+    if (isStopEvaluationResult(result)) {
+      delete (result as any)['typeKind'];
+    }
+    return result;
   } catch (e) {
     if (isRequiresRuntimeResult(e)) {
+      return e;
+    } else if (isStopEvaluationResult(e)) {
+      if (isStopEvaluationResult(e)) {
+        delete (e as any)['typeKind'];
+      }
       return e;
     } else if (!(e instanceof EvaluationError)) {
       console.log('Error evaluating expression:', expr.getText());
@@ -64,6 +73,10 @@ export function partiallyEvaluate(
     }
   }
 }
+
+type StopEvaluationResult = ts.Node & {
+  typeKind: 'StopEvaluationResult';
+};
 
 class EvaluationError extends Error {
   constructor(e: Error) {
@@ -105,13 +118,15 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
   stats?.evaluationStack?.push(expr);
 
   if (!shouldEvaluate(expr, stats)) {
-    return expr;
+    const stopEvaluationResult: StopEvaluationResult = expr as any;
+    stopEvaluationResult.typeKind = 'StopEvaluationResult' as const;
+    return stopEvaluationResult;
   }
 
   if (ts.isBinaryExpression(expr)) {
     if (expr.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
       const left = evaluateInternal(expr.left, context);
-      if (isRequiresRuntimeResult(left)) {
+      if (shouldShortCircuitEvaluation(left)) {
         return left;
       }
       if (!left) {
@@ -122,12 +137,12 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     }
 
     const left = evaluateInternal(expr.left, context);
-    if (isRequiresRuntimeResult(left)) {
+    if (shouldShortCircuitEvaluation(left)) {
       return left;
     }
 
     const right = evaluateInternal(expr.right, context);
-    if (isRequiresRuntimeResult(right)) {
+    if (shouldShortCircuitEvaluation(right)) {
       return right;
     }
 
@@ -190,7 +205,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     return evaluateInternal(expr.expression, context);
   } else if (ts.isConditionalExpression(expr)) {
     const condition = evaluateInternal(expr.condition, context);
-    if (isRequiresRuntimeResult(condition)) {
+    if (shouldShortCircuitEvaluation(condition)) {
       return condition;
     }
     return condition ? evaluateInternal(expr.whenTrue, context) : evaluateInternal(expr.whenFalse, context);
@@ -199,7 +214,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       return requiresRuntimeResult('-- or ++ expressions are not supported', expr);
     }
     const value = evaluateInternal(expr.operand, context);
-    if (isRequiresRuntimeResult(value)) {
+    if (shouldShortCircuitEvaluation(value)) {
       return value;
     }
     if (expr.operator === ts.SyntaxKind.PlusToken) {
@@ -216,7 +231,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     }
   } else if (ts.isPropertyAccessExpression(expr)) {
     const obj = evaluateInternal(expr.expression, context);
-    if (isRequiresRuntimeResult(obj)) {
+    if (shouldShortCircuitEvaluation(obj)) {
       return obj;
     }
     if (!obj && expr.questionDotToken) {
@@ -226,14 +241,14 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     return obj[property];
   } else if (ts.isElementAccessExpression(expr)) {
     const obj = evaluateInternal(expr.expression, context);
-    if (isRequiresRuntimeResult(obj)) {
+    if (shouldShortCircuitEvaluation(obj)) {
       return obj;
     }
     if (!obj && expr.questionDotToken) {
       return undefined;
     }
     const property = evaluateInternal(expr.argumentExpression, context);
-    if (isRequiresRuntimeResult(property)) {
+    if (shouldShortCircuitEvaluation(property)) {
       return property;
     }
     return obj[property];
@@ -243,7 +258,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     let s = expr.head.text;
     for (const span of expr.templateSpans) {
       const value = evaluateInternal(span.expression, context);
-      if (isRequiresRuntimeResult(value)) {
+      if (shouldShortCircuitEvaluation(value)) {
         return value;
       }
       s += value;
@@ -300,7 +315,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
           result = evaluateStatements(expr.body.statements, parameterContext);
         }
 
-        if (isRequiresRuntimeResult(result)) {
+        if (shouldShortCircuitEvaluation(result)) {
           throw result;
         }
         return result;
@@ -312,7 +327,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     let callableContext: any = null;
     if (ts.isPropertyAccessExpression(expr.expression)) {
       callableContext = evaluateInternal(expr.expression.expression, context);
-      if (isRequiresRuntimeResult(callableContext)) {
+      if (shouldShortCircuitEvaluation(callableContext)) {
         return callableContext;
       }
       const name = expr.expression.name.text;
@@ -320,7 +335,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     } else {
       callable = evaluateInternal(expr.expression, context) as Function;
     }
-    if (isRequiresRuntimeResult(callable)) {
+    if (shouldShortCircuitEvaluation(callable)) {
       return callable;
     }
     if (typeof callable !== 'function') {
@@ -329,7 +344,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     const args = [];
     for (const arg of expr.arguments) {
       const value = evaluateInternal(arg, context);
-      if (isRequiresRuntimeResult(value)) {
+      if (shouldShortCircuitEvaluation(value)) {
         return value;
       }
       if (ts.isSpreadElement(arg)) {
@@ -346,7 +361,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     return callable.apply(callableContext, args);
   } else if (ts.isTypeOfExpression(expr)) {
     const value = evaluateInternal(expr.expression, context);
-    if (isRequiresRuntimeResult(value)) {
+    if (shouldShortCircuitEvaluation(value)) {
       return value;
     }
     return typeof value;
@@ -465,7 +480,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     for (const property of expr.properties) {
       if (ts.isSpreadAssignment(property)) {
         const spreadObject = evaluateInternal(property.expression, context);
-        if (isRequiresRuntimeResult(spreadObject)) {
+        if (shouldShortCircuitEvaluation(spreadObject)) {
           return spreadObject;
         }
         Object.assign(obj, spreadObject);
@@ -476,7 +491,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
         }
         if (property.name && ts.isComputedPropertyName(property.name)) {
           const value = evaluateInternal(property.name.expression, context);
-          if (isRequiresRuntimeResult(value)) {
+          if (shouldShortCircuitEvaluation(value)) {
             return value;
           }
           propertyName = value.toString();
@@ -492,6 +507,13 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
           value = evaluateInternal(property.name, context);
         }
 
+        // Note that we check isRequiresRuntimeResult() and not isStopEvaluationResult()
+        // since it's useful to be able to combine an object with static values and TS nodes
+        // that are not yet evaluated.
+        if (isRequiresRuntimeResult(value)) {
+          return value;
+        }
+
         obj[propertyName] = value;
       }
     }
@@ -500,10 +522,16 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     const array: any[] = [];
     for (const element of expr.elements) {
       const value = evaluateInternal(element, context);
+      // Note that we check isRequiresRuntimeResult() and not isStopEvaluationResult()
+      // since it's useful to be able to combine an object with static values and TS nodes
+      // that are not yet evaluated.
       if (isRequiresRuntimeResult(value)) {
         return value;
       }
       if (ts.isSpreadElement(element)) {
+        if (isStopEvaluationResult(value)) {
+          return value;
+        }
         if (!Array.isArray(value)) {
           return requiresRuntimeResult('Spread value could not be statically determined to be an array', element);
         }
@@ -524,7 +552,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
         memberName = member.name.text;
       } else if (ts.isComputedPropertyName(member.name)) {
         const value = evaluateInternal(member.name.expression, context);
-        if (isRequiresRuntimeResult(value)) {
+        if (isStopEvaluationResult(value)) {
           return value;
         }
         memberName = value.toString();
@@ -536,6 +564,9 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
         enm[i] = memberName;
       } else {
         const value = evaluateInternal(member.initializer, context);
+        // Note that we check isRequiresRuntimeResult() and not isStopEvaluationResult()
+        // since it's useful to be able to combine an object with static values and TS nodes
+        // that are not yet evaluated.
         if (isRequiresRuntimeResult(value)) {
           return value;
         }
@@ -648,7 +679,7 @@ function evaluateStatements(statements: ts.NodeArray<ts.Statement>, context: Eva
           let value: any;
           if (declaration.initializer) {
             value = evaluateInternal(declaration.initializer, newContext);
-            if (isRequiresRuntimeResult(value)) {
+            if (isStopEvaluationResult(value)) {
               return value;
             }
           }
@@ -662,7 +693,7 @@ function evaluateStatements(statements: ts.NodeArray<ts.Statement>, context: Eva
       }
     } else if (ts.isIfStatement(statement)) {
       const result = evaluateIfStatement(statement, newContext);
-      if (isRequiresRuntimeResult(result) || result !== StatementsDidNotReturn) {
+      if (isStopEvaluationResult(result) || result !== StatementsDidNotReturn) {
         return result;
       }
     } else if (ts.isFunctionDeclaration(statement)) {
@@ -670,7 +701,7 @@ function evaluateStatements(statements: ts.NodeArray<ts.Statement>, context: Eva
         const symbol = typeChecker.getSymbolAtLocation(statement.name);
         if (symbol) {
           const func = evaluateInternal(statement, newContext);
-          if (isRequiresRuntimeResult(func)) {
+          if (isStopEvaluationResult(func)) {
             return func;
           }
           newScope.set(symbol, func);
@@ -683,7 +714,7 @@ function evaluateStatements(statements: ts.NodeArray<ts.Statement>, context: Eva
       }
     } else if (ts.isSwitchStatement(statement)) {
       const result = evaluateSwitchStatement(statement, newContext);
-      if (isRequiresRuntimeResult(result) || result !== StatementsDidNotReturn) {
+      if (isStopEvaluationResult(result) || result !== StatementsDidNotReturn) {
         return result;
       }
     } else if (ts.isReturnStatement(statement)) {
@@ -702,7 +733,7 @@ function evaluateStatements(statements: ts.NodeArray<ts.Statement>, context: Eva
 
 function evaluateSwitchStatement(switchStatement: ts.SwitchStatement, context: EvaluationContext) {
   const switchValue = evaluateInternal(switchStatement.expression, context);
-  if (isRequiresRuntimeResult(switchValue)) {
+  if (isStopEvaluationResult(switchValue)) {
     return switchValue;
   }
   for (const clause of switchStatement.caseBlock.clauses) {
@@ -732,7 +763,7 @@ function evaluateSwitchStatement(switchStatement: ts.SwitchStatement, context: E
 
 function evaluateIfStatement(ifStatement: ts.IfStatement, context: EvaluationContext): any {
   const expression = evaluateInternal(ifStatement.expression, context);
-  if (isRequiresRuntimeResult(expression)) {
+  if (isStopEvaluationResult(expression)) {
     return expression;
   }
   if (expression) {
@@ -747,7 +778,7 @@ function evaluateIfStatement(ifStatement: ts.IfStatement, context: EvaluationCon
       }
       return evaluateInternal(ifStatement.thenStatement.expression, context);
     } else {
-      return requiresRuntimeResult('Unable to statically then statement', ifStatement.thenStatement);
+      return requiresRuntimeResult('Unable to statically evaluate then statement', ifStatement.thenStatement);
     }
   } else if (ifStatement.elseStatement) {
     if (ts.isIfStatement(ifStatement.elseStatement)) {
@@ -806,6 +837,21 @@ export function isRequiresRuntimeResult(o: unknown): o is RequiresRuntimeResult 
   }
   const res = o as RequiresRuntimeResult;
   return res.__requiresRuntime === true;
+}
+
+function isStopEvaluationResult(o: unknown): o is StopEvaluationResult {
+  if (!o || typeof o !== 'object') {
+    return false;
+  }
+  const res = o as StopEvaluationResult;
+  return res.typeKind === 'StopEvaluationResult';
+}
+
+function shouldShortCircuitEvaluation(o: unknown) {
+  if (isRequiresRuntimeResult(o) || isStopEvaluationResult(o)) {
+    return true;
+  }
+  return false;
 }
 
 type Scope = {

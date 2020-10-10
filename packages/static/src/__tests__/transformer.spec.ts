@@ -204,7 +204,7 @@ const Styled = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
@@ -332,10 +332,10 @@ const Styled = createStyledComponent();
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 11,
-              "message": "Styled component expression requires runtime",
+              "line": 8,
+              "message": "Unable to resolve identifier 'window'",
               "severity": "info",
-              "source": "const Styled = createStyledComponent();",
+              "source": "window",
             },
             "line": 11,
             "message": "Styled component could not be statically evaluated",
@@ -387,7 +387,7 @@ const Styled2 = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
@@ -807,7 +807,7 @@ const DerivedStyled = styled(Styled, {
       });
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}.b{background-color:black}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
   });
 });
 
