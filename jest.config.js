@@ -4,6 +4,8 @@ module.exports = {
       tsconfig: {
         target: 'es6',
         module: 'commonjs',
+        sourceMap: true,
+        inlineSourceMap: true,
       },
     },
   },
