@@ -1594,7 +1594,14 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
                           factory.createBinaryExpression(
                             factory.createStringLiteral(errorMsg),
                             ts.SyntaxKind.PlusToken,
-                            factory.createIdentifier(themeIdentifierName),
+                            factory.createCallExpression(
+                              factory.createPropertyAccessExpression(
+                                factory.createIdentifier('JSON'),
+                                factory.createIdentifier('stringify'),
+                              ),
+                              undefined,
+                              [factory.createIdentifier(themeIdentifierName)],
+                            ),
                           ),
                         ]),
                       ),

@@ -243,7 +243,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
                     case 'Full':
                         return \\"f\\";
                     default:
-                        return __glitzTheme.color === \\"black\\" ? \\"i\\" : __glitzTheme.color === \\"blue\\" ? \\"h\\" : __glitzTheme.color === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })();
+                        return __glitzTheme.color === \\"black\\" ? \\"i\\" : __glitzTheme.color === \\"blue\\" ? \\"h\\" : __glitzTheme.color === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })();
                 }
             };
             const superDynamic = () => {
@@ -1568,20 +1568,20 @@ const node = <Styled1 />;
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             return (<>
               <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }}/>
-              <div className={__glitzTheme.isDark === true ? \\"e f\\" : __glitzTheme.color === \\"blue\\" ? \\"b d\\" : __glitzTheme.color === \\"red\\" ? \\"b c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })()} data-glitzname=\\"styled.Div\\"/>
+              <div className={__glitzTheme.isDark === true ? \\"e f\\" : __glitzTheme.color === \\"blue\\" ? \\"b d\\" : __glitzTheme.color === \\"red\\" ? \\"b c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"styled.Div\\"/>
             </>);
         }
         function MyOtherComponent() {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            const node1 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })()} data-glitzname=\\"Styled1\\"/>;
-            const node2 = <div className={\\"a \\" + (__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })())} data-glitzname=\\"Styled2\\"/>;
-            const node3 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.isDark === false ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })()} data-glitzname=\\"Styled3\\"/>;
+            const node1 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"Styled1\\"/>;
+            const node2 = <div className={\\"a \\" + (__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })())} data-glitzname=\\"Styled2\\"/>;
+            const node3 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.isDark === false ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"Styled3\\"/>;
             const node4 = <div className={\\"h i\\"} data-glitzname=\\"Styled4\\"/>;
             return undefined;
         }
         const MyArrowFunction = () => {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            return <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })()} data-glitzname=\\"Styled1\\"/>;
+            return <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"Styled1\\"/>;
         };
         // This should not get transformed as it's a styled component with themes declared outside of a component
         const node = <Styled1 />;
