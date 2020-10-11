@@ -457,7 +457,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                 const styles = evaluate(declaration.initializer, transformerContext.program);
                 if (Array.isArray(styles)) {
                   if (styles.every(canEvalStyle)) {
-                    let classNameExpr = getClassNameExpression(styles, transformerContext);
+                    const classNameExpr = getClassNameExpression(styles, transformerContext);
                     if (isRequiresRuntimeResult(classNameExpr)) {
                       reportRequiresRuntimeResult(
                         'Evaluation of theme function requires runtime',
@@ -466,10 +466,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                         transformerContext,
                       );
                     } else {
-                      if (ts.isJsxExpression(classNameExpr)) {
-                        const innerExpr = classNameExpr.expression;
-                        classNameExpr = innerExpr as ts.StringLiteral;
-                      }
                       result = factory.createVariableStatement(
                         node.modifiers,
                         factory.createVariableDeclarationList(
@@ -517,42 +513,29 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
     const elementName = node.tagName.name.escapedText.toString().toLowerCase();
     const cssData = getCssDataFromCssProp(node, transformerContext);
     if (cssData) {
-      if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
-        // Everything is static, replace `<styled.[element name] />` with `<[element name] className="[classes]" />`
-        const classNameExpr = getClassNameExpression(cssData, transformerContext);
-        if (isRequiresRuntimeResult(classNameExpr)) {
-          reportRequiresRuntimeResult(
-            'Evaluation of theme function requires runtime',
-            classNameExpr,
-            node,
-            transformerContext,
-          );
+      if (isEvaluableStyle(cssData, !!transformerContext.staticThemes, true)) {
+        if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
+          // Everything is static, replace `<styled.[element name] />` with `<[element name] className="[classes]" />`
+          const classNameExpr = getClassNameExpression(cssData, transformerContext);
+          if (isRequiresRuntimeResult(classNameExpr)) {
+            reportRequiresRuntimeResult(
+              'Evaluation of theme function requires runtime',
+              classNameExpr,
+              node,
+              transformerContext,
+            );
+          } else {
+            const componentName = styledName + '.' + node.tagName.name.escapedText;
+            rewriteToHtmlElement(node, elementName, componentName, classNameExpr, transformerContext);
+          }
         } else {
-          const jsxElement = factory.createJsxSelfClosingElement(
-            factory.createIdentifier(elementName),
-            undefined,
-            factory.createJsxAttributes([
-              ...passThroughProps(node.attributes.properties),
-              factory.createJsxAttribute(factory.createIdentifier('className'), classNameExpr),
-              ...(transformerContext.mode === 'development'
-                ? [
-                    factory.createJsxAttribute(
-                      factory.createIdentifier('data-glitzname'),
-                      factory.createStringLiteral('styled.' + node.tagName.name.escapedText),
-                    ),
-                  ]
-                : []),
-            ]),
-          );
-          ts.setOriginalNode(jsxElement, node);
-          transformerContext.transformations.set(originalNode, jsxElement);
-          result = node;
+          if (transformerContext.transformations.has(originalNode)) {
+            transformerContext.transformations.delete(originalNode);
+          }
+          reportTopLevelJsxInComposedComponent(node, transformerContext);
         }
-      } else {
-        if (transformerContext.transformations.has(originalNode)) {
-          transformerContext.transformations.delete(originalNode);
-        }
-        reportTopLevelJsxInComposedComponent(node, transformerContext);
+      } else if (!rewriteFunctionToReturnClassNamesIfPossible(node, transformerContext)) {
+        reportRequiresRuntimeResult('css prop could not be statically evaluated', cssData, node, transformerContext);
       }
     }
   }
@@ -570,40 +553,26 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
         const cssData = getCssDataFromCssProp(openingElement, transformerContext);
         if (cssData) {
-          const classNameExpr = getClassNameExpression(cssData, transformerContext);
-          if (isRequiresRuntimeResult(classNameExpr)) {
+          if (isEvaluableStyle(cssData, !!transformerContext.staticThemes, true)) {
+            const classNameExpr = getClassNameExpression(cssData, transformerContext);
+            if (isRequiresRuntimeResult(classNameExpr)) {
+              reportRequiresRuntimeResult(
+                'Evaluation of theme function requires runtime',
+                classNameExpr,
+                node,
+                transformerContext,
+              );
+            } else {
+              const componentName = styledName + '.' + openingElement.tagName.name.escapedText;
+              rewriteToHtmlElement(node, elementName, componentName, classNameExpr, transformerContext);
+            }
+          } else if (!rewriteFunctionToReturnClassNamesIfPossible(node, transformerContext)) {
             reportRequiresRuntimeResult(
-              'Evaluation of theme function requires runtime',
-              classNameExpr,
+              'css prop could not be statically evaluated',
+              cssData,
               node,
               transformerContext,
             );
-          } else {
-            // Everything is static, replace `<[element name] className="[classes]">[zero or more children]</[element name]>`
-            const jsxOpeningElement = factory.createJsxOpeningElement(
-              factory.createIdentifier(elementName),
-              undefined,
-              factory.createJsxAttributes([
-                ...passThroughProps(node.openingElement.attributes.properties),
-                factory.createJsxAttribute(factory.createIdentifier('className'), classNameExpr),
-                ...(transformerContext.mode === 'development'
-                  ? [
-                      factory.createJsxAttribute(
-                        factory.createIdentifier('data-glitzname'),
-                        factory.createStringLiteral(styledName + '.' + openingElement.tagName.name.escapedText),
-                      ),
-                    ]
-                  : []),
-              ]),
-            );
-            ts.setOriginalNode(jsxOpeningElement, node.openingElement);
-
-            const jsxClosingElement = factory.createJsxClosingElement(factory.createIdentifier(elementName));
-            ts.setOriginalNode(jsxClosingElement, node.closingElement);
-
-            const jsxElement = factory.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
-            ts.setOriginalNode(jsxElement, node);
-            transformerContext.transformations.set(originalNode, jsxElement);
           }
         }
       } else {
@@ -627,50 +596,39 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         // and is not referenced outside of JSX.
         if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
           const cssPropData = getCssDataFromCssProp(openingElement, transformerContext);
-          const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-          if (styledComponent.elementName) {
-            let styles = styledComponent.styles.filter(style => !!style);
-            if (cssPropData) {
-              styles = styles.slice();
-              styles.push(cssPropData);
-            }
+          if (isRequiresRuntimeResult(cssPropData)) {
+            reportRequiresRuntimeResult(
+              'css prop could not be statically evaluated',
+              cssPropData,
+              node,
+              transformerContext,
+            );
+          } else {
+            const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
+            if (styledComponent.elementName) {
+              let styles = styledComponent.styles.filter(style => !!style);
+              if (cssPropData) {
+                styles = styles.slice();
+                styles.push(cssPropData);
+              }
 
-            const classNameExpr = getClassNameExpression(styles, transformerContext);
-            if (isRequiresRuntimeResult(classNameExpr)) {
-              reportRequiresRuntimeResult(
-                'Evaluation of theme function requires runtime',
-                classNameExpr,
-                node,
-                transformerContext,
-              );
-            } else {
-              // Everything is static, replace with `<[element name] className="[classes]" [zero or more props]>[zero or more children]</[element name]>`
-              const jsxOpeningElement = factory.createJsxOpeningElement(
-                factory.createIdentifier(styledComponent.elementName),
-                undefined,
-                factory.createJsxAttributes([
-                  ...passThroughProps(node.openingElement.attributes.properties),
-                  factory.createJsxAttribute(factory.createIdentifier('className'), classNameExpr),
-                  ...(transformerContext.mode === 'development' && styledComponent.componentName
-                    ? [
-                        factory.createJsxAttribute(
-                          factory.createIdentifier('data-glitzname'),
-                          factory.createStringLiteral(styledComponent.componentName),
-                        ),
-                      ]
-                    : []),
-                ]),
-              );
-              ts.setOriginalNode(jsxOpeningElement, node.openingElement);
-
-              const jsxClosingElement = factory.createJsxClosingElement(
-                factory.createIdentifier(styledComponent.elementName),
-              );
-              ts.setOriginalNode(jsxClosingElement, node.closingElement);
-
-              const jsxElement = factory.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
-              ts.setOriginalNode(jsxElement, node);
-              transformerContext.transformations.set(originalNode, jsxElement);
+              const classNameExpr = getClassNameExpression(styles, transformerContext);
+              if (isRequiresRuntimeResult(classNameExpr)) {
+                reportRequiresRuntimeResult(
+                  'Evaluation of theme function requires runtime',
+                  classNameExpr,
+                  node,
+                  transformerContext,
+                );
+              } else {
+                rewriteToHtmlElement(
+                  node,
+                  styledComponent.elementName,
+                  styledComponent.componentName,
+                  classNameExpr,
+                  transformerContext,
+                );
+              }
             }
           }
         } else {
@@ -697,7 +655,14 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
         const cssPropData = getCssDataFromCssProp(node, transformerContext);
         const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-        if (styledComponent.elementName) {
+        if (isRequiresRuntimeResult(cssPropData)) {
+          reportRequiresRuntimeResult(
+            'css prop could not be statically evaluated',
+            cssPropData,
+            node,
+            transformerContext,
+          );
+        } else if (styledComponent.elementName) {
           let styles = styledComponent.styles.filter(style => !!style);
           if (cssPropData) {
             styles = styles.slice();
@@ -714,24 +679,13 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
             );
           } else {
             // Everything is static, replace with `<[element name] className="[classes]" [zero or more props] />`
-            const jsxElement = factory.createJsxSelfClosingElement(
-              factory.createIdentifier(styledComponent.elementName),
-              undefined,
-              factory.createJsxAttributes([
-                ...passThroughProps(node.attributes.properties),
-                factory.createJsxAttribute(factory.createIdentifier('className'), classNameExpr),
-                ...(transformerContext.mode === 'development' && styledComponent.componentName
-                  ? [
-                      factory.createJsxAttribute(
-                        factory.createIdentifier('data-glitzname'),
-                        factory.createStringLiteral(styledComponent.componentName),
-                      ),
-                    ]
-                  : []),
-              ]),
+            rewriteToHtmlElement(
+              node,
+              styledComponent.elementName,
+              styledComponent.componentName,
+              classNameExpr,
+              transformerContext,
             );
-            ts.setOriginalNode(jsxElement, node);
-            transformerContext.transformations.set(originalNode, jsxElement);
           }
         }
       } else {
@@ -750,6 +704,57 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   }
 
   return result;
+}
+
+function rewriteToHtmlElement(
+  node: ts.JsxElement | ts.JsxSelfClosingElement,
+  elementName: string,
+  componentName: string,
+  className: ts.Expression,
+  transformerContext: TransformerContext,
+) {
+  const factory = transformerContext.tsContext.factory;
+  const properties = ts.isJsxElement(node) ? node.openingElement.attributes.properties : node.attributes.properties;
+
+  const jsxAttributes = factory.createJsxAttributes([
+    ...passThroughProps(properties),
+    factory.createJsxAttribute(
+      factory.createIdentifier('className'),
+      factory.createJsxExpression(undefined, className),
+    ),
+    ...(transformerContext.mode === 'development' && componentName
+      ? [
+          factory.createJsxAttribute(
+            factory.createIdentifier('data-glitzname'),
+            factory.createStringLiteral(componentName),
+          ),
+        ]
+      : []),
+  ]);
+
+  if (ts.isJsxElement(node)) {
+    const jsxOpeningElement = factory.createJsxOpeningElement(
+      factory.createIdentifier(elementName),
+      undefined,
+      jsxAttributes,
+    );
+    ts.setOriginalNode(jsxOpeningElement, node.openingElement);
+
+    const jsxClosingElement = factory.createJsxClosingElement(factory.createIdentifier(elementName));
+    ts.setOriginalNode(jsxClosingElement, node.closingElement);
+
+    const jsxElement = factory.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
+    ts.setOriginalNode(jsxElement, node);
+    transformerContext.transformations.set(node, jsxElement);
+  } else {
+    const jsxSelfClosingElement = factory.createJsxSelfClosingElement(
+      factory.createIdentifier(elementName),
+      undefined,
+      jsxAttributes,
+    );
+    ts.setOriginalNode(jsxSelfClosingElement, node);
+    transformerContext.transformations.set(node, jsxSelfClosingElement);
+  }
 }
 
 // For any node inside a component, traverse up until we find a component declaration
@@ -1074,16 +1079,8 @@ function getCssDataFromCssProp(
   node: ts.JsxSelfClosingElement | ts.JsxOpeningElement,
   transformerContext: TransformerContext,
 ) {
-  const cssJsxAttr = node.attributes.properties.find(
-    p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
-  );
-  if (
-    cssJsxAttr &&
-    ts.isJsxAttribute(cssJsxAttr) &&
-    cssJsxAttr.initializer &&
-    ts.isJsxExpression(cssJsxAttr.initializer) &&
-    cssJsxAttr.initializer.expression
-  ) {
+  const cssPropExpression = getCssPropExpression(node);
+  if (cssPropExpression) {
     const stats: EvaluationStats = {
       evaluationStack: [],
     };
@@ -1108,13 +1105,9 @@ function getCssDataFromCssProp(
 
       return false;
     };
-    let cssData = partiallyEvaluate(
-      cssJsxAttr.initializer.expression,
-      shouldEvaluate,
-      transformerContext.program,
-      undefined,
-      stats,
-    ) as EvaluatedStyle | RequiresRuntimeResult;
+    let cssData = partiallyEvaluate(cssPropExpression, shouldEvaluate, transformerContext.program, undefined, stats) as
+      | EvaluatedStyle
+      | RequiresRuntimeResult;
     if (!transformerContext.staticThemes) {
       transformerContext.glitz.injectStyle(stripUnevaluableProperties(cssData));
     }
@@ -1131,13 +1124,122 @@ function getCssDataFromCssProp(
         );
       }
     }
-    if (isEvaluableStyle(cssData, !!transformerContext.staticThemes, true)) {
-      return cssData;
-    } else {
-      reportRequiresRuntimeResult('css prop could not be statically evaluated', cssData, node, transformerContext);
-    }
+    return cssData;
   }
   return undefined;
+}
+
+function getCssPropExpression(node: ts.JsxSelfClosingElement | ts.JsxOpeningElement) {
+  const cssJsxAttr = node.attributes.properties.find(
+    p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
+  );
+  if (
+    cssJsxAttr &&
+    ts.isJsxAttribute(cssJsxAttr) &&
+    cssJsxAttr.initializer &&
+    ts.isJsxExpression(cssJsxAttr.initializer) &&
+    cssJsxAttr.initializer.expression
+  ) {
+    return cssJsxAttr.initializer.expression;
+  }
+  return undefined;
+}
+
+function rewriteFunctionToReturnClassNamesIfPossible(
+  element: ts.JsxSelfClosingElement | ts.JsxElement,
+  transformerContext: TransformerContext,
+  elementName?: string,
+  componentName?: string,
+) {
+  let cssPropExpression = getCssPropExpression(ts.isJsxElement(element) ? element.openingElement : element);
+  if (cssPropExpression) {
+    const shouldEvaluate = (node: ts.Node) => {
+      if (isFunction(node)) {
+        return false;
+      }
+      return true;
+    };
+    const possibleFunction = partiallyEvaluate(cssPropExpression, shouldEvaluate, transformerContext.program);
+    if (isFunction(possibleFunction)) {
+      let evaluatedReturnsCount = 0;
+      let totalReturnsCount = 0;
+      const returnTransformations = new Map<ts.Expression, ts.Expression>();
+
+      const visitFunctionChild = (node: ts.Node) => {
+        if (ts.isReturnStatement(node)) {
+          totalReturnsCount++;
+          if (node.expression) {
+            let styles = evaluate(node.expression, transformerContext.program);
+            if (typeof styles === 'function') {
+              styles = styles();
+            }
+            if (isEvaluableStyle(styles, !!transformerContext.staticThemes, true)) {
+              const classNames = getClassNameExpression(styles, transformerContext);
+              if (!isRequiresRuntimeResult(classNames)) {
+                const expression = ts.isJsxExpression(classNames) ? classNames.expression! : classNames;
+                returnTransformations.set(node.expression, expression);
+                evaluatedReturnsCount++;
+              } else {
+                reportRequiresRuntimeResult(
+                  'Unable to evaluate return statement',
+                  classNames,
+                  node,
+                  transformerContext,
+                );
+              }
+            } else {
+              reportRequiresRuntimeResult(
+                'Unable to evaluate return statement',
+                requiresRuntimeResult('could not statically evaluate styles'),
+                node,
+                transformerContext,
+              );
+            }
+          } else {
+            evaluatedReturnsCount++;
+          }
+        } else {
+          ts.forEachChild(node, visitFunctionChild);
+        }
+      };
+      ts.forEachChild(possibleFunction, visitFunctionChild);
+
+      if (evaluatedReturnsCount === totalReturnsCount) {
+        returnTransformations.forEach((v, k) => {
+          transformerContext.transformations.set(k, v);
+        });
+
+        if (ts.isIdentifier(cssPropExpression)) {
+          cssPropExpression = transformerContext.tsContext.factory.createCallExpression(
+            cssPropExpression,
+            undefined,
+            [],
+          );
+        }
+
+        const tagName = ts.isJsxElement(element) ? element.openingElement.tagName : element.tagName;
+
+        if (
+          ts.isPropertyAccessExpression(tagName) &&
+          ts.isIdentifier(tagName.expression) &&
+          tagName.expression.escapedText.toString() === styledName
+        ) {
+          elementName = tagName.name.escapedText.toString().toLowerCase();
+          componentName = `${styledName}.${tagName.name.escapedText}`;
+        } else if (!elementName || !componentName) {
+          throw new Error(
+            'Unable to determine element and component name for ' +
+              element.getText() +
+              ' in ' +
+              element.getSourceFile().fileName,
+          );
+        }
+        rewriteToHtmlElement(element, elementName, componentName, cssPropExpression, transformerContext);
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // This takes the file that contains static themes and trys to evaluate
@@ -1311,7 +1413,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
       }
     }
 
-    return ts.createJsxExpression(undefined, ternaryClassNameExpression);
+    return ternaryClassNameExpression!;
   }
 
   if (!transformerContext.staticThemes) {
@@ -1322,7 +1424,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
       );
     } else {
       const classNames = transformerContext.glitz.injectStyle(style);
-      return ts.createStringLiteral(classNames);
+      return factory.createStringLiteral(classNames);
     }
   } else {
     if (!propFunc) {
@@ -1478,16 +1580,13 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
           return factory.createStringLiteral(classesUsedInAllThemes.join(' '));
         }
         if (classesUsedInAllThemes.length) {
-          return factory.createJsxExpression(
-            undefined,
-            factory.createBinaryExpression(
-              factory.createStringLiteral(classesUsedInAllThemes.join(' ') + ' '),
-              ts.SyntaxKind.PlusToken,
-              ternaryExrp!,
-            ),
+          return factory.createBinaryExpression(
+            factory.createStringLiteral(classesUsedInAllThemes.join(' ') + ' '),
+            ts.SyntaxKind.PlusToken,
+            ternaryExrp!,
           );
         }
-        return factory.createJsxExpression(undefined, ternaryExrp);
+        return ternaryExrp;
       } else {
         return requiresRuntimeResult(
           'JSX expression outside of a component declaration cannot be statically evaluated',
@@ -1829,6 +1928,10 @@ function getSeverity(node: ts.Node, transformerContext: TransformerContext): Sev
     node = node.parent;
   }
   return severity;
+}
+
+function isFunction(node: ts.Node): node is ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression {
+  return ts.isArrowFunction(node) || ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node);
 }
 
 function declarePure(node: ts.CallExpression) {

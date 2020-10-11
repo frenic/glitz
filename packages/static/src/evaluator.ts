@@ -486,7 +486,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     if (!symbol) {
       return requiresRuntimeResult(`Unable to resolve identifier '${expr.text}'`, expr);
     }
-
     const value = evaluateInternal({ identifier: expr, symbol }, context);
     return value;
   } else if (ts.isNoSubstitutionTemplateLiteral(expr)) {
