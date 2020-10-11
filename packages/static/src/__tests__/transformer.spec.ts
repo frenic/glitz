@@ -144,6 +144,21 @@ function Component(props: { isStyled: boolean; isLarge: boolean }) {
 
 test('transforms inline decorator in css prop', () => {
   const code = {
+    'themes.ts': `
+export const staticThemes = [{
+  id: 'red',
+  color: 'red',
+  backgroundColor: 'lightblue',
+}, {
+  id: 'blue',
+  color: 'blue',
+  backgroundColor: 'lightblue',
+}, {
+  id: 'black',
+  color: 'black',
+  backgroundColor: 'lightblue',
+}];
+`,
     'file1.tsx': `
 import { styled } from '@glitz/react';
 
@@ -170,8 +185,10 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
           createSomeDecorator(),
           createOtherDecorator(),
         );
+      case 'Full':
+        return styled({ backgroundColor: t => t.backgroundColor });
       default:
-        return styled();
+        return styled({ color: t => t.color });
     }
   };
 
@@ -194,10 +211,12 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
   };
 
   expectEqual(
-    compile(code),
+    compile(code, { staticThemesFile: 'themes.ts' }),
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import(\\"./themes\\");
         function createSomeDecorator() {
             return /*#__PURE__*/ styled({ backgroundColor: 'blue' });
         }
@@ -205,6 +224,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             return /*#__PURE__*/ styled({ backgroundColor: 'red' });
         }
         function GridLayout(props) {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             const dynamic = () => {
                 const gridDecorator = /*#__PURE__*/ styled({ display: 'grid', gridGap: '10px' });
                 switch (props.layout) {
@@ -212,8 +232,10 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
                         return \\"a b c\\";
                     case 'HalfHalf':
                         return \\"c d e\\";
+                    case 'Full':
+                        return \\"f\\";
                     default:
-                        return \\"\\";
+                        return __glitzTheme.color === \\"black\\" ? \\"i\\" : __glitzTheme.color === \\"blue\\" ? \\"h\\" : __glitzTheme.color === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + __glitzTheme); })();
                 }
             };
             const superDynamic = () => {
@@ -232,7 +254,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{gap:10px}.b{display:flex}.c{background-color:red}.d{grid-gap:10px}.e{display:grid}"`,
+        `".a{gap:10px}.b{display:flex}.c{background-color:red}.d{grid-gap:10px}.e{display:grid}.f{background-color:lightblue}.g{color:red}.h{color:blue}.i{color:black}"`,
       );
     },
     diagnostics =>
@@ -242,12 +264,12 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 33,
+              "line": 35,
               "message": "Could not determine a static value for: props",
               "severity": "info",
               "source": "props",
             },
-            "line": 42,
+            "line": 44,
             "message": "css prop could not be statically evaluated",
             "severity": "info",
             "source": "<styled.Div css={superDynamic()}>Super dynamic</styled.Div>",
