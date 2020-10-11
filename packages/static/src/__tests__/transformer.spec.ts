@@ -169,6 +169,10 @@ function createOtherDecorator() {
   return styled({ backgroundColor: 'red' });
 }
 
+export function exportedDecorator() {
+  return styled({ display: 'inline' });
+}
+
 function GridLayout(props: { children: any, layout: string, color?: string }) {
   const dynamic = () => {
     const gridDecorator = styled({ display: 'grid', gridGap: '10px' });
@@ -204,6 +208,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
     <>
       <styled.Div css={dynamic} />
       <styled.Div css={superDynamic()}>Super dynamic</styled.Div>
+      <styled.Div css={exportedDecorator} />
     </>
   );
 }
@@ -222,6 +227,9 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
         }
         function createOtherDecorator() {
             return /*#__PURE__*/ styled({ backgroundColor: 'red' });
+        }
+        export function exportedDecorator() {
+            return /*#__PURE__*/ styled({ display: 'inline' });
         }
         function GridLayout(props) {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
@@ -249,6 +257,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             return (<>
               <div className={dynamic()} data-glitzname=\\"styled.Div\\"/>
               <styled.Div css={superDynamic()}>Super dynamic</styled.Div>
+              <styled.Div css={exportedDecorator}/>
             </>);
         }
         "
@@ -264,15 +273,31 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 35,
+              "line": 39,
               "message": "Could not determine a static value for: props",
               "severity": "info",
               "source": "props",
             },
-            "line": 44,
+            "line": 48,
             "message": "css prop could not be statically evaluated",
             "severity": "info",
             "source": "<styled.Div css={superDynamic()}>Super dynamic</styled.Div>",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 10,
+            "message": "Cannot rewrite decorator since it is exported",
+            "severity": "info",
+            "source": "export function exportedDecorator() {
+          return styled({ display: 'inline' });
+        }",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 49,
+            "message": "css prop could not be statically evaluated",
+            "severity": "info",
+            "source": "<styled.Div css={exportedDecorator} />",
           },
         ]
       `),

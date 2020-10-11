@@ -972,7 +972,7 @@ function isStaticComponentVariableUse(node: ts.Node) {
 
 function reportRequiresRuntimeResult(
   message: string,
-  requiresRuntimeResults: RequiresRuntimeResult | RequiresRuntimeResult[] | EvaluatedStyle[],
+  requiresRuntimeResults: RequiresRuntimeResult | RequiresRuntimeResult[] | EvaluatedStyle[] | undefined,
   node: ts.Node,
   transformerContext: TransformerContext,
 ) {
@@ -1013,6 +1013,14 @@ function reportRequiresRuntimeResult(
           severity: getSeverity(requiresRuntime.node ?? node, transformerContext),
         });
       }
+    } else {
+      transformerContext.diagnosticsReporter({
+        message,
+        file: node.getSourceFile().fileName,
+        line: getLineNumber(node),
+        source: node.getText(),
+        severity: getSeverity(node, transformerContext),
+      });
     }
     const file = node.getSourceFile();
     for (const innerDiagnostic of innerDiagnostics) {
@@ -1175,6 +1183,34 @@ function rewriteFunctionToReturnClassNamesIfPossible(
     };
     const possibleFunction = partiallyEvaluate(cssPropExpression, shouldEvaluate, transformerContext.program);
     if (isFunction(possibleFunction)) {
+      let functionIsExported = false;
+      if (
+        ts.isVariableDeclaration(possibleFunction.parent) &&
+        ts.isVariableStatement(possibleFunction.parent.parent.parent)
+      ) {
+        const stmt = possibleFunction.parent.parent.parent;
+        if (stmt.modifiers && stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
+          functionIsExported = true;
+        }
+      } else if (ts.isFunctionDeclaration(possibleFunction)) {
+        if (
+          possibleFunction.modifiers &&
+          possibleFunction.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)
+        ) {
+          functionIsExported = true;
+        }
+      }
+
+      if (functionIsExported) {
+        reportRequiresRuntimeResult(
+          'Cannot rewrite decorator since it is exported',
+          undefined,
+          possibleFunction,
+          transformerContext,
+        );
+        return false;
+      }
+
       let evaluatedReturnsCount = 0;
       let totalReturnsCount = 0;
       const returnTransformations = new Map<ts.Expression, ts.Expression>();
