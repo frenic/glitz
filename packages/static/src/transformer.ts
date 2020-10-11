@@ -851,7 +851,7 @@ function reportUsageOutsideOfJsxIfNeeded(
         message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
         source: stmt.getText(),
         severity: getSeverity(componentSymbol.valueDeclaration, transformerContext),
-        line: sourceFile.getLineAndCharacterOfPosition(reference.pos).line,
+        line: getLineNumber(reference),
       });
     }
   }
@@ -906,18 +906,19 @@ function isTopLevelJsxInComposedComponent(
 }
 
 function reportTopLevelJsxInComposedComponent(node: ts.Node, transformerContext: TransformerContext) {
+  node = ts.getOriginalNode(node);
   if (hasNodeFlag(transformerContext, node, diagnosticsReportedFlag)) {
     return;
   }
   setNodeFlag(transformerContext, node, diagnosticsReportedFlag);
 
-  const sourceFile = node.getSourceFile();
+  const sourceFile = ts.getOriginalNode(node.getSourceFile()) as ts.SourceFile;
   if (transformerContext.diagnosticsReporter) {
     transformerContext.diagnosticsReporter({
       message:
         'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
       file: sourceFile.fileName,
-      line: sourceFile.getLineAndCharacterOfPosition(node.pos).line,
+      line: getLineNumber(node),
       severity: 'info',
       source: node.getText(),
     });
@@ -1018,7 +1019,7 @@ function reportRequiresRuntimeResult(
       transformerContext.diagnosticsReporter({
         message,
         file: file.fileName,
-        line: file.getLineAndCharacterOfPosition(node.pos).line,
+        line: getLineNumber(node),
         source: node.getText(),
         severity: getSeverity(node, transformerContext),
         innerDiagnostic,
@@ -1964,4 +1965,10 @@ function staticGlitzUsed(stats: EvaluationStats) {
     }
   });
   return staticGlitzUsed;
+}
+
+function getLineNumber(node: ts.Node) {
+  node = ts.getOriginalNode(node);
+  const file = ts.getOriginalNode(node.getSourceFile()) as ts.SourceFile;
+  return file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1;
 }

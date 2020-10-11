@@ -69,7 +69,7 @@ export default function compile(
     },
     getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile) {
       if (fileName in files) {
-        return ts.createSourceFile(fileName, files[fileName], ts.ScriptTarget.Latest);
+        return ts.createSourceFile(fileName, files[fileName].trim(), ts.ScriptTarget.Latest);
       }
 
       const sourceFile = compilerHost.getSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile);

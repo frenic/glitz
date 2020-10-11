@@ -375,7 +375,7 @@ const y = window.innerHeight + 100;
   expect(isRequiresRuntimeResult(res)).toBe(true);
   const diagnostics = res.getDiagnostics();
   expect(diagnostics?.source).toBe('window');
-  expect(diagnostics?.line).toBe(3);
+  expect(diagnostics?.line).toBe(4);
   expect(diagnostics?.file).toBe('entry.ts');
 });
 

@@ -861,16 +861,14 @@ export function requiresRuntimeResult(message: string, node?: ts.Node): Requires
       if (!node) {
         return undefined;
       }
-      let file = node;
-      while (!ts.isSourceFile(file)) {
-        file = file.parent;
-      }
+      const file = ts.getOriginalNode(node.getSourceFile()) as ts.SourceFile;
+      node = ts.getOriginalNode(node);
 
       return {
         message,
         source: node.getText(file),
         file: file.fileName,
-        line: file.getLineAndCharacterOfPosition(node.pos).line,
+        line: file.getLineAndCharacterOfPosition(node.getStart()).line + 1,
       };
     },
   };
