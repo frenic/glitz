@@ -437,6 +437,43 @@ const Styled = styled.div({
   );
 });
 
+test('diagnostics can be suppressed', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+function MyComponent(props: {}) {
+    return <Styled id="some-id">hello</Styled>;
+}
+
+/** @glitz-suppress */
+const Styled = styled.div({
+    width: (window as any).theWidth,
+    height: '100%'
+});
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            return <Styled id=\\"some-id\\">hello</Styled>;
+        }
+        /** @glitz-suppress */
+        const Styled = /*#__PURE__*/ styled.div({
+            width: window.theWidth,
+            height: '100%'
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
+});
+
 test('adds info diagnostics when it cannot evaluate', () => {
   const code = {
     'file1.tsx': `

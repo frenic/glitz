@@ -845,14 +845,17 @@ function reportUsageOutsideOfJsxIfNeeded(
     for (const reference of references) {
       const sourceFile = reference.getSourceFile();
       const stmt = getStatement(reference);
+      const severity = getSeverity(componentSymbol.valueDeclaration, transformerContext);
 
-      transformerContext.diagnosticsReporter({
-        file: sourceFile.fileName,
-        message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
-        source: stmt.getText(),
-        severity: getSeverity(componentSymbol.valueDeclaration, transformerContext),
-        line: getLineNumber(reference),
-      });
+      if (severity !== 'suppressed') {
+        transformerContext.diagnosticsReporter({
+          file: sourceFile.fileName,
+          message: `Component '${componentName}' cannot be statically extracted since it's used outside of JSX`,
+          source: stmt.getText(),
+          line: getLineNumber(reference),
+          severity,
+        });
+      }
     }
   }
 }
@@ -1004,34 +1007,41 @@ function reportRequiresRuntimeResult(
     }
     if (requiresRuntime) {
       const requireRuntimeDiagnostics = requiresRuntime.getDiagnostics();
-      if (requireRuntimeDiagnostics) {
+      const severity = getSeverity(requiresRuntime.node ?? node, transformerContext);
+      if (requireRuntimeDiagnostics && severity !== 'suppressed') {
         innerDiagnostics.push({
           file: requireRuntimeDiagnostics.file,
           line: requireRuntimeDiagnostics.line,
           message: requireRuntimeDiagnostics.message,
           source: requireRuntimeDiagnostics.source,
-          severity: getSeverity(requiresRuntime.node ?? node, transformerContext),
+          severity,
         });
       }
     } else {
-      transformerContext.diagnosticsReporter({
-        message,
-        file: node.getSourceFile().fileName,
-        line: getLineNumber(node),
-        source: node.getText(),
-        severity: getSeverity(node, transformerContext),
-      });
+      const severity = getSeverity(node, transformerContext);
+      if (severity !== 'suppressed') {
+        transformerContext.diagnosticsReporter({
+          message,
+          file: node.getSourceFile().fileName,
+          line: getLineNumber(node),
+          source: node.getText(),
+          severity,
+        });
+      }
     }
     const file = node.getSourceFile();
     for (const innerDiagnostic of innerDiagnostics) {
-      transformerContext.diagnosticsReporter({
-        message,
-        file: file.fileName,
-        line: getLineNumber(node),
-        source: node.getText(),
-        severity: getSeverity(node, transformerContext),
-        innerDiagnostic,
-      });
+      const severity = getSeverity(node, transformerContext);
+      if (severity !== 'suppressed') {
+        transformerContext.diagnosticsReporter({
+          message,
+          file: file.fileName,
+          line: getLineNumber(node),
+          source: node.getText(),
+          innerDiagnostic,
+          severity,
+        });
+      }
     }
   }
 }
@@ -1972,7 +1982,7 @@ function isStyledCall(node: ts.CallExpression) {
   return false;
 }
 
-function getSeverity(node: ts.Node, transformerContext: TransformerContext): Severity {
+function getSeverity(node: ts.Node, transformerContext: TransformerContext): Severity | 'suppressed' {
   if (transformerContext.allStylesShouldBeStatic || transformerContext.currentFileShouldBeStatic) {
     return 'error';
   }
@@ -1981,6 +1991,9 @@ function getSeverity(node: ts.Node, transformerContext: TransformerContext): Sev
     if (hasJSDocTag(node, 'glitz-static')) {
       severity = 'error';
       break;
+    }
+    if (hasJSDocTag(node, 'glitz-suppress')) {
+      return 'suppressed';
     }
     node = node.parent;
   }
