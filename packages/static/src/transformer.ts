@@ -1177,12 +1177,18 @@ function getCssPropExpression(node: ts.JsxSelfClosingElement | ts.JsxOpeningElem
   return undefined;
 }
 
+const decoratorRewrittenFlag = 'decoratorRewritten';
+
 function rewriteFunctionToReturnClassNamesIfPossible(
   element: ts.JsxSelfClosingElement | ts.JsxElement,
   transformerContext: TransformerContext,
   elementName?: string,
   componentName?: string,
 ) {
+  if (hasNodeFlag(transformerContext, element, decoratorRewrittenFlag)) {
+    return true;
+  }
+
   let cssPropExpression = getCssPropExpression(ts.isJsxElement(element) ? element.openingElement : element);
   if (cssPropExpression) {
     const shouldEvaluate = (node: ts.Node) => {
@@ -1295,6 +1301,7 @@ function rewriteFunctionToReturnClassNamesIfPossible(
           );
         }
         rewriteToHtmlElement(element, elementName, componentName, cssPropExpression, transformerContext);
+        setNodeFlag(transformerContext, element, decoratorRewrittenFlag);
         return true;
       }
     }
