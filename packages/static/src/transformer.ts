@@ -1109,6 +1109,19 @@ function getCssDataFromCssProp(
     let cssData = partiallyEvaluate(cssPropExpression, shouldEvaluate, transformerContext.program, undefined, stats) as
       | EvaluatedStyle
       | RequiresRuntimeResult;
+
+    if (typeof cssData === 'function') {
+      try {
+        cssData = (cssData as FunctionWithTsNode)();
+      } catch (e) {
+        if (isRequiresRuntimeResult(e)) {
+          cssData = e;
+        } else {
+          throw e;
+        }
+      }
+    }
+
     if (!transformerContext.staticThemes) {
       transformerContext.glitz.injectStyle(stripUnevaluableProperties(cssData));
     }

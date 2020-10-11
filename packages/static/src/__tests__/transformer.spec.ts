@@ -1224,6 +1224,7 @@ const colorDecorator = styled({ backgroundColor: 'red' });
 const paddingDecorator = styled({ paddingTop: '10px' });
 const decorator = colorDecorator(paddingDecorator());
 const node1 = <styled.Div css={decorator()} />;
+const node2 = <styled.Div css={decorator} />;
 `,
   };
 
@@ -1234,6 +1235,7 @@ const node1 = <styled.Div css={decorator()} />;
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
       const decorator = colorDecorator(paddingDecorator());
       const node1 = <div className={\\"a b\\"} data-glitzname=\\"styled.Div\\"/>;
+      const node2 = <div className={\\"a b\\"} data-glitzname=\\"styled.Div\\"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{padding-top:10px}.b{background-color:red}"`);
