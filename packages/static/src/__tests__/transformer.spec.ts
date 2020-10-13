@@ -209,6 +209,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
       <styled.Div css={dynamic} />
       <styled.Div css={superDynamic()}>Super dynamic</styled.Div>
       <styled.Div css={exportedDecorator} />
+      <styled.Div css={{ color: t => props.color ? t.color : t.backgroundColor }} />
     </>
   );
 }
@@ -258,6 +259,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
               <div className={dynamic()} data-glitzname=\\"styled.Div\\"/>
               <styled.Div css={superDynamic()}>Super dynamic</styled.Div>
               <styled.Div css={exportedDecorator}/>
+              <styled.Div css={{ color: t => props.color ? t.color : t.backgroundColor }}/>
             </>);
         }
         "
@@ -298,6 +300,20 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "message": "css prop could not be statically evaluated",
             "severity": "info",
             "source": "<styled.Div css={exportedDecorator} />",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 50,
+              "message": "Could not determine a static value for: props",
+              "severity": "info",
+              "source": "props",
+            },
+            "line": 50,
+            "message": "Evaluation of theme function requires runtime",
+            "severity": "info",
+            "source": "<styled.Div css={{ color: t => props.color ? t.color : t.backgroundColor }} />",
           },
         ]
       `),
