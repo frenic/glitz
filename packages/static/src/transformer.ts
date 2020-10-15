@@ -16,7 +16,8 @@ import {
 } from './evaluator';
 import { getStaticExports } from './static-module-overloads';
 
-export const glitzModuleName = '@glitz/react';
+export const glitzReactModuleName = '@glitz/react';
+export const glitzCoreModuleName = '@glitz/core';
 export const styledName = 'styled';
 export const useStyleName = 'useStyle';
 const staticThemesName = 'staticThemes';
@@ -26,11 +27,18 @@ const useThemeName = 'useTheme';
 const themeIdPropertyName = 'id';
 const diagnosticsReportedFlag = 'diagnosticsReported';
 
-staticModuleOverloads[glitzModuleName] = () => {
+staticModuleOverloads[glitzReactModuleName] = () => {
   const files: { [moduleName: string]: string } = {};
-  files[glitzModuleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
+  files[glitzReactModuleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
   files['shared.ts'] = fs.readFileSync(path.join(__dirname, 'shared.ts')).toString();
-  return getStaticExports(glitzModuleName, files);
+  return getStaticExports(glitzReactModuleName, files);
+};
+
+staticModuleOverloads[glitzCoreModuleName] = () => {
+  const files: { [moduleName: string]: string } = {};
+  files[glitzCoreModuleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz-core.ts')).toString();
+  files['shared.ts'] = fs.readFileSync(path.join(__dirname, 'shared.ts')).toString();
+  return getStaticExports(glitzCoreModuleName, files);
 };
 
 staticModuleOverloads['react'] = () => {
@@ -311,7 +319,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       undefined,
       undefined,
       importClause,
-      factory.createStringLiteral(glitzModuleName),
+      factory.createStringLiteral(glitzReactModuleName),
     );
     transformerContext.currentFileHasImportedUseTheme = true;
     result = [node, importDecl];
@@ -2042,7 +2050,7 @@ function setNodeFlag(transformerContext: TransformerContext, node: ts.Node, flag
 function staticGlitzUsed(stats: EvaluationStats) {
   let staticGlitzUsed = false;
   stats.usedVariables!.forEach((_, k) => {
-    if (k.getSourceFile().fileName.indexOf(glitzModuleName) !== -1) {
+    if (k.getSourceFile().fileName.indexOf(glitzReactModuleName) !== -1) {
       staticGlitzUsed = true;
     }
   });

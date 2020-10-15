@@ -2,6 +2,9 @@ import { Style } from '@glitz/type';
 import { Query } from '../types/query';
 import { hyphenateProperty } from '../utils/parse';
 
+// NOTE! A very similar implementation of this exists in packages/static/src/static-glitz-core.ts
+// Changes here should be reflected in that file
+
 // Unfortunately we need this until there's a way to have index signatures for
 // other types like: https://github.com/Microsoft/TypeScript/issues/7765.
 // This is a work around that works thanks to dynamic properties.

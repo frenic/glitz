@@ -502,6 +502,11 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     return null;
   } else if (expr.kind === ts.SyntaxKind.UndefinedKeyword) {
     return undefined;
+  } else if (ts.isRegularExpressionLiteral(expr)) {
+    const regex = expr.text.replace(/^\//, '');
+    const parts = regex.split('/');
+    const flags = parts.pop();
+    return new RegExp(parts.join('/'), flags);
   } else if (ts.isObjectLiteralExpression(expr)) {
     const obj: any = {};
     for (const property of expr.properties) {

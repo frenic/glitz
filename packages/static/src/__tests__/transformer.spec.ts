@@ -33,6 +33,59 @@ const Styled = styled.div(styleObject);
   });
 });
 
+test('can use glitz core', () => {
+  const code = {
+    'file1.tsx': `
+import { media, query } from '@glitz/core';
+import { styled } from '@glitz/react';
+
+const BREAKPOINT = 768;
+const MOBILE_MAX_WIDTH = query({ maxWidth: '100px' });
+const DESKTOP_MIN_WIDTH = query({ minWidth: '101px' });
+
+export function createMobileDecorator(mobileStyle: any) {
+  return styled(media(MOBILE_MAX_WIDTH, mobileStyle));
+}
+
+export function createDesktopDecorator(desktopStyle: any) {
+  return styled(media(DESKTOP_MIN_WIDTH, desktopStyle));
+}
+
+const decorator = createMobileDecorator({ gridTemplate: { areas: '"a" "b"', columns: '1fr' } });
+const Styled = styled.div(decorator);
+
+const node = <Styled />;
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { media, query } from '@glitz/core';
+        import { styled } from '@glitz/react';
+        const BREAKPOINT = 768;
+        const MOBILE_MAX_WIDTH = /*#__PURE__*/ query({ maxWidth: '100px' });
+        const DESKTOP_MIN_WIDTH = query({ minWidth: '101px' });
+        export function createMobileDecorator(mobileStyle) {
+            return /*#__PURE__*/ styled(media(MOBILE_MAX_WIDTH, mobileStyle));
+        }
+        export function createDesktopDecorator(desktopStyle) {
+            return /*#__PURE__*/ styled(media(DESKTOP_MIN_WIDTH, desktopStyle));
+        }
+        const decorator = /*#__PURE__*/ createMobileDecorator({ gridTemplate: { areas: '\\"a\\" \\"b\\"', columns: '1fr' } });
+        const Styled = /*#__PURE__*/ styled.div(decorator);
+        const node = <div className={\\"a b\\"} data-glitzname=\\"Styled\\"/>;
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `"@media (max-width: 100px){.a{grid-template-columns:1fr}.b{grid-template-areas:\\"a\\" \\"b\\"}}"`,
+      );
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
+});
+
 test('can handle React.useMemo()', () => {
   const code = {
     'file1.tsx': `

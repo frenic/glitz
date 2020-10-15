@@ -1,5 +1,7 @@
 export type Style = Record<string, any>;
 
+export type Query = Record<string, any>;
+
 export type Styles = Style | Style[] | StaticDecorator;
 
 export type DirtyStyle = Style | StaticDecorator | DirtyStyle[] | false | undefined;
