@@ -37,7 +37,7 @@ export default function compile(
       for (const moduleName of moduleNames) {
         if (moduleName === glitzReactModuleName) {
           resolvedModules.push({
-            resolvedFileName: path.join(__dirname, '..', 'static-glitz.ts'),
+            resolvedFileName: path.join(__dirname, '..', 'static-glitz-react.ts'),
           });
           continue;
         }

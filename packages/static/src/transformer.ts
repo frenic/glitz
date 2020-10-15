@@ -29,7 +29,7 @@ const diagnosticsReportedFlag = 'diagnosticsReported';
 
 staticModuleOverloads[glitzReactModuleName] = () => {
   const files: { [moduleName: string]: string } = {};
-  files[glitzReactModuleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz.ts')).toString();
+  files[glitzReactModuleName + '.ts'] = fs.readFileSync(path.join(__dirname, 'static-glitz-react.ts')).toString();
   files['shared.ts'] = fs.readFileSync(path.join(__dirname, 'shared.ts')).toString();
   return getStaticExports(glitzReactModuleName, files);
 };
