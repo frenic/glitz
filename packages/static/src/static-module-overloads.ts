@@ -95,13 +95,23 @@ export function getStaticExports(name: string, files: { [moduleName: string]: st
       }
     }
 
+    if (ts.isExportAssignment(stmt)) {
+      const symbol = typeChecker.getSymbolAtLocation(stmt.expression);
+      if (symbol) {
+        cachedStaticExports[name]['default'] = symbol;
+      }
+    }
+
     if (
       ts.isFunctionDeclaration(stmt) &&
       stmt.modifiers &&
       stmt.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword) &&
       stmt.name
     ) {
-      cachedStaticExports[name][stmt.name.getText()] = typeChecker.getSymbolAtLocation(stmt.name)!;
+      const exportName = stmt.modifiers.find(m => m.kind === ts.SyntaxKind.DefaultKeyword)
+        ? 'default'
+        : stmt.name.getText();
+      cachedStaticExports[name][exportName] = typeChecker.getSymbolAtLocation(stmt.name)!;
     }
   }
   return [cachedStaticExports[name], program] as const;

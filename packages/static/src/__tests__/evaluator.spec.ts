@@ -180,6 +180,9 @@ function calculator(a: number, b: number) {
   return a + b + one;
 }
 export { calculator };
+export default function() {
+  return 1;
+}
 export const oneHundred = 100;
 export const twoHundred = 200;
 `,
@@ -194,11 +197,12 @@ export const oneHundredExported = oneHundred;
     'entry.ts': `
 import { theCalculator, oneHundredExported } from './shared3';
 import { twoHundred } from './shared1';
+import getOne from './shared1';
 const x = oneHundredExported;
 const y = twoHundred;
 `,
   };
-  expect(evaluate('theCalculator(x, y)', code)).toBe(100 + 200 + 1);
+  expect(evaluate('theCalculator(x, y) + getOne()', code)).toBe(100 + 200 + 1 + 1);
 });
 
 test('can use JS globals', () => {

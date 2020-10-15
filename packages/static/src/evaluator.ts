@@ -661,6 +661,31 @@ function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: t
           }
         }
       }
+    } else if (importDecl && ts.isImportClause(importDecl)) {
+      fileName = importDecl.parent.moduleSpecifier.getText().replace(/["']+/g, '');
+      if (fileName in staticModuleOverloads) {
+        const [staticExports, staticProgram] = staticModuleOverloads[fileName]();
+        if ('default' in staticExports) {
+          symbolOrSymbols = staticExports['default'];
+          program = staticProgram;
+        } else {
+          return [undefined, program, undefined] as const;
+        }
+      } else {
+        const importSymbol = typeChecker.getSymbolAtLocation(importDecl.parent.moduleSpecifier);
+        if (importSymbol) {
+          if (ts.isSourceFile(importSymbol.valueDeclaration)) {
+            fileName = importSymbol.valueDeclaration.fileName;
+          }
+          const exports = typeChecker.getExportsOfModule(importSymbol);
+          for (const exp of exports) {
+            if (exp.escapedName === 'default') {
+              symbolOrSymbols = exp;
+              break;
+            }
+          }
+        }
+      }
     }
   }
   if (!Array.isArray(symbolOrSymbols) && !symbolOrSymbols.valueDeclaration) {
