@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const useMemo = <T>(creator: () => T, deps: any[]) => {
+export const useMemo = <T>(creator: () => T, _: any[]) => {
   return creator();
 };
 
