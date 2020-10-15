@@ -1959,7 +1959,103 @@ function Component() {
   });
 });
 
-test('can compile build-in styled components', () => {
+test('compiles correctly for a single theme', () => {
+  const code = {
+    'themes.ts': `
+export const staticThemes = [{
+  id: 'dark',
+  fontSize: { l: 60 },
+  primary: { text: '#000', color: '#000' },
+}];
+`,
+    'file1.tsx': `
+import * as React from 'react';
+import { styled } from '@glitz/react';
+
+function Image(props: any) {
+  return <img />;
+}
+
+function registerComponent(component: any) {
+  return component;
+}
+
+export const ImageBlock = registerComponent((props: { image: any, textColor: string, showTitle: boolean, title: string }) => (
+  <Container>
+    <Image src={props.image} />
+    {props.showTitle && (
+      <>{props.textColor === 'Light' ? <LightText>{props.title}</LightText> : <DarkText>{props.title}</DarkText>}</>
+    )}
+  </Container>
+));
+
+const Text = styled.span({
+  position: 'absolute',
+  bottom: 60,
+  left: 60,
+  fontSize: t => t.fontSize.l,
+});
+
+const LightText = styled(Text, {
+  color: t => t.primary.text,
+});
+
+const DarkText = styled(Text, {
+  color: t => t.primary.color,
+});
+
+const Container = styled.div({
+  position: 'relative',
+});
+
+`,
+  };
+
+  expectEqual(
+    compile(code, { staticThemesFile: 'themes.ts' }),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import * as React from 'react';
+        import { styled } from '@glitz/react';
+        function Image(props) {
+            return <img />;
+        }
+        function registerComponent(component) {
+            return component;
+        }
+        export const ImageBlock = registerComponent((props) => {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            return (<div className={\\"d\\"} data-glitzname=\\"Container\\">
+            <Image src={props.image}/>
+            {props.showTitle && (<>{props.textColor === 'Light' ? <span className={\\"a b c e f\\"} data-glitzname=\\"LightText\\">{props.title}</span> : <span className={\\"a b c e f\\"} data-glitzname=\\"DarkText\\">{props.title}</span>}</>)}
+          </div>);
+        });
+        const Text = /*#__PURE__*/ styled.span({
+            position: 'absolute',
+            bottom: 60,
+            left: 60,
+            fontSize: t => t.fontSize.l,
+        });
+        const LightText = /*#__PURE__*/ styled(Text, {
+            color: t => t.primary.text,
+        });
+        const DarkText = /*#__PURE__*/ styled(Text, {
+            color: t => t.primary.color,
+        });
+        const Container = /*#__PURE__*/ styled.div({
+            position: 'relative',
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{left:60}.b{bottom:60}.c{position:absolute}.d{position:relative}.e{color:#000}.f{font-size:60}"`,
+      );
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
+});
+
+test('can compile built-in styled components', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';

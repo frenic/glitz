@@ -210,7 +210,13 @@ export function transformer(
       // before `window.Styled = Styled;` we will incorrectly inline it in the second pass
       // and later realize our mistake. This third pass fixes that by bailing on components
       // that are used outside of JSX.
-      if (staticStyledComponents.symbolsWithReferencesOutsideJsx.size !== 0) {
+      //
+      // We also make a third pass if there are any other transformations that got registered
+      // on the second pass.
+      if (
+        staticStyledComponents.symbolsWithReferencesOutsideJsx.size !== 0 ||
+        transformerContext.transformations.size !== 0
+      ) {
         transformedNode = visitNodeAndChildren(firstPassTransformedFile, context, transformerContext);
       }
 
@@ -785,7 +791,7 @@ function getComponentNode(
   if (ts.isFunctionDeclaration(node)) {
     return node;
   }
-  if ((ts.isFunctionExpression(node) || ts.isArrowFunction(node)) && ts.isVariableDeclaration(node.parent)) {
+  if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
     return node;
   }
   return getComponentNode(node.parent);
