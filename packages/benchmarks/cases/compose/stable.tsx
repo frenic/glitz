@@ -4,20 +4,20 @@ import { GlitzProvider, styled } from '@glitz/react-stable';
 
 const glitz = new GlitzClient();
 
-export default function () {
-  const components: any[] = [];
-  for (let i = 0; i < 100; i++) {
-    components.push(
-      styled(() => <styled.Div />, {
-        backgroundColor: `rgb(${i}, ${i}, ${i})`,
-        color: `rgb(${i}, ${i}, ${i})`,
-        marginTop: `${i}px`,
-      }),
-    );
-  }
+const components: any[] = [];
+for (let i = 0; i < 100; i++) {
+  components.push(
+    styled(({ compose }) => <styled.Div css={compose()} />, {
+      backgroundColor: `rgb(${i}, ${i}, ${i})`,
+      color: `rgb(${i}, ${i}, ${i})`,
+      marginTop: `${i}px`,
+    }),
+  );
+}
 
+export default function () {
   return (
-    <GlitzProvider glitz={glitz}>
+    <GlitzProvider glitz={glitz as any}>
       {components.map((Component, i) => (
         <Component key={i} />
       ))}

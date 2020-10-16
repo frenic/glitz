@@ -6,6 +6,7 @@
       "@glitz/*": ["./packages/*/src"],
       "@glitz/type": ["./packages/type"]
     },
+    "skipLibCheck": true,
     "noEmit": true
   },
   "exclude": ["**/cjs/", "**/esnext/", "**/mjs/", "**/types/", "**/__fixtures__"]

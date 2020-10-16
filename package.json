@@ -41,6 +41,6 @@
     "test": "jest --testMatch \"**/src/**/*.spec.(ts|tsx)\"",
     "lazy": "tsc && npm run lint && npm run test",
     "example": "lerna --scope glitz-example run start --",
-    "benchmark": "lerna --scope glitz-benchmark run benchmark --loglevel=silent --"
+    "benchmark": "lerna --scope glitz-benchmark run --loglevel=silent"
   }
 }
