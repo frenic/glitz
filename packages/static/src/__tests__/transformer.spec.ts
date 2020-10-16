@@ -2069,6 +2069,8 @@ const Container = styled.div({
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import * as React from 'react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import(\\"./themes\\");
         import { styled } from '@glitz/react';
         function Image(props) {
             return <img />;

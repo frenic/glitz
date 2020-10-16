@@ -125,7 +125,7 @@ type TransformerContext = {
    * Since a node is used as key, it's really important to use `ts.getOriginalNode(node)`
    * instead of just `node` since it's not certain that the node passed in is the same object.
    */
-  transformations: Map<ts.Node, ts.Node>;
+  transformations: Map<ts.Node, ts.Node | ts.Node[]>;
   /**
    * This can be used as a way of setting flags to make sure that we don't run the same
    * transformations multiple times.
@@ -177,7 +177,7 @@ export function transformer(
           tsContext: context,
           currentFileUsesGlitzThemes: false,
           currentFileHasImportedUseTheme: false,
-          transformations: new Map<ts.Node, ts.Node>(),
+          transformations: new Map<ts.Node, ts.Node | ts.Node[]>(),
           nodeFlags: new Map<ts.Node, string[]>(),
         },
         options,
@@ -275,7 +275,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   const factory = transformerContext.tsContext.factory;
   const staticStyledComponents = transformerContext.staticStyledComponents;
   const isFirstPass = transformerContext.passNumber === 1;
-  const isSecondPass = transformerContext.passNumber === 2;
   const canEvalStyle = (s: EvaluatedStyle) => isEvaluableStyle(s, !!transformerContext.staticThemes);
   const originalNode = ts.getOriginalNode(node);
 
@@ -295,49 +294,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         });
       }
       staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
-    }
-  }
-
-  if (
-    isSecondPass &&
-    transformerContext.currentFileUsesGlitzThemes &&
-    !transformerContext.currentFileHasImportedUseTheme &&
-    !!transformerContext.staticThemes &&
-    ts.isImportDeclaration(node)
-  ) {
-    const importClause = factory.createImportClause(
-      false,
-      undefined,
-      factory.createNamedImports([
-        factory.createImportSpecifier(
-          factory.createIdentifier(useThemeName),
-          factory.createIdentifier(useGlitzThemeName),
-        ),
-      ]),
-    );
-    const importDecl = factory.createImportDeclaration(
-      undefined,
-      undefined,
-      importClause,
-      factory.createStringLiteral(glitzReactModuleName),
-    );
-    transformerContext.currentFileHasImportedUseTheme = true;
-    result = [node, importDecl];
-    if (transformerContext.mode === 'development') {
-      const dirname = path.dirname(transformerContext.currentFile.fileName);
-      let importPath = path.relative(dirname, transformerContext.staticThemesFile!).replace(/\\/g, '/');
-      if (!importPath.startsWith('.')) {
-        importPath = './' + importPath;
-      }
-      const parts = importPath.split('.');
-      parts.splice(parts.length - 1, 1);
-      importPath = parts.join('.');
-      const asyncThemeImport = factory.createExpressionStatement(
-        factory.createCallExpression(factory.createIdentifier('import'), undefined, [
-          factory.createStringLiteral(importPath),
-        ]),
-      );
-      result.push(asyncThemeImport);
     }
   }
 
@@ -1773,6 +1729,7 @@ const useGlitzIsInjectedFlag = 'useGlitzIsInjected';
 function injectUseGlitzThemeVariable(transformerContext: TransformerContext, factory: ts.NodeFactory) {
   const componentNode = getComponentNode(transformerContext.currentNode);
   if (componentNode) {
+    injectImportUseGlitz(transformerContext);
     const originalComponentNode = ts.getOriginalNode(componentNode);
     if (!transformerContext.nodeFlags.has(originalComponentNode)) {
       transformerContext.nodeFlags.set(originalComponentNode, []);
@@ -1844,6 +1801,54 @@ function injectUseGlitzThemeVariable(transformerContext: TransformerContext, fac
     transformerContext.transformations.set(originalComponentNode, transformedComponentNode);
   }
   return componentNode;
+}
+
+const useGlitzImportIsInjectedFlag = 'useGlitzImportIsInjected';
+
+function injectImportUseGlitz(transformerContext: TransformerContext) {
+  if (hasNodeFlag(transformerContext, transformerContext.currentFile, useGlitzImportIsInjectedFlag)) {
+    return;
+  }
+  setNodeFlag(transformerContext, transformerContext.currentFile, useGlitzImportIsInjectedFlag);
+
+  const factory = transformerContext.tsContext.factory;
+  const importClause = factory.createImportClause(
+    false,
+    undefined,
+    factory.createNamedImports([
+      factory.createImportSpecifier(
+        factory.createIdentifier(useThemeName),
+        factory.createIdentifier(useGlitzThemeName),
+      ),
+    ]),
+  );
+  const importDecl = factory.createImportDeclaration(
+    undefined,
+    undefined,
+    importClause,
+    factory.createStringLiteral(glitzReactModuleName),
+  );
+  transformerContext.currentFileHasImportedUseTheme = true;
+  const nodes: ts.Node[] = [importDecl];
+  if (transformerContext.mode === 'development') {
+    const dirname = path.dirname(transformerContext.currentFile.fileName);
+    let importPath = path.relative(dirname, transformerContext.staticThemesFile!).replace(/\\/g, '/');
+    if (!importPath.startsWith('.')) {
+      importPath = './' + importPath;
+    }
+    const parts = importPath.split('.');
+    parts.splice(parts.length - 1, 1);
+    importPath = parts.join('.');
+    const asyncThemeImport = factory.createExpressionStatement(
+      factory.createCallExpression(factory.createIdentifier('import'), undefined, [
+        factory.createStringLiteral(importPath),
+      ]),
+    );
+    nodes.push(asyncThemeImport);
+  }
+  const firstNode = transformerContext.currentFile.statements[0];
+  nodes.unshift(firstNode);
+  transformerContext.transformations.set(firstNode, nodes);
 }
 
 function createLiteral(value: any, factory: ts.NodeFactory) {
