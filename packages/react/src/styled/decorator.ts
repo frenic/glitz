@@ -13,9 +13,10 @@ import { Style } from '@glitz/type';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import createComponent, { StyledComponent, StyledComponentWithRef, WithoutRefProp } from './create';
 import { Styles } from './custom';
-import { pureStyle, DirtyStyle } from './use-glitz';
+import { sanitizeStyle, DirtyStyle } from './use-glitz';
 import { isElementType, StyledElementProps } from './predefined';
 import { DECORATOR_TYPE, SECRET_GLITZ_PROPERTY } from './constants';
+import { isForwardStyleType } from './forward-style';
 
 export interface StyledDecorator {
   [SECRET_GLITZ_PROPERTY]: typeof DECORATOR_TYPE;
@@ -194,7 +195,7 @@ export interface StyledDecorator {
 }
 
 export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorator {
-  const style = pureStyle(dirtyStyle);
+  const style = sanitizeStyle(dirtyStyle);
 
   function decorator<TProps>(
     arg1:
@@ -235,6 +236,10 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorato
 export function isStyle(arg: any): arg is Styles {
   return (
     arg[SECRET_GLITZ_PROPERTY] === DECORATOR_TYPE ||
-    (typeof arg === 'object' && !isElementType(arg) && !isElementLikeType(arg) && !isValidElementType(arg))
+    (typeof arg === 'object' &&
+      !isElementType(arg) &&
+      !isElementLikeType(arg) &&
+      !isForwardStyleType(arg) &&
+      !isValidElementType(arg))
   );
 }

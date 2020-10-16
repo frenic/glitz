@@ -32,7 +32,7 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   let finalStyles: readonly Style[];
 
   if (!isValid) {
-    finalStyles = pureStyle(dirtyStyle);
+    finalStyles = sanitizeStyle(dirtyStyle);
 
     if (previousRef.current[3]) {
       isValid = isCached && shallowEquals(previousRef.current[3], finalStyles);
@@ -81,7 +81,7 @@ export default function useGlitz(dirtyStyle: DirtyStyle) {
   return (previousRef.current[4] = glitz.injectStyle(finalStyles!, theme)) || void 0;
 }
 
-export function pureStyle(dirtyStyle: DirtyStyle): readonly Style[] {
+export function sanitizeStyle(dirtyStyle: DirtyStyle): readonly Style[] {
   if (typeof dirtyStyle === 'function') {
     return dirtyStyle();
   }
@@ -102,7 +102,7 @@ function flattenStyle(dirtyStyles: readonly DirtyStyle[]): readonly Style[] {
   const styles: Style[] = [];
 
   for (const style of dirtyStyles) {
-    styles.push(...pureStyle(style));
+    styles.push(...sanitizeStyle(style));
   }
 
   return styles;

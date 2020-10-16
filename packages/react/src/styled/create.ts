@@ -9,6 +9,7 @@ import {
   PropsWithRef,
   Ref,
   RefAttributes,
+  useCallback,
   useContext,
   useMemo,
 } from 'react';
@@ -16,8 +17,9 @@ import { GlitzServer } from '@glitz/core';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_GLITZ_PROPERTY } from './constants';
 import { isElementType, StyledElement, StyledElementProps } from './predefined';
-import useGlitz, { DirtyStyle } from './use-glitz';
+import useGlitz, { DirtyStyle, sanitizeStyle } from './use-glitz';
 import { ComposeContext, emptyComposeContext, GlitzContext, StreamContext } from '../components/context';
+import { isForwardStyleType, StyledForwardStyle, WithoutCompose } from './forward-style';
 
 export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
   [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponent<TProps>;
@@ -41,6 +43,7 @@ export default function createComponent<TProps>(
   type:
     | StyledElement
     | StyledElementLike<ComponentType<TProps & StyledElementProps>>
+    | StyledForwardStyle<ComponentType<TProps>>
     | StyledComponent<TProps>
     | StyledComponentWithRef<TProps, any>
     | ComponentType<TProps>,
@@ -51,6 +54,7 @@ export default function createComponent<TProps, TInstance>(
   type:
     | StyledElement
     | StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>>
+    | StyledForwardStyle<ComponentType<WithRefProp<TProps, TInstance>>>
     | StyledComponentWithRef<TProps, TInstance>
     | ComponentType<WithRefProp<TProps, TInstance>>,
   statics: DirtyStyle,
@@ -62,6 +66,7 @@ export function factory<TProps, TInstance>(
   type:
     | StyledElement
     | StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>>
+    | StyledForwardStyle<ComponentType<WithRefProp<TProps, TInstance>>>
     | ComponentType<WithRefProp<TProps, TInstance>>,
   statics: DirtyStyle,
 ): StyledComponentWithRef<TProps, TInstance> {
@@ -77,7 +82,7 @@ export function factory<TProps, TInstance>(
             ref,
           });
 
-          if (composed) {
+          if (composed && restProps.children) {
             // Reset ComposeContext
             node = createElement(ComposeContext.Provider, emptyComposeContext, node);
           }
@@ -105,14 +110,37 @@ export function factory<TProps, TInstance>(
 
           return node;
         })
+      : isForwardStyleType<TProps, TInstance>(type)
+      ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>, ref: Ref<TInstance>) => {
+          const composed = useContext(ComposeContext);
+          const compose = useCallback(additional => sanitizeStyle([additional, statics, composed, dynamic]), [
+            composed,
+            dynamic,
+          ]);
+
+          let node = createElement<any>(type.value, { ...restProps, compose, ref });
+
+          if (composed && restProps.children) {
+            // Reset ComposeContext
+            node = createElement(ComposeContext.Provider, emptyComposeContext, node);
+          }
+
+          return node;
+        })
       : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) => {
-          const forwarded = useContext(ComposeContext);
-          const context = useMemo(() => ({ value: [statics, forwarded, dynamic] }), [statics, forwarded, dynamic]);
-          return createElement(
-            ComposeContext.Provider,
-            context,
-            createElement<any>(type, { ...restProps, ref }),
-          );
+          const forwarded = undefined && useContext(ComposeContext);
+          const style = sanitizeStyle([statics, forwarded, dynamic]);
+          let node = createElement<any>(type, { ...restProps, ref });
+
+          if (style.length > 0) {
+            node = createElement(
+              ComposeContext.Provider,
+              useMemo(() => ({ value: style }), [statics, forwarded, dynamic]),
+              node,
+            );
+          }
+
+          return node;
         });
 
   const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
@@ -133,11 +161,15 @@ export function factory<TProps, TInstance>(
 
       return NewStyled;
     },
-  });
+  }) as any;
 
   if (process.env.NODE_ENV !== 'production') {
-    const inner = isElementType(type) || isElementLikeType<TProps, TInstance>(type) ? type.value : type;
-    Styled.displayName = `Styled(${typeof inner === 'string' ? inner : inner.displayName || inner.name || 'Unknown'})`;
+    if (!isForwardStyleType<TProps, TInstance>(type)) {
+      const inner = isElementType(type) || isElementLikeType<TProps, TInstance>(type) ? type.value : type;
+      Styled.displayName = `Styled(${
+        typeof inner === 'string' ? inner : inner.displayName || inner.name || 'Unknown'
+      })`;
+    }
   }
 
   return Styled;

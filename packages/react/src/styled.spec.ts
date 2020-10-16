@@ -8,6 +8,7 @@ import { applyClassName } from './styled/apply-class-name';
 import { ThemeProvider } from './components/ThemeProvider';
 import { WithRefProp } from './styled/create';
 import { StyledElementProps } from './styled/predefined';
+import { forwardStyle, StyledProps } from './styled/forward-style';
 
 describe('react styled', () => {
   const warn = console.warn;
@@ -600,6 +601,17 @@ describe('react styled', () => {
     decorator = decorator({ color: 'red' });
     decorator = decorator({ backgroundColor: 'green' });
     expect(decorator()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+  });
+  it('forwards style using hook', () => {
+    const Component = styled(
+      forwardStyle(({ compose }: StyledProps) => {
+        return React.createElement(styled.Div, { css: compose() });
+      }),
+    );
+    const tree = mountWithGlitz(React.createElement(Component, { css: { color: 'red' } }));
+    expect(tree.getDOMNode().className).toBe('a');
+    tree.setProps({ css: { color: 'green' } });
+    expect(tree.getDOMNode().className).toBe('b');
   });
 });
 
