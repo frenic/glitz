@@ -6,6 +6,7 @@ import { isStaticElement, isStaticComponent, StaticElementName, StaticElement, S
 import {
   evaluate,
   partiallyEvaluate,
+  resolveImportSymbol,
   isRequiresRuntimeResult,
   RequiresRuntimeResult,
   requiresRuntimeResult,
@@ -298,12 +299,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   }
 
   // This evaluates imported styled components
-  if (ts.isImportSpecifier(node) && isFirstPass) {
+  if ((ts.isImportSpecifier(node) || ts.isImportClause(node)) && node.name && isFirstPass) {
     if (isComponentName(node.name.text)) {
       const symbol = typeChecker.getSymbolAtLocation(node.name);
       if (symbol) {
         const staticComponentOrElement = evaluateToStaticComponentOrElement(
-          node.propertyName ?? node.name,
+          ts.isImportSpecifier(node) && node.propertyName ? node.propertyName : node.name,
           transformerContext,
         );
         if (isStaticComponent(staticComponentOrElement) || isStaticElement(staticComponentOrElement)) {
@@ -696,7 +697,13 @@ function rewriteToHtmlElement(
   if (typeof elementName === 'string') {
     elementNameString = elementName;
   } else if (ts.isIdentifier(elementNameNode)) {
-    const symbol = typeChecker.getSymbolAtLocation(elementNameNode);
+    let symbol = typeChecker.getSymbolAtLocation(elementNameNode);
+    if (symbol && !symbol.valueDeclaration) {
+      const [symbolOrSymbols] = resolveImportSymbol(elementNameNode.text, symbol, transformerContext.program);
+      if (symbolOrSymbols && !Array.isArray(symbolOrSymbols)) {
+        symbol = symbolOrSymbols;
+      }
+    }
     if (symbol && symbol.valueDeclaration) {
       const valueDeclaration = symbol.valueDeclaration;
       if (
@@ -844,23 +851,31 @@ function importDeclaration(
       importClause,
       factory.createStringLiteral(importPath),
     );
-    const firstStmt = transformerContext.currentFile.statements[0];
-    let nodes: ts.Node[] = [];
-    if (transformerContext.transformations.has(firstStmt)) {
-      const transformation = transformerContext.transformations.get(firstStmt)!;
-      if (Array.isArray(transformation)) {
-        nodes = transformation;
-      } else {
-        nodes.push(transformation);
-      }
-    } else {
-      nodes.push(firstStmt);
-    }
-    nodes.push(importStmt);
-    transformerContext.transformations.set(firstStmt, nodes);
+    addTopLevelNode(importStmt, transformerContext);
     return importName;
   }
   return undefined;
+}
+
+function addTopLevelNode(node: ts.Node | ts.Node[], transformerContext: TransformerContext) {
+  const firstStmt = transformerContext.currentFile.statements[0];
+  let nodes: ts.Node[] = [];
+  if (transformerContext.transformations.has(firstStmt)) {
+    const transformation = transformerContext.transformations.get(firstStmt)!;
+    if (Array.isArray(transformation)) {
+      nodes = transformation;
+    } else {
+      nodes.push(transformation);
+    }
+  } else {
+    nodes.push(firstStmt);
+  }
+  if (Array.isArray(node)) {
+    nodes.push(...node);
+  } else {
+    nodes.push(node);
+  }
+  transformerContext.transformations.set(firstStmt, nodes);
 }
 
 // For any node inside a component, traverse up until we find a component declaration
@@ -1093,6 +1108,9 @@ function isStaticComponentVariableUse(node: ts.Node) {
       return true;
     }
     if (ts.isImportSpecifier(parent)) {
+      return true;
+    }
+    if (ts.isImportClause(parent)) {
       return true;
     }
     if (ts.isJsxClosingElement(parent)) {
@@ -2010,9 +2028,7 @@ function injectImportUseGlitz(transformerContext: TransformerContext) {
     );
     nodes.push(asyncThemeImport);
   }
-  const firstNode = transformerContext.currentFile.statements[0];
-  nodes.unshift(firstNode);
-  transformerContext.transformations.set(firstNode, nodes);
+  addTopLevelNode(nodes, transformerContext);
 }
 
 function createLiteral(value: any, factory: ts.NodeFactory) {

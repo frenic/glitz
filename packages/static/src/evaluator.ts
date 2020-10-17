@@ -203,6 +203,10 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       evaluationResult = evaluateInternal(symbol.valueDeclaration, context);
       hasEvaluated = true;
     }
+    if (ts.isExportAssignment(symbol.valueDeclaration)) {
+      evaluationResult = evaluateInternal(symbol.valueDeclaration.expression, context);
+      hasEvaluated = true;
+    }
     if (hasEvaluated) {
       stats?.usedVariables?.set(valueDeclaration, evaluationResult);
     }
@@ -636,7 +640,11 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
 
 type ResolveImportResults = readonly [ts.Symbol | ts.Symbol[] | undefined, ts.Program, string | undefined];
 
-function resolveImportSymbol(variableName: string, symbol: ts.Symbol, program: ts.Program): ResolveImportResults {
+export function resolveImportSymbol(
+  variableName: string,
+  symbol: ts.Symbol,
+  program: ts.Program,
+): ResolveImportResults {
   const typeChecker = program.getTypeChecker();
   let symbolOrSymbols: ts.Symbol | ts.Symbol[] = symbol;
   let fileName: string | undefined;

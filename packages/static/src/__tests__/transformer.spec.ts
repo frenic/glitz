@@ -36,6 +36,26 @@ const Styled = styled.div(styleObject);
 test('can use applyClassName', () => {
   const code = {
     'file1.tsx': `
+export function MainLink(props: any) {
+    return <a {...props} />;
+}
+`,
+    'file2.tsx': `
+import { styled, applyClassName } from '@glitz/react';
+import { MainLink } from './file1';
+
+export default styled(applyClassName(MainLink), {
+  color: 'ìnherit',
+  ':hover': {
+    textDecoration: 'underline',
+    color: 'inherit',
+  },
+  ':visited': {
+    color: 'inherit',
+  },
+});
+`,
+    'file3.tsx': `
 import { styled, applyClassName } from '@glitz/react';
 export const Link1 = (props: any) => {
     return <a {...props} />;
@@ -63,9 +83,10 @@ export const ExportedStyledLink4 = styled(applyClassName(Link4), {
   color: 'purple',
 });
 `,
-    'file2.tsx': `
+    'file4.tsx': `
 import { styled, applyClassName } from '@glitz/react';
-import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file1';
+import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file3';
+import TheMainLink from './file2';
 
 function Link(props: any) {
     return <a {...props} />;
@@ -88,6 +109,7 @@ const node3 = <ExportedStyledLink2 />;
 const node4 = <ExportedStyledLink3 />;
 const node5 = <ExportedStyledLink4 />;
 const node6 = <Block />;
+const node7 = <TheMainLink />;
 `,
   };
 
@@ -95,38 +117,61 @@ const node6 = <Block />;
     compile(code),
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
-        "import { styled, applyClassName } from '@glitz/react';
-        export const Link1 = (props) => {
-            return <a {...props}/>;
-        };
-        export function Link2(props) {
+        "export function MainLink(props) {
             return <a {...props}/>;
         }
-        function Link3(props) {
-            return <a {...props}/>;
-        }
-        const Link4 = (props) => {
-            return <a {...props}/>;
-        };
-        export const ExportedStyledLink1 = /*#__PURE__*/ styled(applyClassName(Link1), {
-            color: 'blue',
-        });
-        export const ExportedStyledLink2 = /*#__PURE__*/ styled(applyClassName(Link2), {
-            color: 'green',
-        });
-        export const ExportedStyledLink3 = /*#__PURE__*/ styled(applyClassName(Link3), {
-            color: 'yellow',
-        });
-        export const ExportedStyledLink4 = /*#__PURE__*/ styled(applyClassName(Link4), {
-            color: 'purple',
-        });
         "
-      `);
-      expect(result['file2.jsx']).toMatchInlineSnapshot(`
+      `),
+        expect(result['file2.jsx']).toMatchInlineSnapshot(`
+          "import { styled, applyClassName } from '@glitz/react';
+          import { MainLink } from './file1';
+          export default /*#__PURE__*/ styled(applyClassName(MainLink), {
+              color: 'ìnherit',
+              ':hover': {
+                  textDecoration: 'underline',
+                  color: 'inherit',
+              },
+              ':visited': {
+                  color: 'inherit',
+              },
+          });
+          "
+        `),
+        expect(result['file3.jsx']).toMatchInlineSnapshot(`
+                  "import { styled, applyClassName } from '@glitz/react';
+                  export const Link1 = (props) => {
+                      return <a {...props}/>;
+                  };
+                  export function Link2(props) {
+                      return <a {...props}/>;
+                  }
+                  function Link3(props) {
+                      return <a {...props}/>;
+                  }
+                  const Link4 = (props) => {
+                      return <a {...props}/>;
+                  };
+                  export const ExportedStyledLink1 = /*#__PURE__*/ styled(applyClassName(Link1), {
+                      color: 'blue',
+                  });
+                  export const ExportedStyledLink2 = /*#__PURE__*/ styled(applyClassName(Link2), {
+                      color: 'green',
+                  });
+                  export const ExportedStyledLink3 = /*#__PURE__*/ styled(applyClassName(Link3), {
+                      color: 'yellow',
+                  });
+                  export const ExportedStyledLink4 = /*#__PURE__*/ styled(applyClassName(Link4), {
+                      color: 'purple',
+                  });
+                  "
+              `);
+      expect(result['file4.jsx']).toMatchInlineSnapshot(`
         "import { styled, applyClassName } from '@glitz/react';
-        import { Link1 as AutoImportedLink1 } from \\"./file1\\";
-        import { Link2 as AutoImportedLink2 } from \\"./file1\\";
-        import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file1';
+        import { Link1 as AutoImportedLink1 } from \\"./file3\\";
+        import { Link2 as AutoImportedLink2 } from \\"./file3\\";
+        import { MainLink as AutoImportedMainLink } from \\"./file1\\";
+        import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file3';
+        import TheMainLink from './file2';
         function Link(props) {
             return <a {...props}/>;
         }
@@ -143,32 +188,33 @@ const node6 = <Block />;
         const node4 = <ExportedStyledLink3 />;
         const node5 = <ExportedStyledLink4 />;
         const node6 = <Block />;
+        const node7 = <AutoImportedMainLink className={\\"g h i j\\"}/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{display:block}.f{color:red}"`,
+        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{display:block}.f{color:red}.j{color:ìnherit}.g:visited{color:inherit}.h:hover{color:inherit}.i:hover{text-decoration:underline}"`,
       );
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
         Array [
           Object {
-            "file": "file1.tsx",
+            "file": "file3.tsx",
             "line": 21,
             "message": "Unable to determine static component/element name",
             "severity": "info",
             "source": "Link3",
           },
           Object {
-            "file": "file1.tsx",
+            "file": "file3.tsx",
             "line": 24,
             "message": "Unable to determine static component/element name",
             "severity": "info",
             "source": "Link4",
           },
           Object {
-            "file": "file2.tsx",
-            "line": 9,
+            "file": "file4.tsx",
+            "line": 10,
             "message": "Unable to determine static component/element name",
             "severity": "info",
             "source": "c",

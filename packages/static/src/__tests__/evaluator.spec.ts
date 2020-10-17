@@ -194,15 +194,22 @@ export { theCalculator } from './shared2';
 import { oneHundred } from './shared2';
 export const oneHundredExported = oneHundred;
 `,
+    'shared4.ts': `
+function adder(x: number) {
+  return x + 1;
+}
+export default adder(1);
+`,
     'entry.ts': `
 import { theCalculator, oneHundredExported } from './shared3';
 import { twoHundred } from './shared1';
 import getOne from './shared1';
+import two from './shared4';
 const x = oneHundredExported;
 const y = twoHundred;
 `,
   };
-  expect(evaluate('theCalculator(x, y) + getOne()', code)).toBe(100 + 200 + 1 + 1);
+  expect(evaluate('theCalculator(x, y) + getOne() + two', code)).toBe(100 + 200 + 1 + 1 + 2);
 });
 
 test('can use JS globals', () => {
