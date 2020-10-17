@@ -3,6 +3,8 @@ import {
   isStaticComponent,
   ReactFunctionComponent,
   StaticComponent,
+  StaticElement,
+  StaticElementName,
   StaticDecorator,
   StaticStyled,
   Style,
@@ -56,7 +58,7 @@ function createStaticStyled(styles: Style[]): StaticStyled {
   };
 }
 
-function createStaticComponent(elementName: string, styles?: Style[]): StaticComponent {
+function createStaticComponent(elementName: StaticElementName, styles?: Style[]): StaticComponent {
   function Component(props: any = {}) {
     return {
       styles: cleanStyle(props.css),
@@ -65,6 +67,14 @@ function createStaticComponent(elementName: string, styles?: Style[]): StaticCom
   }
 
   return Object.assign(Component, { styles: styles ?? [], elementName });
+}
+
+export function applyClassName(_component: any): StaticElement;
+export function applyClassName(_component: any, tsStaticArgumentNodes?: any[]): StaticElement {
+  return {
+    styles: [],
+    elementName: tsStaticArgumentNodes![0],
+  };
 }
 
 export function useStyle(style: DirtyStyle): Style[] {

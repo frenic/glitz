@@ -5,6 +5,8 @@ export type FunctionWithTsNode = {
   tsNode?: ts.Node;
 };
 
+const tsStaticArgumentNodesParameterName = 'tsStaticArgumentNodes';
+
 type SymbolWithIdentifier = { symbol: ts.Symbol; identifier: ts.Identifier };
 type SupportedExpressionsNodes = ts.Expression | ts.FunctionDeclaration | ts.EnumDeclaration | ts.Declaration;
 type SupportedExpressions = SupportedExpressionsNodes | SymbolWithIdentifier;
@@ -306,6 +308,8 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       }
       return false;
     }
+  } else if (ts.isNonNullExpression(expr)) {
+    return evaluateInternal(expr.expression, context);
   } else if (ts.isParenthesizedExpression(expr)) {
     return evaluateInternal(expr.expression, context);
   } else if (ts.isConditionalExpression(expr)) {
@@ -428,7 +432,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       { tsNode: expr },
     ) as FunctionWithTsNode;
   } else if (ts.isCallExpression(expr)) {
-    let callable: Function;
+    let callable: FunctionWithTsNode;
     let callableContext: any = null;
     if (ts.isPropertyAccessExpression(expr.expression)) {
       callableContext = evaluateInternal(expr.expression.expression, context);
@@ -438,7 +442,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       const name = expr.expression.name.text;
       callable = callableContext[name];
     } else {
-      callable = evaluateInternal(expr.expression, context) as Function;
+      callable = evaluateInternal(expr.expression, context) as FunctionWithTsNode;
     }
     if (shouldShortCircuitEvaluation(callable)) {
       return callable;
@@ -461,6 +465,21 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
         }
       } else {
         args.push(value);
+      }
+    }
+    if (callable.tsNode) {
+      const tsFunction = callable.tsNode;
+      if (
+        ts.isFunctionDeclaration(tsFunction) ||
+        ts.isArrowFunction(tsFunction) ||
+        ts.isFunctionExpression(tsFunction)
+      ) {
+        const index = tsFunction.parameters.findIndex(
+          p => ts.isIdentifier(p.name) && p.name.text === tsStaticArgumentNodesParameterName,
+        );
+        if (index !== -1) {
+          args[index] = expr.arguments;
+        }
       }
     }
     return callable.apply(callableContext, args);

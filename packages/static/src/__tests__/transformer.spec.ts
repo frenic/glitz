@@ -33,6 +33,151 @@ const Styled = styled.div(styleObject);
   });
 });
 
+test('can use applyClassName', () => {
+  const code = {
+    'file1.tsx': `
+import { styled, applyClassName } from '@glitz/react';
+export const Link1 = (props: any) => {
+    return <a {...props} />;
+}
+export function Link2(props: any) {
+  return <a {...props} />;
+}
+function Link3(props: any) {
+  return <a {...props} />;
+}
+const Link4 = (props: any) => {
+  return <a {...props} />;
+}
+
+export const ExportedStyledLink1 = styled(applyClassName(Link1), {
+  color: 'blue',
+});
+export const ExportedStyledLink2 = styled(applyClassName(Link2), {
+  color: 'green',
+});
+export const ExportedStyledLink3 = styled(applyClassName(Link3), {
+  color: 'yellow',
+});
+export const ExportedStyledLink4 = styled(applyClassName(Link4), {
+  color: 'purple',
+});
+`,
+    'file2.tsx': `
+import { styled, applyClassName } from '@glitz/react';
+import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file1';
+
+function Link(props: any) {
+    return <a {...props} />;
+}
+
+const blockify = (c: any) =>
+  styled(applyClassName(c), {
+    display: 'block',
+  });
+
+const Block = blockify((props: any) => <styled.Div />);
+
+const StyledLink = styled(applyClassName(Link), {
+  color: 'red',
+});
+
+const node1 = <StyledLink />;
+const node2 = <ExportedStyledLink1 />;
+const node3 = <ExportedStyledLink2 />;
+const node4 = <ExportedStyledLink3 />;
+const node5 = <ExportedStyledLink4 />;
+const node6 = <Block />;
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled, applyClassName } from '@glitz/react';
+        export const Link1 = (props) => {
+            return <a {...props}/>;
+        };
+        export function Link2(props) {
+            return <a {...props}/>;
+        }
+        function Link3(props) {
+            return <a {...props}/>;
+        }
+        const Link4 = (props) => {
+            return <a {...props}/>;
+        };
+        export const ExportedStyledLink1 = /*#__PURE__*/ styled(applyClassName(Link1), {
+            color: 'blue',
+        });
+        export const ExportedStyledLink2 = /*#__PURE__*/ styled(applyClassName(Link2), {
+            color: 'green',
+        });
+        export const ExportedStyledLink3 = /*#__PURE__*/ styled(applyClassName(Link3), {
+            color: 'yellow',
+        });
+        export const ExportedStyledLink4 = /*#__PURE__*/ styled(applyClassName(Link4), {
+            color: 'purple',
+        });
+        "
+      `);
+      expect(result['file2.jsx']).toMatchInlineSnapshot(`
+        "import { styled, applyClassName } from '@glitz/react';
+        import { Link1 as AutoImportedLink1 } from \\"./file1\\";
+        import { Link2 as AutoImportedLink2 } from \\"./file1\\";
+        import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file1';
+        function Link(props) {
+            return <a {...props}/>;
+        }
+        const blockify = (c) => /*#__PURE__*/ styled(applyClassName(c), {
+            display: 'block',
+        });
+        const Block = /*#__PURE__*/ blockify((props) => <styled.Div />);
+        const StyledLink = /*#__PURE__*/ styled(applyClassName(Link), {
+            color: 'red',
+        });
+        const node1 = <Link className={\\"f\\"}/>;
+        const node2 = <AutoImportedLink1 className={\\"a\\"}/>;
+        const node3 = <AutoImportedLink2 className={\\"b\\"}/>;
+        const node4 = <ExportedStyledLink3 />;
+        const node5 = <ExportedStyledLink4 />;
+        const node6 = <Block />;
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{display:block}.f{color:red}"`,
+      );
+    },
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 21,
+            "message": "Unable to determine static component/element name",
+            "severity": "info",
+            "source": "Link3",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 24,
+            "message": "Unable to determine static component/element name",
+            "severity": "info",
+            "source": "Link4",
+          },
+          Object {
+            "file": "file2.tsx",
+            "line": 9,
+            "message": "Unable to determine static component/element name",
+            "severity": "info",
+            "source": "c",
+          },
+        ]
+      `),
+  );
+});
+
 test('can use glitz core', () => {
   const code = {
     'file1.tsx': `

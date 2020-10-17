@@ -6,6 +6,8 @@ export type Styles = Style | Style[] | StaticDecorator;
 
 export type DirtyStyle = Style | StaticDecorator | DirtyStyle[] | false | undefined;
 
+export type StaticElementName = string | { [propertyName: string]: any } /* ts.Node */;
+
 export type StaticDecorator = {
   decorator: true;
   (): Style[];
@@ -22,13 +24,13 @@ export type ReactFunctionComponent = (props?: any) => any;
 
 export type StaticComponent = ((props?: any) => StaticElement) & {
   styles: Style[];
-  elementName: string;
+  elementName: StaticElementName;
   displayName?: string;
 };
 
 export type StaticElement = {
   styles: Style[];
-  elementName: string;
+  elementName: StaticElementName;
 };
 
 export function isStaticComponent(object: any): object is StaticComponent {

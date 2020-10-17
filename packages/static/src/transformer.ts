@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 import { GlitzStatic } from '@glitz/core';
-import { isStaticElement, isStaticComponent } from './shared';
+import { isStaticElement, isStaticComponent, StaticElementName, StaticElement, StaticComponent } from './shared';
 import {
   evaluate,
   partiallyEvaluate,
@@ -49,7 +49,7 @@ staticModuleOverloads['react'] = () => {
 
 type StaticStyledComponent = {
   componentName: string;
-  elementName: string | undefined;
+  elementName: StaticElementName | undefined;
   styles: EvaluatedStyle[];
   parent?: StaticStyledComponent;
 };
@@ -302,19 +302,22 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
     if (isComponentName(node.name.text)) {
       const symbol = typeChecker.getSymbolAtLocation(node.name);
       if (symbol) {
-        const potentialStyledComponent = evaluate(node.propertyName ?? node.name, transformerContext.program);
-        if (isStaticComponent(potentialStyledComponent)) {
-          if (potentialStyledComponent.styles.every(canEvalStyle)) {
+        const staticComponentOrElement = evaluateToStaticComponentOrElement(
+          node.propertyName ?? node.name,
+          transformerContext,
+        );
+        if (isStaticComponent(staticComponentOrElement) || isStaticElement(staticComponentOrElement)) {
+          if (staticComponentOrElement.styles.every(canEvalStyle)) {
             const component: StaticStyledComponent = {
               componentName: node.name.text,
-              elementName: potentialStyledComponent.elementName,
-              styles: potentialStyledComponent.styles,
+              elementName: staticComponentOrElement.elementName,
+              styles: staticComponentOrElement.styles,
             };
             staticStyledComponents.symbolToComponent.set(symbol, component);
           } else {
             reportRequiresRuntimeResult(
               'Styled component could not be statically evaluated',
-              potentialStyledComponent.styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
+              staticComponentOrElement.styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
               node,
               transformerContext,
             );
@@ -375,7 +378,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                 const stats: EvaluationStats = {
                   usedVariables: new Map<ts.Declaration, any>(),
                 };
-                const object = evaluate(declaration.initializer, transformerContext.program, undefined, stats);
+                const object = evaluateToStaticComponentOrElement(declaration.initializer, transformerContext, stats);
                 if (isStaticElement(object) || isStaticComponent(object)) {
                   stats.usedVariables!.forEach((_, k) => {
                     if (
@@ -678,13 +681,50 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
 
 function rewriteToHtmlElement(
   node: ts.JsxElement | ts.JsxSelfClosingElement,
-  elementName: string,
+  elementName: StaticElementName,
   componentName: string,
   className: ts.Expression,
   transformerContext: TransformerContext,
 ) {
   const factory = transformerContext.tsContext.factory;
+  const typeChecker = transformerContext.program.getTypeChecker();
   const properties = ts.isJsxElement(node) ? node.openingElement.attributes.properties : node.attributes.properties;
+
+  let setDataGlitzName = true;
+  const elementNameNode = elementName as ts.Node;
+  let elementNameString = '';
+  if (typeof elementName === 'string') {
+    elementNameString = elementName;
+  } else if (ts.isIdentifier(elementNameNode)) {
+    const symbol = typeChecker.getSymbolAtLocation(elementNameNode);
+    if (symbol && symbol.valueDeclaration) {
+      const valueDeclaration = symbol.valueDeclaration;
+      if (
+        ts.isFunctionDeclaration(valueDeclaration) ||
+        (ts.isVariableDeclaration(valueDeclaration) && isTopLevelDeclaration(valueDeclaration))
+      ) {
+        if (valueDeclaration.getSourceFile().fileName !== transformerContext.currentFile.fileName) {
+          const importedName = importDeclaration(valueDeclaration, transformerContext);
+          if (importedName) {
+            elementNameString = importedName;
+            setDataGlitzName = false;
+          }
+        } else {
+          elementNameString = elementNameNode.text;
+          setDataGlitzName = false;
+        }
+      }
+    }
+  }
+  if (!elementNameString) {
+    reportRequiresRuntimeResult(
+      'Unable to determine static component/element name',
+      undefined,
+      elementNameNode,
+      transformerContext,
+    );
+    return;
+  }
 
   const jsxAttributes = factory.createJsxAttributes([
     ...passThroughProps(properties),
@@ -692,7 +732,7 @@ function rewriteToHtmlElement(
       factory.createIdentifier('className'),
       factory.createJsxExpression(undefined, className),
     ),
-    ...(transformerContext.mode === 'development' && componentName
+    ...(transformerContext.mode === 'development' && componentName && setDataGlitzName
       ? [
           factory.createJsxAttribute(
             factory.createIdentifier('data-glitzname'),
@@ -704,13 +744,13 @@ function rewriteToHtmlElement(
 
   if (ts.isJsxElement(node)) {
     const jsxOpeningElement = factory.createJsxOpeningElement(
-      factory.createIdentifier(elementName),
+      factory.createIdentifier(elementNameString),
       undefined,
       jsxAttributes,
     );
     ts.setOriginalNode(jsxOpeningElement, node.openingElement);
 
-    const jsxClosingElement = factory.createJsxClosingElement(factory.createIdentifier(elementName));
+    const jsxClosingElement = factory.createJsxClosingElement(factory.createIdentifier(elementNameString));
     ts.setOriginalNode(jsxClosingElement, node.closingElement);
 
     const jsxElement = factory.createJsxElement(jsxOpeningElement, node.children, jsxClosingElement);
@@ -718,13 +758,109 @@ function rewriteToHtmlElement(
     transformerContext.transformations.set(node, jsxElement);
   } else {
     const jsxSelfClosingElement = factory.createJsxSelfClosingElement(
-      factory.createIdentifier(elementName),
+      factory.createIdentifier(elementNameString),
       undefined,
       jsxAttributes,
     );
     ts.setOriginalNode(jsxSelfClosingElement, node);
     transformerContext.transformations.set(node, jsxSelfClosingElement);
   }
+}
+
+function isTopLevelDeclaration(decl: ts.VariableDeclaration | ts.FunctionDeclaration) {
+  if (ts.isVariableDeclaration(decl)) {
+    return ts.isSourceFile(decl.parent.parent.parent);
+  }
+  if (ts.isFunctionDeclaration(decl)) {
+    return ts.isSourceFile(decl.parent);
+  }
+  return false;
+}
+
+function importDeclaration(
+  decl: ts.VariableDeclaration | ts.FunctionDeclaration,
+  transformerContext: TransformerContext,
+) {
+  if (!isTopLevelDeclaration(decl)) {
+    return undefined;
+  }
+  let sourceFile: ts.SourceFile | undefined = undefined;
+  let exportedName: string | undefined = undefined;
+  if (ts.isVariableDeclaration(decl) && ts.isIdentifier(decl.name)) {
+    if (
+      ts.isVariableStatement(decl.parent.parent) &&
+      decl.parent.parent.modifiers &&
+      decl.parent.parent.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)
+    ) {
+      exportedName = decl.name.text;
+      sourceFile = decl.parent.parent.parent as ts.SourceFile;
+    }
+  }
+  if (ts.isFunctionDeclaration(decl)) {
+    sourceFile = decl.parent as ts.SourceFile;
+    if (decl.modifiers) {
+      if (decl.modifiers.find(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
+        exportedName = decl.modifiers.find(m => m.kind === ts.SyntaxKind.DefaultKeyword)
+          ? 'default'
+          : decl.name
+          ? decl.name.text
+          : undefined;
+      }
+    }
+  }
+  if (sourceFile && exportedName) {
+    const dirname = path.dirname(transformerContext.currentFile.fileName);
+    let importPath = path.relative(dirname, sourceFile.fileName).replace(/\\/g, '/');
+    if (!importPath.startsWith('.')) {
+      importPath = './' + importPath;
+    }
+    const pathParts = importPath.split('/');
+    const nodeModulesIndex = pathParts.lastIndexOf('node_modules');
+    if (nodeModulesIndex !== -1) {
+      importPath = pathParts.slice(nodeModulesIndex).join('/');
+    }
+    const dotParts = importPath.split('.');
+    dotParts.splice(dotParts.length - 1, 1);
+    importPath = dotParts.join('.');
+    const factory = transformerContext.tsContext.factory;
+    let importName = exportedName;
+    let importClause: ts.ImportClause;
+    if (exportedName === 'default') {
+      importName = importPath.replace(/\//g, '');
+      importClause = factory.createImportClause(false, factory.createIdentifier(importName), undefined);
+    } else {
+      importName = 'AutoImported' + importName;
+      importClause = factory.createImportClause(
+        false,
+        undefined,
+        factory.createNamedImports([
+          factory.createImportSpecifier(factory.createIdentifier(exportedName), factory.createIdentifier(importName)),
+        ]),
+      );
+    }
+    const importStmt = factory.createImportDeclaration(
+      undefined,
+      undefined,
+      importClause,
+      factory.createStringLiteral(importPath),
+    );
+    const firstStmt = transformerContext.currentFile.statements[0];
+    let nodes: ts.Node[] = [];
+    if (transformerContext.transformations.has(firstStmt)) {
+      const transformation = transformerContext.transformations.get(firstStmt)!;
+      if (Array.isArray(transformation)) {
+        nodes = transformation;
+      } else {
+        nodes.push(transformation);
+      }
+    } else {
+      nodes.push(firstStmt);
+    }
+    nodes.push(importStmt);
+    transformerContext.transformations.set(firstStmt, nodes);
+    return importName;
+  }
+  return undefined;
 }
 
 // For any node inside a component, traverse up until we find a component declaration
@@ -876,6 +1012,34 @@ function isTopLevelJsxInComposedComponent(
     return true;
   }
   return false;
+}
+
+function evaluateToStaticComponentOrElement(
+  expression: ts.Expression,
+  transformerContext: TransformerContext,
+  stats?: EvaluationStats,
+) {
+  let object = evaluate(expression, transformerContext.program, undefined, stats);
+  if (typeof object === 'function') {
+    try {
+      object = object();
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+  }
+  if (Array.isArray(object)) {
+    let staticElementOrComponent: StaticElement | StaticComponent | undefined = undefined;
+    for (const elem of object) {
+      if (isStaticElement(elem) || isStaticComponent(elem)) {
+        staticElementOrComponent = elem;
+      } else if (staticElementOrComponent) {
+        staticElementOrComponent.styles.push(elem);
+      }
+    }
+    if (staticElementOrComponent) {
+      object = staticElementOrComponent;
+    }
+  }
+  return object;
 }
 
 function reportTopLevelJsxInComposedComponent(node: ts.Node, transformerContext: TransformerContext) {
