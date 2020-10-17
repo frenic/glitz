@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 import { GlitzStatic } from '@glitz/core';
-import { isStaticElement, isStaticComponent, StaticElementName, StaticElement, StaticComponent } from './shared';
+import { isStaticElement, isStaticComponent, StaticElementName, StaticElement, StaticComponent, Style } from './shared';
 import {
   evaluate,
   partiallyEvaluate,
@@ -100,19 +100,17 @@ type StaticThemes = { [id: string]: StaticTheme } | undefined;
 type TransformerContext = {
   program: ts.Program;
   glitz: GlitzStatic;
-  staticThemes: StaticThemes;
   passNumber: number;
   currentFile: ts.SourceFile;
   currentNode: ts.Node;
   currentFileShouldBeStatic: boolean;
   staticStyledComponents: StaticStyledComponents;
+  staticThemes: StaticThemes;
   staticThemesFile?: string;
   diagnosticsReporter?: DiagnosticsReporter;
   mode?: 'development' | 'production';
   allStylesShouldBeStatic?: boolean;
   tsContext: ts.TransformationContext;
-  currentFileUsesGlitzThemes: boolean;
-  currentFileHasImportedUseTheme: boolean;
   /**
    * Instead of directly returning a different node in the visitor function we keep
    * a map of nodes that should be transformed. This allows any function that has
@@ -271,7 +269,6 @@ function visitNodeAndChildren(
 }
 
 function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.Node | ts.Node[] | undefined {
-  let result: ts.Node | ts.Node[] | undefined = node;
   const typeChecker = transformerContext.program.getTypeChecker();
   const factory = transformerContext.tsContext.factory;
   const staticStyledComponents = transformerContext.staticStyledComponents;
@@ -324,7 +321,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
             );
           }
         }
-        result = node;
       }
     }
   }
@@ -429,43 +425,36 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                 }
               } else if (isUseStyle(declaration.initializer)) {
                 const styles = evaluate(declaration.initializer, transformerContext.program);
-                if (Array.isArray(styles)) {
-                  if (styles.every(canEvalStyle)) {
-                    const classNameExpr = getClassNameExpression(styles, transformerContext);
-                    if (isRequiresRuntimeResult(classNameExpr)) {
-                      reportRequiresRuntimeResult(
-                        'Evaluation of theme function requires runtime',
-                        classNameExpr,
-                        node,
-                        transformerContext,
-                      );
-                    } else {
-                      result = factory.createVariableStatement(
-                        node.modifiers,
-                        factory.createVariableDeclarationList(
-                          [
-                            factory.createVariableDeclaration(
-                              declaration.name,
-                              declaration.exclamationToken,
-                              declaration.type,
-                              classNameExpr,
-                            ),
-                          ],
-                          node.declarationList.flags,
-                        ),
-                      );
-                    }
-                  } else {
-                    for (const style of styles.map(stripUnevaluableProperties)) {
-                      transformerContext.glitz.injectStyle(style);
-                    }
-
+                const analyzeResult = analyzeEvaluationResult(
+                  styles,
+                  ExpectedEvaluationResult.StylesArray,
+                  transformerContext,
+                );
+                if (analyzeResult.canUseResult && analyzeResult.stylesArray) {
+                  const classNameExpr = getClassNameExpression(styles, transformerContext);
+                  if (isRequiresRuntimeResult(classNameExpr)) {
                     reportRequiresRuntimeResult(
-                      'useStyle() call could not be statically evaluated',
-                      styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
+                      'Evaluation of theme function requires runtime',
+                      classNameExpr,
                       node,
                       transformerContext,
                     );
+                  } else {
+                    const variableStmt = factory.createVariableStatement(
+                      node.modifiers,
+                      factory.createVariableDeclarationList(
+                        [
+                          factory.createVariableDeclaration(
+                            declaration.name,
+                            declaration.exclamationToken,
+                            declaration.type,
+                            classNameExpr,
+                          ),
+                        ],
+                        node.declarationList.flags,
+                      ),
+                    );
+                    transformerContext.transformations.set(node, variableStmt);
                   }
                 }
               }
@@ -677,7 +666,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
     return previouslyTransformed;
   }
 
-  return result;
+  return node;
 }
 
 function rewriteToHtmlElement(
@@ -851,13 +840,14 @@ function importDeclaration(
       importClause,
       factory.createStringLiteral(importPath),
     );
-    addTopLevelNode(importStmt, transformerContext);
+    injectTopLevelNode(importStmt, transformerContext);
     return importName;
   }
   return undefined;
 }
 
-function addTopLevelNode(node: ts.Node | ts.Node[], transformerContext: TransformerContext) {
+// This adds a node as a top level statement, after the first statement in the file
+function injectTopLevelNode(node: ts.Node | ts.Node[], transformerContext: TransformerContext) {
   const firstStmt = transformerContext.currentFile.statements[0];
   let nodes: ts.Node[] = [];
   if (transformerContext.transformations.has(firstStmt)) {
@@ -903,10 +893,7 @@ function getComponentNode(
   if (!node || ts.isSourceFile(node)) {
     return undefined;
   }
-  if (ts.isFunctionDeclaration(node)) {
-    return node;
-  }
-  if (ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+  if (isFunction(node)) {
     return node;
   }
   return getComponentNode(node.parent);
@@ -919,10 +906,7 @@ function isInsideInlineStyledComponent(node: ts.Node) {
   let func: ts.ArrowFunction | ts.FunctionExpression | undefined;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    if (ts.isArrowFunction(node)) {
-      func = node;
-    }
-    if (ts.isFunctionExpression(node)) {
+    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
       func = node;
     }
     node = node.parent;
@@ -1034,25 +1018,14 @@ function evaluateToStaticComponentOrElement(
   transformerContext: TransformerContext,
   stats?: EvaluationStats,
 ) {
-  let object = evaluate(expression, transformerContext.program, undefined, stats);
-  if (typeof object === 'function') {
-    try {
-      object = object();
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-  if (Array.isArray(object)) {
-    let staticElementOrComponent: StaticElement | StaticComponent | undefined = undefined;
-    for (const elem of object) {
-      if (isStaticElement(elem) || isStaticComponent(elem)) {
-        staticElementOrComponent = elem;
-      } else if (staticElementOrComponent) {
-        staticElementOrComponent.styles.push(elem);
-      }
-    }
-    if (staticElementOrComponent) {
-      object = staticElementOrComponent;
-    }
+  const object = evaluate(expression, transformerContext.program, undefined, stats);
+  const analyzeResult = analyzeEvaluationResult(
+    object,
+    ExpectedEvaluationResult.ElementOrComponent,
+    transformerContext,
+  );
+  if (analyzeResult.canUseResult && analyzeResult.elementOrComponent) {
+    return analyzeResult.elementOrComponent;
   }
   return object;
 }
@@ -1267,9 +1240,7 @@ function getCssDataFromCssProp(
       }
 
       // We don't to look for ternaries inside theme functions
-      const functionDeclAsParent = stats!.evaluationStack!.filter(
-        n => ts.isFunctionExpression(n) || ts.isFunctionDeclaration(n) || ts.isArrowFunction(n),
-      );
+      const functionDeclAsParent = stats!.evaluationStack!.filter(n => isFunction(n));
       if (functionDeclAsParent.length) {
         return true;
       }
@@ -1301,7 +1272,6 @@ function getCssDataFromCssProp(
     } else if (!transformerContext.staticThemes) {
       const propFunc = anyValuesAreFunctions(cssData as EvaluatedStyle);
       if (propFunc) {
-        transformerContext.currentFileUsesGlitzThemes = true;
         cssData = requiresRuntimeResult(
           'Functions in style objects requires runtime or statically declared themes',
           (propFunc as FunctionWithTsNode).tsNode ?? node,
@@ -1536,10 +1506,6 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
 function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transformerContext: TransformerContext) {
   const factory = transformerContext.tsContext.factory;
   const propFunc = anyValuesAreFunctions(style);
-  if (propFunc) {
-    transformerContext.currentFileUsesGlitzThemes = true;
-  }
-
   const allStyles = Array.isArray(style) ? style : [style];
   const allTernaryStyles: string[] = [];
   const stylesPerTernary: {
@@ -2010,7 +1976,6 @@ function injectImportUseGlitz(transformerContext: TransformerContext) {
     importClause,
     factory.createStringLiteral(glitzReactModuleName),
   );
-  transformerContext.currentFileHasImportedUseTheme = true;
   const nodes: ts.Node[] = [importDecl];
   if (transformerContext.mode === 'development') {
     const dirname = path.dirname(transformerContext.currentFile.fileName);
@@ -2028,7 +1993,7 @@ function injectImportUseGlitz(transformerContext: TransformerContext) {
     );
     nodes.push(asyncThemeImport);
   }
-  addTopLevelNode(nodes, transformerContext);
+  injectTopLevelNode(nodes, transformerContext);
 }
 
 function createLiteral(value: any, factory: ts.NodeFactory) {
@@ -2043,6 +2008,80 @@ function createLiteral(value: any, factory: ts.NodeFactory) {
   }
 }
 
+const enum ExpectedEvaluationResult {
+  StylesArray,
+  ElementOrComponent,
+}
+
+function analyzeEvaluationResult(
+  evaluationResult: unknown,
+  expected: ExpectedEvaluationResult,
+  transformerContext: TransformerContext,
+) {
+  if (typeof evaluationResult === 'function') {
+    try {
+      evaluationResult = evaluationResult();
+    } catch (e) {
+      if (isRequiresRuntimeResult(e)) {
+        evaluationResult = e;
+      }
+    }
+  }
+
+  const result = {
+    allRequiresRuntimeResult: getAllRequiresRuntimeResult(evaluationResult),
+    allFunctions: getAllFunctions(evaluationResult),
+    canUseResult: true,
+    stylesArray: undefined as undefined | Style[],
+    elementOrComponent: undefined as undefined | StaticElement | StaticComponent,
+    evaluationResult,
+  };
+
+  if (Array.isArray(evaluationResult)) {
+    if (expected === ExpectedEvaluationResult.StylesArray) {
+      if (evaluationResult.every(s => isEvaluableStyle(s, !!transformerContext.staticThemes))) {
+        result.stylesArray = evaluationResult;
+      } else {
+        result.canUseResult = false;
+        for (const style of evaluationResult.map(stripUnevaluableProperties)) {
+          transformerContext.glitz.injectStyle(style);
+        }
+      }
+    } else if (expected === ExpectedEvaluationResult.ElementOrComponent) {
+      let staticElementOrComponent: StaticElement | StaticComponent | undefined = undefined;
+      for (const elem of evaluationResult) {
+        if (isStaticElement(elem) || isStaticComponent(elem)) {
+          staticElementOrComponent = elem;
+          transformerContext.glitz.injectStyle(elem.styles);
+        } else if (staticElementOrComponent) {
+          staticElementOrComponent.styles.push(elem);
+          transformerContext.glitz.injectStyle(elem);
+        }
+      }
+      if (staticElementOrComponent) {
+        result.elementOrComponent = staticElementOrComponent;
+      } else {
+        result.canUseResult = false;
+      }
+    }
+  } else {
+    if (expected === ExpectedEvaluationResult.ElementOrComponent) {
+      if (!isStaticComponent(evaluationResult) && !isStaticElement(evaluationResult)) {
+        result.canUseResult = false;
+      } else {
+        result.elementOrComponent = evaluationResult;
+      }
+    }
+  }
+  if (!transformerContext.staticThemesFile && result.allFunctions.length) {
+    result.canUseResult = false;
+  }
+  if (result.allRequiresRuntimeResult.length) {
+    result.canUseResult = false;
+  }
+  return result;
+}
+
 function getAllRequiresRuntimeResult(obj: any) {
   const result: RequiresRuntimeResult[] = [];
   if (obj) {
@@ -2054,9 +2093,31 @@ function getAllRequiresRuntimeResult(obj: any) {
           const res = getAllRequiresRuntimeResult(elem);
           result.push(...res);
         }
-      } else if (!ts.isConditionalExpression(obj)) {
+      } else if (!isNode(obj)) {
         for (const key in obj) {
           const res = getAllRequiresRuntimeResult(obj[key]);
+          result.push(...res);
+        }
+      }
+    }
+  }
+  return result;
+}
+
+function getAllFunctions(obj: any): FunctionWithTsNode[] {
+  const result: FunctionWithTsNode[] = [];
+  if (obj) {
+    if (typeof obj === 'function') {
+      result.push(obj as FunctionWithTsNode);
+    } else if (typeof obj === 'object') {
+      if (Array.isArray(obj)) {
+        for (const elem of obj) {
+          const res = getAllFunctions(elem);
+          result.push(...res);
+        }
+      } else if (!isNode(obj)) {
+        for (const key in obj) {
+          const res = getAllFunctions(obj[key]);
           result.push(...res);
         }
       }
@@ -2210,6 +2271,9 @@ function isFunction(node: ts.Node): node is ts.ArrowFunction | ts.FunctionDeclar
   return ts.isArrowFunction(node) || ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node);
 }
 
+// Important to mark all calls to glitz functions as pure as it means the minifier
+// will remove the calls if the aren't used. If they're not marked as pure the
+// minifier can't be sure that the function calls doesn't cause side effects.
 function declarePure(node: ts.CallExpression) {
   const existingComments = ts.getSyntheticLeadingComments(node);
   if (existingComments && existingComments.find(c => c.text === '#__PURE__')) {
@@ -2246,4 +2310,12 @@ function getLineNumber(node: ts.Node) {
   node = ts.getOriginalNode(node);
   const file = ts.getOriginalNode(node.getSourceFile()) as ts.SourceFile;
   return file.getLineAndCharacterOfPosition(node.getStart(file)).line + 1;
+}
+
+function isNode(obj: unknown): obj is ts.Node {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+  const node = obj as ts.Node;
+  return !!node.kind && !!node.pos;
 }

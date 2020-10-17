@@ -182,17 +182,17 @@ const node7 = <TheMainLink />;
         const StyledLink = /*#__PURE__*/ styled(applyClassName(Link), {
             color: 'red',
         });
-        const node1 = <Link className={\\"f\\"}/>;
+        const node1 = <Link className={\\"j\\"}/>;
         const node2 = <AutoImportedLink1 className={\\"a\\"}/>;
         const node3 = <AutoImportedLink2 className={\\"b\\"}/>;
         const node4 = <ExportedStyledLink3 />;
         const node5 = <ExportedStyledLink4 />;
         const node6 = <Block />;
-        const node7 = <AutoImportedMainLink className={\\"g h i j\\"}/>;
+        const node7 = <AutoImportedMainLink className={\\"e f g h\\"}/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{display:block}.f{color:red}.j{color:ìnherit}.g:visited{color:inherit}.h:hover{color:inherit}.i:hover{text-decoration:underline}"`,
+        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.h{color:ìnherit}.i{display:block}.j{color:red}.e:visited{color:inherit}.f:hover{color:inherit}.g:hover{text-decoration:underline}"`,
       );
     },
     diagnostics =>
