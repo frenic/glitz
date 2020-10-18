@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 export type FunctionWithTsNode = {
   (...args: any[]): any;
-  tsNode?: ts.Node;
+  tsNode: ts.Node;
 };
 
 const tsStaticArgumentNodesParameterName = 'tsStaticArgumentNodes';
@@ -905,19 +905,16 @@ function evaluateIfStatement(ifStatement: ts.IfStatement, context: EvaluationCon
 export type RequiresRuntimeResult = {
   __requiresRuntime: true;
   message: string;
-  node?: ts.Node;
+  node: ts.Node;
   getDiagnostics(): undefined | { line: number; source: string; file: string; message: string };
 };
 
-export function requiresRuntimeResult(message: string, node?: ts.Node): RequiresRuntimeResult {
+export function requiresRuntimeResult(message: string, node: ts.Node): RequiresRuntimeResult {
   return {
     __requiresRuntime: true,
     message,
     node,
     getDiagnostics() {
-      if (!node) {
-        return undefined;
-      }
       const file = ts.getOriginalNode(node.getSourceFile()) as ts.SourceFile;
       node = ts.getOriginalNode(node);
 

@@ -182,22 +182,31 @@ const node7 = <TheMainLink />;
         const StyledLink = /*#__PURE__*/ styled(applyClassName(Link), {
             color: 'red',
         });
-        const node1 = <Link className={\\"j\\"}/>;
+        const node1 = <Link className={\\"g\\"}/>;
         const node2 = <AutoImportedLink1 className={\\"a\\"}/>;
         const node3 = <AutoImportedLink2 className={\\"b\\"}/>;
         const node4 = <ExportedStyledLink3 />;
         const node5 = <ExportedStyledLink4 />;
         const node6 = <Block />;
-        const node7 = <AutoImportedMainLink className={\\"e f g h\\"}/>;
+        const node7 = <AutoImportedMainLink className={\\"h i j e\\"}/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.h{color:ìnherit}.i{display:block}.j{color:red}.e:visited{color:inherit}.f:hover{color:inherit}.g:hover{text-decoration:underline}"`,
+        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{color:ìnherit}.f{display:block}.g{color:red}.h:visited{color:inherit}.i:hover{color:inherit}.j:hover{text-decoration:underline}"`,
       );
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
         Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 1,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "export function MainLink(props: any) {
+            return <a {...props} />;
+        }",
+          },
           Object {
             "file": "file3.tsx",
             "line": 21,
@@ -377,9 +386,9 @@ function Component(props: { isStyled: boolean; isLarge: boolean }) {
               "source": "props",
             },
             "line": 12,
-            "message": "css prop could not be statically evaluated",
+            "message": "Unable to statically evaluate css prop",
             "severity": "info",
-            "source": "<styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>What color am I?</styled.Div>",
+            "source": "<styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>",
           },
         ]
       `),
@@ -520,14 +529,28 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "innerDiagnostic": Object {
               "file": "file1.tsx",
               "line": 39,
+              "message": "could not statically evaluate styles",
+              "severity": "info",
+              "source": "return styled({ backgroundColor: props.color });",
+            },
+            "line": 39,
+            "message": "Unable to evaluate return statement",
+            "severity": "info",
+            "source": "return styled({ backgroundColor: props.color });",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 39,
               "message": "Could not determine a static value for: props",
               "severity": "info",
               "source": "props",
             },
             "line": 48,
-            "message": "css prop could not be statically evaluated",
+            "message": "Unable to statically evaluate css prop",
             "severity": "info",
-            "source": "<styled.Div css={superDynamic()}>Super dynamic</styled.Div>",
+            "source": "<styled.Div css={superDynamic()}>",
           },
           Object {
             "file": "file1.tsx",
@@ -537,13 +560,6 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "source": "export function exportedDecorator() {
           return styled({ display: 'inline' });
         }",
-          },
-          Object {
-            "file": "file1.tsx",
-            "line": 49,
-            "message": "css prop could not be statically evaluated",
-            "severity": "info",
-            "source": "<styled.Div css={exportedDecorator} />",
           },
           Object {
             "file": "file1.tsx",
@@ -685,12 +701,12 @@ const Styled = styled.div({
               "source": "window",
             },
             "line": 7,
-            "message": "Styled component could not be statically evaluated",
+            "message": "Unable to statically evaluate to a component or element",
             "severity": "error",
-            "source": "const Styled = styled.div({
+            "source": "styled.div({
             width: (window as any).theWidth,
             height: '100%'
-        });",
+        })",
           },
         ]
       `),
@@ -763,27 +779,17 @@ const Styled = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(`""`);
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
         Array [
           Object {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
-              "file": "file1.tsx",
-              "line": 7,
-              "message": "Functions in style objects requires runtime or statically declared themes",
-              "severity": "info",
-              "source": "(theme) => theme.theWidth",
-            },
-            "line": 6,
-            "message": "Styled component could not be statically evaluated",
+            "line": 7,
+            "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
-            "source": "const Styled = styled.div({
-            width: (theme) => theme.theWidth,
-            height: '100%'
-        });",
+            "source": "(theme) => theme.theWidth",
           },
         ]
       `),
@@ -841,9 +847,9 @@ const Styled = createStyledComponent();
               "source": "window",
             },
             "line": 13,
-            "message": "Styled component could not be statically evaluated",
+            "message": "Unable to statically evaluate to a component or element",
             "severity": "info",
-            "source": "const Styled = createStyledComponent();",
+            "source": "createStyledComponent()",
           },
         ]
       `),
@@ -905,12 +911,12 @@ const Styled2 = styled.div({
               "source": "window",
             },
             "line": 7,
-            "message": "Styled component could not be statically evaluated",
+            "message": "Unable to statically evaluate to a component or element",
             "severity": "error",
-            "source": "const Styled1 = styled.div({
+            "source": "styled.div({
             width: (window as any).theWidth,
             height: '100%'
-        });",
+        })",
           },
           Object {
             "file": "file1.tsx",
@@ -922,12 +928,12 @@ const Styled2 = styled.div({
               "source": "window",
             },
             "line": 12,
-            "message": "Styled component could not be statically evaluated",
+            "message": "Unable to statically evaluate to a component or element",
             "severity": "error",
-            "source": "const Styled2 = styled.div({
+            "source": "styled.div({
             width: '100%',
             height: (window as any).theHeight
-        });",
+        })",
           },
         ]
       `),
@@ -1368,7 +1374,7 @@ const DeepStyled = styled.div({
       });
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`""`);
   });
 });
 
@@ -1407,24 +1413,12 @@ function MyComponent(props: {}) {
         Array [
           Object {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
-              "file": "file1.tsx",
-              "line": 5,
-              "message": "Styled component expression requires runtime",
-              "severity": "info",
-              "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
-            },
-            "line": 5,
-            "message": "Styled component could not be statically evaluated",
+            "line": 2,
+            "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
-            "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
-          },
-          Object {
-            "file": "file1.tsx",
-            "line": 3,
-            "message": "Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components",
-            "severity": "info",
-            "source": "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+            "source": "function StyledWrapper(props: {}) {
+            return <styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>;
+        }",
           },
         ]
       `),
@@ -1466,24 +1460,12 @@ function MyComponent(props: {}) {
         Array [
           Object {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
-              "file": "file1.tsx",
-              "line": 5,
-              "message": "Styled component expression requires runtime",
-              "severity": "info",
-              "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
-            },
-            "line": 5,
-            "message": "Styled component could not be statically evaluated",
+            "line": 2,
+            "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
-            "source": "const Styled = styled(StyledWrapper, { color: 'red' });",
-          },
-          Object {
-            "file": "file1.tsx",
-            "line": 3,
-            "message": "Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components",
-            "severity": "info",
-            "source": "<styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+            "source": "function StyledWrapper(props: {}) {
+            return <div><styled.Div css={{ backgroundColor: 'green' }}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div></div>;
+        }",
           },
         ]
       `),
@@ -1728,16 +1710,33 @@ const MyComponent = styled((props: {}) => {
 `,
   };
 
-  expectEqual(compile(code), result => {
-    expect(result['file1.jsx']).toMatchInlineSnapshot(`
-      "import { styled } from '@glitz/react';
-      const MyComponent = /*#__PURE__*/ styled((props) => {
-          return <styled.Div css={{ backgroundColor: 'green' }}/>;
-      }, { color: 'red' });
-      "
-    `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}"`);
-  });
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+              "import { styled } from '@glitz/react';
+              const MyComponent = /*#__PURE__*/ styled((props) => {
+                  return <styled.Div css={{ backgroundColor: 'green' }}/>;
+              }, { color: 'red' });
+              "
+          `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:green}"`);
+    },
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 2,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "(props: {}) => {
+            return <styled.Div css={{ backgroundColor: 'green' }}/>;
+        }",
+          },
+        ]
+      `),
+  );
 });
 
 test('bails on spread after css prop', () => {

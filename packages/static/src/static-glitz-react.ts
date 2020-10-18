@@ -1,6 +1,7 @@
 import {
   DirtyStyle,
   isStaticComponent,
+  isStaticDecorator,
   ReactFunctionComponent,
   StaticComponent,
   StaticElement,
@@ -32,7 +33,7 @@ function createStaticDecorator(styles: Style[]): StaticDecorator {
     (arg1?: Styles | StaticComponent | ReactFunctionComponent, arg2?: Styles): any => {
       return isStaticComponent(arg1)
         ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle([arg2])])
-        : typeof arg1 === 'object' || isDecorator(arg1)
+        : typeof arg1 === 'object' || isStaticDecorator(arg1)
         ? createStaticStyled([...styles, ...cleanStyle([arg1])])
         : typeof arg1 === 'undefined'
         ? styles
@@ -42,20 +43,19 @@ function createStaticDecorator(styles: Style[]): StaticDecorator {
   );
 }
 
-function isDecorator(arg: any): arg is StaticDecorator {
-  return typeof arg === 'function' && !!(arg as StaticDecorator).decorator;
-}
-
 function createStaticStyled(styles: Style[]): StaticStyled {
-  return (arg1?: Styles | StaticComponent | ReactFunctionComponent, ...rest: Styles[]): any => {
-    return isStaticComponent(arg1)
-      ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle(rest)])
-      : typeof arg1 === 'object' || isDecorator(arg1)
-      ? createStaticDecorator([...styles, ...cleanStyle([arg1]), ...cleanStyle(rest)])
-      : typeof arg1 === 'undefined'
-      ? styles
-      : arg1;
-  };
+  return Object.assign(
+    (arg1?: Styles | StaticComponent | ReactFunctionComponent, ...rest: Styles[]): any => {
+      return isStaticComponent(arg1)
+        ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle(rest)])
+        : typeof arg1 === 'object' || isStaticDecorator(arg1)
+        ? createStaticDecorator([...styles, ...cleanStyle([arg1]), ...cleanStyle(rest)])
+        : typeof arg1 === 'undefined'
+        ? styles
+        : arg1;
+    },
+    { decorator: true } as const,
+  );
 }
 
 function createStaticComponent(elementName: StaticElementName, styles?: Style[]): StaticComponent {

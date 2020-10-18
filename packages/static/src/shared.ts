@@ -33,10 +33,14 @@ export type StaticElement = {
   elementName: StaticElementName;
 };
 
+export function isStaticDecorator(object: any): object is StaticDecorator {
+  return object && typeof object === 'function' && !!object.decorator;
+}
+
 export function isStaticComponent(object: any): object is StaticComponent {
-  return typeof object === 'function' && !!object.styles && !!object.elementName;
+  return object && typeof object === 'function' && !!object.styles && !!object.elementName;
 }
 
 export function isStaticElement(object: any): object is StaticElement {
-  return typeof object === 'object' && !!object.styles && !!object.elementName;
+  return object && typeof object === 'object' && !!object.styles && !!object.elementName;
 }

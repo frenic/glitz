@@ -2,7 +2,15 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 import { GlitzStatic } from '@glitz/core';
-import { isStaticElement, isStaticComponent, StaticElementName, StaticElement, StaticComponent, Style } from './shared';
+import {
+  isStaticElement,
+  isStaticComponent,
+  isStaticDecorator,
+  StaticElementName,
+  StaticElement,
+  StaticComponent,
+  Style,
+} from './shared';
 import {
   evaluate,
   partiallyEvaluate,
@@ -273,7 +281,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   const factory = transformerContext.tsContext.factory;
   const staticStyledComponents = transformerContext.staticStyledComponents;
   const isFirstPass = transformerContext.passNumber === 1;
-  const canEvalStyle = (s: EvaluatedStyle) => isEvaluableStyle(s, !!transformerContext.staticThemes);
   const originalNode = ts.getOriginalNode(node);
 
   if (hasJSDocTag(node, 'glitz-dynamic')) {
@@ -300,26 +307,23 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
     if (isComponentName(node.name.text)) {
       const symbol = typeChecker.getSymbolAtLocation(node.name);
       if (symbol) {
-        const staticComponentOrElement = evaluateToStaticComponentOrElement(
+        const stats: EvaluationStats = {
+          usedVariables: new Map<ts.Declaration, any>(),
+        };
+        const result = evaluateToStaticComponentOrElement(
           ts.isImportSpecifier(node) && node.propertyName ? node.propertyName : node.name,
           transformerContext,
+          stats,
         );
-        if (isStaticComponent(staticComponentOrElement) || isStaticElement(staticComponentOrElement)) {
-          if (staticComponentOrElement.styles.every(canEvalStyle)) {
-            const component: StaticStyledComponent = {
-              componentName: node.name.text,
-              elementName: staticComponentOrElement.elementName,
-              styles: staticComponentOrElement.styles,
-            };
-            staticStyledComponents.symbolToComponent.set(symbol, component);
-          } else {
-            reportRequiresRuntimeResult(
-              'Styled component could not be statically evaluated',
-              staticComponentOrElement.styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
-              node,
-              transformerContext,
-            );
-          }
+        if (result.canUseResult && result.elementOrComponent) {
+          const component: StaticStyledComponent = {
+            componentName: node.name.text,
+            elementName: result.elementOrComponent.elementName,
+            styles: result.elementOrComponent.styles,
+          };
+          staticStyledComponents.symbolToComponent.set(symbol, component);
+        } else {
+          result.report();
         }
       }
     }
@@ -375,8 +379,8 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                 const stats: EvaluationStats = {
                   usedVariables: new Map<ts.Declaration, any>(),
                 };
-                const object = evaluateToStaticComponentOrElement(declaration.initializer, transformerContext, stats);
-                if (isStaticElement(object) || isStaticComponent(object)) {
+                const result = evaluateToStaticComponentOrElement(declaration.initializer, transformerContext, stats);
+                if (result.canUseResult && result.elementOrComponent) {
                   stats.usedVariables!.forEach((_, k) => {
                     if (
                       ts.isVariableDeclaration(k) &&
@@ -389,44 +393,24 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                   });
                   declarePure(declaration.initializer);
 
-                  if (object.styles.every(canEvalStyle)) {
-                    const component = {
-                      componentName,
-                      elementName: object.elementName,
-                      styles: object.styles,
-                    };
-                    for (const style of object.styles.map(stripUnevaluableProperties)) {
-                      transformerContext.glitz.injectStyle(style);
-                    }
-
-                    staticStyledComponents.symbolToComponent.set(componentSymbol, component);
-                  } else {
-                    for (const style of object.styles.map(stripUnevaluableProperties)) {
-                      transformerContext.glitz.injectStyle(style);
-                    }
-
-                    reportRequiresRuntimeResult(
-                      'Styled component could not be statically evaluated',
-                      object.styles.filter(isRequiresRuntimeResultOrStyleWithFunction),
-                      node,
-                      transformerContext,
-                    );
+                  const component = {
+                    componentName,
+                    elementName: result.elementOrComponent.elementName,
+                    styles: result.elementOrComponent.styles,
+                  };
+                  for (const style of result.elementOrComponent.styles.map(stripUnevaluableProperties)) {
+                    transformerContext.glitz.injectStyle(style);
                   }
-                } else if (staticGlitzUsed(stats)) {
-                  const requiresRuntime = isRequiresRuntimeResult(object)
-                    ? object
-                    : requiresRuntimeResult('Styled component expression requires runtime', node);
-                  reportRequiresRuntimeResult(
-                    'Styled component could not be statically evaluated',
-                    requiresRuntime,
-                    node,
-                    transformerContext,
-                  );
+
+                  staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                } else {
+                  result.report();
                 }
               } else if (isUseStyle(declaration.initializer)) {
                 const styles = evaluate(declaration.initializer, transformerContext.program);
                 const analyzeResult = analyzeEvaluationResult(
                   styles,
+                  declaration,
                   ExpectedEvaluationResult.StylesArray,
                   transformerContext,
                 );
@@ -456,6 +440,8 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                     );
                     transformerContext.transformations.set(node, variableStmt);
                   }
+                } else {
+                  analyzeResult.report();
                 }
               }
             }
@@ -474,31 +460,24 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   ) {
     // We now know that: node == `<styled.[element name] />`
     const elementName = node.tagName.name.escapedText.toString().toLowerCase();
-    const cssData = getCssDataFromCssProp(node, transformerContext);
-    if (cssData) {
-      if (isEvaluableStyle(cssData, !!transformerContext.staticThemes, true)) {
-        if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
-          // Everything is static, replace `<styled.[element name] />` with `<[element name] className="[classes]" />`
-          const classNameExpr = getClassNameExpression(cssData, transformerContext);
-          if (isRequiresRuntimeResult(classNameExpr)) {
-            reportRequiresRuntimeResult(
-              'Evaluation of theme function requires runtime',
-              classNameExpr,
-              node,
-              transformerContext,
-            );
-          } else {
-            const componentName = styledName + '.' + node.tagName.name.escapedText;
-            rewriteToHtmlElement(node, elementName, componentName, classNameExpr, transformerContext);
-          }
+    const cssProp = getCssDataFromCssProp(node, transformerContext);
+    if (cssProp.found) {
+      if (cssProp.styles) {
+        // Everything is static, replace `<styled.[element name] />` with `<[element name] className="[classes]" />`
+        const classNameExpr = getClassNameExpression(cssProp.styles, transformerContext);
+        if (isRequiresRuntimeResult(classNameExpr)) {
+          reportRequiresRuntimeResult(
+            'Evaluation of theme function requires runtime',
+            classNameExpr,
+            node,
+            transformerContext,
+          );
         } else {
-          if (transformerContext.transformations.has(originalNode)) {
-            transformerContext.transformations.delete(originalNode);
-          }
-          reportTopLevelJsxInComposedComponent(node, transformerContext);
+          const componentName = styledName + '.' + node.tagName.name.escapedText;
+          rewriteToHtmlElement(node, elementName, componentName, classNameExpr, transformerContext);
         }
       } else if (!rewriteFunctionToReturnClassNamesIfPossible(node, transformerContext)) {
-        reportRequiresRuntimeResult('css prop could not be statically evaluated', cssData, node, transformerContext);
+        cssProp.report();
       }
     }
   }
@@ -512,37 +491,25 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       !hasSpreadWithoutCssPropOrAfterCssProp(openingElement.attributes.properties)
     ) {
       // We now know that: node == `<styled.[element name]>[zero or more children]</styled.[element name]>`
-      if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
-        const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
-        const cssData = getCssDataFromCssProp(openingElement, transformerContext);
-        if (cssData) {
-          if (isEvaluableStyle(cssData, !!transformerContext.staticThemes, true)) {
-            const classNameExpr = getClassNameExpression(cssData, transformerContext);
-            if (isRequiresRuntimeResult(classNameExpr)) {
-              reportRequiresRuntimeResult(
-                'Evaluation of theme function requires runtime',
-                classNameExpr,
-                node,
-                transformerContext,
-              );
-            } else {
-              const componentName = styledName + '.' + openingElement.tagName.name.escapedText;
-              rewriteToHtmlElement(node, elementName, componentName, classNameExpr, transformerContext);
-            }
-          } else if (!rewriteFunctionToReturnClassNamesIfPossible(node, transformerContext)) {
+      const elementName = openingElement.tagName.name.escapedText.toString().toLowerCase();
+      const cssProp = getCssDataFromCssProp(openingElement, transformerContext);
+      if (cssProp.found) {
+        if (cssProp.styles) {
+          const classNameExpr = getClassNameExpression(cssProp.styles, transformerContext);
+          if (isRequiresRuntimeResult(classNameExpr)) {
             reportRequiresRuntimeResult(
-              'css prop could not be statically evaluated',
-              cssData,
+              'Evaluation of theme function requires runtime',
+              classNameExpr,
               node,
               transformerContext,
             );
+          } else {
+            const componentName = styledName + '.' + openingElement.tagName.name.escapedText;
+            rewriteToHtmlElement(node, elementName, componentName, classNameExpr, transformerContext);
           }
+        } else if (!rewriteFunctionToReturnClassNamesIfPossible(node, transformerContext)) {
+          cssProp.report();
         }
-      } else {
-        if (transformerContext.transformations.has(originalNode)) {
-          transformerContext.transformations.delete(originalNode);
-        }
-        reportTopLevelJsxInComposedComponent(node, transformerContext);
       }
     }
 
@@ -557,48 +524,36 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         // We now know that: node == `<[styled component name] [zero or more props]>[zero or more children]</[styled component name]>`
         // and we also know that the JSX points to a component that is 100% static
         // and is not referenced outside of JSX.
-        if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
-          const cssPropData = getCssDataFromCssProp(openingElement, transformerContext);
-          if (isRequiresRuntimeResult(cssPropData)) {
-            reportRequiresRuntimeResult(
-              'css prop could not be statically evaluated',
-              cssPropData,
-              node,
-              transformerContext,
-            );
-          } else {
-            const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-            if (styledComponent.elementName) {
-              let styles = styledComponent.styles.filter(style => !!style);
-              if (cssPropData) {
-                styles = styles.slice();
-                styles.push(cssPropData);
-              }
+        const cssProp = getCssDataFromCssProp(openingElement, transformerContext);
+        if (cssProp.found && !cssProp.styles) {
+          cssProp.report();
+        } else {
+          const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
+          if (styledComponent.elementName) {
+            let styles = styledComponent.styles.filter(style => !!style);
+            if (cssProp.styles) {
+              styles = styles.slice();
+              styles.push(...cssProp.styles);
+            }
 
-              const classNameExpr = getClassNameExpression(styles, transformerContext);
-              if (isRequiresRuntimeResult(classNameExpr)) {
-                reportRequiresRuntimeResult(
-                  'Evaluation of theme function requires runtime',
-                  classNameExpr,
-                  node,
-                  transformerContext,
-                );
-              } else {
-                rewriteToHtmlElement(
-                  node,
-                  styledComponent.elementName,
-                  styledComponent.componentName,
-                  classNameExpr,
-                  transformerContext,
-                );
-              }
+            const classNameExpr = getClassNameExpression(styles, transformerContext);
+            if (isRequiresRuntimeResult(classNameExpr)) {
+              reportRequiresRuntimeResult(
+                'Evaluation of theme function requires runtime',
+                classNameExpr,
+                node,
+                transformerContext,
+              );
+            } else {
+              rewriteToHtmlElement(
+                node,
+                styledComponent.elementName,
+                styledComponent.componentName,
+                classNameExpr,
+                transformerContext,
+              );
             }
           }
-        } else {
-          if (transformerContext.transformations.has(originalNode)) {
-            transformerContext.transformations.delete(originalNode);
-          }
-          reportTopLevelJsxInComposedComponent(node, transformerContext);
         }
       }
     }
@@ -615,47 +570,35 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       // We now know that: node == `<[styled component name] [zero or more props] />`
       // and we also know that the JSX points to a component that is 100% static
       // and is not referenced outside of JSX.
-      if (!isTopLevelJsxInComposedComponent(node, typeChecker, staticStyledComponents)) {
-        const cssPropData = getCssDataFromCssProp(node, transformerContext);
-        const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
-        if (isRequiresRuntimeResult(cssPropData)) {
+      const cssProp = getCssDataFromCssProp(node, transformerContext);
+      const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
+      if (cssProp.found && !cssProp.styles) {
+        cssProp.report();
+      } else if (styledComponent.elementName) {
+        let styles = styledComponent.styles.filter(style => !!style);
+        if (cssProp.styles) {
+          styles = styles.slice();
+          styles.push(...cssProp.styles);
+        }
+
+        const classNameExpr = getClassNameExpression(styles, transformerContext);
+        if (isRequiresRuntimeResult(classNameExpr)) {
           reportRequiresRuntimeResult(
-            'css prop could not be statically evaluated',
-            cssPropData,
+            'Evaluation of theme function requires runtime',
+            classNameExpr,
             node,
             transformerContext,
           );
-        } else if (styledComponent.elementName) {
-          let styles = styledComponent.styles.filter(style => !!style);
-          if (cssPropData) {
-            styles = styles.slice();
-            styles.push(cssPropData);
-          }
-
-          const classNameExpr = getClassNameExpression(styles, transformerContext);
-          if (isRequiresRuntimeResult(classNameExpr)) {
-            reportRequiresRuntimeResult(
-              'Evaluation of theme function requires runtime',
-              classNameExpr,
-              node,
-              transformerContext,
-            );
-          } else {
-            // Everything is static, replace with `<[element name] className="[classes]" [zero or more props] />`
-            rewriteToHtmlElement(
-              node,
-              styledComponent.elementName,
-              styledComponent.componentName,
-              classNameExpr,
-              transformerContext,
-            );
-          }
+        } else {
+          // Everything is static, replace with `<[element name] className="[classes]" [zero or more props] />`
+          rewriteToHtmlElement(
+            node,
+            styledComponent.elementName,
+            styledComponent.componentName,
+            classNameExpr,
+            transformerContext,
+          );
         }
-      } else {
-        if (transformerContext.transformations.has(originalNode)) {
-          transformerContext.transformations.delete(originalNode);
-        }
-        reportTopLevelJsxInComposedComponent(node, transformerContext);
       }
     }
   }
@@ -965,6 +908,16 @@ function reportUsageOutsideOfJsxIfNeeded(
   }
 }
 
+function getJsxElement(node: ts.Node) {
+  while (!ts.isJsxElement(node) && !ts.isJsxSelfClosingElement(node)) {
+    node = node.parent;
+    if (ts.isSourceFile(node)) {
+      return undefined;
+    }
+  }
+  return node as ts.JsxElement | ts.JsxSelfClosingElement;
+}
+
 // If a top level JSX element (that is, the top element returned) in a component
 // has been composed we need to bail because Glitz needs the runtime component
 // in order to do composition safely. Note that top level is both:
@@ -977,7 +930,11 @@ function isTopLevelJsxInComposedComponent(
   typeChecker: ts.TypeChecker,
   staticStyledComponents: StaticStyledComponents,
 ) {
-  let parent: ts.Node | undefined = node.parent;
+  const jsxElement = getJsxElement(node);
+  if (!jsxElement) {
+    return false;
+  }
+  let parent: ts.Node | undefined = jsxElement.parent;
   while (parent) {
     if (ts.isParenthesizedExpression(parent)) {
       parent = parent.parent;
@@ -997,7 +954,7 @@ function isTopLevelJsxInComposedComponent(
   if (!parent) {
     return true;
   }
-  const containingComponentSymbol = getComponentSymbol(node, typeChecker);
+  const containingComponentSymbol = getComponentSymbol(jsxElement, typeChecker);
 
   if (!ts.isReturnStatement(parent) && !ts.isArrowFunction(parent)) {
     return false;
@@ -1006,7 +963,7 @@ function isTopLevelJsxInComposedComponent(
   if (
     (containingComponentSymbol &&
       staticStyledComponents.composedComponentSymbols.indexOf(containingComponentSymbol) !== -1) ||
-    isInsideInlineStyledComponent(node)
+    isInsideInlineStyledComponent(jsxElement)
   ) {
     return true;
   }
@@ -1016,38 +973,16 @@ function isTopLevelJsxInComposedComponent(
 function evaluateToStaticComponentOrElement(
   expression: ts.Expression,
   transformerContext: TransformerContext,
-  stats?: EvaluationStats,
+  stats: EvaluationStats,
 ) {
   const object = evaluate(expression, transformerContext.program, undefined, stats);
   const analyzeResult = analyzeEvaluationResult(
     object,
+    expression,
     ExpectedEvaluationResult.ElementOrComponent,
     transformerContext,
   );
-  if (analyzeResult.canUseResult && analyzeResult.elementOrComponent) {
-    return analyzeResult.elementOrComponent;
-  }
-  return object;
-}
-
-function reportTopLevelJsxInComposedComponent(node: ts.Node, transformerContext: TransformerContext) {
-  node = ts.getOriginalNode(node);
-  if (hasNodeFlag(transformerContext, node, diagnosticsReportedFlag)) {
-    return;
-  }
-  setNodeFlag(transformerContext, node, diagnosticsReportedFlag);
-
-  const sourceFile = ts.getOriginalNode(node.getSourceFile()) as ts.SourceFile;
-  if (transformerContext.diagnosticsReporter) {
-    transformerContext.diagnosticsReporter({
-      message:
-        'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components',
-      file: sourceFile.fileName,
-      line: getLineNumber(node),
-      severity: 'info',
-      source: node.getText(),
-    });
-  }
+  return analyzeResult;
 }
 
 // A statement is basically a node that is on its own line, and we sometimes want to traverse up and find the
@@ -1247,40 +1182,15 @@ function getCssDataFromCssProp(
 
       return false;
     };
-    let cssData = partiallyEvaluate(cssPropExpression, shouldEvaluate, transformerContext.program, undefined, stats) as
-      | EvaluatedStyle
-      | RequiresRuntimeResult;
-
-    if (typeof cssData === 'function') {
-      try {
-        cssData = (cssData as FunctionWithTsNode)();
-      } catch (e) {
-        if (isRequiresRuntimeResult(e)) {
-          cssData = e;
-        } else {
-          throw e;
-        }
-      }
-    }
-
-    if (!transformerContext.staticThemes) {
-      transformerContext.glitz.injectStyle(stripUnevaluableProperties(cssData));
-    }
-    const requiresRuntime = getAllRequiresRuntimeResult(cssData);
-    if (requiresRuntime.length) {
-      cssData = requiresRuntime[0];
-    } else if (!transformerContext.staticThemes) {
-      const propFunc = anyValuesAreFunctions(cssData as EvaluatedStyle);
-      if (propFunc) {
-        cssData = requiresRuntimeResult(
-          'Functions in style objects requires runtime or statically declared themes',
-          (propFunc as FunctionWithTsNode).tsNode ?? node,
-        );
-      }
-    }
-    return cssData;
+    const cssData = partiallyEvaluate(cssPropExpression, shouldEvaluate, transformerContext.program, undefined, stats);
+    const analyzeResult = analyzeEvaluationResult(cssData, node, ExpectedEvaluationResult.CssProp, transformerContext);
+    return {
+      found: true,
+      styles: analyzeResult.cssProp,
+      report: analyzeResult.report,
+    };
   }
-  return undefined;
+  return { found: false, report: () => undefined };
 }
 
 function getCssPropExpression(node: ts.JsxSelfClosingElement | ts.JsxOpeningElement) {
@@ -1378,7 +1288,7 @@ function rewriteFunctionToReturnClassNamesIfPossible(
             } else {
               reportRequiresRuntimeResult(
                 'Unable to evaluate return statement',
-                requiresRuntimeResult('could not statically evaluate styles'),
+                requiresRuntimeResult('could not statically evaluate styles', node),
                 node,
                 transformerContext,
               );
@@ -1523,7 +1433,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         if (propFunc) {
           return requiresRuntimeResult(
             'Functions in style objects cannot be combined with ternaries',
-            (propFunc as FunctionWithTsNode).tsNode,
+            (propFunc as FunctionWithTsNode).tsNode!,
           );
         }
         conditionalFound = true;
@@ -1605,7 +1515,7 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
     if (propFunc) {
       return requiresRuntimeResult(
         'Functions in style objects requires runtime or statically declared themes',
-        (propFunc as FunctionWithTsNode).tsNode,
+        (propFunc as FunctionWithTsNode).tsNode!,
       );
     } else {
       const classNames = transformerContext.glitz.injectStyle(style);
@@ -2010,15 +1920,18 @@ function createLiteral(value: any, factory: ts.NodeFactory) {
 
 const enum ExpectedEvaluationResult {
   StylesArray,
+  CssProp,
   ElementOrComponent,
 }
 
 function analyzeEvaluationResult(
   evaluationResult: unknown,
+  node: ts.Node,
   expected: ExpectedEvaluationResult,
   transformerContext: TransformerContext,
+  stats?: EvaluationStats,
 ) {
-  if (typeof evaluationResult === 'function') {
+  if (isStaticDecorator(evaluationResult)) {
     try {
       evaluationResult = evaluationResult();
     } catch (e) {
@@ -2028,14 +1941,89 @@ function analyzeEvaluationResult(
     }
   }
 
+  let bailedOnTopLevelComposedStyledElement = false;
+  const evaluationObjects = collectEvaluationObjects(evaluationResult);
+
   const result = {
-    allRequiresRuntimeResult: getAllRequiresRuntimeResult(evaluationResult),
-    allFunctions: getAllFunctions(evaluationResult),
+    allRequiresRuntimeResult: evaluationObjects.requiresRuntimeResult,
+    allFunctions: evaluationObjects.functions,
+    nodes: evaluationObjects.nodes,
     canUseResult: true,
     stylesArray: undefined as undefined | Style[],
     elementOrComponent: undefined as undefined | StaticElement | StaticComponent,
+    cssProp: undefined as undefined | EvaluatedStyle[],
     evaluationResult,
+    glitzUsedInEvaluation: undefined as undefined | boolean,
+    report: () => {
+      if (!transformerContext.diagnosticsReporter) {
+        return;
+      }
+      const severity = getSeverity(node, transformerContext);
+      if (severity === 'suppressed') {
+        return;
+      }
+      if (hasNodeFlag(transformerContext, node, diagnosticsReportedFlag)) {
+        return;
+      }
+      setNodeFlag(transformerContext, node, diagnosticsReportedFlag);
+
+      const allRequireRuntimeDiagnostics = result.allRequiresRuntimeResult.map(r => r.getDiagnostics());
+      if (!allRequireRuntimeDiagnostics.length && result.glitzUsedInEvaluation) {
+        allRequireRuntimeDiagnostics.push(undefined);
+      }
+
+      let message = '';
+      switch (expected) {
+        case ExpectedEvaluationResult.CssProp:
+          message = 'Unable to statically evaluate css prop';
+          break;
+        case ExpectedEvaluationResult.ElementOrComponent:
+          message = 'Unable to statically evaluate to a component or element';
+          break;
+        case ExpectedEvaluationResult.StylesArray:
+          message = 'Unable to statically evaluate to one or more style objects';
+          break;
+      }
+      if (bailedOnTopLevelComposedStyledElement) {
+        message =
+          'Top level styled.[Element] cannot be statically extracted inside components that are decorated by other components';
+      } else if (result.allFunctions.length && !transformerContext.staticThemesFile) {
+        message = 'Functions in style objects requires runtime or statically declared themes';
+        for (const func of result.allFunctions) {
+          transformerContext.diagnosticsReporter({
+            message,
+            severity,
+            file: func.tsNode.getSourceFile().fileName,
+            line: getLineNumber(func.tsNode),
+            source: func.tsNode.getText(),
+          });
+        }
+      }
+
+      for (const requireRuntimeDiagnostics of allRequireRuntimeDiagnostics) {
+        transformerContext.diagnosticsReporter({
+          message,
+          severity,
+          file: node.getSourceFile().fileName,
+          line: getLineNumber(node),
+          source: node.getText(),
+          innerDiagnostic: requireRuntimeDiagnostics
+            ? {
+                file: requireRuntimeDiagnostics.file,
+                line: requireRuntimeDiagnostics.line,
+                message: requireRuntimeDiagnostics.message,
+                source: requireRuntimeDiagnostics.source,
+                severity,
+              }
+            : undefined,
+        });
+      }
+    },
   };
+
+  if (stats) {
+    result.glitzUsedInEvaluation = staticGlitzUsed(stats);
+  }
 
   if (Array.isArray(evaluationResult)) {
     if (expected === ExpectedEvaluationResult.StylesArray) {
@@ -2052,16 +2040,28 @@ function analyzeEvaluationResult(
       for (const elem of evaluationResult) {
         if (isStaticElement(elem) || isStaticComponent(elem)) {
           staticElementOrComponent = elem;
-          transformerContext.glitz.injectStyle(elem.styles);
+          transformerContext.glitz.injectStyle(elem.styles.map(stripUnevaluableProperties));
         } else if (staticElementOrComponent) {
           staticElementOrComponent.styles.push(elem);
-          transformerContext.glitz.injectStyle(elem);
+          transformerContext.glitz.injectStyle(stripUnevaluableProperties(elem));
         }
       }
-      if (staticElementOrComponent) {
+      if (
+        staticElementOrComponent &&
+        staticElementOrComponent.styles.every(s => isEvaluableStyle(s, !!transformerContext.staticThemesFile))
+      ) {
         result.elementOrComponent = staticElementOrComponent;
       } else {
         result.canUseResult = false;
+      }
+    } else if (expected === ExpectedEvaluationResult.CssProp) {
+      if (evaluationResult.every(s => isEvaluableStyle(s, !!transformerContext.staticThemesFile, true))) {
+        result.cssProp = evaluationResult;
+      } else {
+        result.canUseResult = false;
+        for (const style of evaluationResult.map(stripUnevaluableProperties)) {
+          transformerContext.glitz.injectStyle(style);
+        }
       }
     }
   } else {
@@ -2069,7 +2069,42 @@ function analyzeEvaluationResult(
       if (!isStaticComponent(evaluationResult) && !isStaticElement(evaluationResult)) {
         result.canUseResult = false;
       } else {
-        result.elementOrComponent = evaluationResult;
+        if (evaluationResult.styles.every(s => isEvaluableStyle(s, !!transformerContext.staticThemesFile))) {
+          result.elementOrComponent = evaluationResult;
+        } else {
+          result.canUseResult = false;
+        }
+      }
+    } else if (expected === ExpectedEvaluationResult.CssProp) {
+      if (isEvaluableStyle(evaluationResult, !!transformerContext.staticThemesFile, true)) {
+        result.cssProp = [evaluationResult];
+      } else {
+        result.canUseResult = false;
+        transformerContext.glitz.injectStyle(stripUnevaluableProperties(evaluationResult));
+      }
+    }
+  }
+
+  if (expected === ExpectedEvaluationResult.CssProp && result.cssProp) {
+    if (
+      isTopLevelJsxInComposedComponent(
+        node,
+        transformerContext.program.getTypeChecker(),
+        transformerContext.staticStyledComponents,
+      )
+    ) {
+      result.canUseResult = false;
+      for (const style of result.cssProp.map(stripUnevaluableProperties)) {
+        transformerContext.glitz.injectStyle(style);
+      }
+      result.cssProp = undefined;
+      bailedOnTopLevelComposedStyledElement = true;
+      const jsxElement = getJsxElement(node);
+      if (jsxElement) {
+        const originalNode = ts.getOriginalNode(jsxElement);
+        if (transformerContext.transformations.has(originalNode)) {
+          transformerContext.transformations.delete(originalNode);
+        }
       }
     }
   }
@@ -2078,6 +2113,46 @@ function analyzeEvaluationResult(
   }
   if (result.allRequiresRuntimeResult.length) {
     result.canUseResult = false;
+  }
+  return result;
+}
+
+type EvaluationResults = {
+  requiresRuntimeResult: RequiresRuntimeResult[];
+  functions: FunctionWithTsNode[];
+  nodes: ts.Node[];
+};
+
+function collectEvaluationObjects(obj: any, result?: EvaluationResults): EvaluationResults {
+  result = result ?? {
+    requiresRuntimeResult: [],
+    functions: [],
+    nodes: [],
+  };
+  if (obj) {
+    if (isRequiresRuntimeResult(obj)) {
+      result.requiresRuntimeResult.push(obj);
+    } else if (isNode(obj)) {
+      result.nodes.push(obj);
+    } else if (typeof obj === 'function') {
+      if (!isStaticComponent(obj) && !isStaticDecorator(obj)) {
+        result.functions.push(obj);
+      } else if (isStaticComponent(obj)) {
+        for (const elem of obj.styles) {
+          collectEvaluationObjects(elem, result);
+        }
+      }
+    } else if (typeof obj === 'object') {
+      if (Array.isArray(obj)) {
+        for (const elem of obj) {
+          collectEvaluationObjects(elem, result);
+        }
+      } else {
+        for (const key in obj) {
+          collectEvaluationObjects(obj[key], result);
+        }
+      }
+    }
   }
   return result;
 }
@@ -2104,33 +2179,7 @@ function getAllRequiresRuntimeResult(obj: any) {
   return result;
 }
 
-function getAllFunctions(obj: any): FunctionWithTsNode[] {
-  const result: FunctionWithTsNode[] = [];
-  if (obj) {
-    if (typeof obj === 'function') {
-      result.push(obj as FunctionWithTsNode);
-    } else if (typeof obj === 'object') {
-      if (Array.isArray(obj)) {
-        for (const elem of obj) {
-          const res = getAllFunctions(elem);
-          result.push(...res);
-        }
-      } else if (!isNode(obj)) {
-        for (const key in obj) {
-          const res = getAllFunctions(obj[key]);
-          result.push(...res);
-        }
-      }
-    }
-  }
-  return result;
-}
-
-function isEvaluableStyle(
-  object: EvaluatedStyle | RequiresRuntimeResult,
-  hasStaticThemes: boolean,
-  allowTernaries = false,
-): object is EvaluatedStyle {
+function isEvaluableStyle(object: any, hasStaticThemes: boolean, allowTernaries = false): object is EvaluatedStyle {
   if (!isRequiresRuntimeResult(object)) {
     if (typeof object === 'function') {
       return false;
@@ -2193,21 +2242,7 @@ function isComponentName(name: string) {
   return false;
 }
 
-function isRequiresRuntimeResultOrStyleWithFunction(obj: RequiresRuntimeResult | { [key: string]: any }) {
-  if (isRequiresRuntimeResult(obj)) {
-    return true;
-  }
-  if (obj && typeof obj === 'object') {
-    for (const key in obj) {
-      if (typeof obj[key] === 'function' || isRequiresRuntimeResultOrStyleWithFunction(obj[key])) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function stripUnevaluableProperties(obj: { [key: string]: any }): EvaluatedStyle {
+function stripUnevaluableProperties(obj: any): EvaluatedStyle {
   if (!obj || typeof obj !== 'object') {
     return {};
   }
@@ -2216,7 +2251,7 @@ function stripUnevaluableProperties(obj: { [key: string]: any }): EvaluatedStyle
   }
   const style: EvaluatedStyle = {};
   for (const key in obj) {
-    if (!isRequiresRuntimeResult(obj[key]) && !ts.isConditionalExpression(obj[key]) && typeof obj[key] !== 'function') {
+    if (!isRequiresRuntimeResult(obj[key]) && !isNode(obj[key]) && typeof obj[key] !== 'function') {
       if (obj[key] && typeof obj[key] === 'object') {
         Object.assign(obj[key], stripUnevaluableProperties(obj[key]));
       } else {
