@@ -585,32 +585,86 @@ test('bails if it finds a comment that it should skip', () => {
     'file1.tsx': `
 import { styled } from '@glitz/react';
 function MyComponent(props: {}) {
-    return <Styled id="some-id">hello</Styled>;
+    return (
+      <>
+        <Styled1 id="some-id">hello</Styled1>
+        <Styled2 id="some-id">hello</Styled2>
+        <Styled3 id="some-id">hello</Styled3>
+        <styled.Div css={/* @glitz-dynamic */ { width: '100%' }} />
+        <styled.Div 
+          /* @glitz-dynamic */ 
+          css={{ width: '100%' }}
+        />
+        <styled.Div 
+          // @glitz-dynamic
+          css={{ width: '100%' }}
+        />
+        <styled.Div css={{ width: '100%' }} />
+      </>
+    );
 }
 
 /** @glitz-dynamic */
-const Styled = styled.div({
+const Styled1 = styled.div({
+    width: '100%',
+    height: '100%'
+});
+
+/* @glitz-dynamic */
+const Styled2 = styled.div({
+    width: '100%',
+    height: '100%'
+});
+
+// @glitz-dynamic
+const Styled3 = styled.div({
     width: '100%',
     height: '100%'
 });
 `,
   };
 
-  expectEqual(compile(code), result => {
-    expect(result['file1.jsx']).toMatchInlineSnapshot(`
-      "import { styled } from '@glitz/react';
-      function MyComponent(props) {
-          return <Styled id=\\"some-id\\">hello</Styled>;
-      }
-      /** @glitz-dynamic */
-      const Styled = /*#__PURE__*/ styled.div({
-          width: '100%',
-          height: '100%'
-      });
-      "
-    `);
-    expect(result['style.css']).toMatchInlineSnapshot(`""`);
-  });
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        function MyComponent(props) {
+            return (<>
+                <Styled1 id=\\"some-id\\">hello</Styled1>
+                <Styled2 id=\\"some-id\\">hello</Styled2>
+                <Styled3 id=\\"some-id\\">hello</Styled3>
+                <styled.Div css={{ width: '100%' }}/>
+                <styled.Div 
+            /* @glitz-dynamic */
+            css={{ width: '100%' }}/>
+                <styled.Div 
+            // @glitz-dynamic
+            css={{ width: '100%' }}/>
+                <div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/>
+              </>);
+        }
+        /** @glitz-dynamic */
+        const Styled1 = /*#__PURE__*/ styled.div({
+            width: '100%',
+            height: '100%'
+        });
+        /* @glitz-dynamic */
+        const Styled2 = /*#__PURE__*/ styled.div({
+            width: '100%',
+            height: '100%'
+        });
+        // @glitz-dynamic
+        const Styled3 = /*#__PURE__*/ styled.div({
+            width: '100%',
+            height: '100%'
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}"`);
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
 });
 
 test('bails all if it finds a comment that it should skip', () => {

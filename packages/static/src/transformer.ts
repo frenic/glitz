@@ -25,6 +25,14 @@ import {
 } from './evaluator';
 import { getStaticExports } from './static-module-overloads';
 
+const glitzComments = {
+  dynamic: '@glitz-dynamic',
+  allDynamic: '@glitz-all-dynamic',
+  static: '@glitz-static',
+  allStatic: '@glitz-all-static',
+  suppress: '@glitz-suppress',
+};
+
 export const glitzReactModuleName = '@glitz/react';
 export const glitzCoreModuleName = '@glitz/core';
 export const styledName = 'styled';
@@ -158,7 +166,7 @@ export function transformer(
       if (file.fileName in evaluationCache) {
         delete evaluationCache[file.fileName];
       }
-      if (file.statements.find(s => hasJSDocTag(s, 'glitz-all-dynamic'))) {
+      if (file.statements.find(s => hasComment(s, glitzComments.allDynamic))) {
         return file;
       }
 
@@ -180,7 +188,7 @@ export function transformer(
           staticStyledComponents,
           currentFile: file,
           currentNode: file,
-          currentFileShouldBeStatic: !!file.statements.find(s => hasJSDocTag(s, 'glitz-all-static')),
+          currentFileShouldBeStatic: !!file.statements.find(s => hasComment(s, glitzComments.allStatic)),
           tsContext: context,
           currentFileUsesGlitzThemes: false,
           currentFileHasImportedUseTheme: false,
@@ -283,10 +291,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   const isFirstPass = transformerContext.passNumber === 1;
   const originalNode = ts.getOriginalNode(node);
 
-  if (hasJSDocTag(node, 'glitz-dynamic')) {
-    return node;
-  }
-
   // This detects any non JSX usage of a variable pointing to a styled component
   if (ts.isIdentifier(node) && !isStaticComponentVariableUse(node)) {
     const symbol = typeChecker.getSymbolAtLocation(node);
@@ -304,7 +308,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
 
   // This evaluates imported styled components
   if ((ts.isImportSpecifier(node) || ts.isImportClause(node)) && node.name && isFirstPass) {
-    if (isComponentName(node.name.text)) {
+    if (isComponentName(node.name.text) && !hasComment(node, glitzComments.dynamic)) {
       const symbol = typeChecker.getSymbolAtLocation(node.name);
       if (symbol) {
         const stats: EvaluationStats = {
@@ -375,7 +379,7 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
               // const Styled = createComponent();
               // we look at the variable name to see if it's a variable with Pascal case
               // and in that case try to evaluate it to a styled component.
-              if (isComponentName(componentName)) {
+              if (isComponentName(componentName) && !hasComment(node, glitzComments.dynamic)) {
                 const stats: EvaluationStats = {
                   usedVariables: new Map<ts.Declaration, any>(),
                 };
@@ -1106,7 +1110,7 @@ function reportRequiresRuntimeResult(
   }
 }
 
-function hasJSDocTag(node: ts.Node, jsDocTag: string) {
+function hasComment(node: ts.Node, commentToLookFor: string) {
   const jsDoc = (node as any).jsDoc;
   if (jsDoc && Array.isArray(jsDoc)) {
     for (const comment of jsDoc) {
@@ -1114,12 +1118,24 @@ function hasJSDocTag(node: ts.Node, jsDocTag: string) {
         comment &&
         comment.tags &&
         Array.isArray(comment.tags) &&
-        comment.tags.find((t: ts.JSDocTag) => t.tagName.text === jsDocTag)
+        comment.tags.find((t: ts.JSDocTag) => t.tagName.text === commentToLookFor.replace('@', ''))
       ) {
         return true;
       }
     }
   }
+
+  const sourceFileText = node.getSourceFile().getText();
+  const comments = ts.getLeadingCommentRanges(sourceFileText, node.getFullStart()) ?? [];
+  comments.push(...(ts.getTrailingCommentRanges(sourceFileText, node.getFullStart()) ?? []));
+
+  for (const comment of comments) {
+    const text = sourceFileText.substring(comment.pos, comment.end);
+    if (text && text.indexOf(commentToLookFor) !== -1) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -1193,7 +1209,13 @@ function getCssDataFromCssProp(
   return { found: false, report: () => undefined };
 }
 
+const dynamicCssJsDocPropRegex = new RegExp('\\/\\*\\s*' + glitzComments.dynamic + '\\s*\\*\\/');
+const dynamicCssCommentPropRegex = new RegExp('\\/\\/\\s*' + glitzComments.dynamic + '\\s*');
 function getCssPropExpression(node: ts.JsxSelfClosingElement | ts.JsxOpeningElement) {
+  // Because TypeScript doesn't give us comments for JSX nodes
+  if (dynamicCssJsDocPropRegex.test(node.getText()) || dynamicCssCommentPropRegex.test(node.getText())) {
+    return undefined;
+  }
   const cssJsxAttr = node.attributes.properties.find(
     p => p.name && ts.isIdentifier(p.name) && p.name.escapedText.toString() === 'css',
   );
@@ -2293,11 +2315,11 @@ function getSeverity(node: ts.Node, transformerContext: TransformerContext): Sev
   }
   let severity: Severity = 'info';
   while (node.parent) {
-    if (hasJSDocTag(node, 'glitz-static')) {
+    if (hasComment(node, glitzComments.static)) {
       severity = 'error';
       break;
     }
-    if (hasJSDocTag(node, 'glitz-suppress')) {
+    if (hasComment(node, glitzComments.suppress)) {
       return 'suppressed';
     }
     node = node.parent;
