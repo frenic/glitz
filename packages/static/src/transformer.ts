@@ -2072,6 +2072,9 @@ function analyzeEvaluationResult(
         if (evaluationResult.styles.every(s => isEvaluableStyle(s, !!transformerContext.staticThemesFile))) {
           result.elementOrComponent = evaluationResult;
         } else {
+          for (const style of evaluationResult.styles.map(stripUnevaluableProperties)) {
+            transformerContext.glitz.injectStyle(style);
+          }
           result.canUseResult = false;
         }
       }

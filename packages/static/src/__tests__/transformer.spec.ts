@@ -779,7 +779,7 @@ const Styled = styled.div({
         });
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`""`);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}"`);
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
@@ -1374,7 +1374,7 @@ const DeepStyled = styled.div({
       });
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`""`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}"`);
   });
 });
 
