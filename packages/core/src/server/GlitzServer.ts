@@ -1,5 +1,5 @@
-import { Style, Theme } from '@glitz/type';
-import { Base, createInjectStyle } from '../core/create-inject-style';
+import { Globals, Style, Theme } from '@glitz/type';
+import { Base, createStyleInjectors } from '../core/create-inject-style';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
@@ -8,6 +8,7 @@ import { formatMediaRule } from '../utils/format';
 
 export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
+  public injectGlobals: (styles: Globals, theme?: Theme) => void;
   public hydrate: (css: string) => void;
   public getStyleMarkup: () => string;
   public getStyleStream: () => [string, { [name: string]: string }, string] | undefined;
@@ -25,7 +26,11 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
         ? (mediaInjectors[media] = mediaInjectors[media] || new InjectorServer(classNameHash, keyframesHash))
         : (plainInjector = plainInjector || new InjectorServer(classNameHash, keyframesHash));
 
-    this.injectStyle = createInjectStyle(getInjector, options.transformer);
+    const [injectStyle, injectGlobals] = createStyleInjectors(getInjector, options.transformer);
+
+    this.injectStyle = injectStyle;
+
+    this.injectGlobals = injectGlobals;
 
     this.hydrate = createHydrate(getInjector);
 

@@ -9,7 +9,7 @@ export default class InjectorServer extends Injector {
   public getStyleStream: () => string;
   public hydrateClassName: (body: string, className: string, suffix?: string) => void;
   public hydrateKeyframes: (body: string, name: string) => void;
-  public hydrateFontFace: (body: string) => void;
+  public hydrateFontFace: (rule: string) => void;
   public clone: (classNameHashClone: HashCounter, keyframesHashClone: HashCounter) => InjectorServer;
   constructor(
     classNameHash: HashCounter,
@@ -28,10 +28,12 @@ export default class InjectorServer extends Injector {
     const selectorResultIndex: Index<Index> = {};
     const keyframesResultIndex: Index = {};
     const fontFaceResultIndex: string[] = [];
+    let globalsResult = '';
     const plainStreamIndex: Index = {};
     const selectorStreamIndex: Index<Index> = {};
     const keyframesStreamIndex: Index = {};
     const fontFaceStreamIndex: string[] = [];
+    let globalsStream = '';
 
     super(
       (block, selector) => {
@@ -73,10 +75,14 @@ export default class InjectorServer extends Injector {
           fontFaceStreamIndex.push(block);
         }
       },
+      rule => {
+        globalsResult += rule;
+        globalsStream += rule;
+      },
     );
 
     this.getStyleResult = () => {
-      let css = '';
+      let css = globalsResult;
 
       for (const block of fontFaceResultIndex) {
         css += formatFontFaceRule(block);
@@ -101,7 +107,8 @@ export default class InjectorServer extends Injector {
     };
 
     this.getStyleStream = () => {
-      let css = '';
+      let css = globalsStream;
+      globalsStream = '';
 
       if (fontFaceStreamIndex.length > 0) {
         for (const block of fontFaceStreamIndex) {
@@ -158,10 +165,10 @@ export default class InjectorServer extends Injector {
       keyframesHydrationIndex[body] = name;
     };
 
-    this.hydrateFontFace = body => {
+    this.hydrateFontFace = rule => {
       preHydrationCheck();
-      fontFaceFullIndex.push(body);
-      fontFaceHydrationIndex.push(body);
+      fontFaceFullIndex.push(rule);
+      fontFaceHydrationIndex.push(rule);
     };
 
     const preCloningCheck = createPreActionCheck('Cloning');

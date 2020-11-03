@@ -1,5 +1,5 @@
-export function formatRule(identifier: string, block: string) {
-  return `${identifier}{${block}}`;
+export function formatRule(selector: string, block: string) {
+  return `${selector}{${block}}`;
 }
 
 export function formatClassRule(className: string, block: string, selector = '') {

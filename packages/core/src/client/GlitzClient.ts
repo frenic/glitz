@@ -1,5 +1,5 @@
-import { Style, Theme } from '@glitz/type';
-import { Base, createInjectStyle } from '../core/create-inject-style';
+import { Globals, Style, Theme } from '@glitz/type';
+import { Base, createStyleInjectors } from '../core/create-inject-style';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../types/options';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
 import { createHashCounter } from '../utils/hash';
@@ -8,6 +8,7 @@ import { createHydrate } from '../utils/hydrate';
 
 export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
+  public injectGlobals: (styles: Globals, theme?: Theme) => void;
   public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
@@ -54,7 +55,11 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
       }
     };
 
-    this.injectStyle = createInjectStyle(getInjector, options.transformer);
+    const [injectStyle, injectGlobals] = createStyleInjectors(getInjector, options.transformer);
+
+    this.injectStyle = injectStyle;
+
+    this.injectGlobals = injectGlobals;
 
     const hydrate = (this.hydrate = createHydrate(getInjector));
 

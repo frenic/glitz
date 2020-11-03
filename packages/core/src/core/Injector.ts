@@ -9,24 +9,24 @@ export default class Injector {
   public injectClassName: (declarations: ResolvedDeclarations, selector?: string) => string;
   public injectKeyframes: (declarationList: ResolvedDeclarationList) => string;
   public injectFontFace: (declarations: ResolvedDeclarations) => string;
+  public injectGlobals: (declarations: ResolvedDeclarations, selector: string) => void;
   constructor(
     className: (block: string, selector?: string) => string,
-    keyframeName: (blockList: string) => string,
-    handleFontFace: (block: string) => void,
+    keyframes: (blockList: string) => string,
+    fontFace: (block: string) => void,
+    globals: (rule: string) => void,
   ) {
     this.injectClassName = (declarations, selector) => {
-      const block = parseDeclarationBlock(declarations);
-      return className(block, selector);
+      return className(parseDeclarationBlock(declarations), selector);
     };
 
     this.injectKeyframes = declarationList => {
       let blockList = '';
       for (const identifier in declarationList) {
-        const keyframeBlock = parseDeclarationBlock(declarationList[identifier]);
-        blockList += formatRule(identifier, keyframeBlock);
+        blockList += formatRule(identifier, parseDeclarationBlock(declarationList[identifier]));
       }
 
-      return keyframeName(blockList);
+      return keyframes(blockList);
     };
 
     this.injectFontFace = original => {
@@ -49,11 +49,14 @@ export default class Injector {
       const family = original[FONT_FAMILY] as string;
       declarations[FONT_FAMILY] = family;
 
-      const block = parseDeclarationBlock(declarations);
-
-      handleFontFace(block);
+      fontFace(parseDeclarationBlock(declarations));
 
       return family;
+    };
+
+    this.injectGlobals = (declarations, selector) => {
+      const rule = formatRule(selector, parseDeclarationBlock(declarations));
+      globals(rule);
     };
   }
 }

@@ -52,6 +52,9 @@ export default class InjectorClient extends Injector {
           injectSheetRule(sheet, formatFontFaceRule(block));
         }
       },
+      rule => {
+        injectSheetRule(sheet, rule, 0);
+      },
     );
 
     this.injectRaw = rule => {

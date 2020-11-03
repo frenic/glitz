@@ -84,6 +84,17 @@ describe('client', () => {
   it('injects fallback rule', () => {
     // Use Puppeteer
   });
+  it('injects global rule', () => {
+    const style = createStyle();
+    const injector = createInjector(style);
+
+    injector.injectGlobals({ color: 'red' }, 'div');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: red;}"`);
+  });
   it('reuses plain rule', () => {
     const style = createStyle();
     const injector = createInjector(style);

@@ -1,5 +1,5 @@
-import { Style, Theme } from '@glitz/type';
-import { Base, createInjectStyle } from '../core/create-inject-style';
+import { Globals, Style, Theme } from '@glitz/type';
+import { Base, createStyleInjectors } from '../core/create-inject-style';
 import { Options } from '../types/options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
@@ -15,6 +15,7 @@ export type Diagnostic = {
 
 export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
+  public injectGlobals: (styles: Globals, theme?: Theme) => void;
   public getStyle: () => string;
   public diagnostics: Diagnostic[] = [];
   constructor(options: Options = {}) {
@@ -32,7 +33,11 @@ export default class GlitzStatic<TStyle = Style> implements Base<TStyle> {
         ? (mediaIndex[media] = mediaIndex[media] || new InjectorServer(classNameHash, keyframesHash))
         : (plain = plain || new InjectorServer(classNameHash, keyframesHash));
 
-    this.injectStyle = createInjectStyle(injector, options.transformer);
+    const [injectStyle, injectGlobals] = createStyleInjectors(injector, options.transformer);
+
+    this.injectStyle = injectStyle;
+
+    this.injectGlobals = injectGlobals;
 
     this.getStyle = () => {
       let css = '';

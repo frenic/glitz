@@ -610,6 +610,17 @@ describe('client', () => {
     expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".i {color: red;}"`);
     expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".j:hover {color: red;}"`);
   });
+  it('injects global rule', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>();
+
+    client.injectGlobals({ div: { color: 'red' } });
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(1);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: red;}"`);
+  });
   it('deletes properties', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();

@@ -1,8 +1,6 @@
 import { prettifyRule } from './format';
 
-export function injectSheetRule(sheet: CSSStyleSheet, rule: string) {
-  const index = sheet.cssRules.length;
-
+export function injectSheetRule(sheet: CSSStyleSheet, rule: string, index = sheet.cssRules.length) {
   try {
     sheet.insertRule(rule, index);
   } catch {

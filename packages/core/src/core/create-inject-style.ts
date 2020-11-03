@@ -1,6 +1,7 @@
 import {
   CommonStyle,
   FontFace,
+  Globals,
   Keyframes,
   ResolvedDeclarationList,
   ResolvedDeclarations,
@@ -32,9 +33,10 @@ const ATTRIBUTE_IDENTIFIER = '['.charCodeAt(0);
 
 export interface Base<TStyle extends Style> {
   injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
+  injectGlobals: (styles: Globals, theme?: Theme) => void;
 }
 
-export function createInjectStyle<TStyle extends Style>(
+export function createStyleInjectors<TStyle extends Style>(
   getInjector: (media?: string) => InjectorClient | InjectorServer,
   transformer: Transformer | undefined,
 ) {
@@ -310,17 +312,25 @@ export function createInjectStyle<TStyle extends Style>(
   const resolveStyle = createResolver(false);
   const injectStyle = createResolver(true);
 
-  return (styles: TStyle | readonly TStyle[], theme: Theme = {}) => {
-    styles = Array.isArray(styles) ? styles : [styles];
-    const index: ResolvedStyle = {};
-    let classNames = '';
+  return [
+    (styles: TStyle | readonly TStyle[], theme: Theme = {}) => {
+      styles = Array.isArray(styles) ? styles : [styles];
+      const index: ResolvedStyle = {};
+      let classNames = '';
 
-    for (let i = styles.length - 1; i >= 0; i--) {
-      classNames += injectStyle(styles[i] as CommonStyle, theme, index);
-    }
+      for (let i = styles.length - 1; i >= 0; i--) {
+        classNames += injectStyle(styles[i] as CommonStyle, theme, index);
+      }
 
-    return classNames.slice(1);
-  };
+      return classNames.slice(1);
+    },
+    (styles: Globals, theme: Theme = {}) => {
+      for (const selector in styles) {
+        const declarations = resolveStyle(styles[selector] as CommonStyle, theme) as ResolvedDeclarations;
+        getInjector().injectGlobals(transformer ? transformer(declarations) : declarations, selector);
+      }
+    },
+  ] as const;
 }
 
 function getIndex<TIndex extends { [key: string]: any }>(

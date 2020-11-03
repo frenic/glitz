@@ -357,6 +357,12 @@ describe('server', () => {
       `"@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:z}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:y}.h{font-family:z}.c:hover{color:red}.d:first-child:hover{color:red}@media (min-width: 768px){.i{color:red}.j:hover{color:red}}"`,
     );
   });
+  it('injects global rule', () => {
+    const server = new GlitzStatic<TestStyle>();
+
+    server.injectGlobals({ div: { color: 'red' } });
+    expect(server.getStyle()).toMatchInlineSnapshot(`"div{color:red}"`);
+  });
   it('deletes properties', () => {
     const server = new GlitzStatic<TestStyle>();
 
