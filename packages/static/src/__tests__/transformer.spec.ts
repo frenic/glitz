@@ -1436,6 +1436,7 @@ test('bails on first level styled element inside extended components', () => {
   const code = {
     'file1.tsx': `
 import { styled } from '@glitz/react';
+import * as React from 'react';
 const Styled1 = styled(() => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>, { color: 'red' });
 const node1 = <Styled1 />
 
@@ -1450,6 +1451,42 @@ const Styled2 = styled(
   { color: 'red' }
 );
 const node2 = <Styled2 />
+
+const Base = styled.div({ borderLeftColor: 'blue' });
+
+const Styled3 = styled(
+  (props: { someProp: boolean }) => {
+    if (props.someProp) {
+      return <Base><styled.Div css={{ backgroundColor: 'red' }} /></Base>;
+    } else {
+      return <Base><styled.Div css={{ backgroundColor: 'green' }} /></Base>
+    }
+  },
+  { color: 'red' }
+);
+const node3 = <Styled3 />
+
+const Image = styled.img({
+  maxWidth: '100%',
+  opacity: 0,
+});
+
+const fadeInDecorator = styled({ opacity: 1 });
+
+const Placeholder = styled(Image, { backgroundColor: 'rgba(0, 0, 0, .05)' });
+
+const Styled4 = styled(
+  React.forwardRef(
+    ({ src, ...restProps }: any, elementRef: any) => {
+      if (src) {
+        return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
+      }
+
+      return <Placeholder css={fadeInDecorator} {...restProps} src="noimage.svg" ref={elementRef} />;
+    },
+  ),
+);
+const node4 = <Styled4 />
 `,
   };
 
@@ -1458,6 +1495,7 @@ const node2 = <Styled2 />
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
+        import * as React from 'react';
         const Styled1 = /*#__PURE__*/ styled(() => <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>, { color: 'red' });
         const node1 = <Styled1 />;
         const Styled2 = /*#__PURE__*/ styled((props) => {
@@ -1469,23 +1507,48 @@ const node2 = <Styled2 />
             }
         }, { color: 'red' });
         const node2 = <Styled2 />;
+        const Base = /*#__PURE__*/ styled.div({ borderLeftColor: 'blue' });
+        const Styled3 = /*#__PURE__*/ styled((props) => {
+            if (props.someProp) {
+                return <Base><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></Base>;
+            }
+            else {
+                return <Base><div className={\\"b\\"} data-glitzname=\\"styled.Div\\"/></Base>;
+            }
+        }, { color: 'red' });
+        const node3 = <Styled3 />;
+        const Image = /*#__PURE__*/ styled.img({
+            maxWidth: '100%',
+            opacity: 0,
+        });
+        const fadeInDecorator = /*#__PURE__*/ styled({ opacity: 1 });
+        const Placeholder = /*#__PURE__*/ styled(Image, { backgroundColor: 'rgba(0, 0, 0, .05)' });
+        const Styled4 = /*#__PURE__*/ styled(React.forwardRef(({ src, ...restProps }, elementRef) => {
+            if (src) {
+                return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
+            }
+            return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef}/>;
+        }));
+        const node4 = <Styled4 />;
         "
       `);
-      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{background-color:green}"`);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{background-color:red}.b{background-color:green}.c{border-left-color:blue}.d{opacity:0}.e{max-width:100%}.f{background-color:rgba(0, 0, 0, .05)}.g{opacity:1}"`,
+      );
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
         Array [
           Object {
             "file": "file1.tsx",
-            "line": 2,
+            "line": 3,
             "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
             "source": "() => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
           },
           Object {
             "file": "file1.tsx",
-            "line": 6,
+            "line": 7,
             "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
             "source": "(props: { someProp: boolean }) => {
@@ -1495,6 +1558,49 @@ const node2 = <Styled2 />
               return <styled.Div><styled.Div css={{ backgroundColor: 'green' }} /></styled.Div>
             }
           }",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 21,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "(props: { someProp: boolean }) => {
+            if (props.someProp) {
+              return <Base><styled.Div css={{ backgroundColor: 'red' }} /></Base>;
+            } else {
+              return <Base><styled.Div css={{ backgroundColor: 'green' }} /></Base>
+            }
+          }",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 43,
+              "message": "Static expressions does not support spread",
+              "severity": "info",
+              "source": "({ src, ...restProps }: any, elementRef: any) => {
+              if (src) {
+                return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
+              }
+
+              return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef} />;
+            }",
+            },
+            "line": 41,
+            "message": "Unable to statically evaluate to a component or element",
+            "severity": "info",
+            "source": "styled(
+          React.forwardRef(
+            ({ src, ...restProps }: any, elementRef: any) => {
+              if (src) {
+                return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
+              }
+
+              return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef} />;
+            },
+          ),
+        )",
           },
         ]
       `),

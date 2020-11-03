@@ -4,7 +4,7 @@ export const useMemo = <T>(creator: () => T, _?: any) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const forwardRef = <T>(Component: T, _?: any) => {
+export const forwardRef = <T, P = {}>(Component: any, _?: any, __?: T | P) => {
   return Component;
 };
 
