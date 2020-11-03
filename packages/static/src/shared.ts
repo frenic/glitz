@@ -44,3 +44,19 @@ export function isStaticComponent(object: any): object is StaticComponent {
 export function isStaticElement(object: any): object is StaticElement {
   return object && typeof object === 'object' && !!object.styles && !!object.elementName;
 }
+
+export function cleanStyle(styles: DirtyStyle[]): Style[] {
+  return styles.reduce<Style[]>(
+    (total, style) => [
+      ...total,
+      ...(typeof style === 'function'
+        ? cleanStyle(style())
+        : Array.isArray(style)
+        ? cleanStyle(style)
+        : style
+        ? [style]
+        : []),
+    ],
+    [],
+  );
+}

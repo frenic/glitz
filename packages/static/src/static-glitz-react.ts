@@ -1,32 +1,17 @@
 import {
-  DirtyStyle,
+  cleanStyle,
   isStaticComponent,
   isStaticDecorator,
+  DirtyStyle,
   ReactFunctionComponent,
   StaticComponent,
+  StaticDecorator,
   StaticElement,
   StaticElementName,
-  StaticDecorator,
   StaticStyled,
   Style,
   Styles,
 } from './shared';
-
-function cleanStyle(styles: DirtyStyle[]): Style[] {
-  return styles.reduce<Style[]>(
-    (total, style) => [
-      ...total,
-      ...(typeof style === 'function'
-        ? cleanStyle(style())
-        : Array.isArray(style)
-        ? cleanStyle(style)
-        : style
-        ? [style]
-        : []),
-    ],
-    [],
-  );
-}
 
 function createStaticDecorator(styles: Style[]): StaticDecorator {
   return Object.assign(

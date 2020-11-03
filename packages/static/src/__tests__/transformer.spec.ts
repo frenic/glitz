@@ -1432,6 +1432,75 @@ const DeepStyled = styled.div({
   });
 });
 
+test('bails on first level styled element inside extended components', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+const Styled1 = styled(() => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>, { color: 'red' });
+const node1 = <Styled1 />
+
+const Styled2 = styled(
+  (props: { someProp: boolean }) => {
+    if (props.someProp) {
+      return <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>;
+    } else {
+      return <styled.Div><styled.Div css={{ backgroundColor: 'green' }} /></styled.Div>
+    }
+  },
+  { color: 'red' }
+);
+const node2 = <Styled2 />
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        const Styled1 = /*#__PURE__*/ styled(() => <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>, { color: 'red' });
+        const node1 = <Styled1 />;
+        const Styled2 = /*#__PURE__*/ styled((props) => {
+            if (props.someProp) {
+                return <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>;
+            }
+            else {
+                return <styled.Div><div className={\\"b\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>;
+            }
+        }, { color: 'red' });
+        const node2 = <Styled2 />;
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{background-color:green}"`);
+    },
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 2,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "() => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 6,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "(props: { someProp: boolean }) => {
+            if (props.someProp) {
+              return <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>;
+            } else {
+              return <styled.Div><styled.Div css={{ backgroundColor: 'green' }} /></styled.Div>
+            }
+          }",
+          },
+        ]
+      `),
+  );
+});
+
 test('bails on top level inline styles inside extended components', () => {
   const code = {
     'file1.tsx': `
@@ -1603,8 +1672,11 @@ import { styled } from '@glitz/react';
 const colorDecorator = styled({ backgroundColor: 'red' });
 const paddingDecorator = styled({ paddingTop: '10px' });
 const decorator = colorDecorator(paddingDecorator());
+const Image = styled.img({ color: 'red' });
 const node1 = <styled.Div css={decorator()} />;
 const node2 = <styled.Div css={decorator} />;
+const node3 = <Image css={decorator()} />;
+const node4 = <Image css={decorator} />;
 `,
   };
 
@@ -1614,11 +1686,14 @@ const node2 = <styled.Div css={decorator} />;
       const colorDecorator = /*#__PURE__*/ styled({ backgroundColor: 'red' });
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
       const decorator = colorDecorator(paddingDecorator());
-      const node1 = <div className={\\"a b\\"} data-glitzname=\\"styled.Div\\"/>;
-      const node2 = <div className={\\"a b\\"} data-glitzname=\\"styled.Div\\"/>;
+      const Image = /*#__PURE__*/ styled.img({ color: 'red' });
+      const node1 = <div className={\\"b c\\"} data-glitzname=\\"styled.Div\\"/>;
+      const node2 = <div className={\\"b c\\"} data-glitzname=\\"styled.Div\\"/>;
+      const node3 = <img className={\\"b c a\\"} data-glitzname=\\"Image\\"/>;
+      const node4 = <img className={\\"b c a\\"} data-glitzname=\\"Image\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{padding-top:10px}.b{background-color:red}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{padding-top:10px}.c{background-color:red}"`);
   });
 });
 
@@ -2425,6 +2500,56 @@ const Styled = styled.div(
       `".a{color:red}.b{background-color:green}.c{border-left-color:blue}.d{border-right-color:yellow}"`,
     );
   });
+});
+
+test('can handle React.forwardRef() and React.memo()', () => {
+  const code = {
+    'file1.tsx': `
+import * as React from 'react';
+import { styled } from '@glitz/react';
+
+const Styled1 = styled(React.forwardRef((props: {}, ref: any) => <styled.Div ref={ref}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>), { color: 'red' });
+const node1 = <Styled1 />
+
+const Styled2 = styled(React.memo((props: {}) => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>), { color: 'red' });
+const node2 = <Styled2 />
+`,
+  };
+
+  expectEqual(
+    compile(code),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import * as React from 'react';
+        import { styled } from '@glitz/react';
+        const Styled1 = /*#__PURE__*/ styled(React.forwardRef((props, ref) => <styled.Div ref={ref}><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>), { color: 'red' });
+        const node1 = <Styled1 />;
+        const Styled2 = /*#__PURE__*/ styled(React.memo((props) => <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>), { color: 'red' });
+        const node2 = <Styled2 />;
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}"`);
+    },
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 4,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "(props: {}, ref: any) => <styled.Div ref={ref}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+          },
+          Object {
+            "file": "file1.tsx",
+            "line": 7,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "(props: {}) => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
+          },
+        ]
+      `),
+  );
 });
 
 function expectEqual(
