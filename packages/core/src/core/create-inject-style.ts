@@ -12,8 +12,6 @@ import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../types/options';
 import { issueFormatter } from '../utils/debugging';
-import { validateMixingShorthandLonghand } from '../utils/mixing-shorthand-longhand';
-import { reverse } from '../utils/reverse';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 
 type ResolvedStyle = { [key: string]: ResolvedValue | ResolvedDeclarations };
@@ -161,7 +159,7 @@ export function createInjectStyle<TStyle extends Style>(
                   if (typeof keyframe === 'object') {
                     const list: ResolvedDeclarationList = {};
                     for (const key in keyframe) {
-                      const block = reverse(resolveStyle(keyframe[key] as CommonStyle, theme));
+                      const block = resolveStyle(keyframe[key] as CommonStyle, theme) as ResolvedDeclarations;
                       list[key] = transformer ? transformer(block) : block;
                     }
 
@@ -179,7 +177,7 @@ export function createInjectStyle<TStyle extends Style>(
 
                 for (const font of fonts) {
                   if (typeof font === 'object') {
-                    const fontFace = reverse(resolveStyle(font as CommonStyle, theme));
+                    const fontFace = resolveStyle(font as CommonStyle, theme) as ResolvedDeclarations;
                     const name = getInjector().injectFontFace(transformer ? transformer(fontFace) : fontFace);
                     if (names.indexOf(name) === -1) {
                       names.push(name);
@@ -319,10 +317,6 @@ export function createInjectStyle<TStyle extends Style>(
 
     for (let i = styles.length - 1; i >= 0; i--) {
       classNames += injectStyle(styles[i] as CommonStyle, theme, index);
-    }
-
-    if (process.env.NODE_ENV !== 'production') {
-      validateMixingShorthandLonghand(index);
     }
 
     return classNames.slice(1);

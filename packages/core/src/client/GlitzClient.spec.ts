@@ -376,7 +376,7 @@ describe('client', () => {
 
     expect(sheet.cssRules).toHaveLength(2);
     expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
-      `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: x;}"`,
+      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-weight: 400; font-style: normal; font-family: x;}"`,
     );
     expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {font-family: x;}"`);
 
@@ -406,7 +406,7 @@ describe('client', () => {
 
     expect(sheet.cssRules).toHaveLength(4);
     expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(
-      `"@font-face {font-style: normal; font-weight: 400; src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: y;}"`,
+      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-weight: 400; font-style: normal; font-family: y;}"`,
     );
     expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".b {font-family: y;}"`);
 
@@ -914,25 +914,6 @@ describe('client', () => {
       expect.any(String),
       value,
     );
-  });
-  it('warns with mixed longhand and shorthand', () => {
-    const client = new GlitzClient<TestStyle>();
-    const logger = (console.warn = jest.fn());
-
-    client.injectStyle({ border: { left: { width: 0 } }, borderLeftWidth: 0 });
-    expect(logger).toHaveBeenCalledTimes(0);
-
-    client.injectStyle({ ':hover': { border: 0 }, borderWidth: 0 } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(0);
-
-    client.injectStyle({ border: 0, borderWidth: 0 } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(1);
-
-    client.injectStyle([{ border: 0 }, { borderWidth: 0 }] as TestStyle[]);
-    expect(logger).toHaveBeenCalledTimes(2);
-
-    client.injectStyle({ ':hover': { border: 0, borderWidth: 0 } } as TestStyle);
-    expect(logger).toHaveBeenCalledTimes(3);
   });
   it('passes theme', () => {
     const style = createStyle();

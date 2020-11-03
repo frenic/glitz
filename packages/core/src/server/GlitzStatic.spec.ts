@@ -253,7 +253,7 @@ describe('server', () => {
     ).toBe('d');
 
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `"@font-face{font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}@font-face{font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}@font-face{font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:x}.a{font-family:x}.b{font-family:y}.c{font-family:x,sans-serif}.d{font-family:sans-serif}"`,
+      `"@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-weight:400;font-style:normal;font-family:x}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-weight:400;font-style:normal;font-family:y}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-weight:400;font-style:normal;font-family:x}.a{font-family:x}.b{font-family:y}.c{font-family:x,sans-serif}.d{font-family:sans-serif}"`,
     );
   });
   it('injects different combinations', () => {
