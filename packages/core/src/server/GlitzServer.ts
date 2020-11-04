@@ -7,11 +7,11 @@ import { createHydrate } from '../utils/hydrate';
 import { formatMediaRule } from '../utils/format';
 
 export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
+  public identifier: string;
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
   public injectGlobals: (styles: Globals, theme?: Theme) => void;
   public hydrate: (css: string) => void;
-  public getStyleMarkup: () => string;
-  public getStyleStream: () => [string, { [name: string]: string }, string] | undefined;
+  public getStyle: (markup?: boolean, stream?: boolean) => string;
   public clone: () => GlitzServer<TStyle>;
   constructor(options?: Options);
   constructor(
@@ -21,6 +21,8 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
     plainInjector?: InjectorServer,
     mediaInjectors: Record<string, InjectorServer> = {},
   ) {
+    const identifier = (this.identifier = options.identifier ?? DEFAULT_HYDRATION_IDENTIFIER);
+
     const getInjector = (media?: string) =>
       media
         ? (mediaInjectors[media] = mediaInjectors[media] || new InjectorServer(classNameHash, keyframesHash))
@@ -34,40 +36,24 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
 
     this.hydrate = createHydrate(getInjector);
 
-    const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
-
-    this.getStyleMarkup = () => {
-      let markup = '';
+    this.getStyle = (markup = false, stream = false) => {
+      let result = '';
       if (plainInjector) {
-        markup += `<style data-${identifier}>${plainInjector.getStyleResult()}</style>`;
+        const style = stream ? plainInjector.getStyleStream() : plainInjector.getStyleResult();
+        result += markup ? `<style data-${identifier}>${style}</style>` : style;
       }
       const medias = options.mediaOrder
         ? Object.keys(mediaInjectors).sort(options.mediaOrder)
         : Object.keys(mediaInjectors);
       for (const media of medias) {
-        markup += `<style data-${identifier} media="${media}">${mediaInjectors[media].getStyleResult()}</style>`;
-      }
-      return markup;
-    };
-
-    this.getStyleStream = () => {
-      let css = '';
-      if (plainInjector) {
-        css += plainInjector.getStyleStream();
-      }
-      const medias = options.mediaOrder
-        ? Object.keys(mediaInjectors).sort(options.mediaOrder)
-        : Object.keys(mediaInjectors);
-      for (const media of medias) {
-        const block = mediaInjectors[media].getStyleStream();
-        if (block) {
-          css += formatMediaRule(media, block);
+        const style = stream ? mediaInjectors[media].getStyleStream() : mediaInjectors[media].getStyleResult();
+        if (style) {
+          result += markup
+            ? `<style data-${identifier} media="${media}">${style}</style>`
+            : formatMediaRule(media, style);
         }
       }
-      if (css) {
-        return ['style', { [`data-${identifier}`]: '' }, css];
-      }
-      return undefined;
+      return result;
     };
 
     this.clone = () => {

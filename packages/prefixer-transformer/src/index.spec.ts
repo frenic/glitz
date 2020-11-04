@@ -6,8 +6,8 @@ describe('prefixer', () => {
     const server = new GlitzServer({ transformer: prefixer });
 
     expect(server.injectStyle({ display: 'flex' })).toBe('a');
-    expect(server.getStyleMarkup()).toMatchInlineSnapshot(
-      `"<style data-glitz>.a{display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}</style>"`,
+    expect(server.getStyle()).toMatchInlineSnapshot(
+      `".a{display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}"`,
     );
   });
 });

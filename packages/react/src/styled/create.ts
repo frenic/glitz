@@ -89,18 +89,17 @@ export function factory<TProps, TInstance>(
           const stream = useContext(StreamContext);
           const glitz = useContext(GlitzContext);
 
-          if (stream && glitz && 'getStyleStream' in glitz) {
+          if (stream && glitz && 'getStyle' in glitz) {
             // React stream rendering
-            const style = glitz.getStyleStream();
+            const style = glitz.getStyle(true);
 
             if (style) {
-              const [tag, props, __html] = style;
               node = createElement(
                 Fragment,
                 null,
-                createElement(tag, {
-                  ...props,
-                  dangerouslySetInnerHTML: { __html },
+                createElement('style', {
+                  [`data-${glitz.identifier}`]: '',
+                  dangerouslySetInnerHTML: { style },
                 }),
                 node,
               );

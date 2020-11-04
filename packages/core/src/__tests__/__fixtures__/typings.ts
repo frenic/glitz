@@ -17,7 +17,7 @@ const server = new GlitzServer(options);
 
 const a: string = server.injectStyle({});
 
-const b: string = server.getStyleMarkup();
+const b: string = server.getStyle();
 
 const client = new GlitzClient(options);
 

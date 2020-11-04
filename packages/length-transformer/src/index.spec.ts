@@ -18,8 +18,8 @@ describe('number to unit', () => {
         transitionDuration: 0,
       }),
     ).toBe('a b c d e f g h i');
-    expect(server.getStyleMarkup()).toMatchInlineSnapshot(
-      `"<style data-glitz>.a{transition-duration:0ms}.b{animation-duration:1ms}.c{order:1}.d{left:0}.e{line-height:1}.f{columns:1}.g{padding-left:1px}.h{height:1px;height:max-content}.i{width:1px}</style>"`,
+    expect(server.getStyle()).toMatchInlineSnapshot(
+      `".a{transition-duration:0ms}.b{animation-duration:1ms}.c{order:1}.d{left:0}.e{line-height:1}.f{columns:1}.g{padding-left:1px}.h{height:1px;height:max-content}.i{width:1px}"`,
     );
   });
   it('injects atomic style with numeric values with different units', () => {
@@ -45,8 +45,8 @@ describe('number to unit', () => {
         transitionDuration: 0,
       }),
     ).toBe('a b c d e f g h i');
-    expect(server.getStyleMarkup()).toMatchInlineSnapshot(
-      `"<style data-glitz>.a{transition-duration:0ms}.b{animation-duration:1s}.c{order:1}.d{left:0}.e{line-height:1}.f{columns:1em}.g{padding-left:1px}.h{height:1rem;height:max-content}.i{width:1rem}</style>"`,
+    expect(server.getStyle()).toMatchInlineSnapshot(
+      `".a{transition-duration:0ms}.b{animation-duration:1s}.c{order:1}.d{left:0}.e{line-height:1}.f{columns:1em}.g{padding-left:1px}.h{height:1rem;height:max-content}.i{width:1rem}"`,
     );
   });
 });
