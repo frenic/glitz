@@ -523,7 +523,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         jsxTagSymbol &&
         staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
         !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
-        !hasSpreadWithoutCssPropOrAfterCssProp(node.openingElement.attributes.properties)
+        !hasSpreadWithoutCssPropOrAfterCssProp(node.openingElement.attributes.properties) &&
+        !isTopLevelJsxInComposedComponent(
+          node,
+          transformerContext.program.getTypeChecker(),
+          transformerContext.staticStyledComponents,
+        )
       ) {
         // We now know that: node == `<[styled component name] [zero or more props]>[zero or more children]</[styled component name]>`
         // and we also know that the JSX points to a component that is 100% static
@@ -569,7 +574,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       jsxTagSymbol &&
       staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
       !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
-      !hasSpreadWithoutCssPropOrAfterCssProp(node.attributes.properties)
+      !hasSpreadWithoutCssPropOrAfterCssProp(node.attributes.properties) &&
+      !isTopLevelJsxInComposedComponent(
+        node,
+        transformerContext.program.getTypeChecker(),
+        transformerContext.staticStyledComponents,
+      )
     ) {
       // We now know that: node == `<[styled component name] [zero or more props] />`
       // and we also know that the JSX points to a component that is 100% static
@@ -850,26 +860,18 @@ function getComponentNode(
 // const Styled = styled((props) => <styled.Div css={{ color: 'red' }}, { color: 'blue' })
 // Used to bail on top level static css inside such components.
 function isInsideInlineStyledComponent(node: ts.Node) {
-  let func: ts.ArrowFunction | ts.FunctionExpression | undefined;
+  let currentNode = node;
   // eslint-disable-next-line no-constant-condition
-  while (true) {
-    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
-      func = node;
+  while (currentNode) {
+    if (
+      ts.isCallExpression(currentNode) &&
+      ts.isIdentifier(currentNode.expression) &&
+      currentNode.expression.text === styledName
+    ) {
+      return true;
     }
-    node = node.parent;
-    if (!node || ts.isSourceFile(node)) {
-      break;
-    }
-  }
-  if (!func) {
-    return false;
-  }
-  if (
-    ts.isCallExpression(func.parent) &&
-    ts.isIdentifier(func.parent.expression) &&
-    func.parent.expression.text === styledName
-  ) {
-    return true;
+
+    currentNode = currentNode.parent;
   }
   return false;
 }

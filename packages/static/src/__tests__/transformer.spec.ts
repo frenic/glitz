@@ -1454,12 +1454,14 @@ const node2 = <Styled2 />
 
 const Base = styled.div({ borderLeftColor: 'blue' });
 
+const SecondBase = styled.div({ opacity: 0 });
+
 const Styled3 = styled(
   (props: { someProp: boolean }) => {
     if (props.someProp) {
       return <Base><styled.Div css={{ backgroundColor: 'red' }} /></Base>;
     } else {
-      return <Base><styled.Div css={{ backgroundColor: 'green' }} /></Base>
+      return <Base><SecondBase /></Base>
     }
   },
   { color: 'red' }
@@ -1508,12 +1510,13 @@ const node4 = <Styled4 />
         }, { color: 'red' });
         const node2 = <Styled2 />;
         const Base = /*#__PURE__*/ styled.div({ borderLeftColor: 'blue' });
+        const SecondBase = /*#__PURE__*/ styled.div({ opacity: 0 });
         const Styled3 = /*#__PURE__*/ styled((props) => {
             if (props.someProp) {
                 return <Base><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></Base>;
             }
             else {
-                return <Base><div className={\\"b\\"} data-glitzname=\\"styled.Div\\"/></Base>;
+                return <Base><div className={\\"d\\"} data-glitzname=\\"SecondBase\\"/></Base>;
             }
         }, { color: 'red' });
         const node3 = <Styled3 />;
@@ -1525,7 +1528,7 @@ const node4 = <Styled4 />
         const Placeholder = /*#__PURE__*/ styled(Image, { backgroundColor: 'rgba(0, 0, 0, .05)' });
         const Styled4 = /*#__PURE__*/ styled(React.forwardRef(({ src, ...restProps }, elementRef) => {
             if (src) {
-                return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
+                return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef}/>;
             }
             return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef}/>;
         }));
@@ -1533,7 +1536,7 @@ const node4 = <Styled4 />
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{background-color:red}.b{background-color:green}.c{border-left-color:blue}.d{opacity:0}.e{max-width:100%}.f{background-color:rgba(0, 0, 0, .05)}.g{opacity:1}"`,
+        `".a{background-color:red}.b{background-color:green}.c{border-left-color:blue}.d{opacity:0}.e{max-width:100%}.f{background-color:rgba(0, 0, 0, .05)}"`,
       );
     },
     diagnostics =>
@@ -1561,14 +1564,14 @@ const node4 = <Styled4 />
           },
           Object {
             "file": "file1.tsx",
-            "line": 21,
+            "line": 23,
             "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
             "source": "(props: { someProp: boolean }) => {
             if (props.someProp) {
               return <Base><styled.Div css={{ backgroundColor: 'red' }} /></Base>;
             } else {
-              return <Base><styled.Div css={{ backgroundColor: 'green' }} /></Base>
+              return <Base><SecondBase /></Base>
             }
           }",
           },
@@ -1576,7 +1579,7 @@ const node4 = <Styled4 />
             "file": "file1.tsx",
             "innerDiagnostic": Object {
               "file": "file1.tsx",
-              "line": 43,
+              "line": 45,
               "message": "Static expressions does not support spread",
               "severity": "info",
               "source": "({ src, ...restProps }: any, elementRef: any) => {
@@ -1587,7 +1590,7 @@ const node4 = <Styled4 />
               return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef} />;
             }",
             },
-            "line": 41,
+            "line": 43,
             "message": "Unable to statically evaluate to a component or element",
             "severity": "info",
             "source": "styled(
