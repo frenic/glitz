@@ -612,14 +612,28 @@ describe('client', () => {
   });
   it('injects global rule', () => {
     const style = createStyle();
+    const media = createStyle('(min-width: 768px)');
     const client = new GlitzClient<TestStyle>();
 
-    client.injectGlobals({ div: { color: 'red' } });
+    client.injectGlobals({
+      div: {
+        color: 'red',
+        backgroundColor: 'green',
+        ':hover': { color: 'green' },
+        '@media (min-width: 768px)': { color: 'blue' },
+      },
+    });
 
     const sheet = style.sheet as CSSStyleSheet;
 
-    expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: red;}"`);
+    expect(sheet.cssRules).toHaveLength(2);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: red; background-color: green;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`"div:hover {color: green;}"`);
+
+    const mediaSheet = media.sheet as CSSStyleSheet;
+
+    expect(mediaSheet.cssRules).toHaveLength(1);
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: blue;}"`);
   });
   it('deletes properties', () => {
     const style = createStyle();

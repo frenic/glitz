@@ -13,6 +13,7 @@ export default class InjectorClient extends Injector {
     const selectorIndex: { [selector: string]: { [block: string]: string } } = {};
     const keyframesIndex: { [blockList: string]: string } = {};
     const fontFaceIndex: string[] = [];
+    let globalRuleIndex = 0;
 
     const sheet = element.sheet;
 
@@ -53,7 +54,7 @@ export default class InjectorClient extends Injector {
         }
       },
       rule => {
-        injectSheetRule(sheet, rule, 0);
+        injectSheetRule(sheet, rule, globalRuleIndex++);
       },
     );
 

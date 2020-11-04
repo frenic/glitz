@@ -19,7 +19,7 @@ export type FeaturedProperties = {
     | ((theme: Theme) => ResolvedProperties[property]);
 };
 
-export type Globals = Record<string, FeaturedProperties>;
+export type Globals = Record<string, FeaturedProperties | Record<string, FeaturedProperties>>;
 
 export type ResolvedValue = string | number | Array<string | number>;
 

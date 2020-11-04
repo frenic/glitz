@@ -57,8 +57,8 @@ describe('server', () => {
   it('injects global rule', () => {
     const injector = createInjector();
 
-    injector.injectGlobals({ color: 'red' }, 'div');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`"div{color:red}"`);
+    injector.injectGlobals({ color: 'red', backgroundColor: 'green' }, 'div');
+    expect(injector.getStyleResult()).toMatchInlineSnapshot(`"div{color:red;background-color:green}"`);
   });
   it('reuses plain rule', () => {
     const injector = createInjector();

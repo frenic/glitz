@@ -360,8 +360,17 @@ describe('server', () => {
   it('injects global rule', () => {
     const server = new GlitzStatic<TestStyle>();
 
-    server.injectGlobals({ div: { color: 'red' } });
-    expect(server.getStyle()).toMatchInlineSnapshot(`"div{color:red}"`);
+    server.injectGlobals({
+      div: {
+        color: 'red',
+        backgroundColor: 'green',
+        ':hover': { color: 'green' },
+        '@media (min-width: 768px)': { color: 'blue' },
+      },
+    });
+    expect(server.getStyle()).toMatchInlineSnapshot(
+      `"div{color:red;background-color:green}div:hover{color:green}@media (min-width: 768px){div{color:blue}}"`,
+    );
   });
   it('deletes properties', () => {
     const server = new GlitzStatic<TestStyle>();

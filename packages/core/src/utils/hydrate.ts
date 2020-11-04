@@ -58,8 +58,6 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
             currentInjector.hydrateKeyframes(body, match[1]);
           } else if (selector === '@font-face') {
             currentInjector.hydrateFontFace(body);
-          } else {
-            throw new Error('Unsupported CSS selector when hydrating in Glitz');
           }
 
           if (callback) {

@@ -196,6 +196,8 @@ export function createStyleInjectors<TStyle extends Style>(
             declarations[property] = declaration[property] = value as ResolvedValue;
 
             if (typeof value !== 'undefined' && inject) {
+              const query = media && media.slice(7);
+
               if (typeof value === 'string' || typeof value === 'number') {
                 // Only supports caching of primitive values
                 const cacheIndex = getIndex(cache, media, selector);
@@ -207,14 +209,14 @@ export function createStyleInjectors<TStyle extends Style>(
 
                 className +=
                   ' ' +
-                  (cachedValues[value] = getInjector(media).injectClassName(
+                  (cachedValues[value] = getInjector(query).injectClassName(
                     transformer ? transformer(declaration) : declaration,
                     selector,
                   ));
               } else {
                 className +=
                   ' ' +
-                  getInjector(media).injectClassName(transformer ? transformer(declaration) : declaration, selector);
+                  getInjector(query).injectClassName(transformer ? transformer(declaration) : declaration, selector);
               }
             }
           }
@@ -233,7 +235,7 @@ export function createStyleInjectors<TStyle extends Style>(
             value,
             theme,
             styleIndex,
-            identifier === MEDIA_IDENTIFIER ? property.slice(7) : media,
+            identifier === MEDIA_IDENTIFIER ? property : media,
             identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER
               ? (selector ?? '') + property
               : selector,
@@ -312,6 +314,35 @@ export function createStyleInjectors<TStyle extends Style>(
   const resolveStyle = createResolver(false);
   const injectStyle = createResolver(true);
 
+  function injectGlobals(selector: string, result: ResolvedStyle, media?: string) {
+    const properties = Object.keys(result);
+    const declarations: ResolvedDeclarations = {};
+    let hasDeclarations = false;
+
+    for (let i = properties.length - 1; i >= 0; i--) {
+      const property = properties[i];
+      const identifier = property.charCodeAt(0);
+      if (identifier !== MEDIA_IDENTIFIER && identifier !== PSEUDO_IDENTIFIER && identifier !== ATTRIBUTE_IDENTIFIER) {
+        declarations[property] = result[property] as ResolvedValue;
+        hasDeclarations = true;
+      }
+    }
+
+    if (hasDeclarations) {
+      getInjector(media).injectGlobals(transformer ? transformer(declarations) : declarations, selector);
+    }
+
+    for (let i = properties.length - 1; i >= 0; i--) {
+      const property = properties[i];
+      const identifier = property.charCodeAt(0);
+      if (identifier === MEDIA_IDENTIFIER) {
+        injectGlobals(selector, result[property] as ResolvedStyle, property.slice(7));
+      } else if (identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER) {
+        injectGlobals(selector + property, result[property] as ResolvedStyle, media);
+      }
+    }
+  }
+
   return [
     (styles: TStyle | readonly TStyle[], theme: Theme = {}) => {
       styles = Array.isArray(styles) ? styles : [styles];
@@ -325,9 +356,8 @@ export function createStyleInjectors<TStyle extends Style>(
       return classNames.slice(1);
     },
     (styles: Globals, theme: Theme = {}) => {
-      for (const selector in styles) {
-        const declarations = resolveStyle(styles[selector] as CommonStyle, theme) as ResolvedDeclarations;
-        getInjector().injectGlobals(transformer ? transformer(declarations) : declarations, selector);
+      for (const property in styles) {
+        injectGlobals(property, resolveStyle(styles[property] as CommonStyle, theme));
       }
     },
   ] as const;

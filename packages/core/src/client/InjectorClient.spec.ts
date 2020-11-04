@@ -88,12 +88,12 @@ describe('client', () => {
     const style = createStyle();
     const injector = createInjector(style);
 
-    injector.injectGlobals({ color: 'red' }, 'div');
+    injector.injectGlobals({ color: 'red', backgroundColor: 'green' }, 'div');
 
     const sheet = style.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(1);
-    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: red;}"`);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`"div {color: red; background-color: green;}"`);
   });
   it('reuses plain rule', () => {
     const style = createStyle();
