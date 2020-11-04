@@ -91,7 +91,7 @@ export function factory<TProps, TInstance>(
 
           if (stream && glitz && 'getStyle' in glitz) {
             // React stream rendering
-            const style = glitz.getStyle(true);
+            const style = glitz.getStyle(false, true);
 
             if (style) {
               node = createElement(
@@ -99,7 +99,7 @@ export function factory<TProps, TInstance>(
                 null,
                 createElement('style', {
                   [`data-${glitz.identifier}`]: '',
-                  dangerouslySetInnerHTML: { style },
+                  dangerouslySetInnerHTML: { __html: style },
                 }),
                 node,
               );
