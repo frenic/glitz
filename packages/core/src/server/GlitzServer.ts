@@ -59,7 +59,10 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
         ? Object.keys(mediaInjectors).sort(options.mediaOrder)
         : Object.keys(mediaInjectors);
       for (const media of medias) {
-        css += formatMediaRule(media, mediaInjectors[media].getStyleStream());
+        const block = mediaInjectors[media].getStyleStream();
+        if (block) {
+          css += formatMediaRule(media, block);
+        }
       }
       if (css) {
         return ['style', { [`data-${identifier}`]: '' }, css];

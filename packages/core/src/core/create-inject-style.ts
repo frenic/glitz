@@ -48,7 +48,6 @@ export function createStyleInjectors<TStyle extends Style>(
     const resolver: Resolver<string | ResolvedStyle> = (style, theme, styleIndex = {}, media, selector) => {
       let className = '';
       const properties = Object.keys(style);
-      const cacheIndex = getIndex(cache, media, selector);
 
       for (let i = properties.length; i > 0; i--) {
         let property = properties[i - 1];
@@ -199,6 +198,7 @@ export function createStyleInjectors<TStyle extends Style>(
             if (typeof value !== 'undefined' && inject) {
               if (typeof value === 'string' || typeof value === 'number') {
                 // Only supports caching of primitive values
+                const cacheIndex = getIndex(cache, media, selector);
                 const cachedValues = (cacheIndex[property] = cacheIndex[property] || {}) as Cache;
                 if (value in cachedValues) {
                   className += ' ' + cachedValues[value];
