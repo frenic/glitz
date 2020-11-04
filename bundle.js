@@ -115,6 +115,7 @@ async function build(input, output, type, production) {
   const { output: chunks } = await bundle.generate({
     name: 'glitz',
     format: type === MJS_TYPE || type === ESNEXT_TYPE ? 'es' : 'cjs',
+    exports: 'named',
     globals: { react: 'React' },
   });
 
