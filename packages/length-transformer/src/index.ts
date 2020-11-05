@@ -1,4 +1,4 @@
-import * as Glitz from '@glitz/type';
+import * as Glitz from '@glitz/core';
 import { lengthSafeProperties, TimeProperties, timeSafeProperties } from './properties';
 
 export type LengthUnit =
@@ -72,7 +72,7 @@ export function createNumberToLengthTransformer(options: Options = {}) {
 
 export default createNumberToLengthTransformer();
 
-declare module '@glitz/type' {
+declare module '@glitz/core' {
   type LengthAndTime = (string & {}) | (number & {});
 
   interface TransformerProperties {

@@ -1,5 +1,4 @@
-import { ResolvedDeclarations, CommonValue, Style } from '@glitz/type';
-import GlitzStatic from './GlitzStatic';
+import { GlitzStatic, ResolvedDeclarations, CommonValue, Style } from '..';
 
 interface TestStyle extends Style {
   '@media (min-width: 100px)'?: Style;

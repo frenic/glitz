@@ -1,5 +1,4 @@
-import { FeaturedProperties, ResolvedDeclarations, Style } from '@glitz/type';
-import GlitzClient from './GlitzClient';
+import { GlitzClient, FeaturedProperties, ResolvedDeclarations, Style } from '..';
 
 interface TestStyle extends Style {
   '@media (min-width: 100px)'?: Style;

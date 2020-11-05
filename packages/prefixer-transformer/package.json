@@ -11,7 +11,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/type": "^3.0.0-alpha.8",
+    "@glitz/core": "^3.0.0-alpha.15",
     "inline-style-prefixer": "^6.0.0"
   },
   "scripts": {

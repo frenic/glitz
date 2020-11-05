@@ -1,4 +1,4 @@
-import { ResolvedDeclarationList, ResolvedDeclarations } from '@glitz/type';
+import { ResolvedDeclarationList, ResolvedDeclarations } from '../style';
 import { formatRule, prettifyRule } from '../utils/format';
 import { parseDeclarationBlock } from '../utils/parse';
 

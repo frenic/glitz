@@ -1,4 +1,4 @@
-import { ResolvedDeclarations } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/core';
 import transformers from '../..';
 
 const a: ResolvedDeclarations = {};

@@ -1,4 +1,4 @@
-import { ResolvedDeclarations } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/core';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { prefix } from 'inline-style-prefixer';

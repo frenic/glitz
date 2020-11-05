@@ -13,7 +13,6 @@
   "side-effects": false,
   "dependencies": {
     "@glitz/core": "^3.0.0-alpha.15",
-    "@glitz/type": "^3.0.0-alpha.8",
     "@types/react": "*",
     "@types/react-is": "*",
     "react-is": "^16.13.1"

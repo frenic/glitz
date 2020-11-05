@@ -15,8 +15,7 @@
     "@glitz/core": "^3.0.0-alpha.15",
     "@glitz/devtool-transformer": "^3.0.0-alpha.8",
     "@glitz/length-transformer": "^3.0.0-alpha.8",
-    "@glitz/prefixer-transformer": "^3.0.0-alpha.8",
-    "@glitz/type": "^3.0.0-alpha.8"
+    "@glitz/prefixer-transformer": "^3.0.0-alpha.8"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",

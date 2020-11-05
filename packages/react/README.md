@@ -160,9 +160,9 @@ function HelloWorld {
 If you're using theming, make sure you type it using module augmentation.
 
 ```tsx
-import * as Glitz from '@glitz/type';
+import * as Glitz from '@glitz/core';
 
-declare module '@glitz/type' {
+declare module '@glitz/core' {
   interface Theme {
     linkColor: string;
     backgroundColor: string;

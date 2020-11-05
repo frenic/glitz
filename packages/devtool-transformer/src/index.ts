@@ -1,4 +1,4 @@
-import { ResolvedDeclarations } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/core';
 
 export type Options = {
   ignoreProperties?: string | RegExp | (string | RegExp)[];

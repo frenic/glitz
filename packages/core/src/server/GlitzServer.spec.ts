@@ -1,5 +1,4 @@
-import { ResolvedDeclarations, CommonValue, Style } from '@glitz/type';
-import GlitzServer from './GlitzServer';
+import { GlitzServer, ResolvedDeclarations, CommonValue, Style } from '..';
 import reboot from '../__fixtures__/reboot';
 
 interface TestStyle extends Style {

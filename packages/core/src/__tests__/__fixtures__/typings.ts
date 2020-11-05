@@ -1,5 +1,4 @@
-import { ResolvedDeclarations } from '@glitz/type';
-import { compose, GlitzClient, GlitzServer, media, Options, selector } from '../..';
+import { compose, GlitzClient, GlitzServer, media, Options, selector, ResolvedDeclarations } from '../..';
 
 const transformer: (input: ResolvedDeclarations) => ResolvedDeclarations = input => ({
   anyProperty: input.anyProperty,

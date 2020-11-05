@@ -1,4 +1,4 @@
-import type { Style } from '@glitz/type';
+import type { Style } from '@glitz/core';
 import { useContext, useRef, useEffect } from 'react';
 import { GlitzContext } from '../components/context';
 import { StyledDecorator } from './decorator';

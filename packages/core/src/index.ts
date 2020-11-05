@@ -1,4 +1,5 @@
-export * from './types/options';
+export * from './style';
+export type { Options, Transformer } from './options';
 export { default as GlitzClient } from './client/GlitzClient';
 export { default as GlitzServer } from './server/GlitzServer';
 export { default as GlitzStatic } from './server/GlitzStatic';

@@ -1,4 +1,4 @@
-import type { Theme } from '@glitz/type';
+import type { Theme } from '@glitz/core';
 import { PropsWithChildren, createElement } from 'react';
 import { ThemeContext } from './context';
 

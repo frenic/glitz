@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { Style } from '@glitz/core';
 import { ClassType, Component, ComponentClass, ComponentState, ComponentType, FunctionComponent } from 'react';
 import { FORWARD_STYLE_TYPE, SECRET_GLITZ_PROPERTY } from './constants';
 import { WithRefProp } from './create';

@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { Style } from '../style';
 
 // Unfortunately we need this until there's a way to have index signatures for
 // other types like: https://github.com/Microsoft/TypeScript/issues/7765.

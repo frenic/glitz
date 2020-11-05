@@ -8,10 +8,10 @@ import {
   ResolvedValue,
   Style,
   Theme,
-} from '@glitz/type';
+} from '../style';
 import InjectorClient from '../client/InjectorClient';
 import InjectorServer from '../server/InjectorServer';
-import { Transformer } from '../types/options';
+import { Transformer } from '../options';
 import { issueFormatter } from '../utils/debugging';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
 

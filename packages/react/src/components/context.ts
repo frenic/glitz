@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import type { GlitzClient, GlitzServer } from '@glitz/core';
-import type { Theme } from '@glitz/type';
+import type { Theme } from '@glitz/core';
 import { DirtyStyle } from '../styled/use-glitz';
 
 export const GlitzContext = createContext<GlitzClient | GlitzServer | undefined>(void 0);

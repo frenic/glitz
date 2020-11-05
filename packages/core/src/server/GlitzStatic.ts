@@ -1,6 +1,6 @@
-import { Globals, Style, Theme } from '@glitz/type';
+import { Globals, Style, Theme } from '../style';
 import { Base, createStyleInjectors } from '../core/create-style-injectors';
-import { Options } from '../types/options';
+import { Options } from '../options';
 import { createHashCounter } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 import { formatMediaRule } from '../utils/format';

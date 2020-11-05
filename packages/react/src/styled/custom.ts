@@ -1,4 +1,4 @@
-import { Style } from '@glitz/type';
+import { Style } from '@glitz/core';
 import {
   FunctionComponent,
   Component,

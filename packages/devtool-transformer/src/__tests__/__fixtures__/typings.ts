@@ -1,4 +1,4 @@
-import { ResolvedDeclarations } from '@glitz/type';
+import { ResolvedDeclarations } from '@glitz/core';
 import devToolTransformer, { createDevToolTransformer } from '../..';
 
 const a: ResolvedDeclarations = {};

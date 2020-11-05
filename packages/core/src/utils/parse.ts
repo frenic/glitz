@@ -1,4 +1,4 @@
-import { ResolvedDeclarations } from '@glitz/type';
+import { ResolvedDeclarations } from '../style';
 
 export function parseDeclarationBlock(declarations: ResolvedDeclarations) {
   let block = '';

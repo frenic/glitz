@@ -3,8 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@glitz/*": ["./packages/*/src"],
-      "@glitz/type": ["./packages/type"]
+      "@glitz/*": ["./packages/*/src"]
     },
     "skipLibCheck": true,
     "noEmit": true

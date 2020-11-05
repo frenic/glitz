@@ -1,4 +1,4 @@
-import type { Globals } from '@glitz/type';
+import type { Globals } from '..';
 
 const reboot: Globals = {
   '*,*::before,*::after': { boxSizing: 'border-box' },

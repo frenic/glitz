@@ -1,5 +1,5 @@
-import { Style } from '@glitz/type';
-import { Query } from '../types/query';
+import { Style } from '../style';
+import { Query } from '../query';
 import { hyphenateProperty } from '../utils/parse';
 
 // NOTE! A very similar implementation of this exists in packages/static/src/static-glitz-core.ts
