@@ -6,6 +6,7 @@ const replace = require('rollup-plugin-replace');
 const typescript = require('rollup-plugin-typescript');
 const { terser } = require('rollup-plugin-terser');
 const resolver = require('rollup-plugin-node-resolve');
+const cleanup = require('rollup-plugin-cleanup');
 
 const CJS_SINGLE_TYPE = Symbol();
 const CJS_DOUBLE_TYPE = Symbol();
@@ -109,6 +110,7 @@ async function build(input, output, type, production) {
           ]
         : []),
       ...(production ? [terser({ toplevel: true })] : []),
+      cleanup({ comments: 'none', extensions: ['js', 'jsx', 'mjs', 'ts', 'tsx'] }),
     ],
   });
 
