@@ -326,7 +326,7 @@ describe('client', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();
 
-    expect(client.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
+    expect(client.injectStyle({ animationName: { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
 
     const sheet = style.sheet as CSSStyleSheet;
 
@@ -339,82 +339,54 @@ describe('client', () => {
     `);
     expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {animation-name: a;}"`);
 
-    expect(client.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
+    expect(client.injectStyle({ animation: { name: { from: { color: 'red' }, to: { color: 'green' } } } })).toBe('a');
 
-    expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`
-      "@keyframes b { 
-        from {color: blue;} 
-        to {color: white;} 
-      }"
-    `);
-    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".b {animation-name: b;}"`);
+    expect(client.injectStyle({ animationName: 'some-thing' })).toBe('b');
 
-    expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
-
-    expect(client.injectStyle({ animationName: 'some-thing' })).toBe('c');
-
-    expect(sheet.cssRules).toHaveLength(5);
-    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".c {animation-name: some-thing;}"`);
+    expect(sheet.cssRules).toHaveLength(3);
+    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(`".b {animation-name: some-thing;}"`);
   });
   it('injects font face rule', () => {
     const style = createStyle();
     const client = new GlitzClient<TestStyle>();
 
-    expect(
-      client.injectStyle({
-        '@font-face': {
-          fontFamily: 'x',
-          fontStyle: 'normal',
-          fontWeight: 400,
-          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
-        },
-      }),
-    ).toBe('a');
-
     const sheet = style.sheet as CSSStyleSheet;
-
-    expect(sheet.cssRules).toHaveLength(2);
-    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
-      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-weight: 400; font-style: normal; font-family: x;}"`,
-    );
-    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {font-family: x;}"`);
 
     expect(
       client.injectStyle({
         fontFamily: {
-          fontFamily: 'y',
+          fontFamily: 'x',
           fontStyle: 'normal',
           fontWeight: 400,
           src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
         },
       }),
-    ).toBe('b');
+    ).toBe('a');
 
     expect(
       client.injectStyle({
         font: {
           family: {
-            fontFamily: 'y',
+            fontFamily: 'x',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
           },
         },
       }),
-    ).toBe('b');
+    ).toBe('a');
 
-    expect(sheet.cssRules).toHaveLength(4);
-    expect(sheet.cssRules[2].cssText).toMatchInlineSnapshot(
-      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-weight: 400; font-style: normal; font-family: y;}"`,
+    expect(sheet.cssRules).toHaveLength(2);
+    expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(
+      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-weight: 400; font-style: normal; font-family: x;}"`,
     );
-    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".b {font-family: y;}"`);
+    expect(sheet.cssRules[1].cssText).toMatchInlineSnapshot(`".a {font-family: x;}"`);
 
     expect(
       client.injectStyle({
         fontFamily: [
           {
-            fontFamily: 'z',
+            fontFamily: 'y',
             fontStyle: 'normal',
             fontWeight: 400,
             src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
@@ -422,14 +394,14 @@ describe('client', () => {
           'sans-serif',
         ],
       }),
-    ).toBe('c');
+    ).toBe('b');
 
     expect(
       client.injectStyle({
         font: {
           family: [
             {
-              fontFamily: 'z',
+              fontFamily: 'y',
               fontStyle: 'normal',
               fontWeight: 400,
               src:
@@ -439,19 +411,19 @@ describe('client', () => {
           ],
         },
       }),
-    ).toBe('c');
+    ).toBe('b');
 
-    expect(sheet.cssRules).toHaveLength(6);
-    expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".c {font-family: z,sans-serif;}"`);
+    expect(sheet.cssRules).toHaveLength(4);
+    expect(sheet.cssRules[3].cssText).toMatchInlineSnapshot(`".b {font-family: y,sans-serif;}"`);
 
     expect(
       client.injectStyle({
         fontFamily: 'sans-serif',
       }),
-    ).toBe('d');
+    ).toBe('c');
 
-    expect(sheet.cssRules).toHaveLength(7);
-    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`".d {font-family: sans-serif;}"`);
+    expect(sheet.cssRules).toHaveLength(5);
+    expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`".c {font-family: sans-serif;}"`);
   });
   it('injects different combinations', () => {
     const style1 = createStyle();
@@ -521,18 +493,12 @@ describe('client', () => {
 
     expect(
       client.injectStyle([
-        { '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } },
-        { '@keyframes': { from: { color: 'green' }, to: { color: 'blue' } } },
+        { animationName: { from: { color: 'red' }, to: { color: 'green' } } },
+        { animationName: { from: { color: 'green' }, to: { color: 'blue' } } },
       ]),
     ).toBe('e');
-    expect(
-      client.injectStyle([
-        { animationName: { from: { color: 'blue' }, to: { color: 'white' } } },
-        { animationName: { from: { color: 'white' }, to: { color: 'black' } } },
-      ]),
-    ).toBe('f');
 
-    expect(sheet.cssRules).toHaveLength(8);
+    expect(sheet.cssRules).toHaveLength(6);
     expect(sheet.cssRules[4].cssText).toMatchInlineSnapshot(`
       "@keyframes a { 
         from {color: green;} 
@@ -540,56 +506,6 @@ describe('client', () => {
       }"
     `);
     expect(sheet.cssRules[5].cssText).toMatchInlineSnapshot(`".e {animation-name: a;}"`);
-    expect(sheet.cssRules[6].cssText).toMatchInlineSnapshot(`
-      "@keyframes b { 
-        from {color: white;} 
-        to {color: black;} 
-      }"
-    `);
-    expect(sheet.cssRules[7].cssText).toMatchInlineSnapshot(`".f {animation-name: b;}"`);
-
-    expect(
-      client.injectStyle([
-        {
-          '@font-face': {
-            fontFamily: 'x',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
-          },
-        },
-        {
-          '@font-face': {
-            fontFamily: 'x',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-          },
-        },
-      ]),
-    ).toBe('g');
-    expect(
-      client.injectStyle([
-        {
-          '@font-face': {
-            fontFamily: 'z',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-          },
-        },
-        {
-          '@font-face': {
-            fontFamily: 'z',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
-          },
-        },
-      ]),
-    ).toBe('h');
-
-    expect(sheet.cssRules).toHaveLength(12);
-    expect(sheet.cssRules[8].cssText).toMatchInlineSnapshot(
-      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2'); font-family: x;}"`,
-    );
-    expect(sheet.cssRules[9].cssText).toMatchInlineSnapshot(`".g {font-family: x;}"`);
-    expect(sheet.cssRules[10].cssText).toMatchInlineSnapshot(
-      `"@font-face {src: url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2'); font-family: z;}"`,
-    );
-    expect(sheet.cssRules[11].cssText).toMatchInlineSnapshot(`".h {font-family: z;}"`);
 
     const mediaSheet = media.sheet as CSSStyleSheet;
 
@@ -598,17 +514,17 @@ describe('client', () => {
         { '@media (min-width: 768px)': { color: 'green' } },
         { '@media (min-width: 768px)': { color: 'red' } },
       ]),
-    ).toBe('i');
+    ).toBe('f');
     expect(
       client.injectStyle([
         { '@media (min-width: 768px)': { ':hover': { color: 'green' } } },
         { '@media (min-width: 768px)': { ':hover': { color: 'red' } } },
       ]),
-    ).toBe('j');
+    ).toBe('g');
 
     expect(mediaSheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".i {color: red;}"`);
-    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".j:hover {color: red;}"`);
+    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".f {color: red;}"`);
+    expect(mediaSheet.cssRules[1].cssText).toMatchInlineSnapshot(`".g:hover {color: red;}"`);
   });
   it('injects global rule', () => {
     const style = createStyle();
@@ -688,7 +604,6 @@ describe('client', () => {
     );
     const client = new GlitzClient<TestStyle>();
 
-    expect(client.injectStyle({ '@keyframes': { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
     expect(client.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
     expect(client.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
   });
@@ -703,7 +618,7 @@ describe('client', () => {
 
     expect(
       client.injectStyle({
-        '@font-face': {
+        fontFamily: {
           fontFamily: 'x',
           fontStyle: 'normal',
           fontWeight: 400,
@@ -711,24 +626,6 @@ describe('client', () => {
         },
       }),
     ).toBe('a');
-    expect(
-      client.injectStyle({
-        '@font-face': [
-          {
-            fontFamily: 'y',
-            fontStyle: 'normal',
-            fontWeight: 400,
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-          },
-          {
-            fontFamily: 'y',
-            fontStyle: 'normal',
-            fontWeight: 400,
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
-          },
-        ],
-      }),
-    ).toBe('b');
     expect(
       client.injectStyle({
         fontFamily: [

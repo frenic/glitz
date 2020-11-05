@@ -170,12 +170,11 @@ describe('server', () => {
   it('injects keyframes rule', () => {
     const server = new GlitzServer<TestStyle>();
 
-    expect(server.injectStyle({ '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } })).toBe('a');
-    expect(server.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('b');
-    expect(server.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('b');
-    expect(server.injectStyle({ animationName: 'some-thing' })).toBe('c');
+    expect(server.injectStyle({ animationName: { from: { color: 'blue' }, to: { color: 'white' } } })).toBe('a');
+    expect(server.injectStyle({ animation: { name: { from: { color: 'blue' }, to: { color: 'white' } } } })).toBe('a');
+    expect(server.injectStyle({ animationName: 'some-thing' })).toBe('b');
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `"@keyframes a{from{color:red}to{color:green}}@keyframes b{from{color:blue}to{color:white}}.a{animation-name:a}.b{animation-name:b}.c{animation-name:some-thing}"`,
+      `"@keyframes a{from{color:blue}to{color:white}}.a{animation-name:a}.b{animation-name:some-thing}"`,
     );
   });
   it('injects font face rule', () => {
@@ -183,7 +182,7 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
-        '@font-face': {
+        fontFamily: {
           fontFamily: 'x',
           fontStyle: 'normal',
           fontWeight: 400,
@@ -194,27 +193,16 @@ describe('server', () => {
 
     expect(
       server.injectStyle({
-        fontFamily: {
-          fontFamily: 'y',
-          fontStyle: 'normal',
-          fontWeight: 400,
-          src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-        },
-      }),
-    ).toBe('b');
-
-    expect(
-      server.injectStyle({
         font: {
           family: {
-            fontFamily: 'y',
+            fontFamily: 'x',
             fontStyle: 'normal',
             fontWeight: 400,
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
           },
         },
       }),
-    ).toBe('b');
+    ).toBe('a');
 
     expect(
       server.injectStyle({
@@ -228,7 +216,7 @@ describe('server', () => {
           'sans-serif',
         ],
       }),
-    ).toBe('c');
+    ).toBe('b');
 
     expect(
       server.injectStyle({
@@ -245,16 +233,16 @@ describe('server', () => {
           ],
         },
       }),
-    ).toBe('c');
+    ).toBe('b');
 
     expect(
       server.injectStyle({
         fontFamily: 'sans-serif',
       }),
-    ).toBe('d');
+    ).toBe('c');
 
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `"@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-weight:400;font-style:normal;font-family:x}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-weight:400;font-style:normal;font-family:y}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-weight:400;font-style:normal;font-family:x}.a{font-family:x}.b{font-family:y}.c{font-family:x,sans-serif}.d{font-family:sans-serif}"`,
+      `"@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-weight:400;font-style:normal;font-family:x}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-weight:400;font-style:normal;font-family:x}.a{font-family:x}.b{font-family:x,sans-serif}.c{font-family:sans-serif}"`,
     );
   });
   it('injects different combinations', () => {
@@ -297,65 +285,26 @@ describe('server', () => {
 
     expect(
       server.injectStyle([
-        { '@keyframes': { from: { color: 'red' }, to: { color: 'green' } } },
-        { '@keyframes': { from: { color: 'green' }, to: { color: 'blue' } } },
-      ]),
-    ).toBe('e');
-    expect(
-      server.injectStyle([
         { animationName: { from: { color: 'blue' }, to: { color: 'white' } } },
         { animationName: { from: { color: 'white' }, to: { color: 'black' } } },
       ]),
-    ).toBe('f');
-
-    expect(
-      server.injectStyle([
-        {
-          '@font-face': {
-            fontFamily: 'x',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
-          },
-        },
-        {
-          '@font-face': {
-            fontFamily: 'y',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-          },
-        },
-      ]),
-    ).toBe('g');
-    expect(
-      server.injectStyle([
-        {
-          '@font-face': {
-            fontFamily: 'y',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
-          },
-        },
-        {
-          '@font-face': {
-            fontFamily: 'z',
-            src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
-          },
-        },
-      ]),
-    ).toBe('h');
+    ).toBe('e');
 
     expect(
       server.injectStyle([
         { '@media (min-width: 768px)': { color: 'green' } },
         { '@media (min-width: 768px)': { color: 'red' } },
       ]),
-    ).toBe('i');
+    ).toBe('f');
     expect(
       server.injectStyle([
         { '@media (min-width: 768px)': { ':hover': { color: 'green' } } },
         { '@media (min-width: 768px)': { ':hover': { color: 'red' } } },
       ]),
-    ).toBe('j');
+    ).toBe('g');
 
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `"@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2');font-family:y}@font-face{src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:z}@keyframes a{from{color:green}to{color:blue}}@keyframes b{from{color:white}to{color:black}}.a{color:red}.b{padding-left:20px}.e{animation-name:a}.f{animation-name:b}.g{font-family:y}.h{font-family:z}.c:hover{color:red}.d:first-child:hover{color:red}@media (min-width: 768px){.i{color:red}.j:hover{color:red}}"`,
+      `"@keyframes a{from{color:white}to{color:black}}.a{color:red}.b{padding-left:20px}.e{animation-name:a}.c:hover{color:red}.d:first-child:hover{color:red}@media (min-width: 768px){.f{color:red}.g:hover{color:red}}"`,
     );
   });
   it('injects global rule', () => {

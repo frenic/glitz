@@ -1,11 +1,7 @@
 import * as CSS from 'csstype';
 export { PropertyValue, PropertiesFallback as Properties } from 'csstype';
 
-export type Style = Selectors &
-  Omit<Merge<FeaturedProperties, ExtendedProperties>, ExcludedShorthands> & {
-    '@keyframes'?: KeyframesProperty;
-    '@font-face'?: FontFaceProperty;
-  };
+export type Style = Selectors & Omit<Merge<FeaturedProperties, ShorthandProperties>, ExcludedShorthands>;
 
 export interface Theme {}
 
@@ -13,11 +9,17 @@ export interface TransformerProperties {}
 
 export type ResolvedProperties = Merge<CSS.PropertiesFallback, TransformerProperties>;
 
-export type FeaturedProperties = {
-  [property in keyof ResolvedProperties]:
-    | ResolvedProperties[property]
-    | ((theme: Theme) => ResolvedProperties[property]);
-};
+export type FeaturedProperties = Merge<
+  {
+    [property in keyof ResolvedProperties]:
+      | ResolvedProperties[property]
+      | ((theme: Theme) => ResolvedProperties[property]);
+  },
+  {
+    animationName?: KeyframesProperty;
+    fontFamily?: FontFaceProperty;
+  }
+>;
 
 export type Globals = Record<string, FeaturedProperties | Record<string, FeaturedProperties>>;
 
@@ -45,25 +47,25 @@ export interface Keyframes {
   [identifier: string]: Style;
 }
 
-export type KeyframesProperty = FeaturedProperties['animationName'] | Keyframes;
+export type KeyframesProperty =
+  | Keyframes
+  | ResolvedProperties['animationName']
+  | ((theme: Theme) => ResolvedProperties['animationName']);
 
-export type FontFace = Omit<CSS.AtRule.FontFaceFallback, 'fontFamily'> & {
-  fontFamily: CSS.AtRule.FontFace['fontFamily'];
-};
+export type FontFace = Merge<
+  CSS.AtRule.FontFaceFallback,
+  {
+    fontFamily: CSS.AtRule.FontFace['fontFamily'];
+  }
+>;
 
 export type FontFaceProperty =
   | FontFace
-  | FeaturedProperties['fontFamily']
-  | Array<FontFace | FeaturedProperties['fontFamily']>;
+  | ResolvedProperties['fontFamily']
+  | ((theme: Theme) => ResolvedProperties['fontFamily'])
+  | Array<FontFace | ResolvedProperties['fontFamily'] | ((theme: Theme) => ResolvedProperties['fontFamily'])>;
 
-export interface ExtendedProperties {
-  // Keyframes
-  animationName?: KeyframesProperty;
-
-  // Font face
-  fontFamily?: FontFaceProperty;
-
-  // Shorthand objects
+export interface ShorthandProperties {
   animation?: AnimationProperty;
   background?: BackgroundProperty;
   border?: BorderProperty;
