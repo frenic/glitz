@@ -1,6 +1,6 @@
 {
   "name": "@glitz/devtool-transformer",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -12,7 +12,7 @@
   "bugs": "https://github.com/frenic/glitz/issues",
   "side-effects": false,
   "dependencies": {
-    "@glitz/core": "^3.0.0-alpha.16"
+    "@glitz/core": "^3.0.0-alpha.17"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
