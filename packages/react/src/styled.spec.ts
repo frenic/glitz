@@ -217,18 +217,6 @@ describe('react styled', () => {
     expect(declarationA.getPropertyValue('color')).toBe('green');
     expect(declarationA.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponentA = styled(
-      () =>
-        React.createElement(StyledComponent, {
-          css: { color: 'green', backgroundColor: 'red' },
-        }),
-      { color: 'blue' },
-    );
-    const treeB = mountWithGlitz(React.createElement(ComposedComponentA));
-    const declarationB = getComputedStyle(treeB.getDOMNode());
-    expect(declarationB.getPropertyValue('color')).toBe('blue');
-    expect(declarationB.getPropertyValue('background-color')).toBe('red');
-
     const ComposedComponentB = styled(
       () =>
         React.createElement(StyledComponent, {
@@ -236,8 +224,20 @@ describe('react styled', () => {
         }),
       { color: 'blue' },
     );
+    const treeB = mountWithGlitz(React.createElement(ComposedComponentB));
+    const declarationB = getComputedStyle(treeB.getDOMNode());
+    expect(declarationB.getPropertyValue('color')).toBe('blue');
+    expect(declarationB.getPropertyValue('background-color')).toBe('red');
+
+    const ComposedComponentC = styled(
+      () =>
+        React.createElement(StyledComponent, {
+          css: { color: 'green', backgroundColor: 'red' },
+        }),
+      { color: 'blue' },
+    );
     const treeC = mountWithGlitz(
-      React.createElement(ComposedComponentB, {
+      React.createElement(ComposedComponentC, {
         css: { color: 'white' },
       }),
     );
@@ -245,17 +245,24 @@ describe('react styled', () => {
     expect(declarationC.getPropertyValue('color')).toBe('white');
     expect(declarationC.getPropertyValue('background-color')).toBe('red');
 
-    const ComposedComponentC = styled(
+    const ComposedComponentD = styled(
       () =>
         React.createElement(styled.Div, {
           css: { color: 'green', backgroundColor: 'red' },
         }),
       { color: 'red' },
     );
-    const treeD = mountWithGlitz(React.createElement(ComposedComponentC));
+    const treeD = mountWithGlitz(React.createElement(ComposedComponentD));
     const declarationD = getComputedStyle(treeD.getDOMNode());
     expect(declarationD.getPropertyValue('color')).toBe('red');
     expect(declarationD.getPropertyValue('background-color')).toBe('red');
+
+    const ComposedComponentE1 = styled(() => React.createElement(styled.Div));
+    const ComposedComponentE2 = styled(() => React.createElement(ComposedComponentE1));
+    const treeE = mountWithGlitz(React.createElement(ComposedComponentE2, { css: { backgroundColor: 'red' } }));
+    const declarationE = getComputedStyle(treeE.getDOMNode());
+    expect(declarationE.getPropertyValue('color')).toBe('red');
+    expect(declarationE.getPropertyValue('background-color')).toBe('red');
   });
   it('caches pure style', () => {
     let parses = 0;

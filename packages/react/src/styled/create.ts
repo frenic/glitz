@@ -111,7 +111,7 @@ export function factory<TProps, TInstance>(
       : isForwardStyleType<TProps, TInstance>(type)
       ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>, ref: Ref<TInstance>) => {
           const composed = useContext(ComposeContext);
-          const compose = useCallback(additional => sanitizeStyle([additional, statics, composed, dynamic]), [
+          const compose = useCallback(additional => sanitizeStyle([additional, statics, dynamic, composed]), [
             composed,
             dynamic,
           ]);
@@ -126,14 +126,14 @@ export function factory<TProps, TInstance>(
           return node;
         })
       : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) => {
-          const forwarded = undefined && useContext(ComposeContext);
-          const style = sanitizeStyle([statics, forwarded, dynamic]);
+          const composed = useContext(ComposeContext);
+          const style = sanitizeStyle([statics, dynamic, composed]);
           let node = createElement<any>(type, { ...restProps, ref });
 
           if (style.length > 0) {
             node = createElement(
               ComposeContext.Provider,
-              useMemo(() => ({ value: style }), [statics, forwarded, dynamic]),
+              useMemo(() => ({ value: style }), [statics, dynamic, composed]),
               node,
             );
           }
