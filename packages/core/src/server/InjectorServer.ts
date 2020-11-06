@@ -5,8 +5,7 @@ import { HashCounter } from '../utils/hash';
 type Index<TValue = string> = Record<string, TValue>;
 
 export default class InjectorServer extends Injector {
-  public getStyleResult: () => string;
-  public getStyleStream: () => string;
+  public getStyle: (stream?: boolean) => string;
   public hydrateClassName: (body: string, className: string, suffix?: string) => void;
   public hydrateKeyframes: (body: string, name: string) => void;
   public hydrateFontFace: (rule: string) => void;
@@ -81,61 +80,56 @@ export default class InjectorServer extends Injector {
       },
     );
 
-    this.getStyleResult = () => {
-      let css = globalsResult;
+    this.getStyle = (stream = false) => {
+      let result = '';
 
-      for (const block of fontFaceResultIndex) {
-        css += formatFontFaceRule(block);
+      if (stream) {
+        result += globalsStream;
+        globalsStream = '';
+      } else {
+        result += globalsResult;
       }
 
-      for (const blockList in keyframesResultIndex) {
-        css += formatKeyframesRule(keyframesResultIndex[blockList], blockList);
+      const fontFaces = stream ? fontFaceStreamIndex : fontFaceResultIndex;
+      for (const block of fontFaces) {
+        result += formatFontFaceRule(block);
       }
 
-      for (const block in plainResultIndex) {
-        css += formatClassRule(plainResultIndex[block], block);
+      if (stream) {
+        fontFaceStreamIndex.length = 0;
       }
 
-      for (const selector in selectorResultIndex) {
-        const index = selectorResultIndex[selector];
+      const keyframes = stream ? keyframesStreamIndex : keyframesResultIndex;
+      for (const blockList in keyframes) {
+        result += formatKeyframesRule(keyframes[blockList], blockList);
+
+        if (stream) {
+          delete keyframesStreamIndex[blockList];
+        }
+      }
+
+      const plains = stream ? plainStreamIndex : plainResultIndex;
+      for (const block in plains) {
+        result += formatClassRule(plains[block], block);
+
+        if (stream) {
+          delete plainStreamIndex[block];
+        }
+      }
+
+      const selectors = stream ? selectorStreamIndex : selectorResultIndex;
+      for (const selector in selectors) {
+        const index = selectors[selector];
         for (const block in index) {
-          css += formatClassRule(index[block], block, selector);
+          result += formatClassRule(index[block], block, selector);
+        }
+
+        if (stream) {
+          delete selectorStreamIndex[selector];
         }
       }
 
-      return css;
-    };
-
-    this.getStyleStream = () => {
-      let css = globalsStream;
-      globalsStream = '';
-
-      if (fontFaceStreamIndex.length > 0) {
-        for (const block of fontFaceStreamIndex) {
-          css += formatFontFaceRule(block);
-        }
-        fontFaceStreamIndex.splice(0, fontFaceStreamIndex.length);
-      }
-
-      for (const blockList in keyframesStreamIndex) {
-        css += formatKeyframesRule(keyframesStreamIndex[blockList], blockList);
-        delete keyframesStreamIndex[blockList];
-      }
-
-      for (const block in plainStreamIndex) {
-        css += formatClassRule(plainStreamIndex[block], block);
-        delete plainStreamIndex[block];
-      }
-
-      for (const selector in selectorStreamIndex) {
-        const index = selectorStreamIndex[selector];
-        for (const block in index) {
-          css += formatClassRule(index[block], block, selector);
-        }
-        delete selectorStreamIndex[selector];
-      }
-
-      return css;
+      return result;
     };
 
     function createPreActionCheck(action: string) {

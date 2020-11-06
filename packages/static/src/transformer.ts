@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
-import { GlitzStatic } from '@glitz/core';
+import { GlitzServer } from '@glitz/core';
 import {
   isStaticElement,
   isStaticComponent,
@@ -115,7 +115,7 @@ type StaticThemes = { [id: string]: StaticTheme } | undefined;
 
 type TransformerContext = {
   program: ts.Program;
-  glitz: GlitzStatic;
+  glitz: GlitzServer;
   passNumber: number;
   currentFile: ts.SourceFile;
   currentNode: ts.Node;
@@ -150,7 +150,7 @@ type TransformerContext = {
 
 export function transformer(
   program: ts.Program,
-  glitz: GlitzStatic,
+  glitz: GlitzServer,
   options: TransformerOptions = {},
 ): ts.TransformerFactory<ts.SourceFile> {
   let staticThemes: StaticThemes;

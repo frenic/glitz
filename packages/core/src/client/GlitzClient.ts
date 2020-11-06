@@ -24,7 +24,7 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
       [media: string]: InjectorClient;
     } = {};
 
-    const identifier = options.identifier || DEFAULT_HYDRATION_IDENTIFIER;
+    const identifier = options.identifier ?? DEFAULT_HYDRATION_IDENTIFIER;
 
     const getInjector = (media?: string) => {
       if (media) {

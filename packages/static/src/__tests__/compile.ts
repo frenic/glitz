@@ -8,7 +8,7 @@ import {
   glitzReactModuleName,
   glitzCoreModuleName,
 } from '../transformer';
-import { GlitzStatic } from '@glitz/core';
+import { GlitzServer } from '@glitz/core';
 
 export type TransformerDiagnostics = Diagnostic[];
 export type Code = { [fileName: string]: string };
@@ -103,7 +103,7 @@ export default function compile(
   };
 
   const program = ts.createProgram(Object.keys(files), compilerOptions, customCompilerHost);
-  const glitz = new GlitzStatic();
+  const glitz = new GlitzServer();
 
   const transformerDiagnostics: TransformerDiagnostics = [];
   const transformers: ts.CustomTransformers = {

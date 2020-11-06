@@ -6,8 +6,17 @@ import InjectorServer from './InjectorServer';
 import { createHydrate } from '../utils/hydrate';
 import { formatMediaRule } from '../utils/format';
 
+export type Diagnostic = {
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+  file: string;
+  line: number;
+  innerDiagnostic?: Diagnostic;
+};
+
 export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
   public identifier: string;
+  public diagnostics: Diagnostic[] = [];
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
   public injectGlobals: (styles: Globals, theme?: Theme) => void;
   public hydrate: (css: string) => void;
@@ -25,8 +34,8 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
 
     const getInjector = (media?: string) =>
       media
-        ? (mediaInjectors[media] = mediaInjectors[media] || new InjectorServer(classNameHash, keyframesHash))
-        : (plainInjector = plainInjector || new InjectorServer(classNameHash, keyframesHash));
+        ? (mediaInjectors[media] ??= new InjectorServer(classNameHash, keyframesHash))
+        : (plainInjector ??= new InjectorServer(classNameHash, keyframesHash));
 
     const [injectStyle, injectGlobals] = createStyleInjectors(getInjector, options.transformer);
 
@@ -38,21 +47,26 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
 
     this.getStyle = (markup = false, stream = false) => {
       let result = '';
+
       if (plainInjector) {
-        const style = stream ? plainInjector.getStyleStream() : plainInjector.getStyleResult();
+        const style = plainInjector.getStyle(stream);
         result += markup ? `<style data-${identifier}>${style}</style>` : style;
       }
-      const medias = options.mediaOrder
-        ? Object.keys(mediaInjectors).sort(options.mediaOrder)
-        : Object.keys(mediaInjectors);
-      for (const media of medias) {
-        const style = stream ? mediaInjectors[media].getStyleStream() : mediaInjectors[media].getStyleResult();
+
+      let queries = Object.keys(mediaInjectors);
+      if (options.mediaOrder) {
+        queries = queries.sort(options.mediaOrder);
+      }
+
+      for (const query of queries) {
+        const style = mediaInjectors[query].getStyle(stream);
         if (style) {
           result += markup
-            ? `<style data-${identifier} media="${media}">${style}</style>`
-            : formatMediaRule(media, style);
+            ? `<style data-${identifier} media="${query}">${style}</style>`
+            : formatMediaRule(query, style);
         }
       }
+
       return result;
     };
 

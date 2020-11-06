@@ -412,4 +412,22 @@ describe('server', () => {
 
     expect(serverB.injectStyle({ color: 'red' })).toBe('a');
   });
+  it('gets markup', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red', '@media (min-width: 768px)': { color: 'green' } })).toBe('a b');
+    expect(server.getStyle(true)).toMatchInlineSnapshot(
+      `"<style data-glitz>.b{color:red}</style><style data-glitz media=\\"(min-width: 768px)\\">.a{color:green}</style>"`,
+    );
+  });
+  it('gets stream', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(server.injectStyle({ color: 'red', '@media (min-width: 768px)': { color: 'green' } })).toBe('a b');
+    expect(server.getStyle(false, true)).toMatchInlineSnapshot(
+      `".b{color:red}@media (min-width: 768px){.a{color:green}}"`,
+    );
+    expect(server.injectStyle({ color: 'green' })).toBe('c');
+    expect(server.getStyle(false, true)).toMatchInlineSnapshot(`".c{color:green}"`);
+  });
 });

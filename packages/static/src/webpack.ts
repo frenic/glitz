@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { GlitzStatic } from '@glitz/core';
+import { GlitzServer } from '@glitz/core';
 import type * as webpack from 'webpack';
 
 const PLUGIN_NAME = 'GlitzStaticPlugin';
@@ -12,10 +12,10 @@ type Diagnostic = Omit<import('./transformer').Diagnostic, 'source' | 'innerDiag
 };
 
 export class GlitzStaticPlugin {
-  private glitz: GlitzStatic;
+  private glitz: GlitzServer;
   private output: Output;
   private hash: (css: string, length: number) => string;
-  constructor(glitz: GlitzStatic, output: Output) {
+  constructor(glitz: GlitzServer, output: Output) {
     this.glitz = glitz;
     this.output = output;
     this.hash = (css, length): string => {

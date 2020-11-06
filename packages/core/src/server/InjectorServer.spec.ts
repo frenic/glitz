@@ -7,14 +7,14 @@ describe('server', () => {
 
     expect(injector.injectClassName({ color: 'red' })).toBe('a');
     expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' })).toBe('b');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a{color:red}.b{color:green;background-color:black}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`".a{color:red}.b{color:green;background-color:black}"`);
   });
   it('injects pseudo selector', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' }, ':hover')).toBe('b');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(
+    expect(injector.getStyle()).toMatchInlineSnapshot(
       `".a:hover{color:red}.b:hover{color:green;background-color:black}"`,
     );
   });
@@ -23,7 +23,7 @@ describe('server', () => {
 
     expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
     expect(injector.injectClassName({ color: 'green', backgroundColor: 'black' }, '[disabled]')).toBe('b');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(
+    expect(injector.getStyle()).toMatchInlineSnapshot(
       `".a[disabled]{color:red}.b[disabled]{color:green;background-color:black}"`,
     );
   });
@@ -38,7 +38,7 @@ describe('server', () => {
         src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2')",
       }),
     ).toBe('x');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(
+    expect(injector.getStyle()).toMatchInlineSnapshot(
       `"@font-face{font-style:normal;font-weight:400;src:url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTtgPs.woff2) format('woff2');font-family:x}"`,
     );
   });
@@ -46,54 +46,54 @@ describe('server', () => {
     const injector = createInjector();
 
     expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`"@keyframes a{from{color:red}to{color:green}}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`"@keyframes a{from{color:red}to{color:green}}"`);
   });
   it('injects fallback rule', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a{color:red;color:green}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`".a{color:red;color:green}"`);
   });
   it('injects global rule', () => {
     const injector = createInjector();
 
     injector.injectGlobals({ color: 'red', backgroundColor: 'green' }, 'div');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`"div{color:red;background-color:green}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`"div{color:red;background-color:green}"`);
   });
   it('reuses plain rule', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: 'red' })).toBe('a');
     expect(injector.injectClassName({ color: 'red' })).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a{color:red}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`".a{color:red}"`);
   });
   it('reuses pseudo selector', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
     expect(injector.injectClassName({ color: 'red' }, ':hover')).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a:hover{color:red}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`".a:hover{color:red}"`);
   });
   it('reuses attribute selector', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
     expect(injector.injectClassName({ color: 'red' }, '[disabled]')).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a[disabled]{color:red}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`".a[disabled]{color:red}"`);
   });
   it('reuses keyframes rule', () => {
     const injector = createInjector();
 
     expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
     expect(injector.injectKeyframes({ from: { color: 'red' }, to: { color: 'green' } })).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`"@keyframes a{from{color:red}to{color:green}}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`"@keyframes a{from{color:red}to{color:green}}"`);
   });
   it('reuses fallback rule', () => {
     const injector = createInjector();
 
     expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
     expect(injector.injectClassName({ color: ['red', 'green'] })).toBe('a');
-    expect(injector.getStyleResult()).toMatchInlineSnapshot(`".a{color:red;color:green}"`);
+    expect(injector.getStyle()).toMatchInlineSnapshot(`".a{color:red;color:green}"`);
   });
   it('resets plain rule', () => {
     const classNameHash = createHashCounter();
