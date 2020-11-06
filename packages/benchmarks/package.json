@@ -21,6 +21,7 @@
   "scripts": {
     "start": "react-benchmark",
     "compose": "npm run start cases/compose/context.tsx && npm run start cases/compose/forward-style.tsx && npm run start cases/compose/stable.tsx",
+    "hydration": "npm run start cases/hydration/with-hydration.tsx && npm run start cases/hydration/without-hydration.tsx",
     "simple": "npm run start cases/simple/current.tsx && npm run start cases/simple/stable.tsx",
     "vanilla": "npm run start cases/vanilla/vanilla.tsx",
     "all": "npm run compose && npm run simple && npm run vanilla"

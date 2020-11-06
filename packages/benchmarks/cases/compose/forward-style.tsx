@@ -2,8 +2,6 @@ import * as React from 'react';
 import { GlitzClient } from '../../../core/src';
 import { GlitzProvider, styled, forwardStyle } from '../../../react/src';
 
-const glitz = new GlitzClient();
-
 const components: any[] = [];
 for (let i = 0; i < 100; i++) {
   components.push(
@@ -19,6 +17,8 @@ for (let i = 0; i < 100; i++) {
 }
 
 export default function () {
+  const glitz = new GlitzClient();
+
   return (
     <GlitzProvider glitz={glitz}>
       {components.map((Component, i) => (
