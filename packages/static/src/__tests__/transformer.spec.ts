@@ -85,8 +85,24 @@ export const ExportedStyledLink4 = styled(applyClassName(Link4), {
 `,
     'file4.tsx': `
 import { styled, applyClassName } from '@glitz/react';
+import { MainLink } from './file1';
+
+export default styled(applyClassName(MainLink), {
+  color: 'ìnherit',
+  ':hover': {
+    textDecoration: 'underline',
+    color: 'inherit',
+  },
+  ':visited': {
+    color: 'inherit',
+  },
+});
+`,
+    'file5.tsx': `
+import { styled, applyClassName } from '@glitz/react';
 import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file3';
 import TheMainLink from './file2';
+import TheOtherMainLink from './file4';
 
 function Link(props: any) {
     return <a {...props} />;
@@ -110,6 +126,7 @@ const node4 = <ExportedStyledLink3 />;
 const node5 = <ExportedStyledLink4 />;
 const node6 = <Block />;
 const node7 = <TheMainLink />;
+const node8 = <TheOtherMainLink />;
 `,
   };
 
@@ -167,11 +184,27 @@ const node7 = <TheMainLink />;
               `);
       expect(result['file4.jsx']).toMatchInlineSnapshot(`
         "import { styled, applyClassName } from '@glitz/react';
+        import { MainLink } from './file1';
+        export default /*#__PURE__*/ styled(applyClassName(MainLink), {
+            color: 'ìnherit',
+            ':hover': {
+                textDecoration: 'underline',
+                color: 'inherit',
+            },
+            ':visited': {
+                color: 'inherit',
+            },
+        });
+        "
+      `);
+      expect(result['file5.jsx']).toMatchInlineSnapshot(`
+        "import { styled, applyClassName } from '@glitz/react';
         import { Link1 as AutoImportedLink1 } from \\"./file3\\";
         import { Link2 as AutoImportedLink2 } from \\"./file3\\";
         import { MainLink as AutoImportedMainLink } from \\"./file1\\";
         import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file3';
         import TheMainLink from './file2';
+        import TheOtherMainLink from './file4';
         function Link(props) {
             return <a {...props}/>;
         }
@@ -189,6 +222,7 @@ const node7 = <TheMainLink />;
         const node5 = <ExportedStyledLink4 />;
         const node6 = <Block />;
         const node7 = <AutoImportedMainLink className={\\"h i j e\\"}/>;
+        const node8 = <AutoImportedMainLink className={\\"h i j e\\"}/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
@@ -198,6 +232,15 @@ const node7 = <TheMainLink />;
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
         Array [
+          Object {
+            "file": "file1.tsx",
+            "line": 1,
+            "message": "Functions in style objects requires runtime or statically declared themes",
+            "severity": "info",
+            "source": "export function MainLink(props: any) {
+            return <a {...props} />;
+        }",
+          },
           Object {
             "file": "file1.tsx",
             "line": 1,
@@ -222,8 +265,8 @@ const node7 = <TheMainLink />;
             "source": "Link4",
           },
           Object {
-            "file": "file4.tsx",
-            "line": 10,
+            "file": "file5.tsx",
+            "line": 11,
             "message": "Unable to determine static component/element name",
             "severity": "info",
             "source": "c",

@@ -113,11 +113,17 @@ export type StaticTheme = {
 
 type StaticThemes = { [id: string]: StaticTheme } | undefined;
 
+type AutoImportedModule = {
+  importPath: string;
+  importName: string;
+};
+
 type TransformerContext = {
   program: ts.Program;
   glitz: GlitzServer;
   passNumber: number;
   currentFile: ts.SourceFile;
+  autoImportedModules: AutoImportedModule[];
   currentNode: ts.Node;
   currentFileShouldBeStatic: boolean;
   staticStyledComponents: StaticStyledComponents;
@@ -195,6 +201,7 @@ export function transformer(
           passNumber: 1,
           staticStyledComponents,
           currentFile: file,
+          autoImportedModules: [],
           currentNode: file,
           currentFileShouldBeStatic: !!file.statements.find(s => hasComment(s, glitzComments.allStatic)),
           tsContext: context,
@@ -808,13 +815,19 @@ function importDeclaration(
         ]),
       );
     }
-    const importStmt = factory.createImportDeclaration(
-      undefined,
-      undefined,
-      importClause,
-      factory.createStringLiteral(importPath),
-    );
-    injectTopLevelNode(importStmt, transformerContext);
+    if (!transformerContext.autoImportedModules.find(m => m.importPath === importPath && m.importName === importName)) {
+      transformerContext.autoImportedModules.push({
+        importPath,
+        importName,
+      });
+      const importStmt = factory.createImportDeclaration(
+        undefined,
+        undefined,
+        importClause,
+        factory.createStringLiteral(importPath),
+      );
+      injectTopLevelNode(importStmt, transformerContext);
+    }
     return importName;
   }
   return undefined;
