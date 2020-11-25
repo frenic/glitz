@@ -1259,6 +1259,7 @@ test('it bails if a declared component is used outside of JSX', () => {
 import { styled } from '@glitz/react';
 function MyComponent(props: {}) {
     const X = <Styled3 />;
+    const Y = <Styled3>hello</Styled3>;
     (window as any).exposeComponent = { x: Styled1, y: Styled3 };
     return <><Styled1 id="my-id" css={{ width: '100%' }}/><Styled2 /><X /><Styled4 /></>;
 }
@@ -1286,6 +1287,7 @@ const Styled4 = styled.div({
         "import { styled } from '@glitz/react';
         function MyComponent(props) {
             const X = <Styled3 />;
+            const Y = <Styled3>hello</Styled3>;
             window.exposeComponent = { x: Styled1, y: Styled3 };
             return <><Styled1 id=\\"my-id\\" css={{ width: '100%' }}/><Styled2 /><X /><div className={\\"d\\"} data-glitzname=\\"Styled4\\"/></>;
         }
@@ -1312,21 +1314,21 @@ const Styled4 = styled.div({
         Array [
           Object {
             "file": "file1.tsx",
-            "line": 4,
+            "line": 5,
             "message": "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
             "severity": "info",
             "source": "(window as any).exposeComponent = { x: Styled1, y: Styled3 };",
           },
           Object {
             "file": "file1.tsx",
-            "line": 14,
+            "line": 15,
             "message": "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
             "severity": "error",
             "source": "Styled2.displayName = 'Styled2';",
           },
           Object {
             "file": "file1.tsx",
-            "line": 4,
+            "line": 5,
             "message": "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
             "severity": "info",
             "source": "(window as any).exposeComponent = { x: Styled1, y: Styled3 };",
@@ -1430,6 +1432,97 @@ const DeepStyled = styled.div({
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:black}"`);
   });
+});
+
+test('injects theme usage correctly', () => {
+  const code = {
+    'themes.ts': `
+export const staticThemes = [{
+  id: 'black',
+  margin: { s: '10px', l: '20px' }
+}];
+`,
+    'file1.tsx': `
+import * as React from 'react';
+import { styled } from '@glitz/react';
+
+const translate: any = () => null;
+
+export function Customer() {
+  return (
+    <Form>
+      <FirstName name="given_name" css={{ gridColumnStart: 'span 2' }}>
+        {translate(t => t.customer.firstName)}
+      </FirstName>
+
+      <AlternativeShippingAddress>Alternativ adress</AlternativeShippingAddress>
+    </Form>
+  );
+}
+
+const Form = styled.form({
+  display: 'grid',
+  grid: {
+    template: {
+      columns: '1fr 1fr 1fr 1fr',
+    },
+  },
+  columnGap: t => t.margin.l,
+  rowGap: t => t.margin.l,
+});
+
+const FirstName = styled.input();
+
+function AlternativeShippingAddress(props: any) {
+  return (
+    <styled.Span css={{ marginLeft: t => t.margin.s }}>{props.children}</styled.Span>
+  );
+}
+`,
+  };
+
+  expectEqual(
+    compile(code, { staticThemesFile: 'themes.ts' }),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import * as React from 'react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import(\\"./themes\\");
+        import { styled } from '@glitz/react';
+        const translate = () => null;
+        export function Customer() {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            return (<form className={\\"a c d e\\"} data-glitzname=\\"Form\\">
+              <input name=\\"given_name\\" className={\\"f\\"} data-glitzname=\\"FirstName\\">
+                {translate(t => t.customer.firstName)}
+              </input>
+
+              <AlternativeShippingAddress>Alternativ adress</AlternativeShippingAddress>
+            </form>);
+        }
+        const Form = /*#__PURE__*/ styled.form({
+            display: 'grid',
+            grid: {
+                template: {
+                    columns: '1fr 1fr 1fr 1fr',
+                },
+            },
+            columnGap: t => t.margin.l,
+            rowGap: t => t.margin.l,
+        });
+        const FirstName = /*#__PURE__*/ styled.input();
+        function AlternativeShippingAddress(props) {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            return (<span className={\\"b\\"} data-glitzname=\\"styled.Span\\">{props.children}</span>);
+        }
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{display:grid}.b{margin-left:10px}.c{row-gap:20px}.d{column-gap:20px}.e{grid-template-columns:1fr 1fr 1fr 1fr}.f{grid-column-start:span 2}"`,
+      );
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
 });
 
 test('bails on first level styled element inside extended components', () => {

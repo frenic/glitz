@@ -142,6 +142,14 @@ type TransformerContext = {
    */
   transformations: Map<ts.Node, ts.Node | ts.Node[]>;
   /**
+   * This map is added to when a transformation in `transformations` is used. Note that
+   * we don't remove from `transformations` because that would cause a transformation
+   * in an early pass to get removed by a later pass.
+   * We check the size of this map against the size of `transformations` to know if
+   * all transformations are applied.
+   */
+  appliedTransformations: Map<ts.Node, ts.Node | ts.Node[]>;
+  /**
    * This can be used as a way of setting flags to make sure that we don't run the same
    * transformations multiple times.
    */
@@ -193,6 +201,7 @@ export function transformer(
           currentFileUsesGlitzThemes: false,
           currentFileHasImportedUseTheme: false,
           transformations: new Map<ts.Node, ts.Node | ts.Node[]>(),
+          appliedTransformations: new Map<ts.Node, ts.Node | ts.Node[]>(),
           nodeFlags: new Map<ts.Node, string[]>(),
         },
         options,
@@ -238,7 +247,7 @@ export function transformer(
       // on the second pass.
       if (
         staticStyledComponents.symbolsWithReferencesOutsideJsx.size !== 0 ||
-        transformerContext.transformations.size !== 0
+        transformerContext.transformations.size > transformerContext.appliedTransformations.size
       ) {
         transformedNode = visitNodeAndChildren(firstPassTransformedFile, context, transformerContext);
       }
@@ -564,6 +573,10 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
             }
           }
         }
+      } else if (jsxTagSymbol && staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)) {
+        // Since usage outside of JSX is determined in later passes we need to reset the node when
+        // we detect this, since the earlier passes will have happily set a transformation for it
+        transformerContext.transformations.set(node, node);
       }
     }
   }
@@ -614,12 +627,16 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
           );
         }
       }
+    } else if (jsxTagSymbol && staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol)) {
+      // Since usage outside of JSX is determined in later passes we need to reset the node when
+      // we detect this, since the earlier passes will have happily set a transformation for it
+      transformerContext.transformations.set(node, node);
     }
   }
 
   if (!isFirstPass && transformerContext.transformations.has(originalNode)) {
-    const previouslyTransformed = transformerContext.transformations.get(originalNode);
-    transformerContext.transformations.delete(originalNode);
+    const previouslyTransformed = transformerContext.transformations.get(originalNode)!;
+    transformerContext.appliedTransformations.set(originalNode, previouslyTransformed);
     return previouslyTransformed;
   }
 
@@ -2130,7 +2147,10 @@ function analyzeEvaluationResult(
       if (jsxElement) {
         const originalNode = ts.getOriginalNode(jsxElement);
         if (transformerContext.transformations.has(originalNode)) {
-          transformerContext.transformations.delete(originalNode);
+          transformerContext.transformations.set(originalNode, originalNode);
+        }
+        if (transformerContext.appliedTransformations.has(originalNode)) {
+          transformerContext.appliedTransformations.set(originalNode, originalNode);
         }
       }
     }
