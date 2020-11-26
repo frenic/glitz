@@ -2246,7 +2246,7 @@ function isEvaluableStyle(object: any, hasStaticThemes: boolean, allowTernaries 
     }
     for (const key in object) {
       const value = object[key];
-      if (ts.isConditionalExpression(value as any)) {
+      if (isNode(value) && ts.isConditionalExpression(value)) {
         return allowTernaries;
       }
       if (isRequiresRuntimeResult(value)) {
