@@ -623,6 +623,103 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
   );
 });
 
+test('does not inject useGlitzTheme inside functions inside a component', () => {
+  const code = {
+    'themes.ts': `
+export const staticThemes = [{
+  id: 'black',
+  color: 'black',
+  backgroundColor: 'lightblue',
+}];
+`,
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+function Items1() {
+  const items = [1, 2, 3];
+  return (
+    <>
+      {items.map(i => <Item>{i}</Item>)}
+    </>
+  );
+}
+
+function Items2() {
+  const items = [1, 2, 3];
+  if ((window as any).someThing) {
+    return null;
+  } else {
+    return (
+      <>
+        {items.map(i => <Item>{i}</Item>)}
+      </>
+    );
+  }
+}
+
+function Items3() {
+  const items = [1, 2, 3];
+  const itemsJsx = items.map(function (i) { return <Item>{i}</Item>; });
+  return (
+    <>
+      {itemsJsx}
+    </>
+  );
+}
+
+const Item = styled.div({
+  backgroundColor: t => t.backgroundColor,
+  color: t => t.color,
+});
+`,
+  };
+
+  expectEqual(
+    compile(code, { staticThemesFile: 'themes.ts' }),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import(\\"./themes\\");
+        function Items1() {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            const items = [1, 2, 3];
+            return (<>
+              {items.map(i => <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>)}
+            </>);
+        }
+        function Items2() {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            const items = [1, 2, 3];
+            if (window.someThing) {
+                return null;
+            }
+            else {
+                return (<>
+                {items.map(i => <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>)}
+              </>);
+            }
+        }
+        function Items3() {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            const items = [1, 2, 3];
+            const itemsJsx = items.map(function (i) { return <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>; });
+            return (<>
+              {itemsJsx}
+            </>);
+        }
+        const Item = /*#__PURE__*/ styled.div({
+            backgroundColor: t => t.backgroundColor,
+            color: t => t.color,
+        });
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(`".a{color:black}.b{background-color:lightblue}"`);
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+  );
+});
+
 test('bails if it finds a comment that it should skip', () => {
   const code = {
     'file1.tsx': `

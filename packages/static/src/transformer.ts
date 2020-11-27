@@ -859,16 +859,20 @@ function injectTopLevelNode(node: ts.Node | ts.Node[], transformerContext: Trans
 // and return the symbol for it. Used to detect if JSX is inside a component that has been
 // composed.
 function getComponentSymbol(node: ts.Node, typeChecker: ts.TypeChecker): ts.Symbol | undefined {
-  if (!node || ts.isSourceFile(node)) {
+  const componentNode = getComponentNode(node);
+  if (!componentNode) {
     return undefined;
   }
-  if (ts.isFunctionDeclaration(node) && node.name) {
-    return typeChecker.getSymbolAtLocation(node.name);
+  if (ts.isFunctionDeclaration(componentNode) && componentNode.name) {
+    return typeChecker.getSymbolAtLocation(componentNode.name);
   }
-  if ((ts.isFunctionExpression(node) || ts.isArrowFunction(node)) && ts.isVariableDeclaration(node.parent)) {
-    return typeChecker.getSymbolAtLocation(node.parent.name);
+  if (
+    (ts.isFunctionExpression(componentNode) || ts.isArrowFunction(node)) &&
+    ts.isVariableDeclaration(componentNode.parent)
+  ) {
+    return typeChecker.getSymbolAtLocation(componentNode.parent.name);
   }
-  return getComponentSymbol(node.parent, typeChecker);
+  return undefined;
 }
 
 // For any node inside a component, traverse up until we find a component declaration
@@ -880,10 +884,48 @@ function getComponentNode(
   if (!node || ts.isSourceFile(node)) {
     return undefined;
   }
-  if (isFunction(node)) {
+  if (isFunction(node) && isComponent(node)) {
     return node;
   }
   return getComponentNode(node.parent);
+}
+
+function isComponent(func: ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression) {
+  const hasJsx = containsJsx(func);
+  if (!hasJsx) {
+    return false;
+  }
+  const parentFunction = getParentFunction(func);
+  if (parentFunction && isComponent(parentFunction)) {
+    return false;
+  }
+  return true;
+}
+
+function getParentFunction(node: ts.Node) {
+  let parent = node.parent;
+  while (parent) {
+    if (isFunction(parent)) {
+      return parent;
+    }
+    parent = parent.parent;
+  }
+  return undefined;
+}
+
+function containsJsx(func: ts.Node) {
+  let hasJsx = false;
+  ts.forEachChild(func, child => {
+    if (ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child) || ts.isJsxFragment(child)) {
+      hasJsx = true;
+    } else if (!isFunction(child)) {
+      const childContainsJSX = containsJsx(child);
+      if (childContainsJSX) {
+        hasJsx = true;
+      }
+    }
+  });
+  return hasJsx;
 }
 
 // Detects if the node is inside a component that is declared inline inside a call to styled, such as:
