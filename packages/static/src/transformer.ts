@@ -1538,9 +1538,15 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         if (isRequiresRuntimeResult(whenTrue)) {
           return whenTrue;
         }
+        if (isFunctionWithTsNode(whenTrue)) {
+          return requiresRuntimeResult('Functions in style objects cannot be combined with ternaries', value);
+        }
         const whenFalse = evaluate(value.whenFalse, transformerContext.program);
         if (isRequiresRuntimeResult(whenFalse)) {
           return whenFalse;
+        }
+        if (isFunctionWithTsNode(whenFalse)) {
+          return requiresRuntimeResult('Functions in style objects cannot be combined with ternaries', value);
         }
 
         const ternaryString = value.getText();
@@ -2402,6 +2408,14 @@ function getSeverity(node: ts.Node, transformerContext: TransformerContext): Sev
     node = node.parent;
   }
   return severity;
+}
+
+function isFunctionWithTsNode(o: unknown): o is FunctionWithTsNode {
+  if (!o || typeof o !== 'function') {
+    return false;
+  }
+  const func = o as FunctionWithTsNode;
+  return !!func.tsNode;
 }
 
 function isFunction(node: ts.Node): node is ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression {

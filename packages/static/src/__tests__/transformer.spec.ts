@@ -2894,7 +2894,7 @@ const node2 = <Styled2 />
   );
 });
 
-test('some unknown failing test', () => {
+test('correctly handles functions in conditionals', () => {
   const code = {
     'themes.ts': `
 export const staticThemes = [{
@@ -2922,6 +2922,13 @@ const Price = styled(({ current, original }: PropType) => {
       >
         {current} kr
       </CurrentPrice>
+      <CurrentPrice
+        css={{
+          color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
+        }}
+      >
+        {current} :-
+      </CurrentPrice>
       {typeof original === 'number' && <OriginalPrice>{original} kr</OriginalPrice>}
     </Base>
   );
@@ -2947,10 +2954,141 @@ const node = <Price current={100} />
   expectEqual(
     compile(code, { staticThemesFile: 'themes.ts' }),
     result => {
-      expect(result['file1.jsx']).toMatchInlineSnapshot();
-      expect(result['style.css']).toMatchInlineSnapshot();
+      expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import(\\"./themes\\");
+        import * as React from 'react';
+        const Price = /*#__PURE__*/ styled(({ current, original }) => {
+            return (<Base>
+              <CurrentPrice css={{
+                color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
+            }}>
+                {current} kr
+              </CurrentPrice>
+              <CurrentPrice css={{
+                color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
+            }}>
+                {current} :-
+              </CurrentPrice>
+              {typeof original === 'number' && <span className={\\"b c\\"} data-glitzname=\\"OriginalPrice\\">{original} kr</span>}
+            </Base>);
+        });
+        export default Price;
+        const Base = /*#__PURE__*/ styled.div({});
+        const CurrentPrice = /*#__PURE__*/ styled.span({
+            fontWeight: 'bold',
+        });
+        const OriginalPrice = /*#__PURE__*/ styled.span({
+            marginLeft: t => t.margin.xs,
+            textDecoration: 'line-through',
+        });
+        const node = <Price current={100}/>;
+        "
+      `);
+      expect(result['style.css']).toMatchInlineSnapshot(
+        `".a{font-weight:bold}.b{text-decoration:line-through}.c{margin-left:1}"`,
+      );
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(),
+    diagnostics =>
+      expect(diagnostics).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 9,
+              "message": "Static expressions does not support spread",
+              "severity": "info",
+              "source": "({ current, original }: PropType) => {
+          return (
+            <Base>
+              <CurrentPrice
+                css={{
+                  color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
+                }}
+              >
+                {current} kr
+              </CurrentPrice>
+              <CurrentPrice
+                css={{
+                  color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
+                }}
+              >
+                {current} :-
+              </CurrentPrice>
+              {typeof original === 'number' && <OriginalPrice>{original} kr</OriginalPrice>}
+            </Base>
+          );
+        }",
+            },
+            "line": 9,
+            "message": "Unable to statically evaluate to a component or element",
+            "severity": "info",
+            "source": "styled(({ current, original }: PropType) => {
+          return (
+            <Base>
+              <CurrentPrice
+                css={{
+                  color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
+                }}
+              >
+                {current} kr
+              </CurrentPrice>
+              <CurrentPrice
+                css={{
+                  color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
+                }}
+              >
+                {current} :-
+              </CurrentPrice>
+              {typeof original === 'number' && <OriginalPrice>{original} kr</OriginalPrice>}
+            </Base>
+          );
+        })",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 14,
+              "message": "Functions in style objects cannot be combined with ternaries",
+              "severity": "info",
+              "source": "typeof original === 'number' && current !== original ? t => t.negative.color : undefined",
+            },
+            "line": 12,
+            "message": "Evaluation of theme function requires runtime",
+            "severity": "info",
+            "source": "<CurrentPrice
+                css={{
+                  color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
+                }}
+              >
+                {current} kr
+              </CurrentPrice>",
+          },
+          Object {
+            "file": "file1.tsx",
+            "innerDiagnostic": Object {
+              "file": "file1.tsx",
+              "line": 21,
+              "message": "Could not determine a static value for: original",
+              "severity": "info",
+              "source": "original",
+            },
+            "line": 19,
+            "message": "Evaluation of theme function requires runtime",
+            "severity": "info",
+            "source": "<CurrentPrice
+                css={{
+                  color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
+                }}
+              >
+                {current} :-
+              </CurrentPrice>",
+          },
+        ]
+      `),
   );
 });
 
