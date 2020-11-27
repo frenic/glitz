@@ -2894,6 +2894,66 @@ const node2 = <Styled2 />
   );
 });
 
+test('some unknown failing test', () => {
+  const code = {
+    'themes.ts': `
+export const staticThemes = [{
+  id: 'something',
+  negative: { color: 'red' },
+  margin: { xs: 1 },
+}];
+`,
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+import * as React from 'react';
+
+type PropType = {
+  current: number;
+  original?: number;
+};
+
+const Price = styled(({ current, original }: PropType) => {
+  return (
+    <Base>
+      <CurrentPrice
+        css={{
+          color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
+        }}
+      >
+        {current} kr
+      </CurrentPrice>
+      {typeof original === 'number' && <OriginalPrice>{original} kr</OriginalPrice>}
+    </Base>
+  );
+});
+
+export default Price;
+
+const Base = styled.div({});
+
+const CurrentPrice = styled.span({
+  fontWeight: 'bold',
+});
+
+const OriginalPrice = styled.span({
+  marginLeft: t => t.margin.xs,
+  textDecoration: 'line-through',
+});
+
+const node = <Price current={100} />
+`,
+  };
+
+  expectEqual(
+    compile(code, { staticThemesFile: 'themes.ts' }),
+    result => {
+      expect(result['file1.jsx']).toMatchInlineSnapshot();
+      expect(result['style.css']).toMatchInlineSnapshot();
+    },
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(),
+  );
+});
+
 function expectEqual(
   results: readonly [Code, TransformerDiagnostics],
   test: (result: Code) => void,
