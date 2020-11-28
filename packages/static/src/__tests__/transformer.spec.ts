@@ -2961,17 +2961,15 @@ const node = <Price current={100} />
         import * as React from 'react';
         const Price = /*#__PURE__*/ styled(({ current, original }) => {
             return (<Base>
-              <CurrentPrice css={{
-                color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
-            }}>
+              <span className={typeof original === 'number' && current !== original ? \\"c\\" : \\"\\"} data-glitzname=\\"CurrentPrice\\">
                 {current} kr
-              </CurrentPrice>
+              </span>
               <CurrentPrice css={{
                 color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
             }}>
                 {current} :-
               </CurrentPrice>
-              {typeof original === 'number' && <span className={\\"b c\\"} data-glitzname=\\"OriginalPrice\\">{original} kr</span>}
+              {typeof original === 'number' && <span className={\\"b d\\"} data-glitzname=\\"OriginalPrice\\">{original} kr</span>}
             </Base>);
         });
         export default Price;
@@ -2987,7 +2985,7 @@ const node = <Price current={100} />
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{font-weight:bold}.b{text-decoration:line-through}.c{margin-left:1}"`,
+        `".a{font-weight:bold}.b{text-decoration:line-through}.c{color:red}.d{margin-left:1}"`,
       );
     },
     diagnostics =>
@@ -3046,26 +3044,6 @@ const node = <Price current={100} />
             </Base>
           );
         })",
-          },
-          Object {
-            "file": "file1.tsx",
-            "innerDiagnostic": Object {
-              "file": "file1.tsx",
-              "line": 14,
-              "message": "Functions in style objects cannot be combined with ternaries",
-              "severity": "info",
-              "source": "typeof original === 'number' && current !== original ? t => t.negative.color : undefined",
-            },
-            "line": 12,
-            "message": "Evaluation of theme function requires runtime",
-            "severity": "info",
-            "source": "<CurrentPrice
-                css={{
-                  color: typeof original === 'number' && current !== original ? t => t.negative.color : undefined,
-                }}
-              >
-                {current} kr
-              </CurrentPrice>",
           },
           Object {
             "file": "file1.tsx",

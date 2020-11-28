@@ -1534,19 +1534,29 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
         }
         conditionalFound = true;
 
-        const whenTrue = evaluate(value.whenTrue, transformerContext.program);
+        let whenTrue = evaluate(value.whenTrue, transformerContext.program);
         if (isRequiresRuntimeResult(whenTrue)) {
           return whenTrue;
         }
         if (isFunctionWithTsNode(whenTrue)) {
-          return requiresRuntimeResult('Functions in style objects cannot be combined with ternaries', value);
+          const [sameForAll, whenTrueValue] = evaluatesToSameForAllStaticThemes(whenTrue, transformerContext);
+          if (sameForAll) {
+            whenTrue = whenTrueValue;
+          } else {
+            return requiresRuntimeResult('Functions in style objects cannot be combined with ternaries', value);
+          }
         }
         const whenFalse = evaluate(value.whenFalse, transformerContext.program);
         if (isRequiresRuntimeResult(whenFalse)) {
           return whenFalse;
         }
         if (isFunctionWithTsNode(whenFalse)) {
-          return requiresRuntimeResult('Functions in style objects cannot be combined with ternaries', value);
+          const [sameForAll, whenFalseValue] = evaluatesToSameForAllStaticThemes(whenFalse, transformerContext);
+          if (sameForAll) {
+            whenTrue = whenFalseValue;
+          } else {
+            return requiresRuntimeResult('Functions in style objects cannot be combined with ternaries', value);
+          }
         }
 
         const ternaryString = value.getText();
@@ -1799,6 +1809,33 @@ function getClassNameExpression(style: EvaluatedStyle | EvaluatedStyle[], transf
       }
     }
   }
+}
+
+function evaluatesToSameForAllStaticThemes(
+  func: FunctionWithTsNode,
+  transformerContext: TransformerContext,
+): readonly [boolean, unknown] {
+  if (transformerContext.staticThemes) {
+    let hasEvaluatedOnce = false;
+    let evaluationResult: any;
+    for (const staticThemeId of Object.keys(transformerContext.staticThemes)) {
+      try {
+        const result = func(transformerContext.staticThemes[staticThemeId]);
+        if (!hasEvaluatedOnce) {
+          evaluationResult = result;
+          hasEvaluatedOnce = true;
+        } else {
+          if (deepEquals(result, evaluationResult)) {
+            return [false, undefined];
+          }
+        }
+      } catch (e) {
+        return [false, undefined];
+      }
+    }
+    return [true, evaluationResult];
+  }
+  return [false, undefined];
 }
 
 // This is used to create a condition to be used in a ternary to render
@@ -2469,4 +2506,59 @@ function isNode(obj: unknown): obj is ts.Node {
   }
   const node = obj as ts.Node;
   return !!node.kind && !!node.pos;
+}
+
+function deepEquals(o1: unknown, o2: unknown) {
+  if (o1 === o2) {
+    return true;
+  }
+  if (typeof o1 !== typeof o2) {
+    return false;
+  }
+  if (typeof o1 === 'object' && typeof o2 === 'object') {
+    if (Array.isArray(o1) || Array.isArray(o2)) {
+      if (!Array.isArray(o1) || !Array.isArray(o2)) {
+        return false;
+      }
+
+      if (o1.length !== o2.length) {
+        return false;
+      }
+
+      for (let i = 0; i < o1.length; i++) {
+        const elemEquals = deepEquals(o1[i], o2[i]);
+        if (!elemEquals) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (o1 instanceof Date || o2 instanceof Date) {
+      if (!(o1 instanceof Date) || !(o2 instanceof Date)) {
+        return false;
+      }
+      return o1.valueOf() === o2.valueOf();
+    }
+
+    if (!o1 || !o2) {
+      return false;
+    }
+    const o1Keys = Object.keys(o1);
+    const o2Keys = Object.keys(o2);
+    if (!deepEquals(o1Keys, o2Keys)) {
+      return false;
+    }
+    for (const key of o1Keys) {
+      const elemEquals = deepEquals((o1 as any)[key], (o2 as any)[key]);
+      if (!elemEquals) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // If we end up here it's just data types left that can be compared with ===
+  // and we've already checked that.
+  return false;
 }
