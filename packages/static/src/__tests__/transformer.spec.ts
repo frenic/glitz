@@ -215,18 +215,18 @@ const node8 = <TheOtherMainLink />;
         const StyledLink = /*#__PURE__*/ styled(applyClassName(Link), {
             color: 'red',
         });
-        const node1 = <Link className={\\"g\\"}/>;
+        const node1 = <Link className={\\"f\\"}/>;
         const node2 = <AutoImportedLink1 className={\\"a\\"}/>;
         const node3 = <AutoImportedLink2 className={\\"b\\"}/>;
         const node4 = <ExportedStyledLink3 />;
         const node5 = <ExportedStyledLink4 />;
         const node6 = <Block />;
-        const node7 = <AutoImportedMainLink className={\\"h i j e\\"}/>;
-        const node8 = <AutoImportedMainLink className={\\"h i j e\\"}/>;
+        const node7 = <AutoImportedMainLink className={\\"g h i j\\"}/>;
+        const node8 = <AutoImportedMainLink className={\\"g h i j\\"}/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{color:ìnherit}.f{display:block}.g{color:red}.h:visited{color:inherit}.i:hover{color:inherit}.j:hover{text-decoration:underline}"`,
+        `".a{color:blue}.b{color:green}.c{color:yellow}.d{color:purple}.e{display:block}.f{color:red}.j{color:ìnherit}.g:visited{color:inherit}.h:hover{color:inherit}.i:hover{text-decoration:underline}"`,
       );
     },
     diagnostics =>
@@ -3068,6 +3068,69 @@ const node = <Price current={100} />
         ]
       `),
   );
+});
+
+test('can handle element like components individually', () => {
+  const code = {
+    'link.tsx': `
+import * as React from 'react';
+import { styled, applyClassName } from '@glitz/react';
+export function MainLink(props) {
+  return <a {...props}/>;
+}
+export default styled(applyClassName(MainLink));
+`,
+    'file1.tsx': `
+import * as React from 'react';
+import { styled } from '@glitz/react';
+import Link from './link';
+
+export function MainMenu(props: any) {
+  return (
+    <>
+      <RowLink />
+      <ColumnLink />
+    </>
+  );
+}
+
+const RowLink = styled(Link, {
+  display: 'flex',
+  flexDirection: 'row',
+});
+const ColumnLink = styled(Link, {
+  display: 'flex',
+  flexDirection: 'column',
+});
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import * as React from 'react';
+      import { MainLink as AutoImportedMainLink } from \\"./link\\";
+      import { styled } from '@glitz/react';
+      import Link from './link';
+      export function MainMenu(props) {
+          return (<>
+            <AutoImportedMainLink className={\\"a b\\"}/>
+            <AutoImportedMainLink className={\\"c b\\"}/>
+          </>);
+      }
+      const RowLink = /*#__PURE__*/ styled(Link, {
+          display: 'flex',
+          flexDirection: 'row',
+      });
+      const ColumnLink = /*#__PURE__*/ styled(Link, {
+          display: 'flex',
+          flexDirection: 'column',
+      });
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(
+      `".a{flex-direction:row}.b{display:flex}.c{flex-direction:column}"`,
+    );
+  });
 });
 
 function expectEqual(

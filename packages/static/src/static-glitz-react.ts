@@ -11,12 +11,13 @@ import {
   StaticStyled,
   Style,
   Styles,
+  isStaticElement,
 } from './shared';
 
 function createStaticDecorator(styles: Style[]): StaticDecorator {
   return Object.assign(
-    (arg1?: Styles | StaticComponent | ReactFunctionComponent, arg2?: Styles): any => {
-      return isStaticComponent(arg1)
+    (arg1?: Styles | StaticComponent | ReactFunctionComponent | StaticElement, arg2?: Styles): any => {
+      return isStaticComponent(arg1) || isStaticElement(arg1)
         ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle([arg2])])
         : typeof arg1 === 'object' || isStaticDecorator(arg1)
         ? createStaticStyled([...styles, ...cleanStyle([arg1])])
@@ -30,8 +31,8 @@ function createStaticDecorator(styles: Style[]): StaticDecorator {
 
 function createStaticStyled(styles: Style[]): StaticStyled {
   return Object.assign(
-    (arg1?: Styles | StaticComponent | ReactFunctionComponent, ...rest: Styles[]): any => {
-      return isStaticComponent(arg1)
+    (arg1?: Styles | StaticComponent | ReactFunctionComponent | StaticElement, ...rest: Styles[]): any => {
+      return isStaticComponent(arg1) || isStaticElement(arg1)
         ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle(rest)])
         : typeof arg1 === 'object' || isStaticDecorator(arg1)
         ? createStaticDecorator([...styles, ...cleanStyle([arg1]), ...cleanStyle(rest)])
