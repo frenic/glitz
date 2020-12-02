@@ -169,12 +169,12 @@ export function transformer(
 ): ts.TransformerFactory<ts.SourceFile> {
   let staticThemes: StaticThemes;
   if (options.staticThemesFile) {
-    staticThemes = getStaticThemes(options.staticThemesFile, program);
+    staticThemes = getStaticThemes(options.staticThemesFile, program.getSourceFile(options.staticThemesFile), program);
   }
 
   return (context: ts.TransformationContext) => (file: ts.SourceFile) => {
     if (file.fileName === options.staticThemesFile) {
-      staticThemes = getStaticThemes(options.staticThemesFile, program);
+      staticThemes = getStaticThemes(options.staticThemesFile, file, program);
     }
     if (file.fileName.endsWith('.tsx')) {
       if (file.fileName in evaluationCache) {
@@ -1449,11 +1449,10 @@ function rewriteFunctionToReturnClassNamesIfPossible(
 //   Object.assign({}, theme, {isCompact: false, id: theme.id + 'desktop'}),
 //   Object.assign({}, theme, {isCompact: true, id: theme.id + 'mobile'}),
 // ], []);
-function getStaticThemes(staticThemesFile: string, program: ts.Program) {
-  const tsStaticThemesFile = program.getSourceFile(staticThemesFile);
-  if (tsStaticThemesFile) {
+function getStaticThemes(fileName: string, source: ts.SourceFile | undefined, program: ts.Program) {
+  if (source) {
     const typeChecker = program.getTypeChecker();
-    const moduleSymbol = typeChecker.getSymbolAtLocation(tsStaticThemesFile);
+    const moduleSymbol = typeChecker.getSymbolAtLocation(source);
     if (moduleSymbol) {
       const exports = typeChecker.getExportsOfModule(moduleSymbol);
       const themesSymbol = exports.find(e => e.escapedName === staticThemesName);
@@ -1468,12 +1467,12 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
             if (diagnostics) {
               message += ` in ${diagnostics.file}:${diagnostics.line}`;
             }
-            throw new Error(`Could not evaluate static themes in the file '${staticThemesFile}': ${message}`);
+            throw new Error(`Could not evaluate static themes in the file '${fileName}': ${message}`);
           }
 
           if (!Array.isArray(staticThemes)) {
             throw new Error(
-              `The exported variable '${staticThemesName}' in the file '${staticThemesFile}' must be an array of theme objects`,
+              `The exported variable '${staticThemesName}' in the file '${fileName}' must be an array of theme objects`,
             );
           }
 
@@ -1481,7 +1480,7 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
           for (const theme of staticThemes) {
             if (!theme || !theme.id || theme.id in staticThemesMap) {
               throw new Error(
-                `The exported variable '${staticThemesName}' in the file '${staticThemesFile}' must be an array of theme objects, and the theme objects must have a property called 'id' which must have a unique value`,
+                `The exported variable '${staticThemesName}' in the file '${fileName}' must be an array of theme objects, and the theme objects must have a property called 'id' which must have a unique value`,
               );
             }
             staticThemesMap[theme.id] = theme;
@@ -1489,19 +1488,17 @@ function getStaticThemes(staticThemesFile: string, program: ts.Program) {
           return staticThemesMap;
         } else {
           throw new Error(
-            `The exported variable '${staticThemesName}' in the file '${staticThemesFile}' must be a variable declaration like 'export const ${staticThemesName} = [...];'`,
+            `The exported variable '${staticThemesName}' in the file '${fileName}' must be a variable declaration like 'export const ${staticThemesName} = [...];'`,
           );
         }
       } else {
-        throw new Error(
-          `Could not find an exported variable called '${staticThemesName}' in the file '${staticThemesFile}'`,
-        );
+        throw new Error(`Could not find an exported variable called '${staticThemesName}' in the file '${fileName}'`);
       }
     } else {
       throw new Error('Could not find a TS symbol for the compile time/static themes file');
     }
   } else {
-    throw new Error(`Could not locate the file for compile time/static themes, looked for: '${staticThemesFile}'`);
+    throw new Error(`Could not locate the file for compile time/static themes, looked for: '${fileName}'`);
   }
 }
 
