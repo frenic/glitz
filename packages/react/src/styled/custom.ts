@@ -15,7 +15,7 @@ import createDecorator, { StyledDecorator, isStyle } from './decorator';
 import { WithoutCompose, StyledForwardStyle } from './forward-style';
 import { StyledElementProps } from './predefined';
 
-export type Styles = Style | readonly Style[] | StyledDecorator;
+export type Styles = Style | readonly Style[] | StyledDecorator | false | undefined;
 
 export interface Styled {
   <TProps = {}>(component: FunctionComponent<TProps>, ...styles: Styles[]): StyledComponent<WithoutRefProp<TProps>>;
@@ -83,9 +83,7 @@ function creator<TProps>(
     | Styles,
   ...arg2: Styles[]
 ): StyledComponent<TProps> | StyledDecorator {
-  return typeof arg1 === 'undefined' || isStyle(arg1)
-    ? createDecorator([arg1, arg2])
-    : createComponent<TProps>(arg1, arg2);
+  return isStyle(arg1) ? createDecorator([arg1, arg2]) : createComponent<TProps>(arg1, arg2);
 }
 
 export const createStyled: Styled = creator;

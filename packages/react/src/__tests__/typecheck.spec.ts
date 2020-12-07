@@ -21,21 +21,25 @@ test('typings', () => {
   `);
   expect(errors[3]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 235:24 - Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
-      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
+      Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly Style[] | StyledDecorator'."
   `);
-  expect(errors[4]).toMatchInlineSnapshot(
-    `"packages/react/src/__tests__/__fixtures__/typings.tsx 237:13 - Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."`,
-  );
+  expect(errors[4]).toMatchInlineSnapshot(`
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 237:11 - Argument of type '{ color: number; }' is not assignable to parameter of type 'Styles'.
+      Types of property 'color' are incompatible.
+        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+  `);
   expect(errors[5]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 239:20 - No overload matches this call.
       The last overload gave the following error.
         Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
-          Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
+          Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly Style[] | StyledDecorator'."
   `);
   expect(errors[6]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 241:9 - No overload matches this call.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 241:7 - No overload matches this call.
       The last overload gave the following error.
-        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+        Argument of type '{ color: number; }' is not assignable to parameter of type 'Styles'.
+          Types of property 'color' are incompatible.
+            Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[7]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 243:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
@@ -50,12 +54,14 @@ test('typings', () => {
     "packages/react/src/__tests__/__fixtures__/typings.tsx 247:51 - No overload matches this call.
       The last overload gave the following error.
         Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
-          Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Styles'."
+          Object literal may only specify known properties, and 'unknownProperty' does not exist in type 'Style | readonly Style[] | StyledDecorator'."
   `);
   expect(errors[10]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 249:40 - No overload matches this call.
+    "packages/react/src/__tests__/__fixtures__/typings.tsx 249:38 - No overload matches this call.
       The last overload gave the following error.
-        Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
+        Argument of type '{ color: number; }' is not assignable to parameter of type 'Styles'.
+          Types of property 'color' are incompatible.
+            Type 'number' is not assignable to type '\\"transparent\\" | \\"inherit\\" | (string & {}) | \\"-moz-initial\\" | \\"initial\\" | \\"revert\\" | \\"unset\\" | \\"aliceblue\\" | \\"antiquewhite\\" | \\"aqua\\" | \\"aquamarine\\" | \\"azure\\" | \\"beige\\" | \\"bisque\\" | ... 172 more ... | undefined'."
   `);
   expect(errors[11]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 251:7 - No overload matches this call.

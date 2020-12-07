@@ -219,7 +219,7 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorato
       | Styles,
     ...arg2: Styles[]
   ) {
-    if (!arg1) {
+    if (arguments.length === 0) {
       return style;
     }
 
@@ -233,9 +233,11 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorato
   return Object.assign(decorator, { [SECRET_GLITZ_PROPERTY]: DECORATOR_TYPE });
 }
 
-export function isStyle(arg: any): arg is Styles {
+export function isStyle(arg: unknown): arg is Styles {
   return (
-    arg[SECRET_GLITZ_PROPERTY] === DECORATOR_TYPE ||
+    arg === false ||
+    typeof arg === 'undefined' ||
+    (typeof arg === 'function' && (arg as StyledDecorator)[SECRET_GLITZ_PROPERTY] === DECORATOR_TYPE) ||
     (typeof arg === 'object' &&
       !isElementType(arg) &&
       !isElementLikeType(arg) &&
