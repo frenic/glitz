@@ -2032,12 +2032,13 @@ function injectImportUseGlitz(transformerContext: TransformerContext) {
     const parts = importPath.split('.');
     parts.splice(parts.length - 1, 1);
     importPath = parts.join('.');
-    const asyncThemeImport = factory.createExpressionStatement(
-      factory.createCallExpression(factory.createIdentifier('import'), undefined, [
-        factory.createStringLiteral(importPath),
-      ]),
+    const themeImport = factory.createImportDeclaration(
+      undefined,
+      undefined,
+      undefined,
+      factory.createStringLiteral(importPath),
     );
-    nodes.push(asyncThemeImport);
+    nodes.push(themeImport);
   }
   injectTopLevelNode(nodes, transformerContext);
 }

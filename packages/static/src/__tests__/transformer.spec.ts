@@ -518,7 +518,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import(\\"./themes\\");
+        import \\"./themes\\";
         function createSomeDecorator() {
             return /*#__PURE__*/ styled({ backgroundColor: 'blue' });
         }
@@ -680,7 +680,7 @@ const Item = styled.div({
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import(\\"./themes\\");
+        import \\"./themes\\";
         function Items1() {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             const items = [1, 2, 3];
@@ -1627,7 +1627,7 @@ function AlternativeShippingAddress(props: any) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import * as React from 'react';
         import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import(\\"./themes\\");
+        import \\"./themes\\";
         import { styled } from '@glitz/react';
         const translate = () => null;
         export function Customer() {
@@ -2316,7 +2316,7 @@ const node = <Styled1 />;
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import(\\"./themes\\");
+        import \\"./themes\\";
         const Styled1 = /*#__PURE__*/ styled.div({
             color: theme => theme.color,
         });
@@ -2731,7 +2731,7 @@ const Container = styled.div({
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import * as React from 'react';
         import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import(\\"./themes\\");
+        import \\"./themes\\";
         import { styled } from '@glitz/react';
         function Image(props) {
             return <img />;
@@ -2957,7 +2957,7 @@ const node = <Price current={100} />
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import(\\"./themes\\");
+        import \\"./themes\\";
         import * as React from 'react';
         const Price = /*#__PURE__*/ styled(({ current, original }) => {
             return (<Base>
