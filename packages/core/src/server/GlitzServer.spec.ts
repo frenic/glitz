@@ -412,6 +412,13 @@ describe('server', () => {
 
     expect(serverB.injectStyle({ color: 'red' })).toBe('a');
   });
+  it('recovers from minified hydration', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    server.hydrate('.b{color:#f00}@media(min-width: 768px){.a{color:#0f0}}');
+
+    expect(server.injectStyle({ color: 'red' })).toBe('c');
+  });
   it('gets markup', () => {
     const server = new GlitzServer<TestStyle>();
 

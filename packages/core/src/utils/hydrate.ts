@@ -5,7 +5,7 @@ const BLOCK_START_CODE = '{'.charCodeAt(0);
 const BLOCK_END_CODE = '}'.charCodeAt(0);
 const PLAIN_SELECTOR = /\.([\w]+)((?::.+)|(\[.+\]))?/;
 const KEYFRAMES_SELECTOR = /@keyframes (.+)/;
-const MEDIA_SELECTOR = /@media (.+)/;
+const MEDIA_SELECTOR = /@media[\s]?(.+)/;
 
 export function createHydrate<TInjector extends InjectorClient | InjectorServer>(
   getInjector: (media?: string | undefined) => TInjector,
