@@ -1,6 +1,6 @@
 {
   "name": "@glitz/static",
-  "version": "0.0.1-alpha.22",
+  "version": "0.0.1-alpha.23",
   "main": "./cjs/index.js",
   "types": "./types/index.d.ts",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "repository": "git@github.com:frenic/glitz.git",
   "bugs": "https://github.com/frenic/glitz/issues",
   "dependencies": {
-    "@glitz/core": "^3.0.0-alpha.18"
+    "@glitz/core": "^3.0.0-alpha.19"
   },
   "peerDependencies": {
     "typescript": "*"
