@@ -419,6 +419,13 @@ describe('server', () => {
 
     expect(server.injectStyle({ color: 'red' })).toBe('c');
   });
+  it('hydration handles special characters in string', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    server.hydrate(`.a:before{content:"{"}.b:after{content:"'{"}.c{color:red}`);
+
+    expect(server.injectStyle({ color: 'red' })).toBe('c');
+  });
   it('gets markup', () => {
     const server = new GlitzServer<TestStyle>();
 
