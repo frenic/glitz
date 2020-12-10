@@ -1,11 +1,11 @@
 import { GlitzClient, FeaturedProperties, ResolvedDeclarations, Style } from '..';
 
 interface TestStyle extends Style {
-  '@media (min-width: 100px)'?: Style;
-  '@media (min-width: 200px)'?: Style;
-  '@media (min-width: 1000px)'?: Style;
-  '@media (min-width: 768px)'?: Style;
-  '@media (min-width: 992px)'?: Style;
+  '@media (min-width: 100px)'?: TestStyle;
+  '@media (min-width: 200px)'?: TestStyle;
+  '@media (min-width: 1000px)'?: TestStyle;
+  '@media (min-width: 768px)'?: TestStyle;
+  '@media (min-width: 992px)'?: TestStyle;
 }
 
 beforeEach(() => {
@@ -213,20 +213,28 @@ describe('client', () => {
   });
   it('injects media rule', () => {
     const style = createStyle();
-    const media = createStyle('(min-width: 768px)');
+    const mediaA = createStyle('(min-width: 768px)');
+    const mediaB = createStyle('(min-width: 768px) and (min-width: 992px)');
     const client = new GlitzClient<TestStyle>();
 
     expect(client.injectStyle({ color: 'red' })).toBe('a');
     expect(client.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('c');
     expect(client.injectStyle({ '@media (min-width: 768px)': { ':hover': { color: 'red' } } })).toBe('d');
+    expect(client.injectStyle({ '@media (min-width: 768px)': { '@media (min-width: 992px)': { color: 'red' } } })).toBe(
+      'e',
+    );
 
     const sheet = style.sheet as CSSStyleSheet;
-    const mediaSheet = media.sheet as CSSStyleSheet;
+    const mediaSheetA = mediaA.sheet as CSSStyleSheet;
+    const mediaSheetB = mediaB.sheet as CSSStyleSheet;
 
     expect(sheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules).toHaveLength(2);
-    expect(mediaSheet.cssRules[0].cssText).toMatchInlineSnapshot(`".c {color: red;}"`);
+    expect(mediaSheetA.cssRules).toHaveLength(2);
+    expect(mediaSheetA.cssRules[0].cssText).toMatchInlineSnapshot(`".c {color: red;}"`);
+    expect(mediaSheetA.cssRules[1].cssText).toMatchInlineSnapshot(`".d:hover {color: red;}"`);
+    expect(mediaSheetB.cssRules).toHaveLength(1);
+    expect(mediaSheetB.cssRules[0].cssText).toMatchInlineSnapshot(`".e {color: red;}"`);
   });
   it('injects media elements in certain order', () => {
     const order = ['(min-width: 100px)', '(min-width: 200px)', '(min-width: 1000px)'];

@@ -14,6 +14,7 @@ import InjectorServer from '../server/InjectorServer';
 import { Transformer } from '../options';
 import { issueFormatter } from '../utils/debugging';
 import { ANIMATION_NAME, FONT_FAMILY } from './Injector';
+import { combineMediaQueries } from '../utils/format';
 
 type ResolvedStyle = { [key: string]: ResolvedValue | ResolvedDeclarations };
 
@@ -235,7 +236,11 @@ export function createStyleInjectors<TStyle extends Style>(
             value,
             theme,
             styleIndex,
-            identifier === MEDIA_IDENTIFIER ? property : media,
+            identifier === MEDIA_IDENTIFIER
+              ? media
+                ? combineMediaQueries(media, property.slice(7))
+                : property
+              : media,
             identifier === PSEUDO_IDENTIFIER || identifier === ATTRIBUTE_IDENTIFIER
               ? (selector ?? '') + property
               : selector,

@@ -70,19 +70,18 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
         // Injector for style elements without `media` is stored with an empty key. So if there's any reason to have
         // more than one of these in the future we need to change that part.
         const media = element.media;
-        let injector: InjectorClient;
 
         if (media) {
           if (!initialMediaSheet) {
             initialMediaSheet = element;
           }
           mediaSheets[media] = element;
-          injector = mediaInjectors[media] = new InjectorClient(element, classNameHash, keyframesHash);
+          mediaInjectors[media] = new InjectorClient(element, classNameHash, keyframesHash);
         } else {
-          injector = plain = new InjectorClient(element, classNameHash, keyframesHash);
+          plain = new InjectorClient(element, classNameHash, keyframesHash);
         }
 
-        hydrate(element.textContent!, injector);
+        hydrate(element.textContent!, media);
       }
 
       if (process.env.NODE_ENV !== 'production') {
@@ -108,7 +107,7 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
 
     if (streamedStyleElements) {
       for (const element of streamedStyleElements) {
-        hydrate(element.textContent!, undefined, (injector, rule) => injector.injectRaw(rule));
+        hydrate(element.textContent!, element.media, (injector, rule) => injector.injectRaw(rule));
         element.parentNode!.removeChild(element);
       }
     }

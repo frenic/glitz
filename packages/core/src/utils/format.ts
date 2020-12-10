@@ -18,6 +18,10 @@ export function formatMediaRule(query: string, block: string) {
   return `@media ${formatRule(query, block)}`;
 }
 
+export function combineMediaQueries(a: string | undefined, b: string | undefined) {
+  return a && b ? `${a} and ${b}` : a || b;
+}
+
 const PRETTY_REGEX = /[{:;}]|(?:(["']).*?\1)/g;
 
 export function prettifyRule(rule: string) {

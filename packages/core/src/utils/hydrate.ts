@@ -12,11 +12,7 @@ const MEDIA_SELECTOR = /@media[\s]?(.+)/;
 export function createHydrate<TInjector extends InjectorClient | InjectorServer>(
   getInjector: (media?: string | undefined) => TInjector,
 ) {
-  return function hydrate(
-    css: string,
-    explicitInjector?: TInjector,
-    callback?: (injector: TInjector, rule: string) => void,
-  ) {
+  return function hydrate(css: string, forceMedia?: string, callback?: (injector: TInjector, rule: string) => void) {
     let string: false | number = false;
     let depth = 0;
     let rule = '';
@@ -54,19 +50,19 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
           }
 
           if (media ? depth === 1 : depth === 0) {
-            const currentInjector = explicitInjector ?? getInjector(media);
+            const injector = getInjector(forceMedia || media);
 
             let match: RegExpExecArray | null;
             if ((match = PLAIN_SELECTOR.exec(selector))) {
-              currentInjector.hydrateClassName(body, match[1], match[2]);
+              injector.hydrateClassName(body, match[1], match[2]);
             } else if ((match = KEYFRAMES_SELECTOR.exec(selector))) {
-              currentInjector.hydrateKeyframes(body, match[1]);
+              injector.hydrateKeyframes(body, match[1]);
             } else if (selector === '@font-face') {
-              currentInjector.hydrateFontFace(body);
+              injector.hydrateFontFace(body);
             }
 
             if (callback) {
-              callback(currentInjector, rule);
+              callback(injector, rule);
             }
 
             rule = '';

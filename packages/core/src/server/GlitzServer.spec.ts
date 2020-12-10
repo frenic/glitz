@@ -2,11 +2,11 @@ import { GlitzServer, ResolvedDeclarations, CommonValue, Style } from '..';
 import reboot from '../__fixtures__/reboot';
 
 interface TestStyle extends Style {
-  '@media (min-width: 100px)'?: Style;
-  '@media (min-width: 200px)'?: Style;
-  '@media (min-width: 300px)'?: Style;
-  '@media (min-width: 768px)'?: Style;
-  '@media (min-width: 992px)'?: Style;
+  '@media (min-width: 100px)'?: TestStyle;
+  '@media (min-width: 200px)'?: TestStyle;
+  '@media (min-width: 300px)'?: TestStyle;
+  '@media (min-width: 768px)'?: TestStyle;
+  '@media (min-width: 992px)'?: TestStyle;
 }
 
 describe('server', () => {
@@ -123,8 +123,11 @@ describe('server', () => {
     expect(server.injectStyle({ ':hover': { color: 'red' } })).toBe('b');
     expect(server.injectStyle({ '@media (min-width: 768px)': { color: 'red' } })).toBe('c');
     expect(server.injectStyle({ '@media (min-width: 768px)': { ':hover': { color: 'red' } } })).toBe('d');
+    expect(server.injectStyle({ '@media (min-width: 768px)': { '@media (min-width: 992px)': { color: 'red' } } })).toBe(
+      'e',
+    );
     expect(server.getStyle()).toMatchInlineSnapshot(
-      `".a{color:red}.b:hover{color:red}@media (min-width: 768px){.c{color:red}.d:hover{color:red}}"`,
+      `".a{color:red}.b:hover{color:red}@media (min-width: 768px){.c{color:red}.d:hover{color:red}}@media (min-width: 768px) and (min-width: 992px){.e{color:red}}"`,
     );
   });
   it('injects media markup in certain order', () => {
@@ -415,9 +418,9 @@ describe('server', () => {
   it('recovers from minified hydration', () => {
     const server = new GlitzServer<TestStyle>();
 
-    server.hydrate('.b{color:#f00}@media(min-width: 768px){.a{color:#0f0}}');
+    server.hydrate('.b{color:#fff}@media(min-width:768px){.a{color:red}}');
 
-    expect(server.injectStyle({ color: 'red' })).toBe('c');
+    expect(server.injectStyle({ color: 'white' })).toBe('c');
   });
   it('hydration handles special characters in string', () => {
     const server = new GlitzServer<TestStyle>();
