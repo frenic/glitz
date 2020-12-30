@@ -429,6 +429,13 @@ describe('server', () => {
 
     expect(server.injectStyle({ color: 'red' })).toBe('c');
   });
+  it('hydration handles comments', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    server.hydrate(`.a{color:red}/*.c{color:green}*/.b{color:blue /* */}`);
+
+    expect(server.injectStyle({ color: 'blue /* */' })).toBe('b');
+  });
   it('gets markup', () => {
     const server = new GlitzServer<TestStyle>();
 
