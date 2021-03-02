@@ -1,15 +1,15 @@
 import * as CSS from 'csstype';
 export type { PropertyValue, PropertiesFallback as Properties } from 'csstype';
 
-export type Style = Selectors & Omit<Merge<FeaturedProperties, ShorthandProperties>, ExcludedShorthands>;
+export type Style = Selectors & Omit<Assign<FeaturedProperties, ShorthandProperties>, ExcludedShorthands>;
 
 export interface Theme {}
 
 export interface TransformerProperties {}
 
-export type ResolvedProperties = Merge<CSS.PropertiesFallback, TransformerProperties>;
+export type ResolvedProperties = Assign<CSS.PropertiesFallback, TransformerProperties>;
 
-export type FeaturedProperties = Merge<
+export type FeaturedProperties = Assign<
   {
     [property in keyof ResolvedProperties]:
       | ResolvedProperties[property]
@@ -21,7 +21,10 @@ export type FeaturedProperties = Merge<
   }
 >;
 
-export type Globals = Record<string, FeaturedProperties | Record<string, FeaturedProperties>>;
+export type Globals = Record<
+  string,
+  (FeaturedProperties | ShorthandProperties) | Record<string, FeaturedProperties | ShorthandProperties>
+>;
 
 export type ResolvedValue = string | number | Array<string | number>;
 
@@ -52,7 +55,7 @@ export type KeyframesProperty =
   | ResolvedProperties['animationName']
   | ((theme: Theme) => ResolvedProperties['animationName']);
 
-export type FontFace = Merge<
+export type FontFace = Assign<
   CSS.AtRule.FontFaceFallback,
   {
     fontFamily: CSS.AtRule.FontFace['fontFamily'];
@@ -90,7 +93,7 @@ export interface ShorthandProperties {
   transition?: TransitionProperty;
 }
 
-type Merge<TSource, TTarget> = Omit<TSource, keyof TTarget> & TTarget;
+type Assign<TSource, TTarget> = Omit<TSource, keyof TTarget> & TTarget;
 
 interface AnimationProperty {
   delay?: FeaturedProperties['animationDelay'];
