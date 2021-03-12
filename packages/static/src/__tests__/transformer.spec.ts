@@ -667,6 +667,15 @@ function Items3() {
   );
 }
 
+function Items4() {
+  const items = [1, 2, 3];
+  return (
+    <>
+      {items.map(i => <>{items.map(j => <Item>{i}{j}</Item>)}</>)}
+    </>
+  );
+}
+
 const Item = styled.div({
   backgroundColor: t => t.backgroundColor,
   color: t => t.color,
@@ -706,6 +715,15 @@ const Item = styled.div({
             const itemsJsx = items.map(function (i) { return <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>; });
             return (<>
               {itemsJsx}
+            </>);
+        }
+        function Items4() {
+            const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
+            const items = [1, 2, 3];
+            return (<>
+              {items.map(i => <>{items.map((j) => {
+                return <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}{j}</div>;
+            })}</>)}
             </>);
         }
         const Item = /*#__PURE__*/ styled.div({
