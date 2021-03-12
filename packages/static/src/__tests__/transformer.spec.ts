@@ -33,6 +33,41 @@ const Styled = styled.div(styleObject);
   });
 });
 
+test('can extract simple components from object', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+const Footer = styled.div({ color: 'blue' });
+
+const MyComponent = Object.assign(styled.div({ color: 'red' }), {
+  Header: styled.div({ color: 'green' }),
+  Footer,
+});
+
+const node1 = <MyComponent />;
+const node2 = <MyComponent.Header />;
+const node3 = <MyComponent.Footer />;
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const Footer = /*#__PURE__*/ styled.div({ color: 'blue' });
+      const MyComponent = /*#__PURE__*/ Object.assign(/*#__PURE__*/ styled.div({ color: 'red' }), {
+          Header: /*#__PURE__*/ styled.div({ color: 'green' }),
+          Footer,
+      });
+      const node1 = <div className={\\"a\\"} data-glitzname=\\"MyComponent\\" />;
+      const node2 = <div className={\\"b\\"} data-glitzname=\\"MyComponent.Header\\" />;
+      const node3 = <div className={\\"c\\"} data-glitzname=\\"MyComponent.Footer\\" />;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{color:green}.c{color:blue}"`);
+  });
+});
+
 test('can use applyClassName', () => {
   const code = {
     'file1.tsx': `
