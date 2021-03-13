@@ -59,12 +59,53 @@ const node3 = <MyComponent.Footer />;
           Header: /*#__PURE__*/ styled.div({ color: 'green' }),
           Footer,
       });
-      const node1 = <div className={\\"a\\"} data-glitzname=\\"MyComponent\\" />;
-      const node2 = <div className={\\"b\\"} data-glitzname=\\"MyComponent.Header\\" />;
-      const node3 = <div className={\\"c\\"} data-glitzname=\\"MyComponent.Footer\\" />;
+      const node1 = <div className={\\"b\\"} data-glitzname=\\"MyComponent\\"/>;
+      const node2 = <div className={\\"c\\"} data-glitzname=\\"MyComponent.Header\\"/>;
+      const node3 = <div className={\\"a\\"} data-glitzname=\\"MyComponent.Footer\\"/>;
       "
     `);
-    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{color:green}.c{color:blue}"`);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:blue}.b{color:red}.c{color:green}"`);
+  });
+});
+
+test('can declare styled components in an object', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+const Footer = styled.div({ color: 'blue' });
+
+const MyComponent = {
+  Header: styled.div({ color: 'green' }),
+  layout: {
+    Main: styled.div({ color: 'red' }),
+  },
+  Footer,
+};
+
+const node1 = <MyComponent.Header />;
+const node2 = <MyComponent.layout.Main />;
+const node3 = <MyComponent.Footer>hello</MyComponent.Footer>;
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      const Footer = /*#__PURE__*/ styled.div({ color: 'blue' });
+      const MyComponent = {
+          Header: /*#__PURE__*/ styled.div({ color: 'green' }),
+          layout: {
+              Main: /*#__PURE__*/ styled.div({ color: 'red' }),
+          },
+          Footer,
+      };
+      const node1 = <div className={\\"b\\"} data-glitzname=\\"MyComponent.Header\\"/>;
+      const node2 = <div className={\\"c\\"} data-glitzname=\\"MyComponent.layout.Main\\"/>;
+      const node3 = <div className={\\"a\\"} data-glitzname=\\"MyComponent.Footer\\">hello</div>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{color:blue}.b{color:green}.c{color:red}"`);
   });
 });
 

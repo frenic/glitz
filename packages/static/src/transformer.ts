@@ -69,7 +69,15 @@ type StaticStyledComponent = {
   elementName: StaticElementName | undefined;
   styles: EvaluatedStyle[];
   parent?: StaticStyledComponent;
+  // A styled component can be defined with `const MyComponent = Object.assign(styled.div(...), {Child: styled.div(...)})
+  // and this will then contain {Child: StaticStyledComponent}
+  nestedComponents?: StaticStyledComponentMap;
 };
+
+type StaticStyledComponentMap = Record<
+  string,
+  StaticComponent | StaticElement | Record<string, StaticComponent | StaticElement>
+>;
 
 type EvaluatedStyle = {
   [key: string]: string | number | undefined | (string | number | undefined)[] | EvaluatedStyle;
@@ -92,9 +100,15 @@ type StaticStyledComponents = {
   // of the variable name because multiple components with the same name can exist in different
   // scopes in the same file.
   symbolToComponent: Map<ts.Symbol, StaticStyledComponent>;
+  // A styled component map is a declaration such as:
+  // const myMap = { Header: styled.div(...), Footer: styled.div(...) };
+  symbolToComponentMap: Map<ts.Symbol, StaticStyledComponentMap>;
   // If a component has usage outside of JSX it will exist in this map. Usage outside
   // of JSX is things like `TheComponent.displayName = 'Xyz';` or `doSomething(TheComponent);`
-  symbolsWithReferencesOutsideJsx: Map<ts.Symbol, { component: StaticStyledComponent; references: ts.Node[] }>;
+  symbolsWithReferencesOutsideJsx: Map<
+    ts.Symbol,
+    { component: StaticStyledComponent | StaticStyledComponentMap; references: ts.Node[] }
+  >;
   // This is a list of symbols pointing to all components that has been composed
   // using const OtherComp = styled(ThisComponentWillBeInComposedComponentSymbols, {});
   composedComponentSymbols: ts.Symbol[];
@@ -186,6 +200,7 @@ export function transformer(
 
       const staticStyledComponents: StaticStyledComponents = {
         symbolToComponent: new Map<ts.Symbol, StaticStyledComponent>(),
+        symbolToComponentMap: new Map<ts.Symbol, StaticStyledComponentMap>(),
         symbolsWithReferencesOutsideJsx: new Map<
           ts.Symbol,
           { component: StaticStyledComponent; references: ts.Node[]; hasBeenReported: false }
@@ -310,15 +325,22 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   // This detects any non JSX usage of a variable pointing to a styled component
   if (ts.isIdentifier(node) && !isStaticComponentVariableUse(node)) {
     const symbol = typeChecker.getSymbolAtLocation(node);
-    if (symbol && staticStyledComponents.symbolToComponent.has(symbol)) {
-      const component = staticStyledComponents.symbolToComponent.get(symbol)!;
-      if (!staticStyledComponents.symbolsWithReferencesOutsideJsx.has(symbol)) {
-        staticStyledComponents.symbolsWithReferencesOutsideJsx.set(symbol, {
-          component,
-          references: [],
-        });
+    if (symbol) {
+      if (
+        staticStyledComponents.symbolToComponent.has(symbol) ||
+        staticStyledComponents.symbolToComponentMap.has(symbol)
+      ) {
+        const component =
+          staticStyledComponents.symbolToComponent.get(symbol)! ??
+          staticStyledComponents.symbolToComponentMap.get(symbol)!;
+        if (!staticStyledComponents.symbolsWithReferencesOutsideJsx.has(symbol)) {
+          staticStyledComponents.symbolsWithReferencesOutsideJsx.set(symbol, {
+            component,
+            references: [],
+          });
+        }
+        staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
       }
-      staticStyledComponents.symbolsWithReferencesOutsideJsx.get(symbol)?.references.push(node.parent);
     }
   }
 
@@ -390,12 +412,19 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
           if (!isFirstPass) {
             reportUsageOutsideOfJsxIfNeeded(componentSymbol, node, componentName, transformerContext);
           } else {
-            if (ts.isCallExpression(declaration.initializer) && ts.isIdentifier(declaration.name)) {
+            const isStyledComponentMap = isStyledComponentMapDeclaration(declaration.initializer);
+            if (
+              (ts.isCallExpression(declaration.initializer) || isStyledComponentMap) &&
+              ts.isIdentifier(declaration.name)
+            ) {
               // Since some declarations of styled components are complex and look like:
               // const Styled = createComponent();
               // we look at the variable name to see if it's a variable with Pascal case
               // and in that case try to evaluate it to a styled component.
-              if (isComponentName(componentName) && !hasComment(node, glitzComments.dynamic)) {
+              if (
+                (isComponentName(componentName) || isStyledComponentMap) &&
+                !hasComment(node, glitzComments.dynamic)
+              ) {
                 const stats: EvaluationStats = {
                   usedVariables: new Map<ts.Declaration, any>(),
                 };
@@ -411,22 +440,28 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
                       }
                     }
                   });
-                  declarePure(declaration.initializer);
+                  if (ts.isCallExpression(declaration.initializer)) {
+                    declarePure(declaration.initializer);
+                  }
 
-                  const component = {
+                  const component: StaticStyledComponent = {
                     componentName,
                     elementName: result.elementOrComponent.elementName,
                     styles: result.elementOrComponent.styles,
+                    nestedComponents: result.nestedComponents,
                   };
                   for (const style of result.elementOrComponent.styles.map(stripUnevaluableProperties)) {
+                    // TODO: Can this be removed?
                     transformerContext.glitz.injectStyle(style);
                   }
 
                   staticStyledComponents.symbolToComponent.set(componentSymbol, component);
+                } else if (result.nestedComponents) {
+                  staticStyledComponents.symbolToComponentMap.set(componentSymbol, result.nestedComponents);
                 } else {
                   result.report();
                 }
-              } else if (isUseStyle(declaration.initializer)) {
+              } else if (ts.isCallExpression(declaration.initializer) && isUseStyle(declaration.initializer)) {
                 const styles = evaluate(declaration.initializer, transformerContext.program);
                 const analyzeResult = analyzeEvaluationResult(
                   styles,
@@ -533,19 +568,12 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
       }
     }
 
-    if (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) {
-      const jsxTagSymbol = typeChecker.getSymbolAtLocation(openingElement.tagName);
-      if (
-        jsxTagSymbol &&
-        staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
-        !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
-        !hasSpreadWithoutCssPropOrAfterCssProp(node.openingElement.attributes.properties) &&
-        !isTopLevelJsxInComposedComponent(
-          node,
-          transformerContext.program.getTypeChecker(),
-          transformerContext.staticStyledComponents,
-        )
-      ) {
+    if (
+      (ts.isIdentifier(openingElement.tagName) && ts.isIdentifier(openingElement.tagName)) ||
+      ts.isPropertyAccessExpression(openingElement.tagName)
+    ) {
+      const { styledComponent, jsxTagSymbol } = getStyledComponentFromJsx(openingElement, transformerContext);
+      if (styledComponent) {
         // We now know that: node == `<[styled component name] [zero or more props]>[zero or more children]</[styled component name]>`
         // and we also know that the JSX points to a component that is 100% static
         // and is not referenced outside of JSX.
@@ -553,7 +581,6 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
         if (cssProp.found && !cssProp.styles) {
           cssProp.report();
         } else {
-          const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
           if (styledComponent.elementName) {
             let styles = styledComponent.styles.filter(style => !!style);
             if (cssProp.styles) {
@@ -588,24 +615,16 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
     }
   }
 
-  if (ts.isJsxSelfClosingElement(node) && ts.isIdentifier(node.tagName)) {
-    const jsxTagSymbol = typeChecker.getSymbolAtLocation(node.tagName);
-    if (
-      jsxTagSymbol &&
-      staticStyledComponents.symbolToComponent.has(jsxTagSymbol) &&
-      !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
-      !hasSpreadWithoutCssPropOrAfterCssProp(node.attributes.properties) &&
-      !isTopLevelJsxInComposedComponent(
-        node,
-        transformerContext.program.getTypeChecker(),
-        transformerContext.staticStyledComponents,
-      )
-    ) {
+  if (
+    ts.isJsxSelfClosingElement(node) &&
+    (ts.isIdentifier(node.tagName) || ts.isPropertyAccessExpression(node.tagName))
+  ) {
+    const { styledComponent, jsxTagSymbol } = getStyledComponentFromJsx(node, transformerContext);
+    if (styledComponent) {
       // We now know that: node == `<[styled component name] [zero or more props] />`
       // and we also know that the JSX points to a component that is 100% static
       // and is not referenced outside of JSX.
       const cssProp = getCssDataFromCssProp(node, transformerContext);
-      const styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
       if (cssProp.found && !cssProp.styles) {
         cssProp.report();
       } else if (styledComponent.elementName) {
@@ -648,6 +667,112 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
   }
 
   return node;
+}
+
+function getStyledComponentFromJsx(
+  node: ts.JsxSelfClosingElement | ts.JsxOpeningElement,
+  transformerContext: TransformerContext,
+) {
+  const typeChecker = transformerContext.program.getTypeChecker();
+  const staticStyledComponents = transformerContext.staticStyledComponents;
+
+  let jsxTagSymbol = typeChecker.getSymbolAtLocation(node.tagName);
+  let styledComponent: StaticStyledComponent | undefined = undefined;
+  if (
+    jsxTagSymbol &&
+    !staticStyledComponents.symbolsWithReferencesOutsideJsx.has(jsxTagSymbol) &&
+    !hasSpreadWithoutCssPropOrAfterCssProp(node.attributes.properties) &&
+    !isTopLevelJsxInComposedComponent(node, typeChecker, transformerContext.staticStyledComponents)
+  ) {
+    let propertyAccess: { identifier: ts.Identifier; propertyNames: string[] } | undefined = undefined;
+    if (ts.isPropertyAccessExpression(node.tagName)) {
+      propertyAccess = getRootPropertyAccessIdentifier(node.tagName);
+      if (propertyAccess) {
+        jsxTagSymbol = typeChecker.getSymbolAtLocation(propertyAccess.identifier);
+        if (!jsxTagSymbol) {
+          return { jsxTagSymbol, styledComponent };
+        }
+      }
+    }
+
+    if (staticStyledComponents.symbolToComponent.has(jsxTagSymbol)) {
+      styledComponent = staticStyledComponents.symbolToComponent.get(jsxTagSymbol)!;
+
+      if (propertyAccess) {
+        if (styledComponent && styledComponent.nestedComponents) {
+          let map: StaticStyledComponentMap | StaticComponent | undefined = styledComponent.nestedComponents;
+          for (const propertyName of propertyAccess.propertyNames) {
+            if (map && propertyName in map) {
+              map = (map as StaticStyledComponentMap)[propertyName] as
+                | StaticStyledComponentMap
+                | StaticComponent
+                | undefined;
+            } else {
+              map = undefined;
+              break;
+            }
+          }
+          if (map) {
+            const staticComponent = (map as unknown) as StaticComponent;
+            styledComponent = {
+              styles: staticComponent.styles,
+              elementName: staticComponent.elementName,
+              componentName: propertyAccess.identifier.text + '.' + propertyAccess.propertyNames.join('.'),
+            };
+          }
+        } else {
+          return { jsxTagSymbol, styledComponent: undefined };
+        }
+      }
+    } else {
+      if (propertyAccess) {
+        jsxTagSymbol = typeChecker.getSymbolAtLocation(propertyAccess.identifier);
+        if (jsxTagSymbol) {
+          let map:
+            | StaticStyledComponentMap
+            | StaticComponent
+            | undefined = staticStyledComponents.symbolToComponentMap.get(jsxTagSymbol);
+          if (map) {
+            for (const propertyName of propertyAccess.propertyNames) {
+              if (map && propertyName in map) {
+                map = (map as StaticStyledComponentMap)[propertyName] as
+                  | StaticStyledComponentMap
+                  | StaticComponent
+                  | undefined;
+              } else {
+                map = undefined;
+                break;
+              }
+            }
+            if (map) {
+              const staticComponent = map as StaticComponent;
+              styledComponent = {
+                styles: staticComponent.styles,
+                elementName: staticComponent.elementName,
+                componentName: propertyAccess.identifier.text + '.' + propertyAccess.propertyNames.join('.'),
+              };
+            }
+          }
+        }
+      }
+    }
+  }
+  return { styledComponent, jsxTagSymbol };
+}
+
+function getRootPropertyAccessIdentifier(propertyAccess: ts.PropertyAccessExpression) {
+  let expression: ts.Expression = propertyAccess;
+  const propertyNames: string[] = [];
+  while (ts.isPropertyAccessExpression(expression)) {
+    if (ts.isIdentifier(expression.name)) {
+      propertyNames.unshift(expression.name.text);
+    }
+    expression = expression.expression;
+  }
+  if (ts.isIdentifier(expression)) {
+    return { identifier: expression, propertyNames };
+  }
+  return undefined;
 }
 
 function rewriteToHtmlElement(
@@ -1083,7 +1208,7 @@ function getStatement(node: ts.Node): ts.Node {
 
 // Used to detect if the use of an identifier to a styled component is "safe" from
 // a static perspective, or if the use should trigger bailing on extraction.
-function isStaticComponentVariableUse(node: ts.Node) {
+function isStaticComponentVariableUse(node: ts.Node): boolean {
   const parent = node.parent;
   if (parent) {
     if (ts.isVariableDeclaration(parent)) {
@@ -1108,6 +1233,10 @@ function isStaticComponentVariableUse(node: ts.Node) {
       if (parent.expression.getText() === styledName) {
         return true;
       }
+    }
+    // This allows `<MyComponent.SubComponent />` usage
+    if (ts.isPropertyAccessExpression(parent)) {
+      return isStaticComponentVariableUse(parent.parent);
     }
   }
   return false;
@@ -2091,6 +2220,7 @@ function analyzeEvaluationResult(
     stylesArray: undefined as undefined | Style[],
     elementOrComponent: undefined as undefined | StaticElement | StaticComponent,
     cssProp: undefined as undefined | EvaluatedStyle[],
+    nestedComponents: undefined as undefined | StaticStyledComponentMap,
     evaluationResult,
     glitzUsedInEvaluation: undefined as undefined | boolean,
     report: () => {
@@ -2205,8 +2335,51 @@ function analyzeEvaluationResult(
     }
   } else {
     if (expected === ExpectedEvaluationResult.ElementOrComponent) {
+      const collectNestedComponents = (obj: Record<string, any>, nestedComponents: StaticStyledComponentMap) => {
+        for (const key in obj) {
+          if (isComponentName(key)) {
+            const potentialComponent = obj[key];
+            if (isStaticComponent(potentialComponent) || isStaticElement(potentialComponent)) {
+              if (potentialComponent.styles.every(s => isEvaluableStyle(s, !!transformerContext.staticThemesFile))) {
+                nestedComponents[key] = potentialComponent;
+                collectNestedComponents(
+                  potentialComponent,
+                  nestedComponents[key] as Record<string, StaticComponent | StaticElement>,
+                );
+              } else {
+                for (const style of potentialComponent.styles.map(stripUnevaluableProperties)) {
+                  transformerContext.glitz.injectStyle(style);
+                }
+              }
+            }
+          } else {
+            const potentialMap = obj[key];
+            if (
+              potentialMap &&
+              (typeof potentialMap === 'object' || typeof potentialMap === 'function') &&
+              !Array.isArray(potentialMap) &&
+              !isNode(potentialMap)
+            ) {
+              const maybeNestedComponents: Record<string, StaticComponent | StaticElement> = {};
+              collectNestedComponents(potentialMap, maybeNestedComponents);
+              if (Object.keys(maybeNestedComponents).length) {
+                nestedComponents[key] = maybeNestedComponents;
+              }
+            }
+          }
+        }
+      };
+
+      const nestedComponents: StaticStyledComponentMap = {};
+      if (evaluationResult && (typeof evaluationResult === 'object' || typeof evaluationResult === 'function')) {
+        collectNestedComponents(evaluationResult as Record<string, any>, nestedComponents);
+      }
+      if (Object.keys(nestedComponents).length) {
+        result.nestedComponents = nestedComponents;
+      }
+
       if (!isStaticComponent(evaluationResult) && !isStaticElement(evaluationResult)) {
-        result.canUseResult = false;
+        result.canUseResult = !!result.nestedComponents;
       } else {
         if (evaluationResult.styles.every(s => isEvaluableStyle(s, !!transformerContext.staticThemesFile))) {
           result.elementOrComponent = evaluationResult;
@@ -2214,7 +2387,7 @@ function analyzeEvaluationResult(
           for (const style of evaluationResult.styles.map(stripUnevaluableProperties)) {
             transformerContext.glitz.injectStyle(style);
           }
-          result.canUseResult = false;
+          result.canUseResult = !!result.nestedComponents;
         }
       }
     } else if (expected === ExpectedEvaluationResult.CssProp) {
@@ -2387,6 +2560,13 @@ function isComponentName(name: string) {
   return false;
 }
 
+function isStyledComponentMapDeclaration(node: ts.Node) {
+  if (ts.isObjectLiteralExpression(node)) {
+    return node.properties.some(p => p.name && ts.isIdentifier(p.name) && isComponentName(p.name.text));
+  }
+  return false;
+}
+
 function stripUnevaluableProperties(obj: any): EvaluatedStyle {
   if (!obj || typeof obj !== 'object') {
     return {};
@@ -2505,7 +2685,7 @@ function isNode(obj: unknown): obj is ts.Node {
     return false;
   }
   const node = obj as ts.Node;
-  return !!node.kind && !!node.pos;
+  return !!node.kind && node.pos !== undefined;
 }
 
 function deepEquals(o1: unknown, o2: unknown) {
