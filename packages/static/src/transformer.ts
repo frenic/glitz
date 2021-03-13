@@ -884,22 +884,24 @@ function getComponentNode(
   if (!node || ts.isSourceFile(node)) {
     return undefined;
   }
-  if (isFunction(node) && isComponent(node)) {
+  if (isFunction(node) && isComponent(node) === 'yes') {
     return node;
   }
   return getComponentNode(node.parent);
 }
 
-function isComponent(func: ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression) {
+function isComponent(
+  func: ts.ArrowFunction | ts.FunctionDeclaration | ts.FunctionExpression,
+): 'yes' | 'no' | 'parent-is-component' {
   const hasJsx = containsJsx(func);
   if (!hasJsx) {
-    return false;
+    return 'no';
   }
   const parentFunction = getParentFunction(func);
-  if (parentFunction && isComponent(parentFunction)) {
-    return false;
+  if (parentFunction && isComponent(parentFunction) !== 'no') {
+    return 'parent-is-component';
   }
-  return true;
+  return 'yes';
 }
 
 function getParentFunction(node: ts.Node) {

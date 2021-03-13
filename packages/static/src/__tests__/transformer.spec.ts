@@ -756,9 +756,7 @@ const Item = styled.div({
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             const items = [1, 2, 3];
             return (<>
-              {items.map(i => <>{items.map((j) => {
-                return <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}{j}</div>;
-            })}</>)}
+              {items.map(i => <>{items.map(j => <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}{j}</div>)}</>)}
             </>);
         }
         const Item = /*#__PURE__*/ styled.div({
