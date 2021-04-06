@@ -866,7 +866,7 @@ const Styled3 = styled.div({
                 <Styled1 id=\\"some-id\\">hello</Styled1>
                 <Styled2 id=\\"some-id\\">hello</Styled2>
                 <Styled3 id=\\"some-id\\">hello</Styled3>
-                <styled.Div css={{ width: '100%' }}/>
+                <styled.Div css={/* @glitz-dynamic */{ width: '100%' }}/>
                 <styled.Div 
             /* @glitz-dynamic */
             css={{ width: '100%' }}/>
@@ -3057,8 +3057,8 @@ const node = <Price current={100} />
                 {current} kr
               </span>
               <CurrentPrice css={{
-                color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
-            }}>
+                    color: t => typeof original === 'number' && current !== original ? t.negative.color : undefined,
+                }}>
                 {current} :-
               </CurrentPrice>
               {typeof original === 'number' && <span className={\\"b d\\"} data-glitzname=\\"OriginalPrice\\">{original} kr</span>}
