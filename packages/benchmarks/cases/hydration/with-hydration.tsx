@@ -12,7 +12,7 @@ for (let i = 0; i < 100; i++) {
     backgroundColor: `rgb(${i}, ${i}, ${i})`,
     color: `rgb(${i}, ${i}, ${i})`,
     marginTop: `${i}px`,
-  } as const;
+  };
   server.injectStyle(style);
   components.push(styled.div(style));
 }

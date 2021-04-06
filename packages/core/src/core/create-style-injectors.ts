@@ -355,7 +355,7 @@ export function createStyleInjectors<TStyle extends Style>(
       let classNames = '';
 
       for (let i = styles.length - 1; i >= 0; i--) {
-        classNames += injectStyle(styles[i] as CommonStyle, theme, index);
+        classNames += injectStyle((styles[i] as unknown) as CommonStyle, theme, index);
       }
 
       return classNames.slice(1);

@@ -42,7 +42,7 @@ export class GlitzStaticPlugin {
           size() {
             return css.length;
           },
-        };
+        } as webpack.sources.Source;
       } else {
         await output(css);
       }
@@ -80,10 +80,12 @@ export class GlitzStaticPlugin {
         const { severity } = diagnostic;
         switch (severity) {
           case 'error':
-            compilation.errors.push(message(diagnostic));
+            // TODO: Fix this
+            compilation.errors.push((message(diagnostic) as unknown) as webpack.WebpackError);
             break;
           case 'warning':
-            compilation.warnings.push(message(diagnostic));
+            // TODO: Fix this
+            compilation.warnings.push((message(diagnostic) as unknown) as webpack.WebpackError);
             break;
           case 'info':
             logger.info(message(diagnostic));

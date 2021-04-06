@@ -249,9 +249,15 @@ styled(() => <styled.Div css={{}} />, { color: '', unknownProperty: 0 });
 
 styled(() => <styled.Div css={{}} />, { color: 0 });
 
-styled(() => new Promise(r => r()), { color: '', unknownProperty: 0 });
+styled(
+  () => new Promise<void>(r => r()),
+  { color: '', unknownProperty: 0 },
+);
 
-styled(() => new Promise(r => r()), { color: 0 });
+styled(
+  () => new Promise<void>(r => r()),
+  { color: 0 },
+);
 
 <styled.button />;
 

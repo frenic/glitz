@@ -517,7 +517,7 @@ describe('react styled', () => {
 
     let renders = 0;
     const logger = (console.warn = jest.fn());
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       const css = {
         color: 'red',
       };
@@ -534,7 +534,7 @@ describe('react styled', () => {
     expect(logger).toHaveBeenCalledTimes(0);
 
     renders = 0;
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       const CacheInvalidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(4, callback => this.forceUpdate(callback), resolve);
         public render() {
@@ -548,7 +548,7 @@ describe('react styled', () => {
     expect(logger).toHaveBeenCalledTimes(0);
 
     renders = 0;
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       const CacheInvalidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(5, callback => this.forceUpdate(callback), resolve);
         public render() {
