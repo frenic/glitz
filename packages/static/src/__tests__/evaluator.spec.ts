@@ -405,6 +405,8 @@ test('can evaluate enums', () => {
 enum MyEnum {
   Option1,
   Option2,
+  Option3 = 3,
+  Option4,
 }
 `,
   };
@@ -412,6 +414,11 @@ enum MyEnum {
   expect(evaluate('MyEnum.Option1', code)).toBe(0);
   expect(evaluate('MyEnum[1]', code)).toBe('Option2');
   expect(evaluate('MyEnum.Option2', code)).toBe(1);
+  expect(evaluate('MyEnum[2]', code)).toBeUndefined();
+  expect(evaluate('MyEnum[3]', code)).toBe('Option3');
+  expect(evaluate('MyEnum.Option3', code)).toBe(3);
+  expect(evaluate('MyEnum[4]', code)).toBe('Option4');
+  expect(evaluate('MyEnum.Option4', code)).toBe(4);
 });
 
 test('can evaluate complex expression', () => {

@@ -2765,6 +2765,38 @@ function Component() {
   });
 });
 
+test('can compile static values from enum', () => {
+  const code = {
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+
+enum ZIndex {
+  A = 1,
+  B,
+}
+
+const Styled = styled.div({ zIndex: ZIndex.B });
+
+<Styled />
+`,
+  };
+
+  expectEqual(compile(code), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+      "import { styled } from '@glitz/react';
+      var ZIndex;
+      (function (ZIndex) {
+          ZIndex[ZIndex[\\"A\\"] = 1] = \\"A\\";
+          ZIndex[ZIndex[\\"B\\"] = 2] = \\"B\\";
+      })(ZIndex || (ZIndex = {}));
+      const Styled = /*#__PURE__*/ styled.div({ zIndex: ZIndex.B });
+      <div className={\\"a\\"} data-glitzname=\\"Styled\\"/>;
+      "
+    `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{z-index:2}"`);
+  });
+});
+
 test('compiles correctly for a single theme', () => {
   const code = {
     'themes.ts': `

@@ -626,6 +626,10 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
           return value;
         }
         enm[memberName] = value;
+        if (typeof value === 'number') {
+          i = value;
+          enm[i] = memberName;
+        }
       }
       i++;
     }
