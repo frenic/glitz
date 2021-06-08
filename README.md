@@ -353,9 +353,9 @@ You can also extend the interface with custom CSS properties like CSS variables 
 
 ```ts
 // my-style.d.ts
-import * as Glitz from '@glitz/type';
+import * as Glitz from '@glitz/core';
 
-declare module '@glitz/type' {
+declare module '@glitz/core' {
   interface Properties {
     // Add CSS property
     mozOsxFontSmoothing?: string;
@@ -454,27 +454,77 @@ const className = glitz.injectStyle({
 
 The Glitz core class for browsers.
 
-#### Method `injectStyle(style: Style)`
+#### `GlitzClient#injectStyle(style: Style)`
 
 Returns: `string`
 
 The returned value contains the class names of the injected style.
 
+```tsx
+const glitz = new GlitzClient();
+const classNames = glitz.injectStyle({ fontWeight: 'bold' });
+```
+
+#### `GlitzClient#injectGlobals(globalStyle: { [tagName]: Style })`
+
+Returns: `void`
+
+Injects global styles.
+
+```tsx
+const glitz = new GlitzClient();
+glitz.injectStyle({ p: { fontWeight: 'bold' } });
+```
+
+#### `GlitzClient#hydrate(css: string)`
+
+Returns: `void`
+
+Manually hydrate external Glitz generated CSS.
+
+_Note that `<style data-glitz>` tags are hydrated automatically._
+
 ### `new GlitzServer(options?: Options)`
 
 The Glitz core class for servers.
 
-#### Method `injectStyle(style: Style)`
+_Note that `options` must be identical to the one used with `GlitzClient`._
+
+#### `GlitzServer#injectStyle(style: Style)`
 
 Returns: `string`
 
-Class names of the injected style.
+The returned value contains the class names of the injected style.
 
-#### Method `getStyleMarkup()`
+```tsx
+const glitz = new GlitzServer();
+const classNames = glitz.injectStyle({ fontWeight: 'bold' });
+```
+
+#### `GlitzServer#injectGlobals(globalStyle: { [tagName]: Style })`
+
+Returns: `void`
+
+Injects global styles.
+
+```tsx
+const glitz = new GlitzServer();
+glitz.injectStyle({ p: { fontWeight: 'bold' } });
+```
+
+#### `GlitzServer#hydrate(css: string)`
+
+Returns: `void`
+
+Manually hydrate external Glitz generated CSS.
+
+_Note that `<style data-glitz>` tags are hydrated automatically._
+
+#### `GlitzServer#getStyle(markup?: boolean)`
 
 Returns: `string`
 
-Markup with style sheets to render into `<head>` that the Glitz core class for browsers will reuse.
+Plain CSS will be returned unless `markup` is set to `true` and it will return markup instead to render directly into `<head>`.
 
 ### Options
 
@@ -543,16 +593,6 @@ const glitz = new GlitzClient({ mediaOrder: mediaQuerySorter });
 ```
 
 It's also possible to use [`sort-css-media-queries`](https://github.com/dutchenkoOleg/sort-css-media-queries/) if you don't have a specific list of media queries.
-
-#### `options.atomic`
-
-```ts
-atomic: boolean;
-```
-
-Default: `true`
-
-Breaks down each CSS declaration to separate class names for minimal output and maximum performance. This can cause problems if you e.g. [mix longhand and shorthand properties](#shorthand-properties) because the order of the CSS can't be guaranteed. Disabling this isn't recommended, but possible by setting this to `false`.
 
 #### `options.prefix`
 
