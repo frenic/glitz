@@ -8,7 +8,7 @@ import { applyClassName } from './styled/apply-class-name';
 import { ThemeProvider } from './components/ThemeProvider';
 import { WithRefProp } from './styled/create';
 import { StyledElementProps } from './styled/predefined';
-import { forwardStyle, StyledProps } from './styled/forward-style';
+import { forwardStyle, ForwardStyleProps } from './styled/forward-style';
 
 describe('react styled', () => {
   const warn = console.warn;
@@ -611,7 +611,7 @@ describe('react styled', () => {
   });
   it('forwards style using hook', () => {
     const Component = styled(
-      forwardStyle(({ compose }: StyledProps) => {
+      forwardStyle(({ compose }: ForwardStyleProps) => {
         return React.createElement(styled.Div, { css: compose() });
       }),
     );
