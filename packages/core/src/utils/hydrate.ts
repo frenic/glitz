@@ -10,10 +10,21 @@ const ASTERISK_CODE = '*'.charCodeAt(0);
 const PLAIN_SELECTOR = /\.([\w]+)((?::.+)|(\[.+\]))?/;
 const KEYFRAMES_SELECTOR = /@keyframes (.+)/;
 const MEDIA_SELECTOR = /@media[\s]?(.+)/;
+const SUPPORTS_SELECTOR = /@supports[\s]?(.+)/;
 
 export function createHydrate<TInjector extends InjectorClient | InjectorServer>(
   getInjector: (media?: string | undefined) => TInjector,
 ) {
+  function matchDepth(initialDepth: number, media: string, condition: string) {
+    if (media) {
+      initialDepth++;
+    }
+    if (condition) {
+      initialDepth++;
+    }
+    return initialDepth;
+  }
+
   return function hydrate(css: string, forceMedia?: string, callback?: (injector: TInjector, rule: string) => void) {
     const length = css.length;
     let comment = false;
@@ -21,6 +32,7 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
     let depth = 0;
     let rule = '';
     let media = '';
+    let condition = '';
     let selector = '';
     let body = '';
 
@@ -40,10 +52,17 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
           } else if (code === BLOCK_START_CODE) {
             depth++;
 
-            if (media ? depth === 2 : depth === 1) {
-              const match = MEDIA_SELECTOR.exec(selector);
+            if (matchDepth(1, media, condition) === depth) {
+              let match = MEDIA_SELECTOR.exec(selector);
               if (match) {
                 media = match[1];
+                rule = '';
+                selector = '';
+              }
+
+              match = SUPPORTS_SELECTOR.exec(selector);
+              if (match) {
+                condition = match[1];
                 rule = '';
                 selector = '';
               }
@@ -53,17 +72,27 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
           } else if (code === BLOCK_END_CODE) {
             depth--;
 
+            if (media && condition && depth === 1) {
+              condition = '';
+              continue;
+            }
+
+            if (condition && depth === 0) {
+              condition = '';
+              continue;
+            }
+
             if (media && depth === 0) {
               media = '';
               continue;
             }
 
-            if (media ? depth === 1 : depth === 0) {
-              const injector = getInjector(forceMedia || media);
+            if (matchDepth(0, media, condition) === depth) {
+              const injector = getInjector(forceMedia || media || void 0);
 
               let match: RegExpExecArray | null;
               if ((match = PLAIN_SELECTOR.exec(selector))) {
-                injector.hydrateClassName(body, match[1], match[2]);
+                injector.hydrateClassName(body, match[1], match[2], condition || void 0);
               } else if ((match = KEYFRAMES_SELECTOR.exec(selector))) {
                 injector.hydrateKeyframes(body, match[1]);
               } else if (selector === '@font-face') {
@@ -89,7 +118,7 @@ export function createHydrate<TInjector extends InjectorClient | InjectorServer>
         string = false;
       }
 
-      if (media ? depth > 1 : depth > 0) {
+      if (matchDepth(0, media, condition) < depth) {
         body += character;
       } else if (comment === false && wasComment === false) {
         selector += character;

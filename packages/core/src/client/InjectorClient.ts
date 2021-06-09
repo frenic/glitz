@@ -1,18 +1,16 @@
 import Injector from '../core/Injector';
-import { injectSheetRule, isCSSStyleSheet } from '../utils/dom';
+import { createInjectorIndexes } from '../utils/create-index';
+import { injectRule, injectSupportsRule, isCSSStyleSheet } from '../utils/dom';
 import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
 import { HashCounter } from '../utils/hash';
 
 export default class InjectorClient extends Injector {
   public injectRaw: (rule: string) => void;
-  public hydrateClassName: (body: string, className: string, suffix?: string) => void;
+  public hydrateClassName: (body: string, className: string, selector?: string, condition?: string) => void;
   public hydrateKeyframes: (body: string, name: string) => void;
   public hydrateFontFace: (body: string) => void;
   constructor(element: HTMLStyleElement, classNameHash: HashCounter, keyframesHash: HashCounter) {
-    const plainIndex: { [block: string]: string } = {};
-    const selectorIndex: { [selector: string]: { [block: string]: string } } = {};
-    const keyframesIndex: { [blockList: string]: string } = {};
-    const fontFaceIndex: string[] = [];
+    const [getIndex, keyframesIndex, fontFaceIndex] = createInjectorIndexes();
     let globalRuleIndex = 0;
 
     const sheet = element.sheet;
@@ -22,8 +20,9 @@ export default class InjectorClient extends Injector {
     }
 
     super(
-      (block, selector) => {
-        const index = selector ? (selectorIndex[selector] = selectorIndex[selector] ?? {}) : plainIndex;
+      (block, selector, condition) => {
+        const index = getIndex(selector, condition);
+
         if (index[block]) {
           return index[block];
         }
@@ -31,7 +30,7 @@ export default class InjectorClient extends Injector {
         const className = classNameHash();
         index[block] = className;
 
-        injectSheetRule(sheet, formatClassRule(className, block, selector));
+        injectSupportsRule(sheet, formatClassRule(className, block, selector), condition);
 
         return className;
       },
@@ -43,28 +42,28 @@ export default class InjectorClient extends Injector {
         const name = keyframesHash();
         keyframesIndex[blockList] = name;
 
-        injectSheetRule(sheet, formatKeyframesRule(name, blockList));
+        injectRule(sheet, formatKeyframesRule(name, blockList));
 
         return name;
       },
       block => {
         if (fontFaceIndex.indexOf(block) === -1) {
           fontFaceIndex.push(block);
-          injectSheetRule(sheet, formatFontFaceRule(block));
+          injectRule(sheet, formatFontFaceRule(block));
         }
       },
       rule => {
-        injectSheetRule(sheet, rule, globalRuleIndex++);
+        injectRule(sheet, rule, globalRuleIndex++);
       },
     );
 
     this.injectRaw = rule => {
-      injectSheetRule(sheet, rule);
+      injectRule(sheet, rule);
     };
 
-    this.hydrateClassName = (body, className, suffix) => {
+    this.hydrateClassName = (body, className, selector, condition) => {
       classNameHash();
-      const index = suffix ? (selectorIndex[suffix] = selectorIndex[suffix] ?? {}) : plainIndex;
+      const index = getIndex(selector, condition);
       index[body] = className;
     };
 

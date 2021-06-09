@@ -215,6 +215,21 @@ describe('client', () => {
     expect(sheet.cssRules).toHaveLength(1);
     expect(sheet.cssRules[0].cssText).toMatchInlineSnapshot(`".a[disabled]:hover {color: red;}"`);
   });
+  it('injects supports rule', () => {
+    const style = createStyle();
+    const client = new GlitzClient<TestStyle>();
+
+    expect(client.injectStyle({ ['@supports (display: grid)' as any]: { display: 'grid', gap: '10px' } })).toBe('a b');
+
+    const sheet = style.sheet as CSSStyleSheet;
+
+    expect(sheet.cssRules).toHaveLength(2);
+
+    expect((sheet.cssRules[0] as CSSSupportsRule).conditionText).toBe('(display: grid)');
+    expect((sheet.cssRules[1] as CSSSupportsRule).conditionText).toBe('(display: grid)');
+    expect((sheet.cssRules[0] as CSSSupportsRule).cssRules[0].cssText).toMatchInlineSnapshot(`".a {gap: 10px;}"`);
+    expect((sheet.cssRules[1] as CSSSupportsRule).cssRules[0].cssText).toMatchInlineSnapshot(`".b {display: grid;}"`);
+  });
   it('injects media rule', () => {
     const style = createStyle();
     const mediaA = createStyle('(min-width: 768px)');
@@ -607,6 +622,26 @@ describe('client', () => {
       'd c',
     );
   });
+  it('hydrates supports rule', () => {
+    createStyle(
+      undefined,
+      '@supports (display: grid) and (grid-auto-flow: dense){.a{color:red}.b{grid-auto-flow:dense}}@supports (display: grid){.c{color:red}.d{gap:10px}.e{display:grid}}@media (min-width: 100px){@supports not (display: grid){.f{color:red}.g{display:flex}}}',
+    );
+    const client = new GlitzClient<TestStyle>();
+
+    expect(
+      client.injectStyle({
+        ['@supports (display: grid)' as any]: {
+          display: 'grid',
+          gap: '10px',
+          ['@supports (grid-auto-flow: dense)' as any]: { gridAutoFlow: 'dense' },
+        },
+        '@media (min-width: 100px)': {
+          ['@supports not (display: grid)' as any]: { display: 'flex' },
+        },
+      }),
+    ).toBe('g b d e');
+  });
   it('hydrates keyframes rule', () => {
     createStyle(
       undefined,
@@ -699,11 +734,14 @@ describe('client', () => {
   });
   it('hydrates static style', () => {
     const client = new GlitzClient<TestStyle>();
-    client.hydrate('.a{color:red}.b:hover{color:green}@media (min-width: 768px){.c{color:blue}.d:hover{color:white}}');
+    client.hydrate(
+      '.a{color:red}.b:hover{color:green}@media (min-width: 768px){.c{color:blue}.d:hover{color:white}}@supports (display: grid){.e{display:grid}}',
+    );
     expect(client.injectStyle({ color: 'red', ':hover': { color: 'green' } })).toBe('b a');
     expect(client.injectStyle({ '@media (min-width: 768px)': { color: 'blue', ':hover': { color: 'white' } } })).toBe(
       'd c',
     );
+    expect(client.injectStyle({ ['@supports (display: grid)' as any]: { display: 'grid' } })).toBe('e');
   });
   it('applies transformer', () => {
     const style = createStyle();

@@ -116,6 +116,25 @@ describe('server', () => {
     expect(server.injectStyle({ '[readonly]': { '[disabled]': { color: 'red' } } })).toBe('a');
     expect(server.getStyle()).toMatchInlineSnapshot(`".a[readonly][disabled]{color:red}"`);
   });
+  it('injects supports rule', () => {
+    const server = new GlitzServer<TestStyle>();
+
+    expect(
+      server.injectStyle({
+        ['@supports (display: grid)' as any]: {
+          display: 'grid',
+          gap: '10px',
+          ['@supports (grid-auto-flow: dense)' as any]: { gridAutoFlow: 'dense' },
+        },
+        '@media (min-width: 100px)': {
+          ['@supports not (display: grid)' as any]: { display: 'flex' },
+        },
+      }),
+    ).toBe('a b c d');
+    expect(server.getStyle()).toMatchInlineSnapshot(
+      `"@supports (display: grid) and (grid-auto-flow: dense){.b{grid-auto-flow:dense}}@supports (display: grid){.c{gap:10px}.d{display:grid}}@media (min-width: 100px){@supports not (display: grid){.a{display:flex}}}"`,
+    );
+  });
   it('injects media rule', () => {
     const server = new GlitzServer<TestStyle>();
 

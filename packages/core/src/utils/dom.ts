@@ -1,6 +1,6 @@
-import { prettifyRule } from './format';
+import { formatSupportsRule, prettifyRule } from './format';
 
-export function injectSheetRule(sheet: CSSStyleSheet, rule: string, index = sheet.cssRules.length) {
+export function injectRule(sheet: CSSStyleSheet | CSSSupportsRule, rule: string, index = sheet.cssRules.length) {
   try {
     sheet.insertRule(rule, index);
   } catch {
@@ -11,6 +11,22 @@ export function injectSheetRule(sheet: CSSStyleSheet, rule: string, index = shee
       );
     }
   }
+}
+
+export function injectSupportsRule(sheet: CSSStyleSheet, rule: string, condition?: string) {
+  if (typeof condition === 'undefined') {
+    return injectRule(sheet, rule);
+  }
+
+  if (typeof CSSSupportsRule !== 'undefined') {
+    for (const cssRule of sheet.cssRules) {
+      if (cssRule instanceof CSSSupportsRule && cssRule.conditionText === condition) {
+        return injectRule(cssRule, rule);
+      }
+    }
+  }
+
+  return injectRule(sheet, formatSupportsRule(condition, rule));
 }
 
 export function createStyleElement(media: string | undefined, identifier: string) {

@@ -6,18 +6,18 @@ export const ANIMATION_NAME = 'animationName';
 export const FONT_FAMILY = 'fontFamily';
 
 export default class Injector {
-  public injectClassName: (declarations: ResolvedDeclarations, selector?: string) => string;
+  public injectClassName: (declarations: ResolvedDeclarations, selector?: string, condition?: string) => string;
   public injectKeyframes: (declarationList: ResolvedDeclarationList) => string;
   public injectFontFace: (declarations: ResolvedDeclarations) => string;
   public injectGlobals: (declarations: ResolvedDeclarations, selector: string) => void;
   constructor(
-    className: (block: string, selector?: string) => string,
+    className: (block: string, selector?: string, condition?: string) => string,
     keyframes: (blockList: string) => string,
     fontFace: (block: string) => void,
     globals: (rule: string) => void,
   ) {
-    this.injectClassName = (declarations, selector) => {
-      return className(parseDeclarationBlock(declarations), selector);
+    this.injectClassName = (declarations, selector, condition) => {
+      return className(parseDeclarationBlock(declarations), selector, condition);
     };
 
     this.injectKeyframes = declarationList => {

@@ -1,12 +1,11 @@
 import Injector from '../core/Injector';
-import { formatClassRule, formatFontFaceRule, formatKeyframesRule } from '../utils/format';
+import { createInjectorIndexes, InjectorIndexes } from '../utils/create-index';
+import { formatClassRule, formatFontFaceRule, formatKeyframesRule, formatSupportsRule } from '../utils/format';
 import { HashCounter } from '../utils/hash';
-
-type Index<TValue = string> = Record<string, TValue>;
 
 export default class InjectorServer extends Injector {
   public getStyle: (stream?: boolean) => string;
-  public hydrateClassName: (body: string, className: string, suffix?: string) => void;
+  public hydrateClassName: (body: string, className: string, selector?: string, condition?: string) => void;
   public hydrateKeyframes: (body: string, name: string) => void;
   public hydrateFontFace: (rule: string) => void;
   public clone: (classNameHashClone: HashCounter, keyframesHashClone: HashCounter) => InjectorServer;
@@ -14,30 +13,42 @@ export default class InjectorServer extends Injector {
     classNameHash: HashCounter,
     keyframesHash: HashCounter,
     postInjection = false,
-    plainFullIndex: Index = {},
-    selectorFullIndex: Index<Index> = {},
-    keyframesFullIndex: Index = {},
-    fontFaceFullIndex: string[] = [],
-    plainHydrationIndex: Index = {},
-    selectorHydrationIndex: Index<Index> = {},
-    keyframesHydrationIndex: Index = {},
-    fontFaceHydrationIndex: string[] = [],
+    fullIndexes: InjectorIndexes = createInjectorIndexes(),
+    hydrationIndex: InjectorIndexes = createInjectorIndexes(),
   ) {
-    const plainResultIndex: Index = {};
-    const selectorResultIndex: Index<Index> = {};
-    const keyframesResultIndex: Index = {};
-    const fontFaceResultIndex: string[] = [];
+    const [getFullIndex, keyframesFullIndex, fontFaceFullIndex, cloneFullIndex] = fullIndexes;
+
+    const [getHydrationIndex, keyframesHydrationIndex, fontFaceHydrationIndex, cloneHydrationIndex] = hydrationIndex;
+
+    const [
+      getResultIndex,
+      keyframesResultIndex,
+      fontFaceResultIndex,
+      {},
+      plainResultIndex,
+      plainSupportsResultIndex,
+      selectorResultIndex,
+      selectorSupportsResultIndex,
+    ] = createInjectorIndexes();
+
+    const [
+      getStreamIndex,
+      keyframesStreamIndex,
+      fontFaceStreamIndex,
+      {},
+      plainStreamIndex,
+      plainSupportsStreamIndex,
+      selectorStreamIndex,
+      selectorSupportsStreamIndex,
+    ] = createInjectorIndexes();
+
     let globalsResult = '';
-    const plainStreamIndex: Index = {};
-    const selectorStreamIndex: Index<Index> = {};
-    const keyframesStreamIndex: Index = {};
-    const fontFaceStreamIndex: string[] = [];
     let globalsStream = '';
 
     super(
-      (block, selector) => {
+      (block, selector, condition) => {
         postInjection = true;
-        const full = selector ? (selectorFullIndex[selector] = selectorFullIndex[selector] ?? {}) : plainFullIndex;
+        const full = getFullIndex(selector, condition);
 
         if (full[block]) {
           return full[block];
@@ -45,12 +56,8 @@ export default class InjectorServer extends Injector {
 
         const className = classNameHash();
 
-        const result = selector
-          ? (selectorResultIndex[selector] = selectorResultIndex[selector] ?? {})
-          : plainResultIndex;
-        const stream = selector
-          ? (selectorStreamIndex[selector] = selectorStreamIndex[selector] ?? {})
-          : plainStreamIndex;
+        const result = getResultIndex(selector, condition);
+        const stream = getStreamIndex(selector, condition);
         full[block] = result[block] = stream[block] = className;
 
         return className;
@@ -117,6 +124,21 @@ export default class InjectorServer extends Injector {
         }
       }
 
+      const supportsBlocks: Record<string, string> = {};
+
+      const plainSupports = stream ? plainSupportsStreamIndex : plainSupportsResultIndex;
+      for (const condition in plainSupports) {
+        for (const block in plainSupports[condition]) {
+          // result += formatSupportsRule(condition, formatClassRule(plainSupports[condition][block], block));
+          supportsBlocks[condition] ??= '';
+          supportsBlocks[condition] += formatClassRule(plainSupports[condition][block], block);
+        }
+
+        if (stream) {
+          delete plainSupportsStreamIndex[condition];
+        }
+      }
+
       const selectors = stream ? selectorStreamIndex : selectorResultIndex;
       for (const selector in selectors) {
         const index = selectors[selector];
@@ -127,6 +149,25 @@ export default class InjectorServer extends Injector {
         if (stream) {
           delete selectorStreamIndex[selector];
         }
+      }
+
+      const selectorSupports = stream ? selectorSupportsStreamIndex : selectorSupportsResultIndex;
+      for (const condition in selectorSupports) {
+        for (const selector in selectorSupports[condition]) {
+          const index = selectorSupports[condition][selector];
+          for (const block in index) {
+            supportsBlocks[condition] ??= '';
+            supportsBlocks[condition] += formatClassRule(index[block], block, selector);
+          }
+        }
+
+        if (stream) {
+          delete selectorSupportsStreamIndex[condition];
+        }
+      }
+
+      for (const condition in supportsBlocks) {
+        result += formatSupportsRule(condition, supportsBlocks[condition]);
       }
 
       return result;
@@ -142,13 +183,11 @@ export default class InjectorServer extends Injector {
 
     const preHydrationCheck = createPreActionCheck('Hydration');
 
-    this.hydrateClassName = (body, className, suffix) => {
+    this.hydrateClassName = (body, className, selector, condition) => {
       preHydrationCheck();
       classNameHash();
-      const full = suffix ? (selectorFullIndex[suffix] = selectorFullIndex[suffix] ?? {}) : plainFullIndex;
-      const hydration = suffix
-        ? (selectorHydrationIndex[suffix] = selectorHydrationIndex[suffix] ?? {})
-        : plainHydrationIndex;
+      const full = getFullIndex(selector, condition);
+      const hydration = getHydrationIndex(selector, condition);
       full[body] = hydration[body] = className;
     };
 
@@ -174,30 +213,9 @@ export default class InjectorServer extends Injector {
         classNameHashClone,
         keyframesHashClone,
         postInjection,
-        clone(plainHydrationIndex),
-        clone(selectorHydrationIndex),
-        clone(keyframesHydrationIndex),
-        fontFaceHydrationIndex.slice(0),
-        clone(plainHydrationIndex),
-        clone(selectorHydrationIndex),
-        clone(keyframesHydrationIndex),
-        fontFaceHydrationIndex.slice(0),
+        cloneFullIndex(),
+        cloneHydrationIndex(),
       );
     };
   }
-}
-
-function clone<TIndex extends Index<string | Index>>(index: TIndex): TIndex {
-  const copy: Index<string | Index> = {};
-
-  for (const key in index) {
-    const value: string | Index = index[key];
-    if (typeof value === 'string') {
-      copy[key] = value;
-    } else {
-      copy[key] = clone(value);
-    }
-  }
-
-  return copy as TIndex;
 }
