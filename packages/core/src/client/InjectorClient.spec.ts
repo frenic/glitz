@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { createHashCounter } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 

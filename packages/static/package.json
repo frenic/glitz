@@ -15,7 +15,7 @@
     "typescript": "*"
   },
   "devDependencies": {
-    "webpack": "^5.25.0"
+    "webpack": "^5.38.1"
   },
   "scripts": {
     "clean": "rimraf cjs types",

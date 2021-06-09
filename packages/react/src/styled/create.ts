@@ -111,10 +111,10 @@ export function factory<TProps, TInstance>(
       : isForwardStyleType<TProps, TInstance>(type)
       ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>, ref: Ref<TInstance>) => {
           const composed = useContext(ComposeContext);
-          const compose = useCallback(additional => sanitizeStyle([additional, statics, dynamic, composed]), [
-            composed,
-            dynamic,
-          ]);
+          const compose = useCallback(
+            additional => sanitizeStyle([additional, statics, dynamic, composed]),
+            [composed, dynamic],
+          );
 
           let node = createElement<any>(type.value, { ...restProps, compose, ref });
 

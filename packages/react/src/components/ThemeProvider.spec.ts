@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';

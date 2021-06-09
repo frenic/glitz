@@ -164,9 +164,10 @@ const reboot: Globals = {
     },
   },
   'legend + *': { clear: 'left' },
-  '::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-text,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-year-field': {
-    padding: 0,
-  },
+  '::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-text,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-year-field':
+    {
+      padding: 0,
+    },
   '::-webkit-inner-spin-button': { height: 'auto' },
   '[type="search"]': { outlineOffset: '-2px', WebkitAppearance: 'textfield' },
   '::-webkit-search-decoration': { WebkitAppearance: 'none' },

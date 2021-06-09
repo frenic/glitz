@@ -138,7 +138,6 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       [symbolOrSymbols, program, fileNameToCacheFor] = resolveImportSymbol(identifier.text, symbol, context.program);
       context = { ...context, program };
       if (Array.isArray(symbolOrSymbols)) {
-        symbolOrSymbols[0].declarations[0];
         const exportedNamespace: { [name: string]: any } = {};
         for (const exportedSymbol of symbolOrSymbols) {
           const exportedValue = evaluateInternal({ symbol: exportedSymbol, identifier }, context);
@@ -176,22 +175,22 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     if (ts.isShorthandPropertyAssignment(symbol.valueDeclaration)) {
       symbol = typeChecker.getShorthandAssignmentValueSymbol(symbol.valueDeclaration);
     }
-    if (!symbol) {
+    if (!symbol || !symbol.valueDeclaration) {
       return requiresRuntimeResult(`Unable to resolve identifier '${identifier.text}'`, identifier);
     }
     let valueDeclaration = symbol.valueDeclaration;
-    if (ts.isVariableDeclaration(symbol.valueDeclaration)) {
-      if (!symbol.valueDeclaration.initializer) {
+    if (ts.isVariableDeclaration(valueDeclaration)) {
+      if (!valueDeclaration.initializer) {
         return requiresRuntimeResult(`Unable to resolve identifier '${identifier.text}'`, identifier);
       }
-      evaluationResult = evaluateInternal(symbol.valueDeclaration.initializer, context);
+      evaluationResult = evaluateInternal(valueDeclaration.initializer, context);
       hasEvaluated = true;
     }
     if (ts.isFunctionDeclaration(valueDeclaration)) {
       if (!valueDeclaration.body) {
-        const declarationWithBody = symbol.declarations.find(
-          d => !!(d as ts.FunctionDeclaration).body,
-        ) as ts.FunctionDeclaration;
+        const declarationWithBody = symbol.declarations?.find(
+          declaration => ts.isFunctionDeclaration(declaration) && !!declaration.body,
+        );
         if (declarationWithBody) {
           valueDeclaration = declarationWithBody;
         }
@@ -199,14 +198,15 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
       evaluationResult = evaluateInternal(valueDeclaration, context);
       hasEvaluated = true;
     }
-    if (ts.isEnumDeclaration(symbol.valueDeclaration)) {
-      evaluationResult = evaluateInternal(symbol.valueDeclaration, context);
+    if (ts.isEnumDeclaration(valueDeclaration)) {
+      evaluationResult = evaluateInternal(valueDeclaration, context);
       hasEvaluated = true;
     }
-    if (ts.isExportAssignment(symbol.valueDeclaration)) {
-      evaluationResult = evaluateInternal(symbol.valueDeclaration.expression, context);
+    if (ts.isExportAssignment(valueDeclaration)) {
+      evaluationResult = evaluateInternal(valueDeclaration.expression, context);
       hasEvaluated = true;
     }
+
     if (hasEvaluated) {
       stats?.usedVariables?.set(valueDeclaration, evaluationResult);
     }
@@ -653,7 +653,7 @@ export function resolveImportSymbol(
   let symbolOrSymbols: ts.Symbol | ts.Symbol[] = symbol;
   let fileName: string | undefined;
   if (!symbol.valueDeclaration) {
-    const importDecl = symbol.declarations[0];
+    const importDecl = symbol.declarations?.[0];
     if (importDecl && ts.isNamespaceImport(importDecl)) {
       fileName = importDecl.parent.parent.moduleSpecifier.getText().replace(/["']+/g, '');
       if (fileName in staticModuleOverloads) {
@@ -663,7 +663,7 @@ export function resolveImportSymbol(
       } else {
         const importSymbol = typeChecker.getSymbolAtLocation(importDecl.parent.parent.moduleSpecifier);
         if (importSymbol) {
-          if (ts.isSourceFile(importSymbol.valueDeclaration)) {
+          if (importSymbol.valueDeclaration && ts.isSourceFile(importSymbol.valueDeclaration)) {
             fileName = importSymbol.valueDeclaration.fileName;
           }
           symbolOrSymbols = typeChecker.getExportsOfModule(importSymbol);
@@ -685,7 +685,7 @@ export function resolveImportSymbol(
       } else {
         const importSymbol = typeChecker.getSymbolAtLocation(importDecl.parent.parent.parent.moduleSpecifier);
         if (importSymbol) {
-          if (ts.isSourceFile(importSymbol.valueDeclaration)) {
+          if (importSymbol.valueDeclaration && ts.isSourceFile(importSymbol.valueDeclaration)) {
             fileName = importSymbol.valueDeclaration.fileName;
           }
           const exports = typeChecker.getExportsOfModule(importSymbol);
@@ -710,7 +710,7 @@ export function resolveImportSymbol(
       } else {
         const importSymbol = typeChecker.getSymbolAtLocation(importDecl.parent.moduleSpecifier);
         if (importSymbol) {
-          if (ts.isSourceFile(importSymbol.valueDeclaration)) {
+          if (importSymbol.valueDeclaration && ts.isSourceFile(importSymbol.valueDeclaration)) {
             fileName = importSymbol.valueDeclaration.fileName;
           }
           const exports = typeChecker.getExportsOfModule(importSymbol);
@@ -725,8 +725,8 @@ export function resolveImportSymbol(
     }
   }
   if (!Array.isArray(symbolOrSymbols) && !symbolOrSymbols.valueDeclaration) {
-    const exportSpecifier = symbolOrSymbols.declarations[0];
-    if (ts.isExportSpecifier(exportSpecifier)) {
+    const exportSpecifier = symbolOrSymbols.declarations?.[0];
+    if (exportSpecifier && ts.isExportSpecifier(exportSpecifier)) {
       const variableToLookFor = exportSpecifier.propertyName?.text ?? exportSpecifier.name.text;
       const moduleSpecifier = exportSpecifier.parent.parent.moduleSpecifier;
       if (moduleSpecifier) {

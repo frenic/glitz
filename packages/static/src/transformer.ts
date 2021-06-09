@@ -713,7 +713,7 @@ function getStyledComponentFromJsx(
             }
           }
           if (map) {
-            const staticComponent = (map as unknown) as StaticComponent;
+            const staticComponent = map as unknown as StaticComponent;
             styledComponent = {
               styles: staticComponent.styles,
               elementName: staticComponent.elementName,
@@ -728,10 +728,8 @@ function getStyledComponentFromJsx(
       if (propertyAccess) {
         jsxTagSymbol = typeChecker.getSymbolAtLocation(propertyAccess.identifier);
         if (jsxTagSymbol) {
-          let map:
-            | StaticStyledComponentMap
-            | StaticComponent
-            | undefined = staticStyledComponents.symbolToComponentMap.get(jsxTagSymbol);
+          let map: StaticStyledComponentMap | StaticComponent | undefined =
+            staticStyledComponents.symbolToComponentMap.get(jsxTagSymbol);
           if (map) {
             for (const propertyName of propertyAccess.propertyNames) {
               if (map && propertyName in map) {
@@ -1090,15 +1088,14 @@ function reportUsageOutsideOfJsxIfNeeded(
     transformerContext.diagnosticsReporter &&
     transformerContext.staticStyledComponents.symbolsWithReferencesOutsideJsx.has(componentSymbol)
   ) {
-    const outsideJsxUsage = transformerContext.staticStyledComponents.symbolsWithReferencesOutsideJsx.get(
-      componentSymbol,
-    )!;
+    const outsideJsxUsage =
+      transformerContext.staticStyledComponents.symbolsWithReferencesOutsideJsx.get(componentSymbol)!;
     const references = outsideJsxUsage.references;
 
     for (const reference of references) {
       const sourceFile = reference.getSourceFile();
       const stmt = getStatement(reference);
-      const severity = getSeverity(componentSymbol.valueDeclaration, transformerContext);
+      const severity = getSeverity(componentSymbol.valueDeclaration!, transformerContext);
 
       if (severity !== 'suppressed') {
         transformerContext.diagnosticsReporter({
@@ -1356,7 +1353,7 @@ function anyValuesAreFunctions(style: EvaluatedStyle | EvaluatedStyle[]): boolea
     } else {
       for (const key in style) {
         if (typeof style[key] === 'function') {
-          return (style[key] as unknown) as FunctionWithTsNode;
+          return style[key] as unknown as FunctionWithTsNode;
         } else if (
           style[key] &&
           !isRequiresRuntimeResult(style[key]) &&
@@ -1589,7 +1586,7 @@ function getStaticThemes(fileName: string, source: ts.SourceFile | undefined, pr
       const themesSymbol = exports.find(e => e.escapedName === staticThemesName);
       if (themesSymbol) {
         const declarationNode = themesSymbol.valueDeclaration;
-        if (ts.isVariableDeclaration(declarationNode) && declarationNode.initializer) {
+        if (declarationNode && ts.isVariableDeclaration(declarationNode) && declarationNode.initializer) {
           const staticThemes = evaluate(declarationNode.initializer, program);
           const requiresRuntimeResults = getAllRequiresRuntimeResult(staticThemes);
           if (requiresRuntimeResults.length) {

@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { GlitzClient } from '@glitz/core';
 import { mount } from 'enzyme';
 import * as React from 'react';
@@ -497,23 +501,20 @@ describe('react styled', () => {
     );
   });
   it('warns of multiple re-renders with invalidated cache', async () => {
-    const createAnimationSimulator = (
-      count: number,
-      update: (callback?: (() => void) | undefined) => void,
-      resolve: () => void,
-    ) => () => {
-      let updates = 0;
-      const frame = () =>
-        requestAnimationFrame(() => {
-          if (updates < count) {
-            updates++;
-            update(frame);
-          } else {
-            requestAnimationFrame(() => resolve());
-          }
-        });
-      frame();
-    };
+    const createAnimationSimulator =
+      (count: number, update: (callback?: (() => void) | undefined) => void, resolve: () => void) => () => {
+        let updates = 0;
+        const frame = () =>
+          requestAnimationFrame(() => {
+            if (updates < count) {
+              updates++;
+              update(frame);
+            } else {
+              requestAnimationFrame(() => resolve());
+            }
+          });
+        frame();
+      };
 
     let renders = 0;
     const logger = (console.warn = jest.fn());

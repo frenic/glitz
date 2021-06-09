@@ -78,10 +78,10 @@ test('typings', () => {
             Type 'Promise<void>' is not assignable to type 'ReactElement<any, any>'."
   `);
   expect(errors[13]).toMatchInlineSnapshot(`
-    "packages/react/src/__tests__/__fixtures__/typings.tsx 261:1 - 'styled.button' cannot be used as a JSX component.
-      Its return type 'StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>' is not a valid JSX element.
-        Type 'StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>' is missing the following properties from type 'Element': type, props, key"
-  `);
+"packages/react/src/__tests__/__fixtures__/typings.tsx 261:1 - 'styled.button' cannot be used as a JSX component.
+  Its return type 'StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>' is not a valid JSX element.
+    Type 'StyledComponentWithRef<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>' is missing the following properties from type 'ReactElement<any, any>': type, props, key"
+`);
   expect(errors[14]).toMatchInlineSnapshot(
     `"packages/react/src/__tests__/__fixtures__/typings.tsx 264:1 - JSX element type 'NotAStyledComponent' does not have any construct or call signatures."`,
   );

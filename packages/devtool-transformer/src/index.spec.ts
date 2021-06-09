@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import devToolTransformer, { createDevToolTransformer } from './index';
 
 describe('style validation', () => {

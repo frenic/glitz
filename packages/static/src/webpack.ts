@@ -81,11 +81,11 @@ export class GlitzStaticPlugin {
         switch (severity) {
           case 'error':
             // TODO: Fix this
-            compilation.errors.push((message(diagnostic) as unknown) as webpack.WebpackError);
+            compilation.errors.push(message(diagnostic) as unknown as webpack.WebpackError);
             break;
           case 'warning':
             // TODO: Fix this
-            compilation.warnings.push((message(diagnostic) as unknown) as webpack.WebpackError);
+            compilation.warnings.push(message(diagnostic) as unknown as webpack.WebpackError);
             break;
           case 'info':
             logger.info(message(diagnostic));

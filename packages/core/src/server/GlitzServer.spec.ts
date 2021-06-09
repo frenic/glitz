@@ -228,8 +228,7 @@ describe('server', () => {
               fontFamily: 'x',
               fontStyle: 'normal',
               fontWeight: 400,
-              src:
-                "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
+              src: "url(https://fonts.gstatic.com/s/paytoneone/v10/0nksC9P7MfYHj2oFtYm2ChTjgPvNiA.woff2) format('woff2')",
             },
             'sans-serif',
           ],
@@ -344,7 +343,7 @@ describe('server', () => {
           paddingRight: '10px',
         },
         {
-          paddingRight: (null as any) as undefined,
+          paddingRight: null as any as undefined,
         },
       ]),
     ).toBe('a');

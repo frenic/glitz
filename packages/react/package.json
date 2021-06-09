@@ -15,10 +15,10 @@
     "@glitz/core": "^3.0.0-alpha.20",
     "@types/react": "*",
     "@types/react-is": "*",
-    "react-is": "^17.0.1"
+    "react-is": "^16.8.0"
   },
   "peerDependencies": {
-    "react": ">= 16.8"
+    "react": ">= 16.8 <= 17"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
