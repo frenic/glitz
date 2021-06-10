@@ -13,9 +13,15 @@ export function query(list: Query): string {
   return results.join(' and ');
 }
 
-// Accept both camel cased and capitalized vendor properties
 const hyphenateRegex = /(?:^(ms|moz|webkit))|[A-Z]/g;
 
 export function hyphenateProperty(property: string) {
   return property.replace(hyphenateRegex, '-$&').toLowerCase();
+}
+
+export function selector(selectors: string | string[], style: Style): Style {
+  // TODO Pseudo validation
+  return typeof selectors === 'string'
+    ? { [selectors]: style }
+    : selectors.reduce((acc, value) => ({ ...acc, [value]: style }), {});
 }

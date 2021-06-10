@@ -355,7 +355,7 @@ const node8 = <TheOtherMainLink />;
 test('can use glitz core', () => {
   const code = {
     'file1.tsx': `
-import { media, query } from '@glitz/core';
+import { media, query, selector } from '@glitz/core';
 import { styled } from '@glitz/react';
 
 const BREAKPOINT = 768;
@@ -371,7 +371,7 @@ export function createDesktopDecorator(desktopStyle: any) {
 }
 
 const decorator = createMobileDecorator({ gridTemplate: { areas: '"a" "b"', columns: '1fr' } });
-const Styled = styled.div(decorator);
+const Styled = styled.div(decorator, selector(':nth-child(odd)', { backgroundColor: 'lightgrey' }));
 
 const node = <Styled />;
 `,
@@ -381,7 +381,7 @@ const node = <Styled />;
     compile(code),
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
-        "import { media, query } from '@glitz/core';
+        "import { media, query, selector } from '@glitz/core';
         import { styled } from '@glitz/react';
         const BREAKPOINT = 768;
         const MOBILE_MAX_WIDTH = /*#__PURE__*/ query({ maxWidth: '100px' });
@@ -393,12 +393,12 @@ const node = <Styled />;
             return /*#__PURE__*/ styled(media(DESKTOP_MIN_WIDTH, desktopStyle));
         }
         const decorator = /*#__PURE__*/ createMobileDecorator({ gridTemplate: { areas: '\\"a\\" \\"b\\"', columns: '1fr' } });
-        const Styled = /*#__PURE__*/ styled.div(decorator);
-        const node = <div className={\\"a b\\"} data-glitzname=\\"Styled\\"/>;
+        const Styled = /*#__PURE__*/ styled.div(decorator, selector(':nth-child(odd)', { backgroundColor: 'lightgrey' }));
+        const node = <div className={\\"a b c\\"} data-glitzname=\\"Styled\\"/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `"@media (max-width: 100px){.a{grid-template-columns:1fr}.b{grid-template-areas:\\"a\\" \\"b\\"}}"`,
+        `".a:nth-child(odd){background-color:lightgrey}@media (max-width: 100px){.b{grid-template-columns:1fr}.c{grid-template-areas:\\"a\\" \\"b\\"}}"`,
       );
     },
     diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
