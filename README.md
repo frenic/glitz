@@ -35,6 +35,7 @@ Along with other built-in features like:
   - [Keyframes](#keyframes)
   - [Font faces](#font-faces)
   - [Media queries](#media-queries)
+  - [Browser compatibility](#browser-compatibility)
 - [React](#react)
 - [Server rendering](#server-rendering)
 - [Shorthand properties](#shorthand-properties)
@@ -228,6 +229,21 @@ You can define any `@media` property as you like.
 const className = glitz.injectStyle({
   '@media (min-width: 768px)': {
     display: 'block',
+  },
+});
+```
+
+### Browser compatibility
+
+You can apply `@supports` condition rules. These can be handy when using server side rendered CSS because `CSS.supports()` isn't available on the server.
+
+```ts
+const className = glitz.injectStyle({
+  '@supports (display: grid)': {
+    display: 'grid',
+  },
+  '@supports not (display: grid)': {
+    display: 'flex',
   },
 });
 ```
