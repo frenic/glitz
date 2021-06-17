@@ -44,10 +44,6 @@ function Message(props) {
 ## Getting started
 
 ```sh
-$ yarn add @glitz/react
-
-// or
-
 $ npm install @glitz/react
 ```
 

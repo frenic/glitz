@@ -36,7 +36,7 @@
     "release": "lerna publish --pre-dist-tag next",
     "build": "npm run clean && lerna run build --",
     "clean": "lerna run clean --parallel",
-    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test:code": "jest",
     "test:types": "jest --testMatch \"**/src/**/typecheck.spec.(ts|tsx)\"",
     "test": "jest --testMatch \"**/src/**/*.spec.(ts|tsx)\"",

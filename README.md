@@ -56,10 +56,6 @@ Along with other built-in features like:
 ## Getting started
 
 ```bash
-$ yarn add @glitz/core @glitz/transformers
-
-// or
-
 $ npm install @glitz/core @glitz/transformers
 ```
 
@@ -637,8 +633,8 @@ To play around with Glitz, just:
 ```bash
 $ git clone https://github.com/frenic/glitz.git
 $ cd glitz
-$ yarn install
-$ yarn example
+$ npm install
+$ npm example
 ```
 
 Open http://localhost:1234 in your browser and edit the code in `packages/example`.

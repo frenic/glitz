@@ -35,9 +35,5 @@ But with correct types for TypeScript when used with `@glitz/core`.
 ## Getting started
 
 ```bash
-$ yarn add @glitz/prefixer-transformer
-
-// or
-
 $ npm install @glitz/prefixer-transformer
 ```

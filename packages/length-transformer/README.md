@@ -25,10 +25,6 @@ Numeric time value for `animationDelay`, `animationDuration`, `transitionDelay` 
 ## Getting started
 
 ```bash
-$ yarn add @glitz/length-transformer
-
-// or
-
 $ npm install @glitz/length-transformer
 ```
 

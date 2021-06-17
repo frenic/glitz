@@ -37,9 +37,5 @@ const className = glitz.injectStyle({
 ## Getting started
 
 ```bash
-$ yarn add @glitz/devtool-transformer
-
-// or
-
 $ npm install @glitz/devtool-transformer
 ```
