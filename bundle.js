@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-const gzipSize = require('gzip-size');
 const { rollup } = require('rollup');
 const replace = require('rollup-plugin-replace');
 const typescript = require('rollup-plugin-typescript');
@@ -126,8 +125,9 @@ async function build(input, output, type, production) {
   }
 }
 
-function write(code, filename) {
-  const gzip = gzipSize.sync(code);
+async function write(code, filename) {
+  const { gzipSize } = await import('gzip-size');
+  const gzip = await gzipSize(code);
 
   const dir = path.dirname(filename);
 

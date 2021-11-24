@@ -17,7 +17,7 @@ test('typings', () => {
   expect(errors[2]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 233:12 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
       Types of property 'color' are incompatible.
-        Type 'number' is not assignable to type 'Color | (Color | undefined)[] | ((theme: Theme) => Color | (Color | undefined)[] | undefined) | undefined'."
+        Type 'number' is not assignable to type 'Color | Color[] | ((theme: Theme) => Color | Color[] | undefined) | undefined'."
   `);
   expect(errors[3]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 235:24 - Argument of type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to parameter of type 'Styles'.
@@ -26,7 +26,7 @@ test('typings', () => {
   expect(errors[4]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 237:11 - Argument of type '{ color: number; }' is not assignable to parameter of type 'Styles'.
       Types of property 'color' are incompatible.
-        Type 'number' is not assignable to type 'Color | (Color | undefined)[] | ((theme: Theme) => Color | (Color | undefined)[] | undefined) | undefined'."
+        Type 'number' is not assignable to type 'Color | Color[] | ((theme: Theme) => Color | Color[] | undefined) | undefined'."
   `);
   expect(errors[5]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 239:20 - No overload matches this call.
@@ -39,7 +39,7 @@ test('typings', () => {
       The last overload gave the following error.
         Argument of type '{ color: number; }' is not assignable to parameter of type 'Styles'.
           Types of property 'color' are incompatible.
-            Type 'number' is not assignable to type 'Color | (Color | undefined)[] | ((theme: Theme) => Color | (Color | undefined)[] | undefined) | undefined'."
+            Type 'number' is not assignable to type 'Color | Color[] | ((theme: Theme) => Color | Color[] | undefined) | undefined'."
   `);
   expect(errors[7]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 243:43 - Type '{ color: \\"\\"; unknownProperty: number; }' is not assignable to type 'DirtyStyle'.
@@ -48,7 +48,7 @@ test('typings', () => {
   expect(errors[8]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 245:25 - Type '{ color: number; }' is not assignable to type 'DirtyStyle'.
       Types of property 'color' are incompatible.
-        Type 'number' is not assignable to type 'Color | (Color | undefined)[] | ((theme: Theme) => Color | (Color | undefined)[] | undefined) | undefined'."
+        Type 'number' is not assignable to type 'Color | Color[] | ((theme: Theme) => Color | Color[] | undefined) | undefined'."
   `);
   expect(errors[9]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 247:51 - No overload matches this call.
@@ -61,7 +61,7 @@ test('typings', () => {
       The last overload gave the following error.
         Argument of type '{ color: number; }' is not assignable to parameter of type 'Styles'.
           Types of property 'color' are incompatible.
-            Type 'number' is not assignable to type 'Color | (Color | undefined)[] | ((theme: Theme) => Color | (Color | undefined)[] | undefined) | undefined'."
+            Type 'number' is not assignable to type 'Color | Color[] | ((theme: Theme) => Color | Color[] | undefined) | undefined'."
   `);
   expect(errors[11]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 252:2 - No overload matches this call.

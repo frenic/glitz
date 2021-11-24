@@ -1,7 +1,15 @@
 /* eslint-disable */
 
 import * as React from 'react';
-import { applyClassName, GlitzProvider, styled, StyledElementProps, StyledComponent } from '../..';
+import {
+  applyClassName,
+  GlitzProvider,
+  styled,
+  StyledElementProps,
+  StyledComponent,
+  forwardStyle,
+  ForwardStyleProps,
+} from '../..';
 import { GlitzClient, GlitzServer } from '../../../../core/src';
 
 const client = new GlitzClient();
@@ -249,15 +257,9 @@ styled(() => <styled.Div css={{}} />, { color: '', unknownProperty: 0 });
 
 styled(() => <styled.Div css={{}} />, { color: 0 });
 
-styled(
-  () => new Promise<void>(r => r()),
-  { color: '', unknownProperty: 0 },
-);
+styled(() => new Promise<void>(r => r()), { color: '', unknownProperty: 0 });
 
-styled(
-  () => new Promise<void>(r => r()),
-  { color: 0 },
-);
+styled(() => new Promise<void>(r => r()), { color: 0 });
 
 <styled.button />;
 
@@ -283,7 +285,7 @@ export function createStyledComponent<TProps>(Component: StyledComponent<TProps>
   ({ x, ...restProps }: TProps & { x: string }) => <Component {...restProps} />;
   // @ts-expect-error
   styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...restProps} />);
-  styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...((restProps as unknown) as TProps)} />);
+  styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...(restProps as unknown as TProps)} />);
 }
 
 styled({})(props => <div />);

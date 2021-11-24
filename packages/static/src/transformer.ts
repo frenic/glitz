@@ -934,7 +934,11 @@ function importDeclaration(
         false,
         undefined,
         factory.createNamedImports([
-          factory.createImportSpecifier(factory.createIdentifier(exportedName), factory.createIdentifier(importName)),
+          factory.createImportSpecifier(
+            false,
+            factory.createIdentifier(exportedName),
+            factory.createIdentifier(importName),
+          ),
         ]),
       );
     }
@@ -2139,6 +2143,7 @@ function injectImportUseGlitz(transformerContext: TransformerContext) {
     undefined,
     factory.createNamedImports([
       factory.createImportSpecifier(
+        false,
         factory.createIdentifier(useThemeName),
         factory.createIdentifier(useGlitzThemeName),
       ),

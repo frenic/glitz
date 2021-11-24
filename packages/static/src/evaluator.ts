@@ -34,7 +34,7 @@ export function evaluate(expr: SupportedExpressions, program: ts.Program, scope?
       console.log('Error evaluating expression:', node.getText());
       console.log('Expression exists in file:', node.getSourceFile().fileName);
       console.error(e);
-      throw new EvaluationError(e);
+      throw new EvaluationError(e as Error);
     } else {
       throw e;
     }
@@ -73,7 +73,7 @@ export function partiallyEvaluate(
       console.log('Error evaluating expression:', node.getText());
       console.log('Expression exists in file:', node.getSourceFile().fileName);
       console.error(e);
-      throw new EvaluationError(e);
+      throw new EvaluationError(e as Error);
     } else {
       throw e;
     }
