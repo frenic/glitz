@@ -291,3 +291,23 @@ export function createStyledComponent<TProps>(Component: StyledComponent<TProps>
 styled({})(props => <div />);
 cDecorator(props => <div />);
 cDecorator({});
+
+const WithRefWithApplyClassName = styled(
+  applyClassName(
+    React.forwardRef<HTMLDivElement, React.HtmlHTMLAttributes<HTMLButtonElement>>(({}, ref) => <div ref={ref} />),
+  ),
+);
+<WithRefWithApplyClassName ref={React.createRef<HTMLDivElement>()} />;
+
+const WithoutRefWithApplyClassName = styled(
+  applyClassName(({}: React.HtmlHTMLAttributes<HTMLButtonElement>) => <div />),
+);
+<WithoutRefWithApplyClassName ref={React.createRef<HTMLDivElement>()} />;
+
+const WithRefWithForwardStyle = styled(
+  forwardStyle(React.forwardRef<HTMLDivElement, ForwardStyleProps>(({}, ref) => <div ref={ref} />)),
+);
+<WithRefWithForwardStyle ref={React.createRef<HTMLDivElement>()} />;
+
+const WithoutRefWithForwardStyle = styled(forwardStyle(({}: ForwardStyleProps) => <div />));
+<WithoutRefWithForwardStyle ref={React.createRef<HTMLDivElement>()} />;

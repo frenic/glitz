@@ -53,11 +53,11 @@ import {
   WebViewHTMLAttributes,
 } from 'react';
 import { factory, StyledComponentWithRef } from './create';
-import { SECRET_GLITZ_PROPERTY, ELEMENT_TYPE, ELEMENT_LIKE_TYPE } from './constants';
+import { SECRET_GLITZ_PROPERTY, ELEMENT_TYPE, ELEMENT_LIKE_TYPE, FORWARD_STYLE_TYPE } from './constants';
 import { Styles } from './custom';
 
 export interface StyledType {
-  [SECRET_GLITZ_PROPERTY]: typeof ELEMENT_TYPE | typeof ELEMENT_LIKE_TYPE;
+  [SECRET_GLITZ_PROPERTY]: typeof ELEMENT_TYPE | typeof ELEMENT_LIKE_TYPE | typeof FORWARD_STYLE_TYPE;
 }
 
 export interface StyledElement extends StyledType {

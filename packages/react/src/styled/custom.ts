@@ -25,7 +25,7 @@ export interface Styled {
   ): StyledComponentWithRef<TProps, TInstance>;
   <TProps>(component: StyledComponent<TProps>, ...styles: Styles[]): StyledComponent<TProps>;
   <TProps>(component: StyledForwardStyle<FunctionComponent<TProps>>, ...styles: Styles[]): StyledComponent<
-    WithoutRefProp<WithoutCompose<TProps>>
+    WithoutCompose<TProps>
   >;
   <TProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledForwardStyle<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
@@ -34,7 +34,7 @@ export interface Styled {
   <TProps extends StyledElementProps>(
     component: StyledElementLike<FunctionComponent<TProps>>,
     ...styles: Styles[]
-  ): StyledComponent<WithoutRefProp<TProps>>;
+  ): StyledComponent<TProps>;
   <TProps extends StyledElementProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledElementLike<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
     ...styles: Styles[]
