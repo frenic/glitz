@@ -6,7 +6,7 @@
   "version": "independent",
   "command": {
     "publish": {
-      "ignoreChanges": ["*.md", "*.spec.ts"]
+      "ignoreChanges": ["**/*.md", "**/*.spec.ts", "**/__tests__/**/*"]
     }
   }
 }
