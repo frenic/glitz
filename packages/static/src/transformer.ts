@@ -24,6 +24,7 @@ import {
   EvaluationStats,
 } from './evaluator';
 import { getStaticExports } from './static-module-overloads';
+import { createImportSpecifier } from './compatibility';
 
 const glitzComments = {
   dynamic: '@glitz-dynamic',
@@ -934,7 +935,8 @@ function importDeclaration(
         false,
         undefined,
         factory.createNamedImports([
-          factory.createImportSpecifier(
+          createImportSpecifier(
+            factory,
             false,
             factory.createIdentifier(exportedName),
             factory.createIdentifier(importName),
@@ -2142,7 +2144,8 @@ function injectImportUseGlitz(transformerContext: TransformerContext) {
     false,
     undefined,
     factory.createNamedImports([
-      factory.createImportSpecifier(
+      createImportSpecifier(
+        factory,
         false,
         factory.createIdentifier(useThemeName),
         factory.createIdentifier(useGlitzThemeName),
