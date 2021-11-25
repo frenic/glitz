@@ -1,6 +1,6 @@
 {
   "name": "@glitz/static",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "main": "./cjs/index.js",
   "types": "./types/index.d.ts",
   "license": "MIT",

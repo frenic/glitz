@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "glitz-benchmark",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Anders Ekdahl <anders.ekdahl@gmail.com>",
   "homepage": "https://github.com/frenic/glitz",
   "repository": "git@github.com:frenic/glitz.git",
@@ -10,7 +10,7 @@
   "dependencies": {
     "@glitz/core": "^4.0.0",
     "@glitz/core-stable": "npm:@glitz/core@^2.1.5",
-    "@glitz/react": "^4.0.0",
+    "@glitz/react": "^4.0.1",
     "@glitz/react-stable": "npm:@glitz/react@^3.1.6",
     "@types/react": "*",
     "@types/react-dom": "*",
