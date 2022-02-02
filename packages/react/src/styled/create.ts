@@ -11,7 +11,6 @@ import {
   RefAttributes,
   useCallback,
   useContext,
-  useMemo,
 } from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_GLITZ_PROPERTY } from './constants';
@@ -131,11 +130,7 @@ export function factory<TProps, TInstance>(
           let node = createElement<any>(type, { ...restProps, ref });
 
           if (style.length > 0) {
-            node = createElement(
-              ComposeContext.Provider,
-              useMemo(() => ({ value: style }), [statics, dynamic, composed]),
-              node,
-            );
+            node = createElement(ComposeContext.Provider, { value: style }, node);
           }
 
           return node;
