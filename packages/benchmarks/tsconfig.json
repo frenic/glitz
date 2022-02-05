@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react",
-    "target": "es5"
+    "target": "es5",
+    "types": ["jest", "webpack-env", "react/next", "react-dom/next"]
   }
 }

@@ -111,7 +111,7 @@ export function factory<TProps, TInstance>(
       ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>, ref: Ref<TInstance>) => {
           const composed = useContext(ComposeContext);
           const compose = useCallback(
-            additional => sanitizeStyle([additional, statics, dynamic, composed]),
+            (additional: DirtyStyle) => sanitizeStyle([additional, statics, dynamic, composed]),
             [composed, dynamic],
           );
 

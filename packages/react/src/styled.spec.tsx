@@ -3,8 +3,9 @@
  */
 
 import { GlitzClient } from '@glitz/core';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { GlitzProvider } from '.';
 import useGlitz, { DirtyStyle } from './styled/use-glitz';
 import { styled } from './styled';
@@ -20,6 +21,11 @@ describe('react styled', () => {
     console.warn = warn;
   });
 
+  it('tests React version', () => {
+    expect(parseInt(React.version)).toBe(18);
+    expect(parseInt(ReactDOM.version)).toBe(18);
+    expect(ReactDOM.version).toBe(React.version);
+  });
   it('returns class names using style hook', () => {
     function Component() {
       const className = useGlitz({ color: 'red' });
@@ -109,7 +115,9 @@ describe('react styled', () => {
         class extends React.Component {
           public componentDidMount() {
             expect(renders).toBe(1);
-            this.forceUpdate();
+            act(() => {
+              this.forceUpdate();
+            });
           }
           public render() {
             updates++;
@@ -581,7 +589,10 @@ describe('react styled', () => {
       const CacheValidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(
           5,
-          callback => this.forceUpdate(callback),
+          callback =>
+            act(() => {
+              this.forceUpdate(callback);
+            }),
           () => {
             unmount();
             resolve();
@@ -602,7 +613,10 @@ describe('react styled', () => {
       const CacheInvalidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(
           4,
-          callback => this.forceUpdate(callback),
+          callback =>
+            act(() => {
+              this.forceUpdate(callback);
+            }),
           () => {
             unmount();
             resolve();
@@ -623,7 +637,10 @@ describe('react styled', () => {
       const CacheInvalidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(
           5,
-          callback => this.forceUpdate(callback),
+          callback =>
+            act(() => {
+              this.forceUpdate(callback);
+            }),
           () => {
             unmount();
             resolve();

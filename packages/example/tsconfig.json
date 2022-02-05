@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "es5",
     "jsx": "react",
-    "declaration": false
+    "declaration": false,
+    "types": ["react/next", "react-dom/next"]
   }
 }

@@ -7,7 +7,8 @@
     },
     "skipLibCheck": true,
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "types": ["jest", "node"]
   },
   "exclude": ["**/cjs/", "**/esnext/", "**/mjs/", "**/types/", "**/__fixtures__"]
 }
