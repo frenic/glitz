@@ -6,7 +6,8 @@
       "@glitz/*": ["./packages/*/src"]
     },
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react"
   },
   "exclude": ["**/cjs/", "**/esnext/", "**/mjs/", "**/types/", "**/__fixtures__"]
 }

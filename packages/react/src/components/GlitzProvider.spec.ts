@@ -3,7 +3,7 @@
  */
 
 import { GlitzClient } from '@glitz/core';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 import { GlitzContext } from './context';
 import { GlitzProvider } from './GlitzProvider';
@@ -16,6 +16,6 @@ describe('GlitzProvider', () => {
       expect(providedGlitz).toBe(glitz);
       return React.createElement('div');
     };
-    mount(React.createElement(GlitzProvider, { glitz }, React.createElement(Spy)));
+    render(React.createElement(GlitzProvider, { glitz }, React.createElement(Spy)));
   });
 });

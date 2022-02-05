@@ -1,6 +1,7 @@
 module.exports = {
   globals: {
     'ts-jest': {
+      diagnostics: false,
       tsconfig: {
         target: 'es6',
         module: 'commonjs',
@@ -9,7 +10,7 @@ module.exports = {
       },
     },
   },
-  moduleFileExtensions: ['ts', 'js'],
+  moduleFileExtensions: ['ts', 'tsx', 'js'],
   moduleNameMapper: {
     '^@glitz/core$': '<rootDir>/packages/core/src',
     '^@glitz/react$': '<rootDir>/packages/react/src',
@@ -19,5 +20,4 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   testMatch: ['**/src/**/!(typecheck).spec.(ts|tsx)'],
-  setupFilesAfterEnv: ['<rootDir>jest.setup.ts'],
 };

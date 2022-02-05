@@ -3,7 +3,7 @@
  */
 
 import { GlitzClient } from '@glitz/core';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 import { ThemeContext } from './context';
 import { GlitzProvider } from './GlitzProvider';
@@ -17,7 +17,7 @@ describe('ThemeProvider', () => {
       expect(providedTheme).toBe(theme);
       return React.createElement('div');
     };
-    mount(
+    render(
       React.createElement(
         GlitzProvider,
         { glitz: new GlitzClient() },
