@@ -3194,6 +3194,83 @@ const node = <Price current={100} />
   );
 });
 
+test('correctly handles decorator with ampersand and ampersand condition', () => {
+  const code = {
+    'themes.ts': `
+export const staticThemes = [{
+  id: 'something',
+  negative: { color: 'red' },
+  margin: { xs: 1 },
+}];
+`,
+    'file1.tsx': `
+import { styled } from '@glitz/react';
+import * as React from 'react';
+
+type PropType = {
+  current: number;
+  original?: number;
+};
+
+const Price = ({current, original}: PropType) => {
+  return (
+    <Base>
+      <CurrentPrice
+        css={current > 100 && original < 200 &&  colorDecorator}
+      >
+        {current} kr
+      </CurrentPrice>
+    </Base>
+  );
+}
+
+export default Price;
+
+const Base = styled.div({
+  fontWeight: 'bold'
+})
+
+const anotherDecorator = styled({ backgroundColor: 'green' });
+
+const colorDecorator = styled(anotherDecorator, {color: t => t.negative.color});
+
+const CurrentPrice = styled.span({
+  fontWeight: 'bold'
+});
+
+const node = <Price current={100} original={150} />;
+`,
+  };
+
+  expectEqual(compile(code, { staticThemesFile: 'themes.ts' }), result => {
+    expect(result['file1.jsx']).toMatchInlineSnapshot(`
+        "import { styled } from '@glitz/react';
+        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+        import \\"./themes\\";
+        import * as React from 'react';
+        const Price = ({ current, original }) => {
+            return (<div className={\\"a\\"} data-glitzname=\\"Base\\">
+              <span className={current > 100 && original < 200 ? \\"a b c\\" : \\"a\\"} data-glitzname=\\"CurrentPrice\\">
+                {current} kr
+              </span>
+            </div>);
+        };
+        export default Price;
+        const Base = /*#__PURE__*/ styled.div({
+            fontWeight: 'bold'
+        });
+        const anotherDecorator = /*#__PURE__*/ styled({ backgroundColor: 'green' });
+        const colorDecorator = /*#__PURE__*/ styled(anotherDecorator, { color: t => t.negative.color });
+        const CurrentPrice = /*#__PURE__*/ styled.span({
+            fontWeight: 'bold'
+        });
+        const node = <Price current={100} original={150}/>;
+        "
+      `);
+    expect(result['style.css']).toMatchInlineSnapshot(`".a{font-weight:bold}.b{color:red}.c{background-color:green}"`);
+  });
+});
+
 test('can handle element like components individually', () => {
   const code = {
     'link.tsx': `

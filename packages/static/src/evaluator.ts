@@ -237,7 +237,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
   if (ts.isBinaryExpression(expr)) {
     if (expr.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
       const left = evaluateInternal(expr.left, context);
-      if (shouldShortCircuitEvaluation(left)) {
+      if (shouldShortCircuitEvaluation(left) && expr.right.kind !== ts.SyntaxKind.Identifier) {
         return left;
       }
       if (!left) {
@@ -248,7 +248,7 @@ function evaluateInternal(expr: SupportedExpressions, context: EvaluationContext
     }
 
     const left = evaluateInternal(expr.left, context);
-    if (shouldShortCircuitEvaluation(left)) {
+    if (shouldShortCircuitEvaluation(left) && expr.right.kind !== ts.SyntaxKind.Identifier) {
       return left;
     }
 

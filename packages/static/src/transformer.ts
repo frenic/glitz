@@ -583,13 +583,22 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
           cssProp.report();
         } else {
           if (styledComponent.elementName) {
-            let styles = styledComponent.styles.filter(style => !!style);
+            const styledComponentStyles = styledComponent.styles.filter(style => !!style);
+            let styles = [...styledComponentStyles];
             if (cssProp.styles) {
               styles = styles.slice();
               styles.push(...cssProp.styles);
             }
 
-            const classNameExpr = getClassNameExpression(styles, transformerContext);
+            const cssProps = getCssPropExpression(openingElement);
+            const classNameExpr = hasDecoratorWithAmpersandAmpersandToken(cssProps)
+              ? getClassNameExpressionForDecoratorWithAmpersandAmpersandToken(
+                  cssProps,
+                  styledComponentStyles,
+                  styles,
+                  transformerContext,
+                )
+              : getClassNameExpression(styles, transformerContext);
             if (isRequiresRuntimeResult(classNameExpr)) {
               reportRequiresRuntimeResult(
                 'Evaluation of theme function requires runtime',
@@ -665,6 +674,28 @@ function visitNode(node: ts.Node, transformerContext: TransformerContext): ts.No
     const previouslyTransformed = transformerContext.transformations.get(originalNode)!;
     transformerContext.appliedTransformations.set(originalNode, previouslyTransformed);
     return previouslyTransformed;
+  }
+
+  function hasDecoratorWithAmpersandAmpersandToken(
+    cssProps: ts.Expression | undefined,
+  ): cssProps is ts.BinaryExpression {
+    return cssProps
+      ? ts.isBinaryExpression(cssProps) && cssProps.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+      : false;
+  }
+
+  function getClassNameExpressionForDecoratorWithAmpersandAmpersandToken(
+    expression: ts.BinaryExpression,
+    defaultStyles: EvaluatedStyle[],
+    allStyles: EvaluatedStyle[],
+    context: TransformerContext,
+  ) {
+    const defaultClassNames = getClassNameExpression(defaultStyles, context);
+    const allClassNames = getClassNameExpression(allStyles, context);
+
+    return isRequiresRuntimeResult(allClassNames) || isRequiresRuntimeResult(defaultClassNames)
+      ? allClassNames
+      : factory.createConditionalExpression(expression.left, undefined, allClassNames, undefined, defaultClassNames);
   }
 
   return node;
