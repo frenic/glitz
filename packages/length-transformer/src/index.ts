@@ -227,7 +227,6 @@ declare module '@glitz/core' {
     shapeMargin?: Glitz.Properties<LengthAndTime, LengthAndTime>['shapeMargin'];
     textDecoration?: Glitz.Properties<LengthAndTime, LengthAndTime>['textDecoration'];
     textDecorationThickness?: Glitz.Properties<LengthAndTime, LengthAndTime>['textDecorationThickness'];
-    textDecorationWidth?: Glitz.Properties<LengthAndTime, LengthAndTime>['textDecorationWidth'];
     textIndent?: Glitz.Properties<LengthAndTime, LengthAndTime>['textIndent'];
     textUnderlineOffset?: Glitz.Properties<LengthAndTime, LengthAndTime>['textUnderlineOffset'];
     top?: Glitz.Properties<LengthAndTime, LengthAndTime>['top'];
