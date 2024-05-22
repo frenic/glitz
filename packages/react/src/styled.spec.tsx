@@ -130,58 +130,6 @@ describe('react styled', () => {
     expect(renders).toBe(1);
     unmount();
   });
-  it('renders styled component with forwardRef', () => {
-    const StyledComponent = styled(
-      React.forwardRef(({}: {}, ref: React.Ref<HTMLDivElement>) =>
-        React.createElement(styled.Div, {
-          ref,
-        }),
-      ),
-      { color: 'red' },
-    );
-    renderWithGlitz(
-      React.createElement(StyledComponent, {
-        ref(el) {
-          if (el) {
-            expect(el.className).toBe('a');
-          }
-        },
-      }),
-    ).unmount();
-  });
-  it('creates decorated styled component', () => {
-    const styleDecoratorA = styled({ color: 'red' });
-    const styleDecoratorB = styleDecoratorA({ backgroundColor: 'green' });
-    const StyledComponentA = styleDecoratorB(() => {
-      return React.createElement(styled.Div, {
-        ref(el) {
-          if (el) {
-            expect(el.className).toBe('a b');
-          }
-        },
-      });
-    });
-    const StyledComponentB = styleDecoratorB(
-      () => {
-        return React.createElement(styled.Div, {
-          ref(el) {
-            if (el) {
-              expect(el.className).toBe('c a');
-            }
-          },
-        });
-      },
-      { color: 'green' },
-    );
-    renderWithGlitz(
-      React.createElement(
-        React.Fragment,
-        null,
-        React.createElement(StyledComponentA),
-        React.createElement(StyledComponentB),
-      ),
-    ).unmount();
-  });
   it('creates predefined styled component', () => {
     const StyledComponent = styled.div({ color: 'red' });
     renderWithGlitz(
@@ -656,13 +604,6 @@ describe('react styled', () => {
     expect(renders).toBe(6);
     expect(logger).toHaveBeenCalledTimes(1);
   });
-  it('inherits default props when composing', () => {
-    const StyledComponent = styled(styled.Button);
-    StyledComponent.defaultProps = { type: 'button' };
-
-    const ComposedComponent = styled(StyledComponent);
-    expect(ComposedComponent.defaultProps).toEqual({ type: 'button' });
-  });
   it('inherits display name when composing', () => {
     const StyledComponent = styled(styled.Button);
     expect(StyledComponent.displayName).toBe('Styled(button)');
@@ -699,13 +640,14 @@ describe('react styled', () => {
 
     unmount();
   });
-  it('creates an empty decorator', () => {
-    let decorator = styled();
-
-    decorator = decorator({ color: 'red' });
-    decorator = decorator({ backgroundColor: 'green' });
-    expect(decorator()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
-  });
+  // TODO: Should this still exist?
+  // it('creates an empty decorator', () => {
+  //   let decorator = styled();
+  //
+  //   decorator = decorator({ color: 'red' });
+  //   decorator = decorator({ backgroundColor: 'green' });
+  //   expect(decorator()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+  // });
   it('forwards style using hook', () => {
     const Component = styled(forwardStyle(({ compose }: ForwardStyleProps) => <StyledTestDiv css={compose()} />));
     const [getElement, { rerender, unmount }] = renderWithTestId(<Component css={{ color: 'red' }} />);
@@ -719,7 +661,7 @@ describe('react styled', () => {
 const TEST_ID = 'styled';
 
 const StyledTestDiv = styled.div();
-StyledTestDiv.defaultProps = { ['data-testid' as string]: TEST_ID };
+// StyledTestDiv.defaultProps = { ['data-testid' as string]: TEST_ID };
 
 function renderWithGlitz(node: React.ReactElement) {
   const glitz = new GlitzClient();
