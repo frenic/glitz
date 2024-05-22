@@ -1,16 +1,13 @@
 import {
   ComponentType,
   createElement,
-  forwardRef,
-  ForwardRefExoticComponent,
   Fragment,
   PropsWithChildren,
-  PropsWithoutRef,
-  PropsWithRef,
-  Ref,
-  RefAttributes,
   useCallback,
   useContext,
+  RefAttributes,
+  PropsWithoutRef,
+  NamedExoticComponent,
 } from 'react';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
 import { SECRET_GLITZ_PROPERTY } from './constants';
@@ -19,17 +16,16 @@ import useGlitz, { DirtyStyle, sanitizeStyle } from './use-glitz';
 import { ComposeContext, emptyComposeContext, GlitzContext, StreamContext } from '../components/context';
 import { isForwardStyleType, StyledForwardStyle, WithoutCompose } from './forward-style';
 
-export interface StyledComponent<TProps> extends ForwardRefExoticComponent<ExternalProps<TProps>> {
+export interface StyledComponent<TProps> extends NamedExoticComponent<ExternalProps<TProps>> {
   [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponent<TProps>;
 }
 
 export interface StyledComponentWithRef<TProps, TInstance>
-  extends ForwardRefExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
+  extends NamedExoticComponent<WithRefProp<ExternalProps<TProps>, TInstance>> {
   [SECRET_GLITZ_PROPERTY](style?: DirtyStyle): StyledComponentWithRef<TProps, TInstance>;
 }
 
 export type WithRefProp<TProps, TInstance> = PropsWithoutRef<TProps> & RefAttributes<TInstance>;
-export type WithoutRefProp<TProps> = TProps extends PropsWithRef<TProps> ? PropsWithoutRef<TProps> : TProps;
 
 export type ExternalProps<TProps> = PropsWithChildren<
   TProps & {
@@ -43,41 +39,29 @@ export default function createComponent<TProps>(
     | StyledElementLike<ComponentType<TProps & StyledElementProps>>
     | StyledForwardStyle<ComponentType<TProps>>
     | StyledComponent<TProps>
-    | StyledComponentWithRef<TProps, any>
     | ComponentType<TProps>,
   statics: DirtyStyle,
-): StyledComponent<TProps>;
-
-export default function createComponent<TProps, TInstance>(
-  type:
-    | StyledElement
-    | StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>>
-    | StyledForwardStyle<ComponentType<WithRefProp<TProps, TInstance>>>
-    | StyledComponentWithRef<TProps, TInstance>
-    | ComponentType<WithRefProp<TProps, TInstance>>,
-  statics: DirtyStyle,
-): StyledComponentWithRef<TProps, TInstance> {
-  return isStyledComponent<TProps, TInstance>(type) ? type[SECRET_GLITZ_PROPERTY](statics) : factory(type, statics);
+): StyledComponent<TProps> {
+  return isStyledComponent<TProps>(type) ? type[SECRET_GLITZ_PROPERTY](statics) : factory(type, statics);
 }
 
-export function factory<TProps, TInstance>(
+export function factory<TProps>(
   type:
     | StyledElement
-    | StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>>
-    | StyledForwardStyle<ComponentType<WithRefProp<TProps, TInstance>>>
-    | ComponentType<WithRefProp<TProps, TInstance>>,
+    | StyledElementLike<ComponentType<TProps>>
+    | StyledForwardStyle<ComponentType<TProps>>
+    | ComponentType<TProps>,
   statics: DirtyStyle,
-): StyledComponentWithRef<TProps, TInstance> {
+): StyledComponent<TProps> {
   const Component =
-    isElementType(type) || isElementLikeType<TProps, TInstance>(type)
-      ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) => {
+    isElementType(type) || isElementLikeType<TProps>(type)
+      ? ({ css: dynamic, ...restProps }: ExternalProps<TProps>) => {
           const composed = useContext(ComposeContext);
           const className = combineClassNames((restProps as any).className, useGlitz([statics, dynamic, composed]));
 
           let node = createElement<any>(type.value, {
             ...restProps,
             className,
-            ref,
           });
 
           if (composed && restProps.children) {
@@ -106,16 +90,16 @@ export function factory<TProps, TInstance>(
           }
 
           return node;
-        })
-      : isForwardStyleType<TProps, TInstance>(type)
-      ? forwardRef(({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>, ref: Ref<TInstance>) => {
+        }
+      : isForwardStyleType<TProps>(type)
+      ? ({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>) => {
           const composed = useContext(ComposeContext);
           const compose = useCallback(
             (additional: DirtyStyle) => sanitizeStyle([additional, statics, dynamic, composed]),
             [composed, dynamic],
           );
 
-          let node = createElement<any>(type.value, { ...restProps, compose, ref });
+          let node = createElement<any>(type.value, { ...restProps, compose });
 
           if (composed && restProps.children) {
             // Reset ComposeContext
@@ -123,33 +107,26 @@ export function factory<TProps, TInstance>(
           }
 
           return node;
-        })
-      : forwardRef(({ css: dynamic, ...restProps }: ExternalProps<TProps>, ref: Ref<TInstance>) => {
+        }
+      : ({ css: dynamic, ...restProps }: ExternalProps<TProps>) => {
           const composed = useContext(ComposeContext);
           const style = sanitizeStyle([statics, dynamic, composed]);
-          let node = createElement<any>(type, { ...restProps, ref });
+          let node = createElement<any>(type, { ...restProps });
 
           if (style.length > 0) {
             node = createElement(ComposeContext.Provider, { value: style }, node);
           }
 
           return node;
-        });
+        };
 
-  const Styled: StyledComponentWithRef<TProps, TInstance> = Object.assign(Component, {
-    [SECRET_GLITZ_PROPERTY](additionals?: DirtyStyle) {
-      const NewStyled = factory(type, [statics, additionals]);
+  const Styled: StyledComponent<TProps> = Object.assign(Component, {
+    [SECRET_GLITZ_PROPERTY](additional?: DirtyStyle) {
+      const NewStyled = factory(type, [statics, additional]);
 
-      if (Component.defaultProps) {
-        NewStyled.defaultProps = {};
-
-        for (const name in Component.defaultProps) {
-          (NewStyled.defaultProps as any)[name] = (Component.defaultProps as any)[name];
-        }
-      }
-
+      // TODO: remove any. It's strange why Component doesn't have displayName since StyledComponent extends NamedExoticComponent
       if (process.env.NODE_ENV !== 'production') {
-        NewStyled.displayName = Component.displayName;
+        NewStyled.displayName = (Component as any).displayName;
       }
 
       return NewStyled;
@@ -157,8 +134,8 @@ export function factory<TProps, TInstance>(
   }) as any;
 
   if (process.env.NODE_ENV !== 'production') {
-    if (!isForwardStyleType<TProps, TInstance>(type)) {
-      const inner = isElementType(type) || isElementLikeType<TProps, TInstance>(type) ? type.value : type;
+    if (!isForwardStyleType<TProps>(type)) {
+      const inner = isElementType(type) || isElementLikeType<TProps>(type) ? type.value : type;
       Styled.displayName = `Styled(${
         typeof inner === 'string' ? inner : inner.displayName || inner.name || 'Unknown'
       })`;
@@ -172,8 +149,6 @@ function combineClassNames(a: string | undefined, b: string | undefined) {
   return a && b ? `${a} ${b}` : a ? a : b;
 }
 
-export function isStyledComponent<TProps, TInstance>(
-  type: any,
-): type is StyledComponent<TProps> | StyledComponentWithRef<TProps, TInstance> {
+export function isStyledComponent<TProps>(type: any): type is StyledComponent<TProps> {
   return typeof type[SECRET_GLITZ_PROPERTY] === 'function';
 }

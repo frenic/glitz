@@ -1,6 +1,5 @@
 import { FunctionComponent, ComponentClass, ClassType, Component, ComponentState, ComponentType } from 'react';
 import { SECRET_GLITZ_PROPERTY, ELEMENT_LIKE_TYPE } from './constants';
-import { WithRefProp } from './create';
 import { StyledElementProps, StyledType } from './predefined';
 
 export interface StyledElementLike<TComponent> extends StyledType {
@@ -25,8 +24,8 @@ export function applyClassName<TProps extends StyledElementProps>(
   };
 }
 
-export function isElementLikeType<TProps extends StyledElementProps, TInstance>(
+export function isElementLikeType<TProps extends StyledElementProps>(
   type: any,
-): type is StyledElementLike<ComponentType<WithRefProp<TProps, TInstance>>> {
+): type is StyledElementLike<ComponentType<TProps>> {
   return type[SECRET_GLITZ_PROPERTY] === ELEMENT_LIKE_TYPE;
 }
