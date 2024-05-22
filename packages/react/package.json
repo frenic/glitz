@@ -18,13 +18,18 @@
     "react-is": "^18.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.15",
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta",
     "@types/webpack-env": "^1.17.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "19.0.0-rc-915b914b3a-20240515",
+    "react-dom": "19.0.0-rc-915b914b3a-20240515"
   },
   "peerDependencies": {
-    "react": ">= 16.8 <= 18"
+    "react": ">18"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
