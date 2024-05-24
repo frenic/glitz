@@ -15,7 +15,7 @@
     "@glitz/core": "^4.0.1",
     "@types/react": "*",
     "@types/react-is": "*",
-    "react-is": "^18.2.0"
+    "react-is": "19.0.0-rc-4c2e457c7c-20240522"
   },
   "devDependencies": {
     "@types/react": "npm:types-react@beta",
@@ -25,11 +25,7 @@
     "react-dom": "19.0.0-rc-915b914b3a-20240515"
   },
   "peerDependencies": {
-    "react": ">18"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta"
+    "react": "19"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
