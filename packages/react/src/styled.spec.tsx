@@ -3,7 +3,7 @@
  */
 
 import { GlitzClient } from '@glitz/core';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { GlitzProvider } from '.';
@@ -22,8 +22,8 @@ describe('react styled', () => {
   });
 
   it('tests React version', () => {
-    expect(parseInt(React.version)).toBe(18);
-    expect(parseInt(ReactDOM.version)).toBe(18);
+    expect(parseInt(React.version)).toBe(19);
+    expect(parseInt(ReactDOM.version)).toBe(19);
     expect(ReactDOM.version).toBe(React.version);
   });
   it('returns class names using style hook', () => {
@@ -113,9 +113,9 @@ describe('react styled', () => {
     const { unmount } = renderWithGlitz(
       React.createElement(
         class extends React.Component {
-          public componentDidMount() {
+          public async componentDidMount() {
             expect(renders).toBe(1);
-            act(() => {
+            await React.act(() => {
               this.forceUpdate();
             });
           }
@@ -487,7 +487,7 @@ describe('react styled', () => {
     }
     const ConnectedStyledComponentA = hoc(
       styled(
-        ({}: {}) =>
+        ({ }: {}) =>
           React.createElement(styled.Div, {
             ref(el) {
               if (el) {
@@ -537,8 +537,8 @@ describe('react styled', () => {
       const CacheValidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(
           5,
-          callback =>
-            act(() => {
+          async callback =>
+            await React.act(() => {
               this.forceUpdate(callback);
             }),
           () => {
@@ -561,8 +561,8 @@ describe('react styled', () => {
       const CacheInvalidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(
           4,
-          callback =>
-            act(() => {
+          async callback =>
+            await React.act(() => {
               this.forceUpdate(callback);
             }),
           () => {
@@ -585,8 +585,8 @@ describe('react styled', () => {
       const CacheInvalidated = class extends React.Component {
         public componentDidMount = createAnimationSimulator(
           5,
-          callback =>
-            act(() => {
+          async callback =>
+            await React.act(() => {
               this.forceUpdate(callback);
             }),
           () => {
@@ -640,16 +640,18 @@ describe('react styled', () => {
 
     unmount();
   });
-  // TODO: Should this still exist?
-  // it('creates an empty decorator', () => {
-  //   let decorator = styled();
+  // TODO: Should this still exist ?
+  //   it('creates an empty decorator', () => {
+  //     let decorator = styled();
   //
-  //   decorator = decorator({ color: 'red' });
-  //   decorator = decorator({ backgroundColor: 'green' });
-  //   expect(decorator()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
-  // });
+  //     decorator = decorator({ color: 'red' });
+  //     decorator = decorator({ backgroundColor: 'green' });
+  //     expect(decorator()).toEqual([{ color: 'red' }, { backgroundColor: 'green' }]);
+  //   });
   it('forwards style using hook', () => {
-    const Component = styled(forwardStyle(({ compose }: ForwardStyleProps) => <StyledTestDiv css={compose()} />));
+    const Component = styled(
+      forwardStyle(({ compose }: ForwardStyleProps) => <StyledTestDiv data-test-id={TEST_ID} css={compose()} />),
+    );
     const [getElement, { rerender, unmount }] = renderWithTestId(<Component css={{ color: 'red' }} />);
     expect(getElement().className).toBe('a');
     rerender(<Component css={{ color: 'green' }} />);
@@ -659,9 +661,9 @@ describe('react styled', () => {
 });
 
 const TEST_ID = 'styled';
-
-const StyledTestDiv = styled.div();
-// StyledTestDiv.defaultProps = { ['data-testid' as string]: TEST_ID };
+const StyledTestDiv = styled((props: { className?: string; ref?: React.Ref<HTMLDivElement> }) => (
+  <styled.Div data-testid={TEST_ID} {...props} />
+));
 
 function renderWithGlitz(node: React.ReactElement) {
   const glitz = new GlitzClient();
