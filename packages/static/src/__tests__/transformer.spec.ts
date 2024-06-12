@@ -20,7 +20,7 @@ const Styled = styled.div(styleObject);
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <div id=\\"some-id\\" className={\\"a b\\"} data-glitzname=\\"Styled\\">hello</div>;
+          return <div id="some-id" className={"a b"} data-glitzname="Styled">hello</div>;
       }
       const styleObject = {
           width: '100%',
@@ -59,9 +59,9 @@ const node3 = <MyComponent.Footer />;
           Header: /*#__PURE__*/ styled.div({ color: 'green' }),
           Footer,
       });
-      const node1 = <div className={\\"b\\"} data-glitzname=\\"MyComponent\\"/>;
-      const node2 = <div className={\\"c\\"} data-glitzname=\\"MyComponent.Header\\"/>;
-      const node3 = <div className={\\"a\\"} data-glitzname=\\"MyComponent.Footer\\"/>;
+      const node1 = <div className={"b"} data-glitzname="MyComponent"/>;
+      const node2 = <div className={"c"} data-glitzname="MyComponent.Header"/>;
+      const node3 = <div className={"a"} data-glitzname="MyComponent.Footer"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{color:blue}.b{color:red}.c{color:green}"`);
@@ -100,9 +100,9 @@ const node3 = <MyComponent.Footer>hello</MyComponent.Footer>;
           },
           Footer,
       };
-      const node1 = <div className={\\"b\\"} data-glitzname=\\"MyComponent.Header\\"/>;
-      const node2 = <div className={\\"c\\"} data-glitzname=\\"MyComponent.layout.Main\\"/>;
-      const node3 = <div className={\\"a\\"} data-glitzname=\\"MyComponent.Footer\\">hello</div>;
+      const node1 = <div className={"b"} data-glitzname="MyComponent.Header"/>;
+      const node2 = <div className={"c"} data-glitzname="MyComponent.layout.Main"/>;
+      const node3 = <div className={"a"} data-glitzname="MyComponent.Footer">hello</div>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{color:blue}.b{color:green}.c{color:red}"`);
@@ -275,9 +275,9 @@ const node8 = <TheOtherMainLink />;
       `);
       expect(result['file5.jsx']).toMatchInlineSnapshot(`
         "import { styled, applyClassName } from '@glitz/react';
-        import { Link1 as AutoImportedLink1 } from \\"./file3\\";
-        import { Link2 as AutoImportedLink2 } from \\"./file3\\";
-        import { MainLink as AutoImportedMainLink } from \\"./file1\\";
+        import { Link1 as AutoImportedLink1 } from "./file3";
+        import { Link2 as AutoImportedLink2 } from "./file3";
+        import { MainLink as AutoImportedMainLink } from "./file1";
         import { ExportedStyledLink1, ExportedStyledLink2, ExportedStyledLink3, ExportedStyledLink4 } from './file3';
         import TheMainLink from './file2';
         import TheOtherMainLink from './file4';
@@ -291,14 +291,14 @@ const node8 = <TheOtherMainLink />;
         const StyledLink = /*#__PURE__*/ styled(applyClassName(Link), {
             color: 'red',
         });
-        const node1 = <Link className={\\"f\\"}/>;
-        const node2 = <AutoImportedLink1 className={\\"a\\"}/>;
-        const node3 = <AutoImportedLink2 className={\\"b\\"}/>;
+        const node1 = <Link className={"f"}/>;
+        const node2 = <AutoImportedLink1 className={"a"}/>;
+        const node3 = <AutoImportedLink2 className={"b"}/>;
         const node4 = <ExportedStyledLink3 />;
         const node5 = <ExportedStyledLink4 />;
         const node6 = <Block />;
-        const node7 = <AutoImportedMainLink className={\\"g h i j\\"}/>;
-        const node8 = <AutoImportedMainLink className={\\"g h i j\\"}/>;
+        const node7 = <AutoImportedMainLink className={"g h i j"}/>;
+        const node8 = <AutoImportedMainLink className={"g h i j"}/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
@@ -307,8 +307,8 @@ const node8 = <TheOtherMainLink />;
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 1,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -317,7 +317,7 @@ const node8 = <TheOtherMainLink />;
             return <a {...props} />;
         }",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 1,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -326,21 +326,21 @@ const node8 = <TheOtherMainLink />;
             return <a {...props} />;
         }",
           },
-          Object {
+          {
             "file": "file3.tsx",
             "line": 21,
             "message": "Unable to determine static component/element name",
             "severity": "info",
             "source": "Link3",
           },
-          Object {
+          {
             "file": "file3.tsx",
             "line": 24,
             "message": "Unable to determine static component/element name",
             "severity": "info",
             "source": "Link4",
           },
-          Object {
+          {
             "file": "file5.tsx",
             "line": 11,
             "message": "Unable to determine static component/element name",
@@ -392,16 +392,16 @@ const node = <Styled />;
         export function createDesktopDecorator(desktopStyle) {
             return /*#__PURE__*/ styled(media(DESKTOP_MIN_WIDTH, desktopStyle));
         }
-        const decorator = /*#__PURE__*/ createMobileDecorator({ gridTemplate: { areas: '\\"a\\" \\"b\\"', columns: '1fr' } });
+        const decorator = /*#__PURE__*/ createMobileDecorator({ gridTemplate: { areas: '"a" "b"', columns: '1fr' } });
         const Styled = /*#__PURE__*/ styled.div(decorator, selector(':nth-child(odd)', { backgroundColor: 'lightgrey' }));
-        const node = <div className={\\"a b c\\"} data-glitzname=\\"Styled\\"/>;
+        const node = <div className={"a b c"} data-glitzname="Styled"/>;
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(
-        `".a:nth-child(odd){background-color:lightgrey}@media (max-width: 100px){.b{grid-template-columns:1fr}.c{grid-template-areas:\\"a\\" \\"b\\"}}"`,
+        `".a:nth-child(odd){background-color:lightgrey}@media (max-width: 100px){.b{grid-template-columns:1fr}.c{grid-template-areas:"a" "b"}}"`,
       );
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -439,13 +439,13 @@ function MyComponent(props: {}) {
                 };
             }, []);
             const Styled = /*#__PURE__*/ styled.div(styleObject);
-            return <div id=\\"some-id\\" className={\\"a b\\"} data-glitzname=\\"Styled\\">hello</div>;
+            return <div id="some-id" className={"a b"} data-glitzname="Styled">hello</div>;
         }
         "
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{height:100%}.b{width:100%}"`);
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -478,11 +478,11 @@ function Component(props: { isStyled: boolean; isLarge: boolean }) {
         function Component(props) {
             const marginTop = props.isStyled ? '10px' : '20px';
             return (<div>
-              <div className={props.isStyled ? \\"a\\" : \\"b\\"} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={props.isStyled ? \\"c\\" : \\"d\\"} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={(props.isStyled ? \\"c\\" : \\"d\\") + \\" \\" + ((props.isStyled ? \\"e\\" : \\"f\\") + \\" \\") + (props.isLarge ? \\"a\\" : \\"g\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={\\"e \\" + (props.isStyled ? \\"c\\" : \\"d\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
-              <div className={\\"e \\" + ((props.isStyled ? \\"c\\" : \\"d\\") + \\" \\") + (props.isLarge ? \\"a\\" : \\"g\\")} data-glitzname=\\"styled.Div\\">What color am I?</div>
+              <div className={props.isStyled ? "a" : "b"} data-glitzname="styled.Div">What color am I?</div>
+              <div className={props.isStyled ? "c" : "d"} data-glitzname="styled.Div">What color am I?</div>
+              <div className={(props.isStyled ? "c" : "d") + " " + ((props.isStyled ? "e" : "f") + " ") + (props.isLarge ? "a" : "g")} data-glitzname="styled.Div">What color am I?</div>
+              <div className={"e " + (props.isStyled ? "c" : "d")} data-glitzname="styled.Div">What color am I?</div>
+              <div className={"e " + ((props.isStyled ? "c" : "d") + " ") + (props.isLarge ? "a" : "g")} data-glitzname="styled.Div">What color am I?</div>
               <styled.Div css={{ ['@media (min-width: 768px)']: { width: props.isLarge ? '10px' : '1px' } }}>What color am I?</styled.Div>
             </div>);
         }
@@ -494,10 +494,10 @@ function Component(props: { isStyled: boolean; isLarge: boolean }) {
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 12,
               "message": "Could not determine a static value for: props",
@@ -593,8 +593,8 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         function createSomeDecorator() {
             return /*#__PURE__*/ styled({ backgroundColor: 'blue' });
         }
@@ -610,13 +610,13 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
                 const gridDecorator = /*#__PURE__*/ styled({ display: 'grid', gridGap: '10px' });
                 switch (props.layout) {
                     case 'Auto':
-                        return \\"a b c\\";
+                        return "a b c";
                     case 'HalfHalf':
-                        return \\"c d e\\";
+                        return "c d e";
                     case 'Full':
-                        return \\"f\\";
+                        return "f";
                     default:
-                        return __glitzTheme.color === \\"black\\" ? \\"i\\" : __glitzTheme.color === \\"blue\\" ? \\"h\\" : __glitzTheme.color === \\"red\\" ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })();
+                        return __glitzTheme.color === "black" ? "i" : __glitzTheme.color === "blue" ? "h" : __glitzTheme.color === "red" ? "g" : (() => { throw new Error("Unexpected theme, this theme did not exist during compile time: " + JSON.stringify(__glitzTheme)); })();
                 }
             };
             const superDynamic = () => {
@@ -628,7 +628,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
                 }
             };
             return (<>
-              <div className={dynamic()} data-glitzname=\\"styled.Div\\"/>
+              <div className={dynamic()} data-glitzname="styled.Div"/>
               <styled.Div css={superDynamic()}>Super dynamic</styled.Div>
               <styled.Div css={exportedDecorator}/>
               <styled.Div css={{ color: t => props.color ? t.color : t.backgroundColor }}/>
@@ -642,10 +642,10 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 39,
               "message": "could not statically evaluate styles",
@@ -657,9 +657,9 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "severity": "info",
             "source": "return styled({ backgroundColor: props.color });",
           },
-          Object {
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 39,
               "message": "Could not determine a static value for: props",
@@ -671,7 +671,7 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
             "severity": "info",
             "source": "<styled.Div css={superDynamic()}>",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 10,
             "message": "Cannot rewrite decorator since it is exported",
@@ -680,9 +680,9 @@ function GridLayout(props: { children: any, layout: string, color?: string }) {
           return styled({ display: 'inline' });
         }",
           },
-          Object {
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 50,
               "message": "Could not determine a static value for: props",
@@ -764,13 +764,13 @@ const Item = styled.div({
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         function Items1() {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             const items = [1, 2, 3];
             return (<>
-              {items.map(i => <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>)}
+              {items.map(i => <div className={"a b"} data-glitzname="Item">{i}</div>)}
             </>);
         }
         function Items2() {
@@ -781,14 +781,14 @@ const Item = styled.div({
             }
             else {
                 return (<>
-                {items.map(i => <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>)}
+                {items.map(i => <div className={"a b"} data-glitzname="Item">{i}</div>)}
               </>);
             }
         }
         function Items3() {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             const items = [1, 2, 3];
-            const itemsJsx = items.map(function (i) { return <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}</div>; });
+            const itemsJsx = items.map(function (i) { return <div className={"a b"} data-glitzname="Item">{i}</div>; });
             return (<>
               {itemsJsx}
             </>);
@@ -797,7 +797,7 @@ const Item = styled.div({
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             const items = [1, 2, 3];
             return (<>
-              {items.map(i => <>{items.map(j => <div className={\\"a b\\"} data-glitzname=\\"Item\\">{i}{j}</div>)}</>)}
+              {items.map(i => <>{items.map(j => <div className={"a b"} data-glitzname="Item">{i}{j}</div>)}</>)}
             </>);
         }
         const Item = /*#__PURE__*/ styled.div({
@@ -808,7 +808,7 @@ const Item = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{color:black}.b{background-color:lightblue}"`);
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -863,9 +863,9 @@ const Styled3 = styled.div({
         "import { styled } from '@glitz/react';
         function MyComponent(props) {
             return (<>
-                <Styled1 id=\\"some-id\\">hello</Styled1>
-                <Styled2 id=\\"some-id\\">hello</Styled2>
-                <Styled3 id=\\"some-id\\">hello</Styled3>
+                <Styled1 id="some-id">hello</Styled1>
+                <Styled2 id="some-id">hello</Styled2>
+                <Styled3 id="some-id">hello</Styled3>
                 <styled.Div css={/* @glitz-dynamic */{ width: '100%' }}/>
                 <styled.Div 
             /* @glitz-dynamic */
@@ -873,7 +873,7 @@ const Styled3 = styled.div({
                 <styled.Div 
             // @glitz-dynamic
             css={{ width: '100%' }}/>
-                <div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/>
+                <div className={"a"} data-glitzname="styled.Div"/>
               </>);
         }
         /** @glitz-dynamic */
@@ -895,7 +895,7 @@ const Styled3 = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`".a{width:100%}"`);
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -925,7 +925,7 @@ const Styled2 = styled.div({
       "/** @glitz-all-dynamic */
       import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <Styled1 id=\\"some-id\\"><Styled2 /></Styled1>;
+          return <Styled1 id="some-id"><Styled2 /></Styled1>;
       }
       const Styled1 = styled.div({
           width: '100%',
@@ -963,7 +963,7 @@ const Styled = styled.div({
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function MyComponent(props) {
-            return <Styled id=\\"some-id\\">hello</Styled>;
+            return <Styled id="some-id">hello</Styled>;
         }
         /** @glitz-static */
         const Styled = /*#__PURE__*/ styled.div({
@@ -976,10 +976,10 @@ const Styled = styled.div({
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 8,
               "message": "Unable to resolve identifier 'window'",
@@ -1021,7 +1021,7 @@ const Styled = styled.div({
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function MyComponent(props) {
-            return <Styled id=\\"some-id\\">hello</Styled>;
+            return <Styled id="some-id">hello</Styled>;
         }
         /** @glitz-suppress */
         const Styled = /*#__PURE__*/ styled.div({
@@ -1032,7 +1032,7 @@ const Styled = styled.div({
       `);
       expect(result['style.css']).toMatchInlineSnapshot(`""`);
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -1057,7 +1057,7 @@ const Styled = styled.div({
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function MyComponent(props) {
-            return <Styled id=\\"some-id\\">hello</Styled>;
+            return <Styled id="some-id">hello</Styled>;
         }
         const Styled = /*#__PURE__*/ styled.div({
             width: (theme) => theme.theWidth,
@@ -1069,8 +1069,8 @@ const Styled = styled.div({
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 7,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -1107,7 +1107,7 @@ const Styled = createStyledComponent();
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function MyComponent(props) {
-            return <Styled id=\\"some-id\\">hello</Styled>;
+            return <Styled id="some-id">hello</Styled>;
         }
         function createStyledComponent() {
             return /*#__PURE__*/ styled(() => <styled.Div />, {
@@ -1122,10 +1122,10 @@ const Styled = createStyledComponent();
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 8,
               "message": "Unable to resolve identifier 'window'",
@@ -1170,7 +1170,7 @@ const Styled2 = styled.div({
         "/** @glitz-all-static */
         import { styled } from '@glitz/react';
         function MyComponent(props) {
-            return <Styled1 id=\\"some-id\\"><Styled2 /></Styled1>;
+            return <Styled1 id="some-id"><Styled2 /></Styled1>;
         }
         const Styled1 = /*#__PURE__*/ styled.div({
             width: window.theWidth,
@@ -1186,10 +1186,10 @@ const Styled2 = styled.div({
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 8,
               "message": "Unable to resolve identifier 'window'",
@@ -1204,9 +1204,9 @@ const Styled2 = styled.div({
             height: '100%'
         })",
           },
-          Object {
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 14,
               "message": "Unable to resolve identifier 'window'",
@@ -1249,7 +1249,7 @@ const DerivedStyled = styled(Styled, {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <div onClick={() => alert('woah!')} className={\\"c a b\\"} data-glitzname=\\"DerivedStyled\\">hello</div>;
+          return <div onClick={() => alert('woah!')} className={"c a b"} data-glitzname="DerivedStyled">hello</div>;
       }
       const Styled = /*#__PURE__*/ styled.div({
           width: '100%',
@@ -1296,7 +1296,7 @@ function smallScreen() {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <><div className={\\"a c d e f\\"} data-glitzname=\\"Styled\\">hello</div><div className={\\"g b\\"} data-glitzname=\\"MediaComp\\"/></>;
+          return <><div className={"a c d e f"} data-glitzname="Styled">hello</div><div className={"g b"} data-glitzname="MediaComp"/></>;
       }
       const Styled = /*#__PURE__*/ styled.div({
           [largeScreen()]: { width: '50%', height: '50%' },
@@ -1335,7 +1335,7 @@ function MyComponent(props: {}) {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <div className={\\"a\\"} data-glitzname=\\"styled.Div\\">hello</div>;
+          return <div className={"a"} data-glitzname="styled.Div">hello</div>;
       }
       "
     `);
@@ -1371,7 +1371,7 @@ const Styled = styled.div({
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <div className={\\"a\\"} data-glitzname=\\"Styled\\">hello1</div>;
+          return <div className={"a"} data-glitzname="Styled">hello1</div>;
       }
       const Styled = /*#__PURE__*/ styled.div({
           backgroundColor: 'black',
@@ -1381,7 +1381,7 @@ const Styled = styled.div({
     expect(result['file2.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <div className={\\"b\\"} data-glitzname=\\"Styled\\">hello2</div>;
+          return <div className={"b"} data-glitzname="Styled">hello2</div>;
       }
       const Styled = /*#__PURE__*/ styled.div({
           backgroundColor: 'red',
@@ -1418,13 +1418,13 @@ function MyComponent2(props: {}) {
           const Styled = /*#__PURE__*/ styled.div({
               backgroundColor: 'black',
           });
-          return <div className={\\"a\\"} data-glitzname=\\"Styled\\">hello1</div>;
+          return <div className={"a"} data-glitzname="Styled">hello1</div>;
       }
       function MyComponent2(props) {
           const Styled = /*#__PURE__*/ styled.div({
               backgroundColor: 'red',
           });
-          return <div className={\\"b\\"} data-glitzname=\\"Styled\\">hello2</div>;
+          return <div className={"b"} data-glitzname="Styled">hello2</div>;
       }
       "
     `);
@@ -1448,7 +1448,7 @@ function MyComponent(props: {}) {
       "import { styled } from '@glitz/react';
       const size = '100' + '%';
       function MyComponent(props) {
-          return <div className={\\"a\\"} data-glitzname=\\"styled.Div\\">hello</div>;
+          return <div className={"a"} data-glitzname="styled.Div">hello</div>;
       }
       "
     `);
@@ -1474,7 +1474,7 @@ const Styled1 = styled.div({
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function MyComponent(props) {
-          return <div id=\\"my-id\\" className={\\"b a\\"} data-glitzname=\\"Styled1\\"/>;
+          return <div id="my-id" className={"b a"} data-glitzname="Styled1"/>;
       }
       const Styled1 = /*#__PURE__*/ styled.div({
           height: '100%',
@@ -1521,7 +1521,7 @@ const Styled4 = styled.div({
             const X = <Styled3 />;
             const Y = <Styled3>hello</Styled3>;
             window.exposeComponent = { x: Styled1, y: Styled3 };
-            return <><Styled1 id=\\"my-id\\" css={{ width: '100%' }}/><Styled2 /><X /><div className={\\"d\\"} data-glitzname=\\"Styled4\\"/></>;
+            return <><Styled1 id="my-id" css={{ width: '100%' }}/><Styled2 /><X /><div className={"d"} data-glitzname="Styled4"/></>;
         }
         const Styled1 = /*#__PURE__*/ styled.div({
             height: '100%',
@@ -1543,22 +1543,22 @@ const Styled4 = styled.div({
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 5,
             "message": "Component 'Styled1' cannot be statically extracted since it's used outside of JSX",
             "severity": "info",
             "source": "(window as any).exposeComponent = { x: Styled1, y: Styled3 };",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 15,
             "message": "Component 'Styled2' cannot be statically extracted since it's used outside of JSX",
             "severity": "error",
             "source": "Styled2.displayName = 'Styled2';",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 5,
             "message": "Component 'Styled3' cannot be statically extracted since it's used outside of JSX",
@@ -1718,14 +1718,14 @@ function AlternativeShippingAddress(props: any) {
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import * as React from 'react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         import { styled } from '@glitz/react';
         const translate = () => null;
         export function Customer() {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            return (<form className={\\"a c d e\\"} data-glitzname=\\"Form\\">
-              <input name=\\"given_name\\" className={\\"f\\"} data-glitzname=\\"FirstName\\">
+            return (<form className={"a c d e"} data-glitzname="Form">
+              <input name="given_name" className={"f"} data-glitzname="FirstName">
                 {translate(t => t.customer.firstName)}
               </input>
 
@@ -1745,7 +1745,7 @@ function AlternativeShippingAddress(props: any) {
         const FirstName = /*#__PURE__*/ styled.input();
         function AlternativeShippingAddress(props) {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            return (<span className={\\"b\\"} data-glitzname=\\"styled.Span\\">{props.children}</span>);
+            return (<span className={"b"} data-glitzname="styled.Span">{props.children}</span>);
         }
         "
       `);
@@ -1753,7 +1753,7 @@ function AlternativeShippingAddress(props: any) {
         `".a{display:grid}.b{margin-left:10px}.c{row-gap:20px}.d{column-gap:20px}.e{grid-template-columns:1fr 1fr 1fr 1fr}.f{grid-column-start:span 2}"`,
       );
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -1823,14 +1823,14 @@ const node4 = <Styled4 />
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         import * as React from 'react';
-        const Styled1 = /*#__PURE__*/ styled(() => <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>, { color: 'red' });
+        const Styled1 = /*#__PURE__*/ styled(() => <styled.Div><div className={"a"} data-glitzname="styled.Div"/></styled.Div>, { color: 'red' });
         const node1 = <Styled1 />;
         const Styled2 = /*#__PURE__*/ styled((props) => {
             if (props.someProp) {
-                return <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>;
+                return <styled.Div><div className={"a"} data-glitzname="styled.Div"/></styled.Div>;
             }
             else {
-                return <styled.Div><div className={\\"b\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>;
+                return <styled.Div><div className={"b"} data-glitzname="styled.Div"/></styled.Div>;
             }
         }, { color: 'red' });
         const node2 = <Styled2 />;
@@ -1838,10 +1838,10 @@ const node4 = <Styled4 />
         const SecondBase = /*#__PURE__*/ styled.div({ opacity: 0 });
         const Styled3 = /*#__PURE__*/ styled((props) => {
             if (props.someProp) {
-                return <Base><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></Base>;
+                return <Base><div className={"a"} data-glitzname="styled.Div"/></Base>;
             }
             else {
-                return <Base><div className={\\"d\\"} data-glitzname=\\"SecondBase\\"/></Base>;
+                return <Base><div className={"d"} data-glitzname="SecondBase"/></Base>;
             }
         }, { color: 'red' });
         const node3 = <Styled3 />;
@@ -1855,7 +1855,7 @@ const node4 = <Styled4 />
             if (src) {
                 return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef}/>;
             }
-            return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef}/>;
+            return <Placeholder css={fadeInDecorator} {...restProps} src="noimage.svg" ref={elementRef}/>;
         }));
         const node4 = <Styled4 />;
         "
@@ -1866,15 +1866,15 @@ const node4 = <Styled4 />
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 3,
             "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
             "source": "() => <styled.Div><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 7,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -1887,7 +1887,7 @@ const node4 = <Styled4 />
             }
           }",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 23,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -1900,9 +1900,9 @@ const node4 = <Styled4 />
             }
           }",
           },
-          Object {
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 45,
               "message": "Static expressions does not support spread",
@@ -1912,7 +1912,7 @@ const node4 = <Styled4 />
                 return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
               }
 
-              return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef} />;
+              return <Placeholder css={fadeInDecorator} {...restProps} src="noimage.svg" ref={elementRef} />;
             }",
             },
             "line": 43,
@@ -1925,7 +1925,7 @@ const node4 = <Styled4 />
                 return <Image {...restProps} css={fadeInDecorator} src={src} ref={elementRef} />;
               }
 
-              return <Placeholder css={fadeInDecorator} {...restProps} src=\\"noimage.svg\\" ref={elementRef} />;
+              return <Placeholder css={fadeInDecorator} {...restProps} src="noimage.svg" ref={elementRef} />;
             },
           ),
         )",
@@ -1955,7 +1955,7 @@ function MyComponent(props: {}) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function StyledWrapper(props) {
-            return <styled.Div css={{ backgroundColor: 'green' }}><div className={\\"b\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>;
+            return <styled.Div css={{ backgroundColor: 'green' }}><div className={"b"} data-glitzname="styled.Div"/></styled.Div>;
         }
         const Styled = /*#__PURE__*/ styled(StyledWrapper, { color: 'red' });
         function MyComponent(props) {
@@ -1967,8 +1967,8 @@ function MyComponent(props: {}) {
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 2,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -2002,7 +2002,7 @@ function MyComponent(props: {}) {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
         function StyledWrapper(props) {
-            return <div><styled.Div css={{ backgroundColor: 'green' }}><div className={\\"b\\"} data-glitzname=\\"styled.Div\\"/></styled.Div></div>;
+            return <div><styled.Div css={{ backgroundColor: 'green' }}><div className={"b"} data-glitzname="styled.Div"/></styled.Div></div>;
         }
         const Styled = /*#__PURE__*/ styled(StyledWrapper, { color: 'red' });
         function MyComponent(props) {
@@ -2014,8 +2014,8 @@ function MyComponent(props: {}) {
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 2,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -2050,7 +2050,7 @@ function MyComponent(props: {}) {
       const Base = /*#__PURE__*/ styled.div({ backgroundColor: 'green' });
       const Styled = /*#__PURE__*/ styled(Base, { color: 'red' });
       function MyComponent(props) {
-          return <div className={\\"c b a\\"} data-glitzname=\\"Styled\\"/>;
+          return <div className={"c b a"} data-glitzname="Styled"/>;
       }
       "
     `);
@@ -2092,7 +2092,7 @@ const node = <ImportantList />;
       export const ImportantList = /*#__PURE__*/ listStyled(List, {
           fontWeight: 'bold',
       });
-      const node = <ul className={\\"c b a\\"} data-glitzname=\\"ImportantList\\"/>;
+      const node = <ul className={"c b a"} data-glitzname="ImportantList"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{list-style:square}.c{font-weight:bold}"`);
@@ -2121,10 +2121,10 @@ const node4 = <Image css={decorator} />;
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
       const decorator = colorDecorator(paddingDecorator());
       const Image = /*#__PURE__*/ styled.img({ color: 'red' });
-      const node1 = <div className={\\"b c\\"} data-glitzname=\\"styled.Div\\"/>;
-      const node2 = <div className={\\"b c\\"} data-glitzname=\\"styled.Div\\"/>;
-      const node3 = <img className={\\"b c a\\"} data-glitzname=\\"Image\\"/>;
-      const node4 = <img className={\\"b c a\\"} data-glitzname=\\"Image\\"/>;
+      const node1 = <div className={"b c"} data-glitzname="styled.Div"/>;
+      const node2 = <div className={"b c"} data-glitzname="styled.Div"/>;
+      const node3 = <img className={"b c a"} data-glitzname="Image"/>;
+      const node4 = <img className={"b c a"} data-glitzname="Image"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{padding-top:10px}.c{background-color:red}"`);
@@ -2150,7 +2150,7 @@ const node1 = <ColorDiv />;
       const paddingDecorator = /*#__PURE__*/ styled({ paddingTop: '10px' });
       const decorator = /*#__PURE__*/ colorDecorator(paddingDecorator());
       const ColorDiv = /*#__PURE__*/ styled(styled.Div, decorator());
-      const node1 = <div className={\\"b a\\"} data-glitzname=\\"ColorDiv\\"/>;
+      const node1 = <div className={"b a"} data-glitzname="ColorDiv"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{background-color:red}.b{padding-top:10px}"`);
@@ -2199,11 +2199,11 @@ const className3 = useStyle((window as any).someStyle);
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled, useStyle } from '@glitz/react';
-      const className1 = \\"a\\";
+      const className1 = "a";
       export const decorator = /*#__PURE__*/ styled({
           backgroundColor: 'red',
       });
-      const className2 = \\"b c\\";
+      const className2 = "b c";
       const className3 = /*#__PURE__*/ useStyle(window.someStyle);
       "
     `);
@@ -2248,7 +2248,7 @@ const node = <MyNewList />;
     `);
     expect(result['file2.jsx']).toMatchInlineSnapshot(`
       "import { List } from './file1';
-      const node = <ul className={\\"a\\"} data-glitzname=\\"List\\"/>;
+      const node = <ul className={"a"} data-glitzname="List"/>;
       "
     `);
     expect(result['file3.jsx']).toMatchInlineSnapshot(`
@@ -2256,7 +2256,7 @@ const node = <MyNewList />;
       const MyNewList = /*#__PURE__*/ listDecorator(MyList, {
           fontWeight: 'bold',
       });
-      const node = <ul className={\\"c b a\\"} data-glitzname=\\"MyNewList\\"/>;
+      const node = <ul className={"c b a"} data-glitzname="MyNewList"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:red}.c{font-weight:bold}"`);
@@ -2287,8 +2287,8 @@ const MyComponent = styled((props: {}) => {
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 2,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -2328,10 +2328,10 @@ const node6 = <Styled {...obj} css={{ backgroundColor: 'green' }} />;
       });
       const node1 = <styled.Div css={{ backgroundColor: 'green' }} {...obj}/>;
       const node2 = <styled.Div {...obj}/>;
-      const node3 = <div {...obj} className={\\"b\\"} data-glitzname=\\"styled.Div\\"/>;
+      const node3 = <div {...obj} className={"b"} data-glitzname="styled.Div"/>;
       const node4 = <Styled {...obj}/>;
       const node5 = <Styled css={{ backgroundColor: 'green' }} {...obj}/>;
-      const node6 = <div {...obj} className={\\"b a\\"} data-glitzname=\\"Styled\\"/>;
+      const node6 = <div {...obj} className={"b a"} data-glitzname="Styled"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{color:red}.b{background-color:green}"`);
@@ -2407,8 +2407,8 @@ const node = <Styled1 />;
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         const Styled1 = /*#__PURE__*/ styled.div({
             color: theme => theme.color,
         });
@@ -2427,20 +2427,20 @@ const node = <Styled1 />;
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
             return (<>
               <styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }}/>
-              <div className={__glitzTheme.isDark === true ? \\"e f\\" : __glitzTheme.color === \\"blue\\" ? \\"b d\\" : __glitzTheme.color === \\"red\\" ? \\"b c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"styled.Div\\"/>
+              <div className={__glitzTheme.isDark === true ? "e f" : __glitzTheme.color === "blue" ? "b d" : __glitzTheme.color === "red" ? "b c" : (() => { throw new Error("Unexpected theme, this theme did not exist during compile time: " + JSON.stringify(__glitzTheme)); })()} data-glitzname="styled.Div"/>
             </>);
         }
         function MyOtherComponent() {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            const node1 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"Styled1\\"/>;
-            const node2 = <div className={\\"a \\" + (__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })())} data-glitzname=\\"Styled2\\"/>;
-            const node3 = <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.isDark === false ? \\"g\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"Styled3\\"/>;
-            const node4 = <div className={\\"h i\\"} data-glitzname=\\"Styled4\\"/>;
+            const node1 = <div className={__glitzTheme.isDark === true ? "f" : __glitzTheme.color === "blue" ? "d" : __glitzTheme.color === "red" ? "c" : (() => { throw new Error("Unexpected theme, this theme did not exist during compile time: " + JSON.stringify(__glitzTheme)); })()} data-glitzname="Styled1"/>;
+            const node2 = <div className={"a " + (__glitzTheme.isDark === true ? "f" : __glitzTheme.color === "blue" ? "d" : __glitzTheme.color === "red" ? "c" : (() => { throw new Error("Unexpected theme, this theme did not exist during compile time: " + JSON.stringify(__glitzTheme)); })())} data-glitzname="Styled2"/>;
+            const node3 = <div className={__glitzTheme.isDark === true ? "f" : __glitzTheme.isDark === false ? "g" : (() => { throw new Error("Unexpected theme, this theme did not exist during compile time: " + JSON.stringify(__glitzTheme)); })()} data-glitzname="Styled3"/>;
+            const node4 = <div className={"h i"} data-glitzname="Styled4"/>;
             return undefined;
         }
         const MyArrowFunction = () => {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            return <div className={__glitzTheme.isDark === true ? \\"f\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : __glitzTheme.color === \\"red\\" ? \\"c\\" : (() => { throw new Error(\\"Unexpected theme, this theme did not exist during compile time: \\" + JSON.stringify(__glitzTheme)); })()} data-glitzname=\\"Styled1\\"/>;
+            return <div className={__glitzTheme.isDark === true ? "f" : __glitzTheme.color === "blue" ? "d" : __glitzTheme.color === "red" ? "c" : (() => { throw new Error("Unexpected theme, this theme did not exist during compile time: " + JSON.stringify(__glitzTheme)); })()} data-glitzname="Styled1"/>;
         };
         // This should not get transformed as it's a styled component with themes declared outside of a component
         const node = <Styled1 />;
@@ -2452,10 +2452,10 @@ const node = <Styled1 />;
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 20,
               "message": "Could not determine a static value for: props",
@@ -2467,9 +2467,9 @@ const node = <Styled1 />;
             "severity": "info",
             "source": "<styled.Div css={{ color: theme => theme.color, backgroundColor: theme => theme.isDark && props.someProp ? 'black' : 'white' }} />",
           },
-          Object {
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 37,
               "message": "JSX expression outside of a component declaration cannot be statically evaluated",
@@ -2562,7 +2562,7 @@ function MyOtherComponent() {
   expectEqual(compile(code, { staticThemesFile: 'themes.ts', mode: 'production' }), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
-      import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+      import { useTheme as useGlitzTheme } from "@glitz/react";
       const Styled1 = /*#__PURE__*/ styled.div({
           color: theme => theme.color,
       });
@@ -2581,11 +2581,11 @@ function MyOtherComponent() {
       function MyOtherComponent() {
           const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
           return (<>
-            <div className={\\"a\\"}/>
-            <div className={__glitzTheme.gray === \\"#ccc\\" ? \\"b\\" : \\"c\\"}/>
-            <div className={__glitzTheme.primary === \\"green\\" ? \\"f\\" : __glitzTheme.primary === \\"blue\\" ? \\"e\\" : __glitzTheme.primary === \\"red\\" ? \\"d\\" : \\"g\\"}/>
-            <div className={__glitzTheme.isCompact === true ? \\"f\\" : \\"h\\"}/>
-            <div className={__glitzTheme.id === \\"black4\\" ? \\"g\\" : __glitzTheme.primary === \\"red\\" ? \\"d\\" : \\"a\\"}/>
+            <div className={"a"}/>
+            <div className={__glitzTheme.gray === "#ccc" ? "b" : "c"}/>
+            <div className={__glitzTheme.primary === "green" ? "f" : __glitzTheme.primary === "blue" ? "e" : __glitzTheme.primary === "red" ? "d" : "g"}/>
+            <div className={__glitzTheme.isCompact === true ? "f" : "h"}/>
+            <div className={__glitzTheme.id === "black4" ? "g" : __glitzTheme.primary === "red" ? "d" : "a"}/>
           </>);
       }
       "
@@ -2650,7 +2650,7 @@ const MyArrowFunction = () => <Styled1 />;
   expectEqual(compile(code, { staticThemesFile: 'themes.ts', mode: 'production' }), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
-      import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
+      import { useTheme as useGlitzTheme } from "@glitz/react";
       const Styled1 = /*#__PURE__*/ styled.div({
           color: theme => theme.color,
       });
@@ -2660,20 +2660,20 @@ const MyArrowFunction = () => <Styled1 />;
       function MyComponent(props) {
           const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
           return (<>
-            <div className={\\"a\\"}>hello</div>
-            <div className={__glitzTheme.isDark === true ? \\"a e\\" : __glitzTheme.color === \\"blue\\" ? \\"b d\\" : \\"b c\\"}/>
+            <div className={"a"}>hello</div>
+            <div className={__glitzTheme.isDark === true ? "a e" : __glitzTheme.color === "blue" ? "b d" : "b c"}/>
           </>);
       }
       function MyOtherComponent() {
           const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
           return (<>
-          <div className={__glitzTheme.isDark === true ? \\"a\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : \\"c\\"}/>
-          <div className={\\"f g\\"}/>
+          <div className={__glitzTheme.isDark === true ? "a" : __glitzTheme.color === "blue" ? "d" : "c"}/>
+          <div className={"f g"}/>
         </>);
       }
       const MyArrowFunction = () => {
           const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-          return <div className={__glitzTheme.isDark === true ? \\"a\\" : __glitzTheme.color === \\"blue\\" ? \\"d\\" : \\"c\\"}/>;
+          return <div className={__glitzTheme.isDark === true ? "a" : __glitzTheme.color === "blue" ? "d" : "c"}/>;
       };
       "
     `);
@@ -2732,7 +2732,7 @@ function Component() {
       "import { styled } from '@glitz/react';
       export var Theme;
       (function (Theme) {
-          Theme[Theme[\\"Test\\"] = 0] = \\"Test\\";
+          Theme[Theme["Test"] = 0] = "Test";
       })(Theme || (Theme = {}));
       const testTheme = {
           background: 'red',
@@ -2755,7 +2755,7 @@ function Component() {
           padding: { xy: theme(t => t.padding) },
       });
       function Component() {
-          return <header className={\\"c d e f a b\\"} data-glitzname=\\"Base\\"/>;
+          return <header className={"c d e f a b"} data-glitzname="Base"/>;
       }
       "
     `);
@@ -2786,11 +2786,11 @@ const Styled = styled.div({ zIndex: ZIndex.B });
       "import { styled } from '@glitz/react';
       var ZIndex;
       (function (ZIndex) {
-          ZIndex[ZIndex[\\"A\\"] = 1] = \\"A\\";
-          ZIndex[ZIndex[\\"B\\"] = 2] = \\"B\\";
+          ZIndex[ZIndex["A"] = 1] = "A";
+          ZIndex[ZIndex["B"] = 2] = "B";
       })(ZIndex || (ZIndex = {}));
       const Styled = /*#__PURE__*/ styled.div({ zIndex: ZIndex.B });
-      <div className={\\"a\\"} data-glitzname=\\"Styled\\"/>;
+      <div className={"a"} data-glitzname="Styled"/>;
       "
     `);
     expect(result['style.css']).toMatchInlineSnapshot(`".a{z-index:2}"`);
@@ -2854,8 +2854,8 @@ const Container = styled.div({
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import * as React from 'react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         import { styled } from '@glitz/react';
         function Image(props) {
             return <img />;
@@ -2865,9 +2865,9 @@ const Container = styled.div({
         }
         export const ImageBlock = registerComponent((props) => {
             const __glitzTheme = /*#__PURE__*/ useGlitzTheme();
-            return (<div className={\\"d\\"} data-glitzname=\\"Container\\">
+            return (<div className={"d"} data-glitzname="Container">
             <Image src={props.image}/>
-            {props.showTitle && (<>{props.textColor === 'Light' ? <span className={\\"a b c e f\\"} data-glitzname=\\"LightText\\">{props.title}</span> : <span className={\\"a b c e f\\"} data-glitzname=\\"DarkText\\">{props.title}</span>}</>)}
+            {props.showTitle && (<>{props.textColor === 'Light' ? <span className={"a b c e f"} data-glitzname="LightText">{props.title}</span> : <span className={"a b c e f"} data-glitzname="DarkText">{props.title}</span>}</>)}
           </div>);
         });
         const Text = /*#__PURE__*/ styled.span({
@@ -2891,7 +2891,7 @@ const Container = styled.div({
         `".a{left:60}.b{bottom:60}.c{position:absolute}.d{position:relative}.e{color:#000}.f{font-size:60}"`,
       );
     },
-    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`Array []`),
+    diagnostics => expect(diagnostics).toMatchInlineSnapshot(`[]`),
   );
 });
 
@@ -2914,7 +2914,7 @@ const Base = styled(styled.Header, {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       export default function Header() {
-          return <header className={\\"a\\"} data-glitzname=\\"Base\\"/>;
+          return <header className={"a"} data-glitzname="Base"/>;
       }
       /** @glitz-static */
       const Base = /*#__PURE__*/ styled(styled.Header, {
@@ -2952,7 +2952,7 @@ const Styled = styled.div(
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import { styled } from '@glitz/react';
       function Component() {
-          return <div className={\\"d c b a\\"} data-glitzname=\\"Styled\\"/>;
+          return <div className={"d c b a"} data-glitzname="Styled"/>;
       }
       const someDecorator = /*#__PURE__*/ styled({ color: 'red' });
       const anotherDecorator = /*#__PURE__*/ styled({ backgroundColor: 'green' });
@@ -2988,9 +2988,9 @@ const node2 = <Styled2 />
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import * as React from 'react';
         import { styled } from '@glitz/react';
-        const Styled1 = /*#__PURE__*/ styled(React.forwardRef((props, ref) => <styled.Div ref={ref}><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>), { color: 'red' });
+        const Styled1 = /*#__PURE__*/ styled(React.forwardRef((props, ref) => <styled.Div ref={ref}><div className={"a"} data-glitzname="styled.Div"/></styled.Div>), { color: 'red' });
         const node1 = <Styled1 />;
-        const Styled2 = /*#__PURE__*/ styled(React.memo((props) => <styled.Div><div className={\\"a\\"} data-glitzname=\\"styled.Div\\"/></styled.Div>), { color: 'red' });
+        const Styled2 = /*#__PURE__*/ styled(React.memo((props) => <styled.Div><div className={"a"} data-glitzname="styled.Div"/></styled.Div>), { color: 'red' });
         const node2 = <Styled2 />;
         "
       `);
@@ -2998,15 +2998,15 @@ const node2 = <Styled2 />
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
             "line": 4,
             "message": "Functions in style objects requires runtime or statically declared themes",
             "severity": "info",
             "source": "(props: {}, ref: any) => <styled.Div ref={ref}><styled.Div css={{ backgroundColor: 'red' }} /></styled.Div>",
           },
-          Object {
+          {
             "file": "file1.tsx",
             "line": 7,
             "message": "Functions in style objects requires runtime or statically declared themes",
@@ -3080,12 +3080,12 @@ const node = <Price current={100} />
     result => {
       expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         import * as React from 'react';
         const Price = /*#__PURE__*/ styled(({ current, original }) => {
             return (<Base>
-              <span className={typeof original === 'number' && current !== original ? \\"c\\" : \\"\\"} data-glitzname=\\"CurrentPrice\\">
+              <span className={typeof original === 'number' && current !== original ? "c" : ""} data-glitzname="CurrentPrice">
                 {current} kr
               </span>
               <CurrentPrice css={{
@@ -3093,7 +3093,7 @@ const node = <Price current={100} />
                 }}>
                 {current} :-
               </CurrentPrice>
-              {typeof original === 'number' && <span className={\\"b d\\"} data-glitzname=\\"OriginalPrice\\">{original} kr</span>}
+              {typeof original === 'number' && <span className={"b d"} data-glitzname="OriginalPrice">{original} kr</span>}
             </Base>);
         });
         export default Price;
@@ -3114,10 +3114,10 @@ const node = <Price current={100} />
     },
     diagnostics =>
       expect(diagnostics).toMatchInlineSnapshot(`
-        Array [
-          Object {
+        [
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 9,
               "message": "Static expressions does not support spread",
@@ -3169,9 +3169,9 @@ const node = <Price current={100} />
           );
         })",
           },
-          Object {
+          {
             "file": "file1.tsx",
-            "innerDiagnostic": Object {
+            "innerDiagnostic": {
               "file": "file1.tsx",
               "line": 21,
               "message": "Could not determine a static value for: original",
@@ -3245,12 +3245,12 @@ const node = <Price current={100} original={150} />;
   expectEqual(compile(code, { staticThemesFile: 'themes.ts' }), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
         "import { styled } from '@glitz/react';
-        import { useTheme as useGlitzTheme } from \\"@glitz/react\\";
-        import \\"./themes\\";
+        import { useTheme as useGlitzTheme } from "@glitz/react";
+        import "./themes";
         import * as React from 'react';
         const Price = ({ current, original }) => {
-            return (<div className={\\"a\\"} data-glitzname=\\"Base\\">
-              <span className={current > 100 && original < 200 ? \\"a b c\\" : \\"a\\"} data-glitzname=\\"CurrentPrice\\">
+            return (<div className={"a"} data-glitzname="Base">
+              <span className={current > 100 && original < 200 ? "a b c" : "a"} data-glitzname="CurrentPrice">
                 {current} kr
               </span>
             </div>);
@@ -3309,13 +3309,13 @@ const ColumnLink = styled(Link, {
   expectEqual(compile(code), result => {
     expect(result['file1.jsx']).toMatchInlineSnapshot(`
       "import * as React from 'react';
-      import { MainLink as AutoImportedMainLink } from \\"./link\\";
+      import { MainLink as AutoImportedMainLink } from "./link";
       import { styled } from '@glitz/react';
       import Link from './link';
       export function MainMenu(props) {
           return (<>
-            <AutoImportedMainLink className={\\"a b\\"}/>
-            <AutoImportedMainLink className={\\"c b\\"}/>
+            <AutoImportedMainLink className={"a b"}/>
+            <AutoImportedMainLink className={"c b"}/>
           </>);
       }
       const RowLink = /*#__PURE__*/ styled(Link, {

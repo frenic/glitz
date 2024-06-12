@@ -1,16 +1,7 @@
 import { Style } from '@glitz/core';
-import {
-  FunctionComponent,
-  Component,
-  ComponentState,
-  ComponentClass,
-  ClassType,
-  ForwardRefExoticComponent,
-  RefAttributes,
-  ComponentType,
-} from 'react';
+import { FunctionComponent, Component, ComponentState, ComponentClass, ClassType, ComponentType } from 'react';
 import { StyledElementLike } from './apply-class-name';
-import createComponent, { StyledComponent, StyledComponentWithRef, WithoutRefProp } from './create';
+import createComponent, { StyledComponent, StyledComponentWithRef } from './create';
 import createDecorator, { StyledDecorator, isStyle } from './decorator';
 import { WithoutCompose, StyledForwardStyle } from './forward-style';
 import { StyledElementProps } from './predefined';
@@ -18,36 +9,36 @@ import { StyledElementProps } from './predefined';
 export type Styles = Style | readonly Style[] | StyledDecorator | false | undefined;
 
 export interface Styled {
-  <TProps = {}>(component: FunctionComponent<TProps>, ...styles: Styles[]): StyledComponent<WithoutRefProp<TProps>>;
-  <TProps, TInstance>(
-    component: StyledComponentWithRef<TProps, TInstance>,
-    ...styles: Styles[]
-  ): StyledComponentWithRef<TProps, TInstance>;
+  <TProps = {}>(component: FunctionComponent<TProps>, ...styles: Styles[]): StyledComponent<TProps>;
+
   <TProps>(component: StyledComponent<TProps>, ...styles: Styles[]): StyledComponent<TProps>;
+
   <TProps>(component: StyledForwardStyle<FunctionComponent<TProps>>, ...styles: Styles[]): StyledComponent<
     WithoutCompose<TProps>
   >;
+
   <TProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledForwardStyle<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
     ...styles: Styles[]
-  ): StyledComponentWithRef<WithoutCompose<TProps>, TInstance>;
+  ): StyledComponent<WithoutCompose<TProps>>;
+
   <TProps extends StyledElementProps>(
     component: StyledElementLike<FunctionComponent<TProps>>,
     ...styles: Styles[]
   ): StyledComponent<TProps>;
+
   <TProps extends StyledElementProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledElementLike<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
     ...styles: Styles[]
   ): StyledComponentWithRef<TProps, TInstance>;
-  <TProps, TInstance>(
-    component: ForwardRefExoticComponent<TProps & RefAttributes<TInstance>>,
-    ...styles: Styles[]
-  ): StyledComponentWithRef<TProps, TInstance>;
+
   <TProps, TInstance extends Component<TProps, ComponentState>>(
     component: ClassType<TProps, TInstance, ComponentClass<TProps>>,
     ...styles: Styles[]
   ): StyledComponentWithRef<TProps, TInstance>;
+
   (...styles: Styles[]): StyledDecorator;
+
   (): StyledDecorator;
 
   // These last overloads prevents errors on `component` when `style` is
@@ -63,7 +54,6 @@ function creator<TProps>(
   arg1:
     | StyledForwardStyle<ComponentType<TProps>>
     | StyledElementLike<ComponentType<StyledElementProps>>
-    | StyledComponentWithRef<any, any>
     | StyledComponent<any>
     | ComponentType,
   ...arg2: Styles[]
@@ -77,7 +67,6 @@ function creator<TProps>(
   arg1?:
     | StyledForwardStyle<ComponentType<TProps>>
     | StyledElementLike<ComponentType<TProps & StyledElementProps>>
-    | StyledComponentWithRef<TProps, any>
     | StyledComponent<TProps>
     | ComponentType<TProps>
     | Styles,
