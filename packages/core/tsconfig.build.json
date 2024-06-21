@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "./src",
-    "outDir": "./types",
+    "declarationDir": "./types",
     "emitDeclarationOnly": true
   },
   "exclude": ["**/*.spec.ts", "**/__tests__"]
