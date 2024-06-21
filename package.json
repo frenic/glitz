@@ -5,6 +5,8 @@
   ],
   "author": "Fredrik Nicol <fredrik.nicol@gmail.com>",
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/react": "16.0.0",
     "@types/jest": "^29.5.12",

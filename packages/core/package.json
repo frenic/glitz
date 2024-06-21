@@ -13,7 +13,7 @@
   "side-effects": false,
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
-    "build": "tsc -p tsconfig.build.json && node ../../bundle.js src/index.ts --cjsx2 index --esnext index --mjs index",
+    "build": "tsc -p tsconfig.build.json && rollup --config rollup.config.ts --configPlugin typescript",
     "prepublish": "npm run clean & npm run build"
   },
   "files": [

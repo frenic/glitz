@@ -3,5 +3,5 @@
   "editor.formatOnSave": true,
   "eslint.enable": true,
   "files.eol": "\n",
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

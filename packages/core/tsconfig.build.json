@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "baseUrl": "./src",
     "outDir": "./types",
     "emitDeclarationOnly": true
   },
-  "exclude": ["server/", "**/*.spec.ts", "**/__tests__"]
+  "exclude": ["**/*.spec.ts", "**/__tests__"]
 }
