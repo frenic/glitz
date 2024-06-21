@@ -52,10 +52,10 @@ export function cleanStyle(styles: DirtyStyle[]): Style[] {
       ...(typeof style === 'function'
         ? cleanStyle(style())
         : Array.isArray(style)
-        ? cleanStyle(style)
-        : style
-        ? [style]
-        : []),
+          ? cleanStyle(style)
+          : style
+            ? [style]
+            : []),
     ],
     [],
   );

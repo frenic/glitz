@@ -13,9 +13,10 @@ export interface Styled {
 
   <TProps>(component: StyledComponent<TProps>, ...styles: Styles[]): StyledComponent<TProps>;
 
-  <TProps>(component: StyledForwardStyle<FunctionComponent<TProps>>, ...styles: Styles[]): StyledComponent<
-    WithoutCompose<TProps>
-  >;
+  <TProps>(
+    component: StyledForwardStyle<FunctionComponent<TProps>>,
+    ...styles: Styles[]
+  ): StyledComponent<WithoutCompose<TProps>>;
 
   <TProps, TInstance extends Component<TProps, ComponentState>>(
     component: StyledForwardStyle<ClassType<TProps, TInstance, ComponentClass<TProps>>>,

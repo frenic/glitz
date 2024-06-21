@@ -92,33 +92,33 @@ export function factory<TProps>(
           return node;
         }
       : isForwardStyleType<TProps>(type)
-      ? ({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>) => {
-          const composed = useContext(ComposeContext);
-          const compose = useCallback(
-            (additional: DirtyStyle) => sanitizeStyle([additional, statics, dynamic, composed]),
-            [composed, dynamic],
-          );
+        ? ({ css: dynamic, ...restProps }: ExternalProps<WithoutCompose<TProps>>) => {
+            const composed = useContext(ComposeContext);
+            const compose = useCallback(
+              (additional: DirtyStyle) => sanitizeStyle([additional, statics, dynamic, composed]),
+              [composed, dynamic],
+            );
 
-          let node = createElement<any>(type.value, { ...restProps, compose });
+            let node = createElement<any>(type.value, { ...restProps, compose });
 
-          if (composed && restProps.children) {
-            // Reset ComposeContext
-            node = createElement(ComposeContext.Provider, emptyComposeContext, node);
+            if (composed && restProps.children) {
+              // Reset ComposeContext
+              node = createElement(ComposeContext.Provider, emptyComposeContext, node);
+            }
+
+            return node;
           }
+        : ({ css: dynamic, ...restProps }: ExternalProps<TProps>) => {
+            const composed = useContext(ComposeContext);
+            const style = sanitizeStyle([statics, dynamic, composed]);
+            let node = createElement<any>(type, { ...restProps });
 
-          return node;
-        }
-      : ({ css: dynamic, ...restProps }: ExternalProps<TProps>) => {
-          const composed = useContext(ComposeContext);
-          const style = sanitizeStyle([statics, dynamic, composed]);
-          let node = createElement<any>(type, { ...restProps });
+            if (style.length > 0) {
+              node = createElement(ComposeContext.Provider, { value: style }, node);
+            }
 
-          if (style.length > 0) {
-            node = createElement(ComposeContext.Provider, { value: style }, node);
-          }
-
-          return node;
-        };
+            return node;
+          };
 
   const Styled: StyledComponent<TProps> = Object.assign(Component, {
     [SECRET_GLITZ_PROPERTY](additional?: DirtyStyle) {

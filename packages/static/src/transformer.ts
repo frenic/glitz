@@ -935,8 +935,8 @@ function importDeclaration(
         exportedName = decl.modifiers.find(m => m.kind === ts.SyntaxKind.DefaultKeyword)
           ? 'default'
           : decl.name
-          ? decl.name.text
-          : undefined;
+            ? decl.name.text
+            : undefined;
       }
     }
   }

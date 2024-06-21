@@ -20,10 +20,10 @@ function createStaticDecorator(styles: Style[]): StaticDecorator {
       return isStaticComponent(arg1) || isStaticElement(arg1)
         ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle([arg2])])
         : typeof arg1 === 'object' || isStaticDecorator(arg1)
-        ? createStaticStyled([...styles, ...cleanStyle([arg1])])
-        : typeof arg1 === 'undefined'
-        ? styles
-        : arg1;
+          ? createStaticStyled([...styles, ...cleanStyle([arg1])])
+          : typeof arg1 === 'undefined'
+            ? styles
+            : arg1;
     },
     { decorator: true } as const,
   );
@@ -35,10 +35,10 @@ function createStaticStyled(styles: Style[]): StaticStyled {
       return isStaticComponent(arg1) || isStaticElement(arg1)
         ? createStaticComponent(arg1.elementName, [...arg1.styles, ...styles, ...cleanStyle(rest)])
         : typeof arg1 === 'object' || isStaticDecorator(arg1)
-        ? createStaticDecorator([...styles, ...cleanStyle([arg1]), ...cleanStyle(rest)])
-        : typeof arg1 === 'undefined'
-        ? styles
-        : arg1;
+          ? createStaticDecorator([...styles, ...cleanStyle([arg1]), ...cleanStyle(rest)])
+          : typeof arg1 === 'undefined'
+            ? styles
+            : arg1;
     },
     { decorator: true } as const,
   );

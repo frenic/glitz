@@ -11,10 +11,10 @@
     "@glitz/core": "^4.0.1",
     "@glitz/react": "^4.0.3",
     "@glitz/transformers": "^4.0.3",
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta",
-    "react": "19.0.0-rc-915b914b3a-20240515",
-    "react-dom": "19.0.0-rc-915b914b3a-20240515"
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc",
+    "react": "19.0.0-rc.0",
+    "react-dom": "19.0.0-rc.0"
   },
   "devDependencies": {
     "@flaviut/parcel-plugin-typescript": "^1.0.1",

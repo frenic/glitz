@@ -12,7 +12,7 @@
   "side-effects": false,
   "dependencies": {
     "@glitz/core": "^4.0.1",
-    "inline-style-prefixer": "^6.0.0"
+    "inline-style-prefixer": "^7.0.0"
   },
   "scripts": {
     "clean": "rimraf cjs mjs types",
