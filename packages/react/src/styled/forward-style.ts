@@ -1,7 +1,6 @@
 import { Style } from '@glitz/core';
 import { ClassType, Component, ComponentClass, ComponentState, ComponentType, FunctionComponent } from 'react';
 import { FORWARD_STYLE_TYPE, SECRET_GLITZ_PROPERTY } from './constants';
-import { WithRefProp } from './create';
 import { Styles } from './custom';
 import { StyledType } from './predefined';
 
@@ -33,8 +32,6 @@ export function forwardStyle<TProps extends ForwardStyleProps>(
   };
 }
 
-export function isForwardStyleType<TProps, TInstance>(
-  type: any,
-): type is StyledForwardStyle<ComponentType<WithRefProp<TProps, TInstance>>> {
+export function isForwardStyleType<TProps>(type: any): type is StyledForwardStyle<ComponentType<TProps>> {
   return type[SECRET_GLITZ_PROPERTY] === FORWARD_STYLE_TYPE;
 }

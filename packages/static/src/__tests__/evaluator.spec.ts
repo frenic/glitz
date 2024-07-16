@@ -433,23 +433,23 @@ const staticThemes = themes.reduce((acc, theme) => [
 `,
   };
   expect(evaluate('staticThemes', code)).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "color": "red",
         "id": "reddesktop",
         "isCompact": false,
       },
-      Object {
+      {
         "color": "red",
         "id": "redmobile",
         "isCompact": true,
       },
-      Object {
+      {
         "color": "blue",
         "id": "bluedesktop",
         "isCompact": false,
       },
-      Object {
+      {
         "color": "blue",
         "id": "bluemobile",
         "isCompact": true,

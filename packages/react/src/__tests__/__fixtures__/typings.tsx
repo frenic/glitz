@@ -49,13 +49,13 @@ const StyledStyledFunctionComponentWithoutStyle = styled(() => <StyledFunctionCo
 const StyledFunctionComponentWithStyle = styled(() => <styled.Div css={{}} />, {});
 <StyledFunctionComponentWithStyle css={{}} />;
 
-const StyledFunctionComponentWithRequiredProps = styled(({}: { x: string }) => <styled.Div css={{}} />, {});
+const StyledFunctionComponentWithRequiredProps = styled(({ }: { x: string }) => <styled.Div css={{}} />, {});
 <StyledFunctionComponentWithRequiredProps x="" css={{}} />;
 
 const StyledStyledFunctionComponentWithRequiredProps = styled(StyledFunctionComponentWithRequiredProps);
 <StyledStyledFunctionComponentWithRequiredProps x="" css={{}} />;
 
-const StyledFunctionComponentWithOptionalProps = styled(({}: { x?: string }) => <styled.Div css={{}} />, {});
+const StyledFunctionComponentWithOptionalProps = styled(({ }: { x?: string }) => <styled.Div css={{}} />, {});
 <StyledFunctionComponentWithOptionalProps x="" css={{}} />;
 
 const StyledStyledFunctionComponentWithOptionalProps = styled(StyledFunctionComponentWithOptionalProps);
@@ -197,8 +197,9 @@ styled(() => <styled.Div css={[aDecorator(), {}]} />);
 <styled.Div css={[aDecorator(), {}]} />;
 
 const StyledForwardRefComponentWithRequiredProps = styled(
-  React.forwardRef(({}: { x: string }, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
+  ({ ref }: { x: string; ref: React.Ref<HTMLButtonElement> }) => <styled.Button css={{}} ref={ref} />,
 );
+
 <StyledForwardRefComponentWithRequiredProps
   x=""
   css={{}}
@@ -209,10 +210,9 @@ const StyledForwardRefComponentWithRequiredProps = styled(
 />;
 
 const StyledForwardRefComponentWithOptionalProps = styled(
-  React.forwardRef(({}: { x?: string }, ref: React.Ref<HTMLButtonElement>) => <styled.Button css={{}} ref={ref} />),
+  ({ ref }: { x?: string; ref: React.Ref<HTMLButtonElement> }) => <styled.Button css={{}} ref={ref} />,
 );
 <StyledForwardRefComponentWithOptionalProps
-  x=""
   css={{}}
   ref={ref => {
     const element: HTMLButtonElement | null = ref;
@@ -275,7 +275,7 @@ const StyledComponentWithInheritedRef = styled(styled.button({}));
   }}
 />;
 
-const StyledComponentFunctionWithoutRef = styled(({}: { ref?: React.Ref<HTMLButtonElement> }) => <styled.Button />);
+const StyledComponentFunctionWithoutRef = styled(({ }: { ref?: React.Ref<HTMLButtonElement> }) => <styled.Button />);
 <StyledComponentFunctionWithoutRef css={{}} ref={React.createRef()} />;
 
 export function createStyledComponent<TProps>(Component: StyledComponent<TProps>) {
@@ -288,26 +288,26 @@ export function createStyledComponent<TProps>(Component: StyledComponent<TProps>
   styled(({ x, ...restProps }: TProps & { x: string }) => <Component {...(restProps as unknown as TProps)} />);
 }
 
-styled({})(props => <div />);
-cDecorator(props => <div />);
-cDecorator({});
+// styled({})(props => <div />);
+// cDecorator(props => <div />);
+// cDecorator({});
 
 const WithRefWithApplyClassName = styled(
-  applyClassName(
-    React.forwardRef<HTMLDivElement, React.HtmlHTMLAttributes<HTMLButtonElement>>(({}, ref) => <div ref={ref} />),
-  ),
+  applyClassName(({ ref }: React.HTMLAttributes<HTMLDivElement> & { ref: React.Ref<HTMLDivElement> }) => (
+    <div ref={ref} />
+  )),
 );
 <WithRefWithApplyClassName ref={React.createRef<HTMLDivElement>()} />;
 
 const WithoutRefWithApplyClassName = styled(
-  applyClassName(({}: React.HtmlHTMLAttributes<HTMLButtonElement>) => <div />),
+  applyClassName(({ }: React.HtmlHTMLAttributes<HTMLButtonElement>) => <div />),
 );
 <WithoutRefWithApplyClassName ref={React.createRef<HTMLDivElement>()} />;
 
 const WithRefWithForwardStyle = styled(
-  forwardStyle(React.forwardRef<HTMLDivElement, ForwardStyleProps>(({}, ref) => <div ref={ref} />)),
+  forwardStyle(({ ref }: { ref: React.Ref<HTMLDivElement> } & ForwardStyleProps) => <div ref={ref} />),
 );
 <WithRefWithForwardStyle ref={React.createRef<HTMLDivElement>()} />;
 
-const WithoutRefWithForwardStyle = styled(forwardStyle(({}: ForwardStyleProps) => <div />));
+const WithoutRefWithForwardStyle = styled(forwardStyle(({ }: ForwardStyleProps) => <div />));
 <WithoutRefWithForwardStyle ref={React.createRef<HTMLDivElement>()} />;
