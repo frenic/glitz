@@ -641,16 +641,3 @@ query(query: Query): string
 ```
 
 Parse and validate [`Query`](https://github.com/frenic/glitz/blob/master/packages/core/src/types/query.ts) into a valid media query.
-
-## Playground
-
-To play around with Glitz, just:
-
-```bash
-$ git clone https://github.com/frenic/glitz.git
-$ cd glitz
-$ npm install
-$ npm example
-```
-
-Open http://localhost:1234 in your browser and edit the code in `packages/example`.
