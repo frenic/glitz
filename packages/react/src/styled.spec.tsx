@@ -487,7 +487,7 @@ describe('react styled', () => {
     }
     const ConnectedStyledComponentA = hoc(
       styled(
-        ({ }: {}) =>
+        ({}: {}) =>
           React.createElement(styled.Div, {
             ref(el) {
               if (el) {
