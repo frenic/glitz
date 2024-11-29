@@ -1,4 +1,4 @@
-import { createHashCounter } from './hash';
+import { createHashCounter, createHashCountsFromStringList } from './hash';
 
 describe('hash', () => {
   it('increments', () => {
@@ -31,5 +31,10 @@ describe('hash', () => {
     const counterB = counterA.clone();
     expect(counterA()).toBe('b');
     expect(counterB()).toBe('b');
+  });
+  it('skips skip list', () => {
+    const skipList = createHashCountsFromStringList(['a']);
+    const counter = createHashCounter(undefined, skipList);
+    expect(counter()).toBe('b');
   });
 });

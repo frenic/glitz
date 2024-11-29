@@ -9,4 +9,5 @@ export type Options = {
   transformer?: Transformer;
   mediaOrder?: (a: string, b: string) => number;
   prefix?: string;
+  classNameSkipList?: string[];
 };

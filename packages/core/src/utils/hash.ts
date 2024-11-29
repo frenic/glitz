@@ -3,7 +3,7 @@ export type HashCounter = {
   clone(): HashCounter;
 };
 
-export function createHashCounter(prefix = '', count = 0, offset = 10, msb = 35, power = 1): HashCounter {
+export function createHashCounter(prefix = '', skipList: number[] = [], count = 0, offset = 10, msb = 35, power = 1): HashCounter {
   function increment(): string {
     const virtualCount = count + offset;
 
@@ -15,7 +15,7 @@ export function createHashCounter(prefix = '', count = 0, offset = 10, msb = 35,
     count++;
 
     // Skip "ad" due to ad-blockers
-    if (virtualCount === 373) {
+    if (virtualCount === 373 || skipList.findIndex(s => s === virtualCount) > -1) {
       return increment();
     }
 
@@ -24,7 +24,11 @@ export function createHashCounter(prefix = '', count = 0, offset = 10, msb = 35,
 
   return Object.assign(increment, {
     clone() {
-      return createHashCounter(prefix, count, offset, msb, power);
+      return createHashCounter(prefix, skipList, count, offset, msb, power);
     },
   });
+}
+
+export function createHashCountsFromStringList(classNameSkipList: string[] = []) {
+  return classNameSkipList.map(c => parseInt(c, 36));
 }
