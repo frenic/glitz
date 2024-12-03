@@ -15,7 +15,7 @@ export function createHashCounter(prefix = '', skipList: number[] = [], count = 
     count++;
 
     // Skip "ad" due to ad-blockers
-    if (virtualCount === 373 || skipList.findIndex(s => s === virtualCount) > -1) {
+    if (virtualCount === 373 || skipList.indexOf(virtualCount) > -1) {
       return increment();
     }
 
