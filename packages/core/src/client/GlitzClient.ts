@@ -2,7 +2,7 @@ import { Globals, Style, Theme } from '../style';
 import { Base, createStyleInjectors } from '../core/create-style-injectors';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../options';
 import { createStyleElement, insertStyleElement } from '../utils/dom';
-import { createHashCounter } from '../utils/hash';
+import { createHashCounter, createHashCountsFromStringList } from '../utils/hash';
 import InjectorClient from './InjectorClient';
 import { createHydrate } from '../utils/hydrate';
 
@@ -12,8 +12,9 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
   public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
-    const classNameHash = createHashCounter(prefix);
-    const keyframesHash = createHashCounter(prefix);
+    const hashSkipList = createHashCountsFromStringList(options.disallowedClassNames);
+    const classNameHash = createHashCounter(prefix, hashSkipList);
+    const keyframesHash = createHashCounter(prefix, hashSkipList);
 
     const mediaOrderOption = options.mediaOrder;
     const mediaSheets: { [media: string]: HTMLStyleElement } = {};

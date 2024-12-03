@@ -1,7 +1,7 @@
 import { Globals, Style, Theme } from '../style';
 import { Base, createStyleInjectors } from '../core/create-style-injectors';
 import { DEFAULT_HYDRATION_IDENTIFIER, Options } from '../options';
-import { createHashCounter } from '../utils/hash';
+import { createHashCounter, createHashCountsFromStringList } from '../utils/hash';
 import InjectorServer from './InjectorServer';
 import { createHydrate } from '../utils/hydrate';
 import { formatMediaRule } from '../utils/format';
@@ -25,8 +25,8 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
   constructor(options?: Options);
   constructor(
     options: Options = {},
-    classNameHash = createHashCounter(options.prefix),
-    keyframesHash = createHashCounter(options.prefix),
+    classNameHash = createHashCounter(options.prefix, createHashCountsFromStringList(options.disallowedClassNames)),
+    keyframesHash = createHashCounter(options.prefix, createHashCountsFromStringList(options.disallowedClassNames)),
     plainInjector?: InjectorServer,
     mediaInjectors: Record<string, InjectorServer> = {},
   ) {
