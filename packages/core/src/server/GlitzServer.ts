@@ -25,8 +25,8 @@ export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
   constructor(options?: Options);
   constructor(
     options: Options = {},
-    classNameHash = createHashCounter(options.prefix, createHashCountsFromStringList(options.classNameSkipList)),
-    keyframesHash = createHashCounter(options.prefix, createHashCountsFromStringList(options.classNameSkipList)),
+    classNameHash = createHashCounter(options.prefix, createHashCountsFromStringList(options.disallowedClassNames)),
+    keyframesHash = createHashCounter(options.prefix, createHashCountsFromStringList(options.disallowedClassNames)),
     plainInjector?: InjectorServer,
     mediaInjectors: Record<string, InjectorServer> = {},
   ) {

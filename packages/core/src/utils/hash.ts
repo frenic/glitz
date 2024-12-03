@@ -29,6 +29,6 @@ export function createHashCounter(prefix = '', skipList: number[] = [], count = 
   });
 }
 
-export function createHashCountsFromStringList(classNameSkipList: string[] = []) {
-  return classNameSkipList.map(c => parseInt(c, 36));
+export function createHashCountsFromStringList(disallowedClassNames: string[] = []) {
+  return disallowedClassNames.map(c => parseInt(c, 36));
 }

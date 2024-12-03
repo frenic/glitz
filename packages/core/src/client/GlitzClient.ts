@@ -12,7 +12,7 @@ export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
   public hydrate: (css: string) => void;
   constructor(options: Options = {}) {
     const prefix = options.prefix;
-    const hashSkipList = createHashCountsFromStringList(options.classNameSkipList);
+    const hashSkipList = createHashCountsFromStringList(options.disallowedClassNames);
     const classNameHash = createHashCounter(prefix, hashSkipList);
     const keyframesHash = createHashCounter(prefix, hashSkipList);
 
