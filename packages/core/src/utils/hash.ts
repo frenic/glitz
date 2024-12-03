@@ -3,7 +3,14 @@ export type HashCounter = {
   clone(): HashCounter;
 };
 
-export function createHashCounter(prefix = '', skipList: number[] = [], count = 0, offset = 10, msb = 35, power = 1): HashCounter {
+export function createHashCounter(
+  prefix = '',
+  skipList: number[] = [],
+  count = 0,
+  offset = 10,
+  msb = 35,
+  power = 1,
+): HashCounter {
   function increment(): string {
     const virtualCount = count + offset;
 
