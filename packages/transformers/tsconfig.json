@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["jest", "webpack-env"]
+    "types": ["jest", "webpack-env"],
+    "skipLibCheck": true
   }
 }

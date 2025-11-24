@@ -66,14 +66,14 @@ test('typings', () => {
   expect(errors[11]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 259:7 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '() => Promise<void>' is not assignable to parameter of type 'ComponentType<{}> | StyledElementLike<ComponentType<StyledElementProps>>'.
+        Argument of type '() => Promise<void>' is not assignable to parameter of type 'StyledElementLike<ComponentType<StyledElementProps>> | ComponentType<{}>'.
           Type '() => Promise<void>' is not assignable to type 'FunctionComponent<{}>'.
             Type 'Promise<void>' is missing the following properties from type 'ReactElement<any, any>': type, props, key"
   `);
   expect(errors[12]).toMatchInlineSnapshot(`
     "packages/react/src/__tests__/__fixtures__/typings.tsx 261:7 - No overload matches this call.
       The last overload gave the following error.
-        Argument of type '() => Promise<void>' is not assignable to parameter of type 'ComponentType<{}> | StyledElementLike<ComponentType<StyledElementProps>>'.
+        Argument of type '() => Promise<void>' is not assignable to parameter of type 'StyledElementLike<ComponentType<StyledElementProps>> | ComponentType<{}>'.
           Type '() => Promise<void>' is not assignable to type 'FunctionComponent<{}>'.
             Type 'Promise<void>' is not assignable to type 'ReactElement<any, any>'."
   `);
