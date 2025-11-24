@@ -6,7 +6,7 @@ import { createHashCounter, createHashCountsFromStringList } from '../utils/hash
 import InjectorClient from './InjectorClient';
 import { createHydrate } from '../utils/hydrate';
 
-export default class GlitzClient<TStyle = Style> implements Base<TStyle> {
+export default class GlitzClient<TStyle extends Style = Style> implements Base<TStyle> {
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;
   public injectGlobals: (styles: Globals, theme?: Theme) => void;
   public hydrate: (css: string) => void;
