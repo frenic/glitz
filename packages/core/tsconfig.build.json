@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./types",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true
   },
   "exclude": ["server/", "**/*.spec.ts", "**/__tests__"]
 }

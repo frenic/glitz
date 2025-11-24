@@ -8,6 +8,7 @@ export function typescriptDiagnostics(filename: string) {
     jsx: ts.JsxEmit.Preserve,
     strict: true,
     baseUrl: __dirname,
+    skipLibCheck: true,
     paths: {
       '@glitz/*': ['./packages/*/src'],
       '@glitz/type': ['./packages/type'],

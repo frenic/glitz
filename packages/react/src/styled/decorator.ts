@@ -1,17 +1,8 @@
-import {
-  FunctionComponent,
-  Component,
-  ComponentState,
-  ComponentClass,
-  ClassType,
-  ForwardRefExoticComponent,
-  RefAttributes,
-  ComponentType,
-} from 'react';
+import { ComponentType } from 'react';
 import { isValidElementType } from 'react-is';
 import type { Style } from '@glitz/core';
 import { isElementLikeType, StyledElementLike } from './apply-class-name';
-import createComponent, { StyledComponent, StyledComponentWithRef, WithoutRefProp } from './create';
+import createComponent, { StyledComponent } from './create';
 import { Styles } from './custom';
 import { sanitizeStyle, DirtyStyle } from './use-glitz';
 import { isElementType, StyledElementProps } from './predefined';
@@ -21,188 +12,15 @@ import { isForwardStyleType } from './forward-style';
 export interface StyledDecorator {
   [SECRET_GLITZ_PROPERTY]: typeof DECORATOR_TYPE;
 
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps = {}>(component: FunctionComponent<TProps>, ...styles: Styles[]): StyledComponent<WithoutRefProp<TProps>>;
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps, TInstance>(
-    component: StyledComponentWithRef<TProps, TInstance>,
-    ...styles: Styles[]
-  ): StyledComponentWithRef<TProps, TInstance>;
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps>(component: StyledComponent<TProps>, ...styles: Styles[]): StyledComponent<TProps>;
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps extends StyledElementProps>(
-    component: StyledElementLike<FunctionComponent<TProps>>,
-    ...styles: Styles[]
-  ): StyledComponent<WithoutRefProp<TProps>>;
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps extends StyledElementProps, TInstance extends Component<TProps, ComponentState>>(
-    component: StyledElementLike<ClassType<TProps, TInstance, ComponentClass<TProps>>>,
-    ...styles: Styles[]
-  ): StyledComponentWithRef<TProps, TInstance>;
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps, TInstance>(
-    component: ForwardRefExoticComponent<TProps & RefAttributes<TInstance>>,
-    ...styles: Styles[]
-  ): StyledComponentWithRef<TProps, TInstance>;
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  <TProps, TInstance extends Component<TProps, ComponentState>>(
-    component: ClassType<TProps, TInstance, ComponentClass<TProps>>,
-    ...styles: Styles[]
-  ): StyledComponentWithRef<TProps, TInstance>;
-
-  /**
-   * @deprecated
-   * **Styles** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  (style: Styles, ...styles: Styles[]): StyledDecorator;
-
   /** Apply decorator style */
   (): readonly Style[];
-
-  // These last overloads prevents errors on `component` when `style` is
-  // incorrect and enables usage of generic parameter to provide prop type
-
-  /**
-   * @deprecated
-   * **Components** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   Component,
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  (
-    component: StyledElementLike<ComponentType<StyledElementProps>> | ComponentType,
-    ...styles: Styles[]
-  ): StyledComponent<any>;
-
-  /**
-   * @deprecated
-   * **Styles** as argument to a decorator is deprecated and will be removed in next major version, use your decorator with `styled()` instead
-   *
-   * ```
-   * // Example
-   * styled(
-   *   yourDecorator(),
-   *   { color: 'red' },
-   * );
-   * ```
-   */
-  (style: Styles): StyledDecorator;
 }
 
 export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorator {
   const style = sanitizeStyle(dirtyStyle);
 
   function decorator<TProps>(
-    arg1:
-      | StyledElementLike<ComponentType<StyledElementProps>>
-      | StyledComponentWithRef<any, any>
-      | StyledComponent<any>
-      | ComponentType,
+    arg1: StyledElementLike<ComponentType<StyledElementProps>> | StyledComponent<any> | ComponentType,
     ...arg2: Styles[]
   ): StyledComponent<TProps>;
 
@@ -213,7 +31,6 @@ export default function createDecorator(dirtyStyle?: DirtyStyle): StyledDecorato
   function decorator<TProps>(
     arg1?:
       | StyledElementLike<ComponentType<TProps & StyledElementProps>>
-      | StyledComponentWithRef<TProps, any>
       | StyledComponent<TProps>
       | ComponentType<TProps>
       | Styles,

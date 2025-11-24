@@ -14,7 +14,7 @@ export type Diagnostic = {
   innerDiagnostic?: Diagnostic;
 };
 
-export default class GlitzServer<TStyle = Style> implements Base<TStyle> {
+export default class GlitzServer<TStyle extends Style = Style> implements Base<TStyle> {
   public identifier: string;
   public diagnostics: Diagnostic[] = [];
   public injectStyle: (styles: TStyle | readonly TStyle[], theme?: Theme) => string;

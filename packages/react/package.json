@@ -1,6 +1,6 @@
 {
   "name": "@glitz/react",
-  "version": "4.0.4",
+  "version": "5.0.0-alpha.0",
   "main": "./cjs/index.js",
   "module": "./mjs/index.js",
   "esnext": "./esnext/index.js",
@@ -15,16 +15,21 @@
     "@glitz/core": "^4.1.0",
     "@types/react": "*",
     "@types/react-is": "*",
-    "react-is": "^18.2.0"
+    "react-is": "^19.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.15",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@types/webpack-env": "^1.17.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc"
   },
   "peerDependencies": {
-    "react": ">= 16.8 <= 18"
+    "react": "19"
   },
   "scripts": {
     "clean": "rimraf cjs esnext mjs types",
